@@ -4,7 +4,6 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
@@ -15,9 +14,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@components': fileURLToPath(new URL('./components', import.meta.url)),
-      '@views': fileURLToPath(new URL('./views', import.meta.url)),
-      '@': fileURLToPath(new URL('./', import.meta.url)),
+      '@http': fileURLToPath(new URL('./HTTPServices', import.meta.url)),
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
 })
