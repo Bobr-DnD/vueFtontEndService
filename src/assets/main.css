@@ -2,6 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Gothic 821 Condensed";
+  src: url("./fonts/Gothic821Condensed.otf") format("otf");
+}
+
+@font-face {
+  font-family: "Univers 59 Condensed";
+  src: url("./fonts/Univers59Condensed.otf") format("otf");
+}
+
+@font-face {
+  font-family: "Arial Black";
+  src: local("Arial Black"), url("./fonts/ArialBlack.ttf") format("ttf");
+}
+
 .test {
     color: #dd3b3b;
+}
+
+nav {
+    background-image: radial-gradient(rgba(255, 0, 0, 0.05) 1px, transparent 1px);
+    background-size: 4px 4px;
 }
