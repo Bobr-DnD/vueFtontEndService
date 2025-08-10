@@ -7,10 +7,10 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 export default defineConfig({
   plugins: [
     vue(),
-    vueDevTools(),
+    //vueDevTools(),
   ],
   server:{
-    port: 5050
+    port: 8080
   },
   resolve: {
     alias: {
