@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, reactive } from 'vue';
 import { useRoute, RouterLink } from 'vue-router';
-import Session from '@http/sessionRepository'
+import RepositoryFactory from '@http/RepositoryFactory'
 import MasterPageNavigation from '@/components/MasterPageNavigation.vue';
 
 const id = useRoute().params.id
@@ -12,7 +12,7 @@ const state = reactive({
 })
 onMounted(async () => {
   try {
-    const res = await Session.getById(id)
+    const res = await RepositoryFactory.getById('session', id)
     state.session = res.data
   } catch (err) {
     console.error(err)
