@@ -10,7 +10,9 @@ export default defineConfig({
     //vueDevTools(),
   ],
   server:{
-    port: 8080
+    port: 8080,
+    host: '0.0.0.0',
+    allowedHosts: ['fallout-dnd.tplinkdns.com']
   },
   resolve: {
     alias: {
