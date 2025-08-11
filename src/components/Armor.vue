@@ -14,5 +14,5 @@ let armor = ref(null)
 </script>
 
 <template>
-    <FormDropDown class="flex justify-self-center" entity_name="Armor" v-model:armors="armors"/>
+    <FormDropDown class="flex justify-self-center w-2/5 " entity_name="Armor" v-model:armors="armors"/>
 </template>

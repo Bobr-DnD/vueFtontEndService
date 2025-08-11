@@ -20,7 +20,7 @@ let fields = ref([])
 
 onMounted(async () => {
     try {
-        const res = await RepositoryFactory.getById('session',id)
+        const res = await RepositoryFactory.getById('session', id)
         state.session = res.data
 
         currency = Object.entries(state.session.currency).map(([key]) => `${key}`)
@@ -29,7 +29,7 @@ onMounted(async () => {
     } catch (err) {
         console.error(err)
     }
-    finally{
+    finally {
         state.isLoading = false
     }
 })
@@ -38,19 +38,22 @@ onMounted(async () => {
 <template>
     <MasterPageNavigation />
     <div v-if="!state.isLoading" class="flex">
-        <main class="grid grid-cols-2 auto-rows-[minmax(0,2fr)] w-full gap-4 p-6">
-            <div class="col-span-2 max-h-20">
-                <Armor class="col-start-1 " v-model:armors="state.session.armors"/>
+        <main class="w-full">
+            <div class="mt-4 mb-4">
+                <Armor class="col-start-1" v-model:armors="state.session.armors" />
             </div>
-            <div v-for="i in 100">{{ i }} texts</div>
+            <div class="grid grid-cols-2 justify-items-center">
+                <div v-for="i in 4" :key="i">{{ i }} texts</div>
+            </div>
+
         </main>
-        <MasterPageMenu :session_name="state.session.name" :session_image="''" :entities="entities"/>
+        <MasterPageMenu :session_name="state.session.name" :session_image="''" :entities="entities" />
     </div>
 
     <div v-if="state.isLoading" class="text-center text-gray-500 py-6">
         <Loader />
     </div>
-
 </template>
+
 
 <style scoped></style>
