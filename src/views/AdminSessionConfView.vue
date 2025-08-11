@@ -32,6 +32,8 @@ onMounted(async () => {
     finally {
         state.isLoading = false
     }
+
+    console.log(state.session.armors);
 })
 </script>
 
@@ -40,12 +42,8 @@ onMounted(async () => {
     <div v-if="!state.isLoading" class="flex">
         <main class="w-full">
             <div class="mt-4 mb-4">
-                <Armor class="col-start-1" v-model:armors="state.session.armors" />
+                <Armor v-model:armors="state.session.armors" />
             </div>
-            <div class="grid grid-cols-2 justify-items-center">
-                <div v-for="i in 4" :key="i">{{ i }} texts</div>
-            </div>
-
         </main>
         <MasterPageMenu :session_name="state.session.name" :session_image="''" :entities="entities" />
     </div>
