@@ -25,10 +25,16 @@ const id = useRoute().params.id
 
         <hr class="w-1 h-6 bg-fallout-red border-0 mx-4 bg-gradient-to-r from-transparent via-fallout-red to-transparent rounded" />
 
-        <RouterLink :to="'/admin/session/' + id" class="relative text-fallout-red font-semibold tracking-wide
+        <RouterLink :to="'/admin/' + id" class="relative text-fallout-red font-semibold tracking-wide
            after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[3px]
            after:bg-fallout-red hover:after:w-full after:transition-[width] after:duration-400 after:ease-out">
             Сесія
+        </RouterLink>
+
+        <RouterLink :to="'/admin/session/' + id" class="relative text-fallout-red font-semibold tracking-wide
+           after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[3px]
+           after:bg-fallout-red hover:after:w-full after:transition-[width] after:duration-400 after:ease-out">
+            Конфігуратор сесії
         </RouterLink>
     </nav>
 </template>

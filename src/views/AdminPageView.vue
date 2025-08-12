@@ -3,12 +3,11 @@ import { onMounted, reactive } from 'vue';
 import { useRoute, RouterLink } from 'vue-router';
 import RepositoryFactory from '@http/RepositoryFactory'
 import MasterPageNavigation from '@/components/MasterPageNavigation.vue';
+import characterCard from '@/components/characterCard.vue';
 
 const id = useRoute().params.id
 const state = reactive({
   session: {},
-  players: [],
-  effects: []
 })
 onMounted(async () => {
   try {
@@ -22,10 +21,9 @@ onMounted(async () => {
 
 <template>
   <MasterPageNavigation />
-  <h1>admin view</h1>
-  <h2>{{ id }}</h2>
-
-  <h3>{{ state.session.name }}</h3>
+  <div  class="flex items-center mt-5">
+    <characterCard v-for="character in state.session.characters" :character="character"/>
+  </div>
 </template>
 
 <style scoped></style>
