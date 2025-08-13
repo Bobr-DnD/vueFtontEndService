@@ -6,18 +6,29 @@ export default {
   theme: {
     extend: {
       colors: {
-        fallout: {
-          dark: '#390c06',
-          red: '#8f1b15',
-          sand: '#f3a770',
-          brown: '#4f2b1b',
-          blackish: '#1a130d'
+        greenish: {
+          dark: '#3E5F44',
+          mid: '#5E936C',
+          light: '#93DA97',
+          pale: '#E8FFD7'
+        },
+        darkred: {
+          dark: '#1D1616',
+          red: '#8E1616',
+          bright: '#D84040',
+          light: '#EEEEEE'
+        },
+        orange: {
+          gold: '#FABC3F',
+          orange: '#E85C0D',
+          red: '#C7253E',
+          dark: '#821131'
         }
       },
       fontFamily: {
-        gothic: ['"Gothic 821 Condensed"', 'sans-serif'],
-        univers: ['"Univers 59 Condensed"', 'sans-serif'],
-        arialblack: ['"Arial Black"', 'sans-serif']
+        gothic: ['"Rubik"', 'sans-serif'],
+        univers: ['"TitilliumWeb"', 'sans-serif'],
+        comic: ['"Comic Neue']
       }
     }
   },

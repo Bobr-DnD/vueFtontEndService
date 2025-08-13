@@ -4,13 +4,9 @@ import Navigation from '@/components/Navigation.vue';
 
 <template>
   <Navigation />
-  <h1 class="test">Home</h1>
 
-  <h1 class="text-fallout-sand font-gothic text-4xl">Fallout Session</h1>
-  <p class="text-fallout-red font-univers">Danger ahead...</p>
-  <p class="text-fallout-blackish font-arialblack">testovich</p>
-
-
+  <h1 class="font-comic text-4xl">Hello World</h1>
+  <p class="font-univers">Some text here</p>
 </template>
 
 <style scoped></style>

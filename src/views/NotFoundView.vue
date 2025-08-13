@@ -6,7 +6,7 @@ import { RouterLink } from 'vue-router';
 <template>
   <Navigation />
   <div
-    class="flex flex-col items-center justify-center text-center min-h-screen bg-gradient-to-b from-fallout-blackish to-gray-900 px-4">
+    class="flex flex-col items-center justify-center text-center min-h-screen bg-gradient-to-b from-darkred-red to-gray-900 px-4">
     <h1 class="text-9xl font-extrabold text-yellow-400 drop-shadow-lg animate-bounce">
       404
     </h1>

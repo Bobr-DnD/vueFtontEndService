@@ -21,7 +21,7 @@ onMounted(async () => {
 
 <template>
   <MasterPageNavigation />
-  <div  class="flex items-center mt-5">
+  <div  class="flex items-center justify-center flex-nowrap mt-5">
     <characterCard v-for="character in state.session.characters" :character="character"/>
   </div>
 </template>
