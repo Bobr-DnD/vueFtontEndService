@@ -8,7 +8,7 @@ const id = useRoute().params.id
 
 <template>
     <nav
-        class="flex gap-8 px-6 py-4 h-16 bg-darkred-dark border-b-2 border-darkred-red shadow-[0_0_25px_rgba(0,0,0,0.8)] font-gothic tracking-wide uppercase select-none">
+        class="flex flex-wrap gap-8 px-6 py-4  bg-darkred-dark border-b-2 border-darkred-red shadow-[0_0_25px_rgba(0,0,0,0.8)] font-gothic tracking-wide uppercase select-none">
 
         <RouterLink to="/"
             class="relative text-darkred-light hover:text-darkred-bright transition-colors duration-300
