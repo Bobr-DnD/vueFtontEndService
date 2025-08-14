@@ -15,11 +15,11 @@ const props = defineProps({
 </script>
 
 <template>
-    <form class="flex flex-col w-full max-w-xs mx-auto font-univers mb-3">
-        <label :for="entity_name" class="mb-2 text-darkred-dark font-semibold text-sm tracking-wide">
-            {{ entity_name }}: {{ value }}
+    <form class="flex items-center justify-center w-full max-w-xs mx-auto font-univers mb-3">
+        <label :for="entity_name" class="mb-2 text-darkred-dark font-semibold text-lg tracking-wide">
+            {{ entity_name.toUpperCase() }}: 
         </label>
-        <input :id="entity_name" type="number" v-model="value" class="bg-darkred-bright text-darkred-bright placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
+        <input :id="entity_name" type="number" v-model="value" class="bg-darkred-bright text-darkred-light placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
            focus:outline-none focus:ring-2 focus:ring-darkred-red transition" />
     </form>
 

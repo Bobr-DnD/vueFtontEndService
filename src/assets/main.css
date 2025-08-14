@@ -6,3 +6,7 @@ nav {
     background-image: radial-gradient(rgba(255, 0, 0, 0.05) 1px, transparent 1px);
     background-size: 4px 4px;
 }
+
+.hidden{
+    display: none;
+}
