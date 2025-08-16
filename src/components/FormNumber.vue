@@ -15,8 +15,8 @@ const props = defineProps({
 </script>
 
 <template>
-    <form class="flex items-center w-auto\ font-univers mb-3">
-        <label :for="entity_name" class="mr-2 text-darkred-dark font-semibold text-lg tracking-wide">
+    <form class="flex items-center max-w-80 p-4 font-univers mb-4 shadow-[rgba(0,0,0,0.5)_0px_8px_24px] rounded-xl">
+        <label :for="entity_name" class="mr-2 w-full text-darkred-dark font-semibold text-lg tracking-wide">
             {{ entity_name.toUpperCase() }}: 
         </label>
         <input :id="entity_name" type="number" v-model="value" class="bg-darkred-gray max-w-28 text-darkred-light text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2

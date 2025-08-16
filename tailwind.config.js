@@ -14,6 +14,7 @@ export default {
         },
         darkred: {
           dark: '#1D1616',
+          dark_gray: '#262626',
           gray: '#8F8F8F',
           red: '#8E1616',
           bright: '#D84040',
