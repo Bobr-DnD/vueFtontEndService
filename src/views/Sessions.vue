@@ -14,7 +14,6 @@ onMounted(async () => {
   try {
     const res = await RepositoryFactory.get('session')
     state.sessions = res.data
-
   } catch (err) {
     console.error(err)
   }

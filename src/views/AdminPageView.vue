@@ -25,7 +25,6 @@ onMounted(async () => {
   }
   finally {
     state.isLoading = false
-    console.log(state.session);
     getEffects(state.session.characters)
 
     effect_id.value = state.session.effects[0].id
@@ -86,11 +85,11 @@ async function deleteEffect(id) {
 
   </div>
 
-  <div v-if="!state.isLoading && characterShowed" class="flex items-center justify-center flex-wrap mt-5">
+  <div v-if="!state.isLoading && characterShowed" class="flex items-start justify-center flex-wrap mt-5">
     <characterCard v-for="character in state.session.characters" :character="character" />
   </div>
 
-  <div v-if="!state.isLoading && fieldsShowed" class="flex flex-wrap items-center justify-center">
+  <div v-if="!state.isLoading && fieldsShowed" class="flex flex-wrap items-center justify-center mt-4">
     <div class="mx-4">
       <FormNumber v-for="value, name in state.session.currency" :label="'Currency_' + name" :entity_name="name"
         v-model:value="state.session.currency[name]" />

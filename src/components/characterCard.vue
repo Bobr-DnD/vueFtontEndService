@@ -1,19 +1,33 @@
 <script setup>
+import { RouterLink, useRoute } from 'vue-router';
 const props = defineProps({
     character: {
         type: Object,
         type: true
+    },
+    routing: {
+        type: Boolean,
+        required: true,
+        default: false
     }
 })
+console.log(props.routing);
+
+const id = useRoute().params.id
 
 </script>
 
 <template>
-    <div class="m-4 p-2 rounded-xl border-4 border-darkred-dark font-gothic text-lg">
+    <div class="m-4 p-2 rounded-xl border-4 border-darkred-dark font-gothic text-lg h-full">
         <div class="w-full mb-3 flex flex-col items-center">
-            <img class="w-full mb-3 h-32 object-cover rounded-xl" src="https://placehold.co/400x200?text=Character"
-                alt="Session image" />
-            <div class="font-semibold text-2xl">{{ props.character.name }}</div>
+            <RouterLink v-if="props.routing" :to="'/session/character/'+id" class="w-full">
+                <img class="w-full mb-3 h-32 object-cover rounded-xl border-darkred-red border-4 " src="https://placehold.co/400x200?text=Character"
+                alt="Character image" />
+            </RouterLink>
+            <img v-else class="w-full mb-3 h-32 object-cover rounded-xl" src="https://placehold.co/400x200?text=Character"
+                alt="Character image" />
+            <RouterLink v-if="props.routing" :to="'/session/character/' + id" class="font-semibold text-2xl bg-darkred-red text-darkred-light rounded-lg p-2">{{ props.character.name }}</RouterLink>
+            <div v-else class="font-semibold text-2xl">{{ props.character.name }}</div>
         </div>
 
         <div class="flex justify-around items-center mb-2 border-b-2 border-darkred-gray rounded-lg">

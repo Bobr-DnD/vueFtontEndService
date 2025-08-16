@@ -1,9 +1,35 @@
 <script setup>
+import {reactive, ref, onMounted} from 'vue'
+import { useRoute } from 'vue-router';
+import RepositoryFactory from '@http/RepositoryFactory';
+import SessionViewNavigtaion from '@/components/SessionViewNavigtaion.vue';
+import characterCard from '@/components/characterCard.vue';
 
+const id = useRoute().params.id
+const state = reactive({
+  session: {},
+  isLoading: true
+})
+
+onMounted(async () => {
+  try {
+    const res = await RepositoryFactory.getById('session', id)
+    state.session = res.data
+
+  } catch (err) {
+    console.error(err)
+  }
+  finally {
+    state.isLoading = false
+  }
+})
 </script>
 
 <template>
-  <h1>player view</h1>
+  <SessionViewNavigtaion />
+  <div v-if="!state.isLoading" class="flex items-start justify-center flex-wrap mt-5">
+    <characterCard v-for="character in state.session.characters" :character="character" :routing="true" />
+  </div>
 </template>
 
 <style scoped></style>
