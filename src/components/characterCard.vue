@@ -18,7 +18,7 @@ const id = useRoute().params.id
 </script>
 
 <template>
-    <div class="m-4 p-2 rounded-xl border-4 border-darkred-dark font-gothic text-lg h-full">
+    <div class="m-4 p-2 rounded-xl border-4 border-darkred-dark font-gothic text-lg h-full w-80">
         <div class="w-full mb-3 flex flex-col items-center">
             <RouterLink v-if="props.routing" :to="'/session/character/'+id" class="w-full">
                 <img class="w-full mb-3 h-32 object-cover rounded-xl border-darkred-red border-4 " src="https://placehold.co/400x200?text=Character"
@@ -26,7 +26,7 @@ const id = useRoute().params.id
             </RouterLink>
             <img v-else class="w-full mb-3 h-32 object-cover rounded-xl" src="https://placehold.co/400x200?text=Character"
                 alt="Character image" />
-            <RouterLink v-if="props.routing" :to="'/session/character/' + id" class="font-semibold text-2xl bg-darkred-red text-darkred-light rounded-lg p-2">{{ props.character.name }}</RouterLink>
+            <RouterLink v-if="props.routing" :to="'/session/character/' + props.character.id" class="font-semibold text-2xl bg-darkred-red text-darkred-light rounded-lg p-2">{{ props.character.name }}</RouterLink>
             <div v-else class="font-semibold text-2xl">{{ props.character.name }}</div>
         </div>
 
@@ -44,8 +44,8 @@ const id = useRoute().params.id
 
         <div class="border-b-2 border-darkred-bright rounded-lg mb-4">
             <div class="text-center border-t-2 border-darkred-bright rounded-lg">Характеристики:</div>
-            <div class="grid grid-cols-4">
-                <div class="p-2" v-for="c, index in props.character.characteristics">
+            <div class="flex flex-wrap items-center justify-start">
+                <div class="p-2 grow" v-for="c, index in props.character.characteristics">
                     <div class="p-1 text-center border-2 rounded-md border-darkred-dark">{{ index }} - {{ c }}</div>
                 </div>
             </div>

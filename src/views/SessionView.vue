@@ -1,7 +1,8 @@
 <script setup>
-import {reactive, ref, onMounted} from 'vue'
+import { reactive, ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router';
 import RepositoryFactory from '@http/RepositoryFactory';
+import Loader from 'vue-spinner/src/SyncLoader.vue'
 import SessionViewNavigtaion from '@/components/SessionViewNavigtaion.vue';
 import characterCard from '@/components/characterCard.vue';
 
@@ -29,6 +30,10 @@ onMounted(async () => {
   <SessionViewNavigtaion />
   <div v-if="!state.isLoading" class="flex items-start justify-center flex-wrap mt-5">
     <characterCard v-for="character in state.session.characters" :character="character" :routing="true" />
+  </div>
+
+  <div v-if="state.isLoading" class="text-center py-6">
+    <Loader />
   </div>
 </template>
 

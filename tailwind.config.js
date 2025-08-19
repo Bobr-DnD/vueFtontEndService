@@ -30,7 +30,7 @@ export default {
       fontFamily: {
         gothic: ['"Rubik"', 'sans-serif'],
         univers: ['"TitilliumWeb"', 'sans-serif'],
-        comic: ['"Comic Neue']
+        comic: ['"Comic Neue"', 'sans-serif']
       }
     }
   },
