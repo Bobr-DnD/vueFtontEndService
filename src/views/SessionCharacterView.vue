@@ -12,6 +12,7 @@ const state = reactive({
 })
 
 let connected = ref(false)
+let weapons_hidden = ref(false)
 const id = useRoute().params.id
 
 onMounted(async () => {
@@ -31,10 +32,18 @@ onMounted(async () => {
 
 function addExperience() {
     state.character.experience++;
-    if (state.character.experience >= state.character.experienceToLevelUp){
+    if (state.character.experience >= state.character.experienceToLevelUp) {
         state.character.experience = 0;
         state.character.perkPoints++;
     }
+}
+function deleteRow(index, id) {
+    const el = document.getElementById(index)
+    el.remove()
+}
+function addRow(){
+    console.log(event.target.value);
+    
 }
 </script>
 
@@ -106,7 +115,9 @@ function addExperience() {
                                 'bg-green-500': state.character.experience / state.character.experienceToLevelUp > 0.6,
                                 'bg-yellow-400': state.character.experience / state.character.experienceToLevelUp <= 0.6 && state.character.experience / state.character.experienceToLevelUp > 0.3,
                                 'bg-red-500': state.character.experience / state.character.experienceToLevelUp <= 0.3
-                            }" :style="{ width: (state.character.experience / state.character.experienceToLevelUp * 100) + '%' }"></div>
+                            }"
+                                :style="{ width: (state.character.experience / state.character.experienceToLevelUp * 100) + '%' }">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -121,6 +132,40 @@ function addExperience() {
                 transition-all duration-200 ease-in-out Fshadow-md hover:shadow-lg">
                     +1 досвід </button> </div>
         </div>
+    </div>
+
+
+    <div class="grid grid-cols-1 justify-items-center mx-auto min-w-fit max-w-sm">
+        <h1
+            class="w-4/5 text-center text-3xl font-bold text-darkred-dark_gray border-b-2 border-t-2 border-darkred-red rounded-lg mx-2">
+            Інвентар</h1>
+
+        <div class="mx-auto">
+            <h1 @click="weapons_hidden = !weapons_hidden" class="mx-auto my-3 w-fit p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
+            rounded-md hover:cursor-pointer">Зброя</h1>
+        </div>
+
+        <div :class="['grid grid-cols-1 mx-2 max-w-full', weapons_hidden ? 'hidden' : '']">
+            <div v-for="weapon, index in state.character.weapons" class="grid grid-cols-[1fr_1fr_1fr_1fr_30px] grid-rows-2 p-2 gap-2 items-center justify-items-center 
+            bg-darkred-gray border-2 border-darkred-red rounded-lg text-darkred-dark text-sm font-medium my-2" :id="'Weapon' + `${index + 1}`">
+                <div class="col-span-4 p2 text-clip ">{{ weapon.name }}</div>
+                <div @click="deleteRow('Weapon' + `${index + 1}`, weapon.id)"
+                    class="row-span-2 p-2 text-clip w-full bg-darkred-red rounded-xl border-2 border-darkred-dark text-darkred-light font-medium hover:cursor-pointer">
+                    X</div>
+                <div class="col-span-2 p2 text-clip ">Урон: {{ weapon.damage }}</div>
+                <div class="p2 text-clip ">Очки дії: {{ weapon.actionPoints }}</div>
+                <div class="p2 text-clip ">Вимоги: {{Object.entries(weapon.requirement).map(([key, value]) =>
+                    `${key}:${value}`).join(',')}}</div>
+
+            </div>
+        </div>
+        <select name="Weapons" id="Weapons" @change="addRow"
+            :class="[weapons_hidden ? 'hidden' : '', 'w-4/5 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic', 
+            'tracking-wide uppercase shadow-inner outline-none transition-all duration-200 focus:border-darkred-red focus:ring-2 focus:ring-darkred-red', 
+            'hover:border-darkred-red text-center']">
+            <option v-for="weapon in state.session.weapons" :value="weapon.id"
+                class="bg-darkred-dark text-darkred-bright">{{ weapon.name }} </option>
+        </select>
     </div>
 
 
