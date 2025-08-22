@@ -37,13 +37,13 @@ function addExperience() {
         state.character.perkPoints++;
     }
 }
-function deleteRow(index, id) {
-    const el = document.getElementById(index)
-    el.remove()
+function deleteRow(index) {
+    state.character.weapons.splice(index, 1) 
 }
 function addRow(){
-    console.log(event.target.value);
-    
+    const weapon = state.session.weapons.filter(w=> w.id === event.target.value)[0]
+    state.character.weapons.push(weapon)
+    event.target.value = 'default'
 }
 </script>
 
@@ -149,7 +149,7 @@ function addRow(){
             <div v-for="weapon, index in state.character.weapons" class="grid grid-cols-[1fr_1fr_1fr_1fr_30px] grid-rows-2 p-2 gap-2 items-center justify-items-center 
             bg-darkred-gray border-2 border-darkred-red rounded-lg text-darkred-dark text-sm font-medium my-2" :id="'Weapon' + `${index + 1}`">
                 <div class="col-span-4 p2 text-clip ">{{ weapon.name }}</div>
-                <div @click="deleteRow('Weapon' + `${index + 1}`, weapon.id)"
+                <div @click="deleteRow(index)"
                     class="row-span-2 p-2 text-clip w-full bg-darkred-red rounded-xl border-2 border-darkred-dark text-darkred-light font-medium hover:cursor-pointer">
                     X</div>
                 <div class="col-span-2 p2 text-clip ">Урон: {{ weapon.damage }}</div>
@@ -163,6 +163,7 @@ function addRow(){
             :class="[weapons_hidden ? 'hidden' : '', 'w-4/5 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic', 
             'tracking-wide uppercase shadow-inner outline-none transition-all duration-200 focus:border-darkred-red focus:ring-2 focus:ring-darkred-red', 
             'hover:border-darkred-red text-center']">
+            <option value="default" class="bg-darkred-dark text-darkred-bright">Виберіть зброю</option>
             <option v-for="weapon in state.session.weapons" :value="weapon.id"
                 class="bg-darkred-dark text-darkred-bright">{{ weapon.name }} </option>
         </select>
