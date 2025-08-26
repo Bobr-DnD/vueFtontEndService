@@ -11,7 +11,6 @@ const props = defineProps({
         default: false
     }
 })
-console.log(props.routing);
 
 const id = useRoute().params.id
 

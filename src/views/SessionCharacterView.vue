@@ -4,6 +4,8 @@ import { useRoute } from 'vue-router';
 import RepositoryFactory from '@http/RepositoryFactory';
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import SessionViewNavigtaion from '@/components/SessionViewNavigtaion.vue';
+import WeaponRow from '@/components/reusable/WeaponRow.vue';
+import ArmorRow from '@/components/reusable/ArmorRow.vue';
 
 const state = reactive({
     character: {},
@@ -13,6 +15,7 @@ const state = reactive({
 
 let connected = ref(false)
 let weapons_hidden = ref(false)
+let armors_hidden = ref(false)
 const id = useRoute().params.id
 
 onMounted(async () => {
@@ -26,7 +29,7 @@ onMounted(async () => {
         console.error(err)
     }
     finally {
-        state.isLoading = false
+        state.isLoading = false   
     }
 })
 
@@ -36,14 +39,6 @@ function addExperience() {
         state.character.experience = 0;
         state.character.perkPoints++;
     }
-}
-function deleteRow(index) {
-    state.character.weapons.splice(index, 1) 
-}
-function addRow(){
-    const weapon = state.session.weapons.filter(w=> w.id === event.target.value)[0]
-    state.character.weapons.push(weapon)
-    event.target.value = 'default'
 }
 </script>
 
@@ -135,7 +130,7 @@ function addRow(){
     </div>
 
 
-    <div class="grid grid-cols-1 justify-items-center mx-auto min-w-fit max-w-sm">
+    <div v-if="!state.isLoading" class="grid grid-cols-1 justify-items-center mx-auto min-w-fit max-w-sm">
         <h1
             class="w-4/5 text-center text-3xl font-bold text-darkred-dark_gray border-b-2 border-t-2 border-darkred-red rounded-lg mx-2">
             Інвентар</h1>
@@ -146,29 +141,21 @@ function addRow(){
         </div>
 
         <div :class="['grid grid-cols-1 mx-2 max-w-full', weapons_hidden ? 'hidden' : '']">
-            <div v-for="weapon, index in state.character.weapons" class="grid grid-cols-[1fr_1fr_1fr_1fr_30px] grid-rows-2 p-2 gap-2 items-center justify-items-center 
-            bg-darkred-gray border-2 border-darkred-red rounded-lg text-darkred-dark text-sm font-medium my-2" :id="'Weapon' + `${index + 1}`">
-                <div class="col-span-4 p2 text-clip ">{{ weapon.name }}</div>
-                <div @click="deleteRow(index)"
-                    class="row-span-2 p-2 text-clip w-full bg-darkred-red rounded-xl border-2 border-darkred-dark text-darkred-light font-medium hover:cursor-pointer">
-                    X</div>
-                <div class="col-span-2 p2 text-clip ">Урон: {{ weapon.damage }}</div>
-                <div class="p2 text-clip ">Очки дії: {{ weapon.actionPoints }}</div>
-                <div class="p2 text-clip ">Вимоги: {{Object.entries(weapon.requirement).map(([key, value]) =>
-                    `${key}:${value}`).join(',')}}</div>
+            <WeaponRow :weapons_all="state.session.weapons" v-model:weapons="state.character.weapons" />
 
-            </div>
         </div>
-        <select name="Weapons" id="Weapons" @change="addRow"
-            :class="[weapons_hidden ? 'hidden' : '', 'w-4/5 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic', 
-            'tracking-wide uppercase shadow-inner outline-none transition-all duration-200 focus:border-darkred-red focus:ring-2 focus:ring-darkred-red', 
-            'hover:border-darkred-red text-center']">
-            <option value="default" class="bg-darkred-dark text-darkred-bright">Виберіть зброю</option>
-            <option v-for="weapon in state.session.weapons" :value="weapon.id"
-                class="bg-darkred-dark text-darkred-bright">{{ weapon.name }} </option>
-        </select>
-    </div>
 
+        <div class="mx-auto">
+            <h1 @click="armors_hidden = !armors_hidden" class="mx-auto my-3 w-fit p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
+            rounded-md hover:cursor-pointer">Броня</h1>
+        </div>
+
+        <div :class="['grid grid-cols-1 mx-2 max-w-full', armors_hidden ? 'hidden' : '']">
+            <ArmorRow :armors_all="state.session.armors" v-model:armors="state.character.armor" />
+
+        </div>
+
+    </div>
 
     <div v-if="state.isLoading" class="text-center py-6">
         <Loader />
