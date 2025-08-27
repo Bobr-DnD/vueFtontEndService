@@ -1,4 +1,6 @@
 <script setup>
+import { ref } from 'vue'
+
 const inventory = defineModel('inventory', { type: Array, required: true })
 const props = defineProps({
     inventory_all: {
@@ -7,6 +9,13 @@ const props = defineProps({
     }
 })
 
+let block_hidden = ref(true)
+let inventory_selected = ref({})
+
+function showDetails(id) {
+    inventory_selected.value = props.inventory_all.filter(w => w.id === id)[0]
+    block_hidden.value = false
+}
 function deleteRow(index) {
     inventory.value.splice(index, 1)
 }
@@ -18,20 +27,51 @@ function addRow() {
 </script>
 
 <template>
-    <div v-for="inv, index in inventory" class="grid grid-cols-[1fr_1fr_1fr_1fr_30px] p-2 gap-2 items-center justify-items-center 
-            bg-darkred-gray border-2 border-darkred-red rounded-lg text-darkred-dark text-sm font-medium my-2"
-        :id="'Weapon' + `${index + 1}`">
-        <div class="col-span-4 p2 text-clip ">{{ inv.name }}</div>
-        <div @click="deleteRow(index)"
-            class="row-span-2 p-2 text-clip w-full bg-darkred-red rounded-xl border-2 border-darkred-dark text-darkred-light font-medium hover:cursor-pointer">
+    <div v-for="inv, index in inventory"
+        class="grid grid-cols-[75%_1fr_30px] p-2 gap-2 items-center justify-items-center 
+            bg-darkred-gray border-2 border-darkred-red rounded-lg text-darkred-dark text-sm font-medium my-2 hover:cursor-pointer"
+        :id="'Inventory' + `${index + 1}`" @click="showDetails(inv.id)">
+
+        <div class="p2 text-clip">{{ inv.name }}</div>
+        <div class="p2 text-clip">Ціна: {{ inv.price }}</div>
+
+        <div @click.stop="deleteRow(index)"
+            class=" p-2 w-full bg-darkred-red rounded-xl border-2 border-darkred-dark text-darkred-light font-medium hover:cursor-pointer">
             X</div>
+
     </div>
+
     <select name="Inventory" id="Inventory" @change="addRow" :class="['min-w-fit max-w-4/5 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
         'tracking-wide uppercase shadow-inner outline-none transition-all duration-200 focus:border-darkred-red focus:ring-2 focus:ring-darkred-red',
         'hover:border-darkred-red text-center justify-self-center']">
+
         <option value="default" class="bg-darkred-dark text-darkred-bright">Виберіть річ</option>
+
         <option v-for="inv in props.inventory_all" :value="inv.id"
             class="bg-darkred-dark text-darkred-bright text-clip">
             {{ inv.name }} </option>
+
     </select>
+
+    <div v-if="!block_hidden" class="fixed inset-0 flex items-center justify-center z-50 bg-black/50">
+        <div
+            class="w-80 p-5 grid grid-cols-1 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative">
+
+            <div @click="block_hidden = true"
+                class="absolute top-2 right-2 px-3 py-1 bg-darkred-red border border-darkred-dark rounded-md text-darkred-light font-bold cursor-pointer hover:bg-darkred-bright transition">
+                ✕
+            </div>
+
+            <div class="font-bold text-2xl text-center border-b border-darkred-red pb-2">
+                {{ inventory_selected.name }}
+            </div>
+
+            <div class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Опис: <span
+                    class="font-medium">{{ inventory_selected.description }}</span></div>
+
+            <div class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Ціна: <span
+                    class="font-medium">{{ inventory_selected.price }}</span></div>
+
+        </div>
+    </div>
 </template>

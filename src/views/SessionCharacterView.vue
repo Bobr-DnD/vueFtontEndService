@@ -8,6 +8,7 @@ import WeaponRow from '@/components/reusable/WeaponRow.vue';
 import ArmorRow from '@/components/reusable/ArmorRow.vue';
 import MedsRow from '@/components/reusable/MedsRow.vue';
 import InventoryRow from '@/components/reusable/InventoryRow.vue';
+import PerkRow from '@/components/reusable/PerkRow.vue';
 
 const state = reactive({
     character: {},
@@ -20,6 +21,7 @@ let weapons_hidden = ref(false)
 let armors_hidden = ref(false)
 let meds_hidden = ref(false)
 let inventories_hidden = ref(false)
+let perks_hidden = ref(false)
 const id = useRoute().params.id
 
 onMounted(async () => {
@@ -163,7 +165,7 @@ function addExperience() {
         </div>
 
         <div :class="['grid grid-cols-1 mx-2 max-w-full', meds_hidden ? 'hidden' : '']">
-            <MedsRow  :medicines_all="state.session.medicines" v-model:medicines="state.character.medicines"/>
+            <MedsRow :medicines_all="state.session.medicines" v-model:medicines="state.character.medicines" />
         </div>
 
         <div class="mx-auto">
@@ -172,7 +174,16 @@ function addExperience() {
         </div>
 
         <div :class="['grid grid-cols-1 mx-2 max-w-full', inventories_hidden ? 'hidden' : '']">
-            <InventoryRow :inventory_all="state.session.inventories", v-model:inventory="state.character.inventory"/>
+            <InventoryRow :inventory_all="state.session.inventories" v-model:inventory="state.character.inventory" />
+        </div>
+
+        <div class="mx-auto">
+            <h1 @click="perks_hidden = !perks_hidden" class="mx-auto my-3 w-fit p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
+            rounded-md hover:cursor-pointer">Навчики</h1>
+        </div>
+
+        <div :class="['grid grid-cols-1 mx-2 max-w-full', perks_hidden ? 'hidden' : '']">
+            <PerkRow :perks_all="state.session.perks" v-model:perks="state.character.perks" v-model:perkPoints="state.character.perkPoints"/>
         </div>
 
     </div>
