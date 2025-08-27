@@ -27,9 +27,9 @@ function addRow() {
             class="row-span-2 p-2 text-clip w-full bg-darkred-red rounded-xl border-2 border-darkred-dark text-darkred-light font-medium hover:cursor-pointer">
             X</div>
         <div class="col-span-2 p2 text-clip ">Урон: {{ weapon.damage }}</div>
-        <div class="p2 text-clip ">Очки дії: {{ weapon.actionPoints }}</div>
         <div class="p2 text-clip ">Вимоги: {{Object.entries(weapon.requirement).map(([key, value]) =>
             `${key}:${value}`).join(',')}}</div>
+        <div class="p2 text-clip ">Очки дії: {{ weapon.actionPoints }}</div>
     </div>
     <select name="Weapons" id="Weapons" @change="addRow" :class=" ['min-w-fit max-w-4/5 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
         'tracking-wide uppercase shadow-inner outline-none transition-all duration-200 focus:border-darkred-red focus:ring-2 focus:ring-darkred-red',

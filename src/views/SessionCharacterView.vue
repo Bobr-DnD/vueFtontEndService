@@ -6,6 +6,8 @@ import Loader from 'vue-spinner/src/SyncLoader.vue'
 import SessionViewNavigtaion from '@/components/SessionViewNavigtaion.vue';
 import WeaponRow from '@/components/reusable/WeaponRow.vue';
 import ArmorRow from '@/components/reusable/ArmorRow.vue';
+import MedsRow from '@/components/reusable/MedsRow.vue';
+import InventoryRow from '@/components/reusable/InventoryRow.vue';
 
 const state = reactive({
     character: {},
@@ -16,6 +18,8 @@ const state = reactive({
 let connected = ref(false)
 let weapons_hidden = ref(false)
 let armors_hidden = ref(false)
+let meds_hidden = ref(false)
+let inventories_hidden = ref(false)
 const id = useRoute().params.id
 
 onMounted(async () => {
@@ -29,7 +33,7 @@ onMounted(async () => {
         console.error(err)
     }
     finally {
-        state.isLoading = false   
+        state.isLoading = false;
     }
 })
 
@@ -142,7 +146,6 @@ function addExperience() {
 
         <div :class="['grid grid-cols-1 mx-2 max-w-full', weapons_hidden ? 'hidden' : '']">
             <WeaponRow :weapons_all="state.session.weapons" v-model:weapons="state.character.weapons" />
-
         </div>
 
         <div class="mx-auto">
@@ -152,7 +155,24 @@ function addExperience() {
 
         <div :class="['grid grid-cols-1 mx-2 max-w-full', armors_hidden ? 'hidden' : '']">
             <ArmorRow :armors_all="state.session.armors" v-model:armors="state.character.armor" />
+        </div>
 
+        <div class="mx-auto">
+            <h1 @click="meds_hidden = !meds_hidden" class="mx-auto my-3 w-fit p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
+            rounded-md hover:cursor-pointer">Медикаменти</h1>
+        </div>
+
+        <div :class="['grid grid-cols-1 mx-2 max-w-full', meds_hidden ? 'hidden' : '']">
+            <MedsRow  :medicines_all="state.session.medicines" v-model:medicines="state.character.medicines"/>
+        </div>
+
+        <div class="mx-auto">
+            <h1 @click="inventories_hidden = !inventories_hidden" class="mx-auto my-3 w-fit p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
+            rounded-md hover:cursor-pointer">Інвентар</h1>
+        </div>
+
+        <div :class="['grid grid-cols-1 mx-2 max-w-full', inventories_hidden ? 'hidden' : '']">
+            <InventoryRow :inventory_all="state.session.inventories", v-model:inventory="state.character.inventory"/>
         </div>
 
     </div>
