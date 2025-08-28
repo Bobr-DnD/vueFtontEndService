@@ -2,12 +2,12 @@
 import { onMounted, reactive, ref } from 'vue';
 import { useRoute, RouterLink } from 'vue-router';
 import Loader from 'vue-spinner/src/SyncLoader.vue'
-import FormNumber from '@/components/FormNumber.vue';
+import FormNumber from '@/components/reusable/FormNumber.vue';
 import FormButtonPlusOne from '@/components/FormButtonPlusOne.vue';
 import RepositoryFactory from '@http/RepositoryFactory'
 import MasterPageNavigation from '@/components/MasterPageNavigation.vue';
 import characterCard from '@/components/characterCard.vue';
-import FormString from '@/components/FormString.vue';
+import FormString from '@/components/reusable/FormString.vue';
 
 const sessionId = useRoute().params.sessionId
 const state = reactive({
@@ -92,15 +92,15 @@ async function deleteEffect(id) {
   <div v-if="!state.isLoading && fieldsShowed" class="flex flex-wrap items-center justify-center mt-4">
     <div class="mx-4">
       <FormNumber v-for="value, name in state.session.currency" :label="'Currency_' + name" :entity_name="name"
-        v-model:value="state.session.currency[name]" />
+        v-model:value="state.session.currency[name]" class="shadow-[rgba(0,0,0,0.5)_0px_8px_24px]"/>
     </div>
 
     <div class="mx-4 grid md:grid-flow-col md:grid-rows-2 md:auto-cols-auto auto-grid-rows grid-flow-row grid-cols-1  gap-2">
       <div v-for="value, name in state.session.customFields">
         <FormNumber v-if="typeof (value) === 'number'" :label="'CustomFields_' + name" :entity_name="name"
-          v-model:value="state.session.customFields[name]" />
+          v-model:value="state.session.customFields[name]" class="shadow-[rgba(0,0,0,0.5)_0px_8px_24px]"/>
         <FormString v-if="typeof (value) === 'string'" :label="'CustomFields_' + name" :entity_name="name"
-          v-model:value="state.session.customFields[name]" />
+          v-model:value="state.session.customFields[name]" class="shadow-[rgba(0,0,0,0.5)_0px_8px_24px]"/>
       </div>
     </div>
 

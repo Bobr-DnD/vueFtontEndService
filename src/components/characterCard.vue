@@ -3,11 +3,11 @@ import { RouterLink, useRoute } from 'vue-router';
 const props = defineProps({
     character: {
         type: Object,
-        type: true
+        required: true
     },
     routing: {
         type: Boolean,
-        required: true,
+        required: false,
         default: false
     }
 })

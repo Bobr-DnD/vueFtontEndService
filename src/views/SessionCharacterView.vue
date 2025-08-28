@@ -9,6 +9,8 @@ import ArmorRow from '@/components/reusable/ArmorRow.vue';
 import MedsRow from '@/components/reusable/MedsRow.vue';
 import InventoryRow from '@/components/reusable/InventoryRow.vue';
 import PerkRow from '@/components/reusable/PerkRow.vue';
+import FormNumber from '@/components/reusable/FormNumber.vue';
+import FormString from '@/components/reusable/FormString.vue';
 
 const state = reactive({
     character: {},
@@ -79,16 +81,6 @@ function addExperience() {
             </div>
         </section>
 
-        <section>
-            <h2 class="text-center text-lg font-semibold text-gray-600 mb-2">Додаткові характеристики</h2>
-            <div class="flex flex-grow items-center justify-center gap-2">
-                <div v-for="c, index in state.character.customFields"
-                    class="grow p-2 text-center rounded-md border border-gray-300 bg-gray-50 text-gray-700 text-sm">
-                    {{ index }} — {{ c }}
-                </div>
-            </div>
-        </section>
-
         <div class="flex flex-wrap items-center justify-start">
             <div class="p-1 grow ">
                 <div class="p-2 border-2 rounded-md border-darkred-dark">
@@ -135,6 +127,22 @@ function addExperience() {
         </div>
     </div>
 
+    <div v-if="!state.isLoading" class="w-96 mx-auto my-4">
+        <section>
+            
+        </section>
+        <section v-if="state.character.customFields">
+            <h2 class="text-center text-xl font-semibold text-gray-600 mb-2">Додаткові характеристики</h2>
+            <div v-for="value, field in state.character.customFields">
+                <FormString v-if="typeof (value) === 'string'" :label="'CustomFields_' + field" :entity_name="field"
+                    v-model:value="state.character.customFields[field]" class="mx-auto shadow-[rgba(0,0,0,0.5)_0px_4px_16px]" />
+
+                <FormNumber v-if="typeof (value) === 'number'" :label="'CustomFields_' + field" :entity_name="field"
+                    v-model:value="state.character.customFields[field]" class="mx-auto shadow-[rgba(0,0,0,0.5)_0px_4px_16px]" />
+            </div>
+        </section>
+    </div>
+
 
     <div v-if="!state.isLoading" class="grid grid-cols-1 justify-items-center mx-auto min-w-fit max-w-sm">
         <h1
@@ -146,7 +154,7 @@ function addExperience() {
             rounded-md hover:cursor-pointer">Зброя</h1>
         </div>
 
-        <div :class="['grid grid-cols-1 mx-2 max-w-full', weapons_hidden ? 'hidden' : '']">
+        <div :class="['grid grid-cols-1 mx-2 w-11/12', weapons_hidden ? 'hidden' : '']">
             <WeaponRow :weapons_all="state.session.weapons" v-model:weapons="state.character.weapons" />
         </div>
 
@@ -155,7 +163,7 @@ function addExperience() {
             rounded-md hover:cursor-pointer">Броня</h1>
         </div>
 
-        <div :class="['grid grid-cols-1 mx-2 max-w-full', armors_hidden ? 'hidden' : '']">
+        <div :class="['grid grid-cols-1 mx-2 w-11/12', armors_hidden ? 'hidden' : '']">
             <ArmorRow :armors_all="state.session.armors" v-model:armors="state.character.armor" />
         </div>
 
@@ -164,7 +172,7 @@ function addExperience() {
             rounded-md hover:cursor-pointer">Медикаменти</h1>
         </div>
 
-        <div :class="['grid grid-cols-1 mx-2 max-w-full', meds_hidden ? 'hidden' : '']">
+        <div :class="['grid grid-cols-1 mx-2 w-11/12', meds_hidden ? 'hidden' : '']">
             <MedsRow :medicines_all="state.session.medicines" v-model:medicines="state.character.medicines" />
         </div>
 
@@ -173,7 +181,7 @@ function addExperience() {
             rounded-md hover:cursor-pointer">Інвентар</h1>
         </div>
 
-        <div :class="['grid grid-cols-1 mx-2 max-w-full', inventories_hidden ? 'hidden' : '']">
+        <div :class="['grid grid-cols-1 mx-2 w-11/12', inventories_hidden ? 'hidden' : '']">
             <InventoryRow :inventory_all="state.session.inventories" v-model:inventory="state.character.inventory" />
         </div>
 
@@ -183,7 +191,8 @@ function addExperience() {
         </div>
 
         <div :class="['grid grid-cols-1 mx-2 max-w-full', perks_hidden ? 'hidden' : '']">
-            <PerkRow :perks_all="state.session.perks" v-model:perks="state.character.perks" v-model:perkPoints="state.character.perkPoints"/>
+            <PerkRow :perks_all="state.session.perks" v-model:perks="state.character.perks"
+                v-model:perkPoints="state.character.perkPoints" />
         </div>
 
     </div>

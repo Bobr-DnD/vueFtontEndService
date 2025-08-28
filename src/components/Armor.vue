@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
-import FormString from './FormString.vue'
-import FormNumber from './FormNumber.vue'
+import FormString from './reusable/FormString.vue'
+import FormNumber from './reusable/FormNumber.vue'
 import FormDropDown from './FormDropdown.vue'
 
 const armors = defineModel('armors', {type: Array, required:true})
