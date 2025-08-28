@@ -1,0 +1,104 @@
+<script setup>
+import { computed, onMounted, ref, watch } from 'vue'
+
+const health = defineModel('health', { type: Number, required: true })
+
+const props = defineProps({
+  min: { type: Number, required: true },
+  max: { type: Number, required: true },
+  step: { type: Number, default: 1 },
+  pad: { type: Number, default: 2 }, // e.g. 2 -> "07"
+})
+
+const items = computed(() => {
+  const out = []
+  for (let v = props.min; v <= props.max; v += props.step) out.push(v)
+  return out
+})
+
+const scroller = ref(null)
+const itemRefs = ref([])
+
+function format(v) {
+  return props.pad ? String(v).padStart(props.pad, '0') : String(v)
+}
+
+function select(v) {
+  health.value += v
+}
+
+function getItemUnderIndicator() {
+  const wrap = scroller.value
+  if (!wrap) return null
+
+  const centerX = wrap.scrollLeft + wrap.clientWidth / 2
+
+  for (let i = 0; i < itemRefs.value.length; i++) {
+    const el = itemRefs.value[i]
+    const left = el.offsetLeft
+    const right = left + el.offsetWidth
+    if (centerX >= left && centerX <= right) {
+      select(items.value[i])
+    }
+  }
+
+  return null
+}
+
+function scrollToValue() {
+  const idx = items.value.indexOf(0)
+
+  const el = itemRefs.value[idx]
+  const wrap = scroller.value
+
+  if (!el || !wrap) return
+
+  const offset = el.offsetLeft + el.offsetWidth / 2 - wrap.clientWidth / 2
+  wrap.scrollTo({ left: offset, behavior: 'smooth' })
+}
+
+onMounted(() => scrollToValue())
+watch(() => health.value, scrollToValue)
+</script>
+
+<template>
+  <div class="w-full max-w-md mx-auto">
+    <!-- Track -->
+    <div ref="scroller" class="relative flex gap-4 overflow-x-auto no-scrollbar px-6 py-3
+             snap-x snap-mandatory scroll-p-1 select-none">
+
+      <!-- numbers -->
+      <div v-for="(v, i) in items" :key="v" :ref="el => itemRefs[i] = el"
+        class="snap-center shrink-0 w-14 h-14 grid place-items-center rounded-xl border transition-all duration-200 cursor-pointer bg-white text-gray-800 
+        border-gray-300 hover:border-gray-400 hover:bg-gray-50 dark:bg-zinc-900 dark:text-zinc-100 dark:border-zinc-700 dark:hover:border-zinc-500">
+
+        <span class="text-xl font-semibold tabular-nums">{{ format(v) }}</span>
+
+      </div>
+
+    </div>
+
+    <!-- center indicator line -->
+    <div class="relative h-0">
+      <div class="absolute left-1/2 -translate-x-1/2 -top-8 h-8 w-0.5 bg-darkred-bright/70 rounded"></div>
+    </div>
+  </div>
+  
+  <div class="w-full flex items-center justify-center">
+    <button @click="getItemUnderIndicator"
+      class="mx-auto p-2 w-32 h-16 bg-greenish-dark border-2 rounded-xl text-darkred-light text-3xl font-medium">OK</button>
+  </div>
+
+
+</template>
+
+<style>
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+</style>

@@ -1,6 +1,8 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import { ArrowDownIcon, ArrowUpIcon } from '@heroicons/vue/24/solid'
+import test from '@/components/reusable/HorizontalNumberPicker.vue';
 import RepositoryFactory from '@http/RepositoryFactory';
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import SessionViewNavigtaion from '@/components/SessionViewNavigtaion.vue';
@@ -24,6 +26,7 @@ let armors_hidden = ref(false)
 let meds_hidden = ref(false)
 let inventories_hidden = ref(false)
 let perks_hidden = ref(false)
+let custom_hidden = ref(true)
 const characterId = useRoute().params.characterId
 
 onMounted(async () => {
@@ -47,6 +50,11 @@ function addExperience() {
         state.character.experience = 0;
         state.character.perkPoints++;
     }
+}
+function checkHealth() {
+    if (state.character.health > state.character.maxHealth) state.character.health = state.character.maxHealth
+    if (state.character.health < 0) state.character.health = 0
+
 }
 </script>
 
@@ -82,7 +90,7 @@ function addExperience() {
         </section>
 
         <div class="flex flex-wrap items-center justify-start">
-            <div class="p-1 grow ">
+            <!--<div class="p-1 grow ">
                 <div class="p-2 border-2 rounded-md border-darkred-dark">
                     <div class="text-sm mb-1 text-center font-medium">
                         Здоров'я: {{ state.character.health }}/{{ state.character.maxHealth }}
@@ -95,6 +103,11 @@ function addExperience() {
                         }" :style="{ width: (state.character.health / state.character.maxHealth * 100) + '%' }"></div>
                     </div>
                 </div>
+            </div>-->
+
+            <div class="p-1 grow h-full">
+                <div class="p-2 text-center border-2 rounded-md border-darkred-dark"> Очки рівня: {{
+                    state.character.perkPoints }} </div>
             </div>
 
             <div class="p-1 grow">
@@ -116,10 +129,7 @@ function addExperience() {
                 </div>
 
             </div>
-            <div class="p-1 grow">
-                <div class="p-2 text-center border-2 rounded-md border-darkred-dark"> Очки рівня: {{
-                    state.character.perkPoints }} </div>
-            </div>
+
             <div class="p-1 grow"> <button @click="addExperience" class="w-full h-full p-2 rounded-lg border-2 border-darkred-red bg-darkred-dark_gray 
                 text-darkred-light font-semibold tracking-wide hover:bg-darkred-red hover:text-darkred-light active:bg-darkred-bright active:scale-95 
                 transition-all duration-200 ease-in-out Fshadow-md hover:shadow-lg">
@@ -128,17 +138,70 @@ function addExperience() {
     </div>
 
     <div v-if="!state.isLoading" class="w-96 mx-auto my-4">
-        <section>
-            
+
+        <!--<section class="w-fit mx-auto flex items-center justify-center">
+
+            <form class="flex items-center max-w-80 p-4 font-univers rounded-xl" @submit.prevent>
+                <label for="Health" class="mr-2 w-full text-darkred-dark font-semibold text-lg tracking-wide">
+                    Health:
+                </label>
+                <input @change="checkHealth" min="0" :max="state.character.maxHealth" id="Health" type="number"
+                    v-model="state.character.health"
+                    class="bg-darkred-gray max-w-28 text-darkred-light text-md placeholder-darkred-dark border no-arrows
+                    border-darkred-dark rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
+            </form>
+
+            <button :disabled="state.character.health >= state.character.maxHealth" @click="state.character.health++"
+                class="p-1 mx-2 border-2 rounded-md text-darkred-dark_gray" :class="state.character.health >= state.character.maxHealth
+                    ? 'bg-gray-300 border-gray-400 text-gray-500 cursor-not-allowed'
+                    : 'bg-greenish-light border-greenish-dark'
+                    ">
+                <ArrowUpIcon class="w-8 h-8" />
+            </button>
+
+            <button :disabled="state.character.health <= 0" @click="state.character.health--"
+                class="p-1 mx-2 border-2 text-darkred-dark_gray rounded-md" :class="state.character.health <= 0
+                    ? 'bg-gray-300 border-gray-400 text-gray-500 cursor-not-allowed'
+                    : 'bg-darkred-bright border-darkred-red '
+                    ">
+                <ArrowDownIcon class="w-8 h-8" />
+            </button>
+
+        </section>-->
+
+        <section class="mb-2">
+            <div class="p-1 grow ">
+                <div class="p-2 border-2 rounded-md border-darkred-dark">
+                    <div class="text-md mb-1 text-center font-medium">
+                        Здоров'я: {{ state.character.health }}/{{ state.character.maxHealth }}
+                    </div>
+                    <div class="w-full h-5 bg-gray-300 rounded overflow-hidden">
+                        <div class="h-full transition-all duration-300" :class="{
+                            'bg-green-500': state.character.health / state.character.maxHealth > 0.6,
+                            'bg-yellow-400': state.character.health / state.character.maxHealth <= 0.6 && state.character.health / state.character.maxHealth > 0.3,
+                            'bg-red-500': state.character.health / state.character.maxHealth <= 0.3
+                        }" :style="{ width: (state.character.health / state.character.maxHealth * 100) + '%' }"></div>
+                    </div>
+                </div>
+            </div>
+
+            <test v-model:health="state.character.health" :min="-state.character.health"
+                :max="state.character.maxHealth - state.character.health" />
+
         </section>
+
         <section v-if="state.character.customFields">
-            <h2 class="text-center text-xl font-semibold text-gray-600 mb-2">Додаткові характеристики</h2>
-            <div v-for="value, field in state.character.customFields">
+            <h2 @click="custom_hidden = !custom_hidden"
+                class="text-center text-xl font-semibold py-2  bg-darkred-dark text-darkred-light mb-2 rounded-lg hover:cursor-pointer">
+                Додаткові характеристики</h2>
+            <div v-if="!custom_hidden" v-for="value, field in state.character.customFields">
                 <FormString v-if="typeof (value) === 'string'" :label="'CustomFields_' + field" :entity_name="field"
-                    v-model:value="state.character.customFields[field]" class="mx-auto shadow-[rgba(0,0,0,0.5)_0px_4px_16px]" />
+                    v-model:value="state.character.customFields[field]"
+                    class="mx-auto shadow-[rgba(0,0,0,0.5)_0px_4px_16px]" />
 
                 <FormNumber v-if="typeof (value) === 'number'" :label="'CustomFields_' + field" :entity_name="field"
-                    v-model:value="state.character.customFields[field]" class="mx-auto shadow-[rgba(0,0,0,0.5)_0px_4px_16px]" />
+                    v-model:value="state.character.customFields[field]"
+                    class="mx-auto shadow-[rgba(0,0,0,0.5)_0px_4px_16px]" />
             </div>
         </section>
     </div>
@@ -151,7 +214,7 @@ function addExperience() {
 
         <div class="mx-auto">
             <h1 @click="weapons_hidden = !weapons_hidden" class="mx-auto my-3 w-fit p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
-            rounded-md hover:cursor-pointer">Зброя</h1>
+            rounded-xl hover:cursor-pointer">Зброя</h1>
         </div>
 
         <div :class="['grid grid-cols-1 mx-2 w-11/12', weapons_hidden ? 'hidden' : '']">
@@ -160,7 +223,7 @@ function addExperience() {
 
         <div class="mx-auto">
             <h1 @click="armors_hidden = !armors_hidden" class="mx-auto my-3 w-fit p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
-            rounded-md hover:cursor-pointer">Броня</h1>
+            rounded-xl hover:cursor-pointer">Броня</h1>
         </div>
 
         <div :class="['grid grid-cols-1 mx-2 w-11/12', armors_hidden ? 'hidden' : '']">
@@ -169,7 +232,7 @@ function addExperience() {
 
         <div class="mx-auto">
             <h1 @click="meds_hidden = !meds_hidden" class="mx-auto my-3 w-fit p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
-            rounded-md hover:cursor-pointer">Медикаменти</h1>
+            rounded-xl hover:cursor-pointer">Медикаменти</h1>
         </div>
 
         <div :class="['grid grid-cols-1 mx-2 w-11/12', meds_hidden ? 'hidden' : '']">
@@ -178,7 +241,7 @@ function addExperience() {
 
         <div class="mx-auto">
             <h1 @click="inventories_hidden = !inventories_hidden" class="mx-auto my-3 w-fit p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
-            rounded-md hover:cursor-pointer">Інвентар</h1>
+            rounded-xl hover:cursor-pointer">Інвентар</h1>
         </div>
 
         <div :class="['grid grid-cols-1 mx-2 w-11/12', inventories_hidden ? 'hidden' : '']">
@@ -187,7 +250,7 @@ function addExperience() {
 
         <div class="mx-auto">
             <h1 @click="perks_hidden = !perks_hidden" class="mx-auto my-3 w-fit p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
-            rounded-md hover:cursor-pointer">Навчики</h1>
+            rounded-xl hover:cursor-pointer">Навчики</h1>
         </div>
 
         <div :class="['grid grid-cols-1 mx-2 max-w-full', perks_hidden ? 'hidden' : '']">
@@ -202,3 +265,15 @@ function addExperience() {
     </div>
 
 </template>
+
+<style scoped>
+.no-arrows::-webkit-outer-spin-button,
+.no-arrows::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.no-arrows[type=number] {
+    -moz-appearance: textfield;
+}
+</style>
