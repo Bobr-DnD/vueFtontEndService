@@ -9,7 +9,7 @@ import MasterPageNavigation from '@/components/MasterPageNavigation.vue';
 import characterCard from '@/components/characterCard.vue';
 import FormString from '@/components/FormString.vue';
 
-const id = useRoute().params.id
+const sessionId = useRoute().params.sessionId
 const state = reactive({
   session: {},
   isLoading: true
@@ -17,7 +17,7 @@ const state = reactive({
 
 onMounted(async () => {
   try {
-    const res = await RepositoryFactory.getById('session', id)
+    const res = await RepositoryFactory.getById('session', sessionId)
     state.session = res.data
 
   } catch (err) {

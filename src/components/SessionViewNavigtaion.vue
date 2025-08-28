@@ -1,8 +1,7 @@
 <script setup>
 import { RouterLink, useRoute } from 'vue-router'
 
-const id = useRoute().params.id
-
+const sessionId = useRoute().params.sessionId
 
 </script>
 
@@ -27,7 +26,7 @@ const id = useRoute().params.id
         <hr
             class="w-1 h-6 bg-darkred-bright border-0 mx-4 bg-gradient-to-r from-transparent via-darkred-bright to-transparent rounded" />
 
-        <RouterLink :to="'/session/' + id" class="relative text-darkred-bright font-semibold tracking-wide
+        <RouterLink :to="'/session/' + sessionId" class="relative text-darkred-bright font-semibold tracking-wide
            after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[3px]
            after:bg-darkred-bright hover:after:w-full after:transition-[width] after:duration-400 after:ease-out">
             Список персонажів

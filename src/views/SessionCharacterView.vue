@@ -22,11 +22,11 @@ let armors_hidden = ref(false)
 let meds_hidden = ref(false)
 let inventories_hidden = ref(false)
 let perks_hidden = ref(false)
-const id = useRoute().params.id
+const characterId = useRoute().params.characterId
 
 onMounted(async () => {
     try {
-        let res = await RepositoryFactory.getById('character', id)
+        let res = await RepositoryFactory.getById('character', characterId)
         state.character = res.data
         res = await RepositoryFactory.getById('session', state.character.session)
         state.session = res.data

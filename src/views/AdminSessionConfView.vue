@@ -7,7 +7,7 @@ import MasterPageNavigation from '@/components/MasterPageNavigation.vue';
 import MasterPageMenu from '@/components/MasterPageMenu.vue';
 import Armor from '@/components/Armor.vue';
 
-const id = useRoute().params.id
+const sessionId = useRoute().params.sessionId
 const state = reactive({
     session: {},
     isLoading: true
@@ -20,7 +20,7 @@ let fields = ref([])
 
 onMounted(async () => {
     try {
-        const res = await RepositoryFactory.getById('session', id)
+        const res = await RepositoryFactory.getById('session', sessionId)
         state.session = res.data
 
         currency = Object.entries(state.session.currency).map(([key]) => `${key}`)

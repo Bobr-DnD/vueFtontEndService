@@ -22,22 +22,22 @@ const router = createRouter({
             component: Sessions
         },
         {
-            path: '/admin/:id',
+            path: '/admin/:sessionId',
             name: 'admin_panel',
             component: AdminPageView
         },
         {
-            path: '/admin/session/:id',
+            path: '/admin/session/:sessionId',
             name: 'admin_session',
             component: AdminSessionConfView
         },
         {
-            path: '/session/:id',
+            path: '/session/:sessionId',
             name: 'session',
             component: SessionView
         },
         {
-            path: '/session/character/:id',
+            path: '/session/:sessionId/character/:characterId',
             name: 'session_character',
             component: SessionCharacterView
         },
