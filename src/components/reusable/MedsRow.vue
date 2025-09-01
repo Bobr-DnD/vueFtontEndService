@@ -34,7 +34,7 @@ function useItem(index, effect) {
 <template>
 
     <div v-for="med, index in medicines"
-        class="grid grid-cols-[1fr_1fr_30px_30px] p-2 gap-2 items-center justify-items-center 
+        class="grid grid-cols-[1fr_1fr_30px_30px] p-2 gap-2 items-center justify-items-center font-gothic
             bg-darkred-gray border-2 border-darkred-red rounded-lg text-darkred-dark text-sm font-medium my-2 hover:cursor-pointer"
         :id="'Medicine' + `${index + 1}`" @click="showDetails(med.id)">
 
@@ -43,11 +43,11 @@ function useItem(index, effect) {
         <div class="p2 text-clip">{{ med.description }}</div>
 
         <div @click.stop="useItem(index, med.effect)"
-            class="p-2 w-full bg-greenish-dark rounded-xl border-2 border-darkred-dark text-darkred-light font-medium hover:cursor-pointer">
+            class="p-2 w-full bg-greenish-dark rounded-xl border-2 border-darkred-dark text-darkred-light font-medium hover:cursor-pointer select-none">
             ✓</div>
 
         <div @click.stop="deleteRow(index)"
-            class="p-2 pw-full bg-darkred-red rounded-xl border-2 border-darkred-dark text-darkred-light font-medium hover:cursor-pointer">
+            class="p-2 pw-full bg-darkred-red rounded-xl border-2 border-darkred-dark text-darkred-light font-medium hover:cursor-pointer select-none">
             X</div>
 
     </div>
@@ -66,10 +66,10 @@ function useItem(index, effect) {
 
     <div v-if="!block_hidden" class="fixed inset-0 flex items-center justify-center z-50 bg-black/50">
         <div
-            class="w-80 p-5 grid grid-cols-2 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative">
+            class="w-80 p-5 grid grid-cols-2 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-univers">
 
             <div @click="block_hidden = true"
-                class="absolute top-2 right-2 px-3 py-1 bg-darkred-red border border-darkred-dark rounded-md text-darkred-light font-bold cursor-pointer hover:bg-darkred-bright transition">
+                class="absolute top-2 right-2 px-3 py-1 bg-darkred-red border border-darkred-dark rounded-md text-darkred-light font-bold cursor-pointer hover:bg-darkred-bright transition select-none">
                 ✕
             </div>
 

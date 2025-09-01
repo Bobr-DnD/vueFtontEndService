@@ -28,14 +28,14 @@ function addRow() {
 
 <template>
     <div v-for="weapon, index in weapons"
-        class="grid grid-cols-[1fr_1fr_1fr_30px] grid-rows-3 p-2 gap-2 items-center justify-items-center 
+        class="grid grid-cols-[1fr_1fr_1fr_30px] grid-rows-3 p-2 gap-2 items-center justify-items-center font-gothic
             bg-darkred-gray border-2 border-darkred-red rounded-lg text-darkred-dark text-sm font-medium my-2 hover:cursor-pointer"
         :id="'Weapon' + `${index + 1}`" @click="showDetails(weapon.id)">
 
         <div class="col-span-3 p2 text-clip">{{ weapon.name }}</div>
 
         <div @click.stop="deleteRow(index)"
-            class="row-span-3 p-2 w-full bg-darkred-red rounded-xl border-2 border-darkred-dark text-darkred-light font-medium hover:cursor-pointer">
+            class="row-span-3 p-2 w-full bg-darkred-red rounded-xl border-2 border-darkred-dark text-darkred-light font-medium hover:cursor-pointer select-none">
             X</div>
 
         <div class="col-span-2 p2 text-clip">Урон: {{ weapon.damage }}</div>
@@ -64,10 +64,10 @@ function addRow() {
 
     <div v-if="!block_hidden" class="fixed inset-0 flex items-center justify-center z-50 bg-black/50">
         <div
-            class="w-80 p-5 grid grid-cols-2 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative">
+            class="w-80 p-5 grid grid-cols-2 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-univers">
 
             <div @click="block_hidden = true"
-                class="absolute top-2 right-2 px-3 py-1 bg-darkred-red border border-darkred-dark rounded-md text-darkred-light font-bold cursor-pointer hover:bg-darkred-bright transition">
+                class="absolute top-2 right-2 px-3 py-1 bg-darkred-red border border-darkred-dark rounded-md text-darkred-light font-bold cursor-pointer hover:bg-darkred-bright transition select-none">
                 ✕
             </div>
 

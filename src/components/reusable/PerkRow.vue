@@ -18,7 +18,7 @@ function addRow() {
 
 <template>
     <div v-for="perk, index in perks"
-        class="grid grid-cols-1 p-2 gap-2 items-center justify-items-start 
+        class="grid grid-cols-1 p-2 gap-2 items-center justify-items-start font-gothic
             bg-darkred-gray border-2 border-darkred-red rounded-lg text-darkred-dark text-sm font-medium my-2"
         :id="'Perk' + `${index + 1}`">
 

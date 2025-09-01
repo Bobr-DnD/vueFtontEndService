@@ -86,7 +86,7 @@ watch(() => health.value, scrollToValue)
 </script>
 
 <template>
-  <div class="w-full max-w-md mx-auto">
+  <div class="w-full max-w-md mx-auto font-gothic">
     <!-- Track -->
     <div ref="scroller" class="relative flex gap-4 overflow-x-auto no-scrollbar px-6 py-3
              snap-x snap-mandatory scroll-p-1 select-none">
@@ -111,7 +111,7 @@ watch(() => health.value, scrollToValue)
     </div>
   </div>
 
-  <div class="w-full flex items-center justify-center">
+  <div class="w-full flex items-center justify-center font-gothic">
     <button @click="getItemUnderIndicator"
       class="mx-auto p-2 w-32 h-16 bg-greenish-dark border-2 rounded-xl text-darkred-light text-3xl font-medium">OK</button>
   </div>

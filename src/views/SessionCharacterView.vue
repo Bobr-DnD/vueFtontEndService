@@ -20,6 +20,8 @@ const state = reactive({
     isLoading: true
 })
 
+let effectsText = ref('Показати активні ефекти')
+let customFields_Text = ref('Показати додаткові характеристики')
 let connected = ref(false)
 let weapons_hidden = ref(false)
 let armors_hidden = ref(false)
@@ -27,6 +29,7 @@ let meds_hidden = ref(false)
 let inventories_hidden = ref(false)
 let perks_hidden = ref(false)
 let custom_hidden = ref(true)
+let effects_hidden = ref(true)
 const characterId = useRoute().params.characterId
 
 onMounted(async () => {
@@ -172,7 +175,7 @@ function checkHealth() {
         <section class="mb-2">
             <div class="p-1 grow ">
                 <div class="p-2 border-2 rounded-md border-darkred-dark">
-                    <div class="text-md mb-1 text-center font-medium">
+                    <div class="text-md mb-1 text-center font-medium font-gothic">
                         Здоров'я: {{ state.character.health }}/{{ state.character.maxHealth }}
                     </div>
                     <div class="w-full h-5 bg-gray-300 rounded overflow-hidden">
@@ -191,9 +194,11 @@ function checkHealth() {
         </section>
 
         <section v-if="state.character.customFields">
-            <h2 @click="custom_hidden = !custom_hidden"
-                class="text-center text-xl font-semibold py-2  bg-darkred-dark text-darkred-light mb-2 rounded-lg hover:cursor-pointer">
-                Додаткові характеристики</h2>
+            <h2 @click="custom_hidden = !custom_hidden; customFields_Text === 'Показати додаткові характеристики' ? customFields_Text = 'Приховати додаткові характеристики' : customFields_Text = 'Показати додаткові характеристики'"
+                class="text-center text-xl font-univers font-semibold py-2 mb-2 rounded-lg hover:cursor-pointer transition-all duration-500 ease-in-out select-none"
+                :class="custom_hidden ? 'bg-darkred-gray text-darkred-dark' : 'bg-darkred-dark text-darkred-light'">
+                {{ customFields_Text }}</h2>
+
             <div v-if="!custom_hidden" v-for="value, field in state.character.customFields">
                 <FormString v-if="typeof (value) === 'string'" :label="'CustomFields_' + field" :entity_name="field"
                     v-model:value="state.character.customFields[field]"
@@ -203,18 +208,62 @@ function checkHealth() {
                     v-model:value="state.character.customFields[field]"
                     class="mx-auto shadow-[rgba(0,0,0,0.5)_0px_4px_16px]" />
             </div>
+            
         </section>
+    </div>
+
+    <div v-if="!state.isLoading" class="grid grid-cols-1 gap-2 w-96 mx-auto my-4">
+        <button @click="effects_hidden = !effects_hidden; effectsText === 'Показати активні ефекти'
+                ? (effectsText = 'Приховати активні ефекти')
+                : (effectsText = 'Показати активні ефекти')" 
+                class="px-4 py-2 rounded-xl font-univers font-semibold text-xl transition-all duration-500 ease-in-out"
+                :class="effects_hidden ? 'bg-darkred-gray text-darkred-dark' : 'bg-darkred-dark text-darkred-light'">
+            {{ effectsText }}
+        </button>
+
+
+        <div v-if="!effects_hidden" class="space-y-2 font-univers">
+            <div class="grid grid-cols-[1fr_1fr_min-content] p-2 gap-2 justify-items-center items-center bg-darkred-dark_gray  
+                border-darkred-gray rounded-xl shadow-sm text-darkred-light">
+                <div>
+                    Назва
+                </div>
+                <div>
+                    Ефект
+                </div>
+                <div class="justify-self-end">
+                    Тривалість
+                </div>
+            </div>
+            <div v-for="effect in state.character.effects" class="grid grid-cols-[1fr_1fr_80px] gap-2 p-3 justify-items-center items-center
+         bg-darkred-dark_gray  border-darkred-gray rounded-xl shadow-sm text-darkred-light">
+
+                <div class="text-lg font-semibold">
+                    {{ effect.effect.name }}
+                </div>
+
+                <div class="text-sm">
+                    {{ effect.effect.description }}
+                </div>
+
+                <div class="text-md font-medium px-2 py-1 rounded-lg bg-darkred-dark">
+                    {{ effect.deathTime }}
+                </div>
+            </div>
+        </div>
+
+
     </div>
 
 
     <div v-if="!state.isLoading" class="grid grid-cols-1 justify-items-center mx-auto min-w-fit max-w-sm">
         <h1
-            class="w-4/5 text-center text-3xl font-bold text-darkred-dark_gray border-b-2 border-t-2 border-darkred-red rounded-lg mx-2">
+            class="w-4/5 text-center text-3xl font-bold text-darkred-dark_gray border-b-2 border-t-2 border-darkred-red rounded-lg mx-2 font-gothic">
             Інвентар</h1>
 
         <div class="mx-auto">
             <h1 @click="weapons_hidden = !weapons_hidden" class="mx-auto my-3 w-fit p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
-            rounded-xl hover:cursor-pointer">Зброя</h1>
+            rounded-xl hover:cursor-pointer select-none font-gothic">Зброя</h1>
         </div>
 
         <div :class="['grid grid-cols-1 mx-2 w-11/12', weapons_hidden ? 'hidden' : '']">
@@ -223,7 +272,7 @@ function checkHealth() {
 
         <div class="mx-auto">
             <h1 @click="armors_hidden = !armors_hidden" class="mx-auto my-3 w-fit p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
-            rounded-xl hover:cursor-pointer">Броня</h1>
+            rounded-xl hover:cursor-pointer select-none font-gothic">Броня</h1>
         </div>
 
         <div :class="['grid grid-cols-1 mx-2 w-11/12', armors_hidden ? 'hidden' : '']">
@@ -232,7 +281,7 @@ function checkHealth() {
 
         <div class="mx-auto">
             <h1 @click="meds_hidden = !meds_hidden" class="mx-auto my-3 w-fit p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
-            rounded-xl hover:cursor-pointer">Медикаменти</h1>
+            rounded-xl hover:cursor-pointer select-none font-gothic">Медикаменти</h1>
         </div>
 
         <div :class="['grid grid-cols-1 mx-2 w-11/12', meds_hidden ? 'hidden' : '']">
@@ -241,7 +290,7 @@ function checkHealth() {
 
         <div class="mx-auto">
             <h1 @click="inventories_hidden = !inventories_hidden" class="mx-auto my-3 w-fit p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
-            rounded-xl hover:cursor-pointer">Інвентар</h1>
+            rounded-xl hover:cursor-pointer select-none font-gothic">Інвентар</h1>
         </div>
 
         <div :class="['grid grid-cols-1 mx-2 w-11/12', inventories_hidden ? 'hidden' : '']">
@@ -250,7 +299,7 @@ function checkHealth() {
 
         <div class="mx-auto">
             <h1 @click="perks_hidden = !perks_hidden" class="mx-auto my-3 w-fit p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
-            rounded-xl hover:cursor-pointer">Навчики</h1>
+            rounded-xl hover:cursor-pointer select-none font-gothic">Навчики</h1>
         </div>
 
         <div :class="['grid grid-cols-1 mx-2 max-w-full', perks_hidden ? 'hidden' : '']">
