@@ -20,8 +20,9 @@ const state = reactive({
     isLoading: true
 })
 
-let effectsText = ref('Показати активні ефекти')
-let customFields_Text = ref('Показати додаткові характеристики')
+let effects_text = ref('Показати активні ефекти')
+let customFields_text = ref('Показати додаткові характеристики')
+let currency_text = ref('Показати баланс')
 let connected = ref(false)
 let weapons_hidden = ref(false)
 let armors_hidden = ref(false)
@@ -30,6 +31,7 @@ let inventories_hidden = ref(false)
 let perks_hidden = ref(false)
 let custom_hidden = ref(true)
 let effects_hidden = ref(true)
+let currency_hidden = ref(true)
 const characterId = useRoute().params.characterId
 
 onMounted(async () => {
@@ -194,10 +196,10 @@ function checkHealth() {
         </section>
 
         <section v-if="state.character.customFields">
-            <h2 @click="custom_hidden = !custom_hidden; customFields_Text === 'Показати додаткові характеристики' ? customFields_Text = 'Приховати додаткові характеристики' : customFields_Text = 'Показати додаткові характеристики'"
+            <h2 @click="custom_hidden = !custom_hidden; customFields_text === 'Показати додаткові характеристики' ? customFields_text = 'Приховати додаткові характеристики' : customFields_text = 'Показати додаткові характеристики'"
                 class="text-center text-xl font-univers font-semibold py-2 mb-2 rounded-lg hover:cursor-pointer transition-all duration-500 ease-in-out select-none"
                 :class="custom_hidden ? 'bg-darkred-gray text-darkred-dark' : 'bg-darkred-dark text-darkred-light'">
-                {{ customFields_Text }}</h2>
+                {{ customFields_text }}</h2>
 
             <div v-if="!custom_hidden" v-for="value, field in state.character.customFields">
                 <FormString v-if="typeof (value) === 'string'" :label="'CustomFields_' + field" :entity_name="field"
@@ -208,17 +210,17 @@ function checkHealth() {
                     v-model:value="state.character.customFields[field]"
                     class="mx-auto shadow-[rgba(0,0,0,0.5)_0px_4px_16px]" />
             </div>
-            
+
         </section>
     </div>
 
-    <div v-if="!state.isLoading" class="grid grid-cols-1 gap-2 w-96 mx-auto my-4">
-        <button @click="effects_hidden = !effects_hidden; effectsText === 'Показати активні ефекти'
-                ? (effectsText = 'Приховати активні ефекти')
-                : (effectsText = 'Показати активні ефекти')" 
-                class="px-4 py-2 rounded-xl font-univers font-semibold text-xl transition-all duration-500 ease-in-out"
-                :class="effects_hidden ? 'bg-darkred-gray text-darkred-dark' : 'bg-darkred-dark text-darkred-light'">
-            {{ effectsText }}
+    <section v-if="!state.isLoading" class="grid grid-cols-1 gap-2 w-96 mx-auto my-4">
+        <button @click="effects_hidden = !effects_hidden; effects_text === 'Показати активні ефекти'
+            ? (effects_text = 'Приховати активні ефекти')
+            : (effects_text = 'Показати активні ефекти')"
+            class="px-4 py-2 rounded-xl font-univers font-semibold text-xl transition-all duration-500 ease-in-out"
+            :class="effects_hidden ? 'bg-darkred-gray text-darkred-dark' : 'bg-darkred-dark text-darkred-light'">
+            {{ effects_text }}
         </button>
 
 
@@ -253,7 +255,21 @@ function checkHealth() {
         </div>
 
 
-    </div>
+    </section>
+
+    <section v-if="state.session.currency" class="w-96 mx-auto my-4">
+        <h2 @click="currency_hidden = !currency_hidden; currency_text === 'Показати баланс' ? currency_text = 'Приховати баланс' : currency_text = 'Показати баланс'"
+            class="text-center text-xl font-univers font-semibold py-2 mb-2 rounded-lg hover:cursor-pointer transition-all duration-500 ease-in-out select-none"
+            :class="currency_hidden ? 'bg-darkred-gray text-darkred-dark' : 'bg-darkred-dark text-darkred-light'">
+            {{ currency_text }}</h2>
+
+        <div v-if="!currency_hidden" v-for="value, field in state.session.currency">
+            <FormNumber v-if="typeof (value) === 'number'" :label="'Currency_' + field" :entity_name="field"
+                v-model:value="state.session.currency[field]"
+                class="mx-auto shadow-[rgba(0,0,0,0.5)_0px_4px_16px]" />
+        </div>
+
+    </section>
 
 
     <div v-if="!state.isLoading" class="grid grid-cols-1 justify-items-center mx-auto min-w-fit max-w-sm">
