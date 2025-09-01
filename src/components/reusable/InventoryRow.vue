@@ -28,7 +28,7 @@ function addRow() {
 
 <template>
     <div v-for="inv, index in inventory"
-        class="grid grid-cols-[75%_1fr_30px] p-2 gap-2 items-center justify-items-center 
+        class="grid grid-cols-[65%_1fr_30px] p-2 gap-2 items-center justify-items-center 
             bg-darkred-gray border-2 border-darkred-red rounded-lg text-darkred-dark text-sm font-medium my-2 hover:cursor-pointer"
         :id="'Inventory' + `${index + 1}`" @click="showDetails(inv.id)">
 

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch, nextTick } from 'vue'
 
 const health = defineModel('health', { type: Number, required: true })
 
@@ -19,6 +19,14 @@ const items = computed(() => {
 const scroller = ref(null)
 const itemRefs = ref([])
 
+function throwError(err){
+  console.log(err);
+}
+
+function getItemEl(idx) {
+  return itemRefs.value[idx] || null
+}
+
 function format(v) {
   return props.pad ? String(v).padStart(props.pad, '0') : String(v)
 }
@@ -29,23 +37,39 @@ function select(v) {
 
 function getItemUnderIndicator() {
   const wrap = scroller.value
-  if (!wrap) return null
+  if (!wrap) return throwError('No wrap')
 
   const centerX = wrap.scrollLeft + wrap.clientWidth / 2
 
+  let closestIdx = -1
+  let closestDist = Infinity
+
   for (let i = 0; i < itemRefs.value.length; i++) {
-    const el = itemRefs.value[i]
-    const left = el.offsetLeft
-    const right = left + el.offsetWidth
-    if (centerX >= left && centerX <= right) {
-      select(items.value[i])
+    const el = getItemEl(i)
+    if (!el) continue
+
+    const elCenter = el.offsetLeft + el.offsetWidth / 2
+    const dist = Math.abs(centerX - elCenter)
+
+    if (dist < closestDist) {
+      closestDist = dist
+      closestIdx = i
     }
   }
 
+  if (closestIdx !== -1) {
+    const delta = items.value[closestIdx]
+    health.value += delta // 🔥 Add instead of set
+    return delta
+  }
+
+  throwError('No item found')
   return null
 }
 
-function scrollToValue() {
+async function scrollToValue() {
+  await nextTick()
+
   const idx = items.value.indexOf(0)
 
   const el = itemRefs.value[idx]
@@ -57,7 +81,7 @@ function scrollToValue() {
   wrap.scrollTo({ left: offset, behavior: 'smooth' })
 }
 
-onMounted(() => scrollToValue())
+onMounted(() => nextTick(scrollToValue))
 watch(() => health.value, scrollToValue)
 </script>
 
@@ -67,14 +91,17 @@ watch(() => health.value, scrollToValue)
     <div ref="scroller" class="relative flex gap-4 overflow-x-auto no-scrollbar px-6 py-3
              snap-x snap-mandatory scroll-p-1 select-none">
 
+      <div class="shrink-0" :style="{ width: '50%' }"></div>
+
       <!-- numbers -->
-      <div v-for="(v, i) in items" :key="v" :ref="el => itemRefs[i] = el"
-        class="snap-center shrink-0 w-14 h-14 grid place-items-center rounded-xl border transition-all duration-200 cursor-pointer bg-white text-gray-800 
-        border-gray-300 hover:border-gray-400 hover:bg-gray-50 dark:bg-zinc-900 dark:text-zinc-100 dark:border-zinc-700 dark:hover:border-zinc-500">
+      <div v-for="(v, i) in items" :key="v" :ref="el => itemRefs[i] = el" class="snap-center shrink-0 w-14 h-14 grid place-items-center rounded-xl border transition-all duration-200 cursor-pointer bg-white text-gray-800 
+        border-gray-300 dark:bg-zinc-900 dark:text-zinc-100 dark:border-zinc-700 dark:hover:border-zinc-500">
 
         <span class="text-xl font-semibold tabular-nums">{{ format(v) }}</span>
 
       </div>
+
+      <div class="shrink-0" :style="{ width: '50%' }"></div>
 
     </div>
 
@@ -83,7 +110,7 @@ watch(() => health.value, scrollToValue)
       <div class="absolute left-1/2 -translate-x-1/2 -top-8 h-8 w-0.5 bg-darkred-bright/70 rounded"></div>
     </div>
   </div>
-  
+
   <div class="w-full flex items-center justify-center">
     <button @click="getItemUnderIndicator"
       class="mx-auto p-2 w-32 h-16 bg-greenish-dark border-2 rounded-xl text-darkred-light text-3xl font-medium">OK</button>

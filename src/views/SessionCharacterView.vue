@@ -2,7 +2,7 @@
 import { reactive, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { ArrowDownIcon, ArrowUpIcon } from '@heroicons/vue/24/solid'
-import test from '@/components/reusable/HorizontalNumberPicker.vue';
+import HorizontalNumberPicker from '@/components/reusable/HorizontalNumberPicker.vue';
 import RepositoryFactory from '@http/RepositoryFactory';
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import SessionViewNavigtaion from '@/components/SessionViewNavigtaion.vue';
@@ -185,7 +185,7 @@ function checkHealth() {
                 </div>
             </div>
 
-            <test v-model:health="state.character.health" :min="-state.character.health"
+            <HorizontalNumberPicker v-model:health="state.character.health" :min="-state.character.health"
                 :max="state.character.maxHealth - state.character.health" />
 
         </section>
