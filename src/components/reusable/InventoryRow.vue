@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 
 const inventory = defineModel('inventory', { type: Array, required: true })
 const props = defineProps({
@@ -13,14 +13,16 @@ let block_hidden = ref(true)
 let inventory_selected = ref({})
 
 function showDetails(id) {
-    inventory_selected.value = props.inventory_all.filter(w => w.id === id)[0]
-    block_hidden.value = false
+    inventory_selected.value = props.inventory_all.find(w => w.id === id)
+    nextTick(() => {
+        block_hidden.value = false
+    })
 }
 function deleteRow(index) {
     inventory.value.splice(index, 1)
 }
 function addRow() {
-    const inventory_one = props.inventory_all.filter(w => w.id === event.target.value)[0]
+    const inventory_one = props.inventory_all.find(w => w.id === event.target.value)
     inventory.value.push(inventory_one)
     event.target.value = 'default'
 }
@@ -29,7 +31,7 @@ function addRow() {
 <template>
     <div v-for="inv, index in inventory"
         class="grid grid-cols-[65%_1fr_30px] p-2 gap-2 items-center justify-items-center font-gothic
-            bg-darkred-gray border-2 border-darkred-red rounded-lg text-darkred-dark text-sm font-medium my-2 hover:cursor-pointer"
+            bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2 hover:cursor-pointer"
         :id="'Inventory' + `${index + 1}`" @click="showDetails(inv.id)">
 
         <div class="p2 text-clip">{{ inv.name }}</div>
@@ -41,9 +43,9 @@ function addRow() {
 
     </div>
 
-    <select name="Inventory" id="Inventory" @change="addRow" :class="['min-w-fit w-4/5 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
+    <select name="Inventory" id="Inventory" @change="addRow" :class="['w-full h-12 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
         'tracking-wide uppercase shadow-inner outline-none transition-all duration-200 focus:border-darkred-red focus:ring-2 focus:ring-darkred-red',
-        'hover:border-darkred-red text-center justify-self-center']">
+        'hover:border-darkred-red text-center justify-self-center font-semibold text-lg']">
 
         <option value="default" class="bg-darkred-dark text-darkred-bright">Виберіть річ</option>
 

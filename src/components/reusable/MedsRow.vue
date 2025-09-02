@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue' 
+import { ref, nextTick } from 'vue'
 
 const medicines = defineModel('medicines', { type: Array, required: true })
 const props = defineProps({
@@ -13,21 +13,23 @@ let block_hidden = ref(true)
 let medicine_selected = ref({})
 
 function showDetails(id) {
-    medicine_selected.value = props.medicines_all.filter(w => w.id === id)[0]
-    block_hidden.value = false
+    medicine_selected.value = props.medicines_all.find(w => w.id === id)
+    nextTick(() => {
+        block_hidden.value = false
+    })
 }
 function deleteRow(index) {
     medicines.value.splice(index, 1)
 }
 function addRow() {
-    const meds_one = props.medicines_all.filter(w => w.id === event.target.value)[0]
+    const meds_one = props.medicines_all.find(w => w.id === event.target.value)
     medicines.value.push(meds_one)
     event.target.value = 'default'
 }
 function useItem(index, effect) {
     medicines.value.splice(index, 1)
     console.log(effect);
-    
+
 }
 </script>
 
@@ -35,7 +37,7 @@ function useItem(index, effect) {
 
     <div v-for="med, index in medicines"
         class="grid grid-cols-[1fr_1fr_30px_30px] p-2 gap-2 items-center justify-items-center font-gothic
-            bg-darkred-gray border-2 border-darkred-red rounded-lg text-darkred-dark text-sm font-medium my-2 hover:cursor-pointer"
+            bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2 hover:cursor-pointer"
         :id="'Medicine' + `${index + 1}`" @click="showDetails(med.id)">
 
         <div class="p2 text-clip">{{ med.name }}</div>
@@ -52,9 +54,9 @@ function useItem(index, effect) {
 
     </div>
 
-    <select name="Medicines" id="Medicines" @change="addRow" :class="['min-w-fit w-4/5 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
+    <select name="Medicines" id="Medicines" @change="addRow" :class="['w-full h-12 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
         'tracking-wide uppercase shadow-inner outline-none transition-all duration-200 focus:border-darkred-red focus:ring-2 focus:ring-darkred-red',
-        'hover:border-darkred-red text-center justify-self-center']">
+        'hover:border-darkred-red text-center justify-self-center font-semibold text-lg']">
 
         <option value="default" class="bg-darkred-dark text-darkred-bright">Виберіть медикамент</option>
 

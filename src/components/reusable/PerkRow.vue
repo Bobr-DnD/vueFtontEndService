@@ -9,7 +9,7 @@ const props = defineProps({
 })
 
 function addRow() {
-    const perk_one = props.perks_all.filter(w => w.id === event.target.value)[0]
+    const perk_one = props.perks_all.find(w => w.id === event.target.value)
     perks.value.push(perk_one)
     event.target.value = 'default'
     perkPoints.value--;
@@ -19,7 +19,7 @@ function addRow() {
 <template>
     <div v-for="perk, index in perks"
         class="grid grid-cols-1 p-2 gap-2 items-center justify-items-start font-gothic
-            bg-darkred-gray border-2 border-darkred-red rounded-lg text-darkred-dark text-sm font-medium my-2"
+            bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2"
         :id="'Perk' + `${index + 1}`">
 
         <div class="p2 text-clip">Назва: {{ perk.name }}</div>
@@ -30,7 +30,7 @@ function addRow() {
 
         <select v-if="perkPoints > 0" name="Perk" id="Perk" @change="addRow" :class="['min-w-fit w-4/5 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
         'tracking-wide uppercase shadow-inner outline-none transition-all duration-200 focus:border-darkred-red focus:ring-2 focus:ring-darkred-red',
-        'hover:border-darkred-red text-center justify-self-center']">
+        'hover:border-darkred-red text-center justify-self-center font-semibold text-lg']">
 
         <option value="default" class="bg-darkred-dark text-darkred-bright">Додати перк</option>
 
