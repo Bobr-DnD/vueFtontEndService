@@ -27,6 +27,15 @@ export default {
           dark: '#821131'
         }
       },
+      keyframes: {
+        'gradient-pulse': {
+          '0%, 100%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+        },
+      },
+      animation: {
+        'gradient-pulse': 'gradient-pulse 3s ease-in-out infinite',
+      },
       fontFamily: {
         gothic: ['"Rubik"', 'sans-serif'],
         univers: ['"TitilliumWeb"', 'sans-serif'],

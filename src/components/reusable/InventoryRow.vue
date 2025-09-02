@@ -41,7 +41,7 @@ function addRow() {
 
     </div>
 
-    <select name="Inventory" id="Inventory" @change="addRow" :class="['min-w-fit max-w-4/5 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
+    <select name="Inventory" id="Inventory" @change="addRow" :class="['min-w-fit w-4/5 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
         'tracking-wide uppercase shadow-inner outline-none transition-all duration-200 focus:border-darkred-red focus:ring-2 focus:ring-darkred-red',
         'hover:border-darkred-red text-center justify-self-center']">
 

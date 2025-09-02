@@ -95,20 +95,6 @@ function checkHealth() {
         </section>
 
         <div class="flex flex-wrap items-center justify-start">
-            <!--<div class="p-1 grow ">
-                <div class="p-2 border-2 rounded-md border-darkred-dark">
-                    <div class="text-sm mb-1 text-center font-medium">
-                        Здоров'я: {{ state.character.health }}/{{ state.character.maxHealth }}
-                    </div>
-                    <div class="w-full h-5 bg-gray-300 rounded overflow-hidden">
-                        <div class="h-full transition-all duration-300" :class="{
-                            'bg-green-500': state.character.health / state.character.maxHealth > 0.6,
-                            'bg-yellow-400': state.character.health / state.character.maxHealth <= 0.6 && state.character.health / state.character.maxHealth > 0.3,
-                            'bg-red-500': state.character.health / state.character.maxHealth <= 0.3
-                        }" :style="{ width: (state.character.health / state.character.maxHealth * 100) + '%' }"></div>
-                    </div>
-                </div>
-            </div>-->
 
             <div class="p-1 grow h-full">
                 <div class="p-2 text-center border-2 rounded-md border-darkred-dark"> Очки рівня: {{

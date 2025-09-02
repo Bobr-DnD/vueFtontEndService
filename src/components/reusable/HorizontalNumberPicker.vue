@@ -19,7 +19,7 @@ const items = computed(() => {
 const scroller = ref(null)
 const itemRefs = ref([])
 
-function throwError(err){
+function throwError(err) {
   console.log(err);
 }
 
@@ -59,7 +59,7 @@ function getItemUnderIndicator() {
 
   if (closestIdx !== -1) {
     const delta = items.value[closestIdx]
-    health.value += delta // 🔥 Add instead of set
+    health.value += delta
     return delta
   }
 
@@ -78,6 +78,7 @@ async function scrollToValue() {
   if (!el || !wrap) return
 
   const offset = el.offsetLeft + el.offsetWidth / 2 - wrap.clientWidth / 2
+  console.log(offset);
   wrap.scrollTo({ left: offset, behavior: 'smooth' })
 }
 
@@ -112,10 +113,12 @@ watch(() => health.value, scrollToValue)
   </div>
 
   <div class="w-full flex items-center justify-center font-gothic">
-    <button @click="getItemUnderIndicator"
-      class="mx-auto p-2 w-32 h-16 bg-greenish-dark border-2 rounded-xl text-darkred-light text-3xl font-medium">OK</button>
+    <button @click="getItemUnderIndicator" class="mx-auto p-2 w-32 h-16 border-2 rounded-xl text-darkred-light text-3xl font-medium
+           bg-gradient-to-r from-darkred-dark_gray via-greenish-dark to-darkred-dark_gray
+           bg-[length:200%_200%] animate-gradient-pulse">
+      OK
+    </button>
   </div>
-
 
 </template>
 
