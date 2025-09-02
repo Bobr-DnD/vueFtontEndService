@@ -13,6 +13,7 @@ import InventoryRow from '@/components/reusable/InventoryRow.vue';
 import PerkRow from '@/components/reusable/PerkRow.vue';
 import FormNumber from '@/components/reusable/FormNumber.vue';
 import FormString from '@/components/reusable/FormString.vue';
+import FormAddSubtract from '@/components/reusable/FormAddSubtract.vue';
 
 const state = reactive({
     character: {},
@@ -249,14 +250,17 @@ function checkHealth() {
             :class="currency_hidden ? 'bg-darkred-gray text-darkred-dark' : 'bg-darkred-dark text-darkred-light'">
             {{ currency_text }}</h2>
 
-        <div v-if="!currency_hidden" v-for="value, field in state.session.currency">
+        <!--<div v-if="!currency_hidden" v-for="value, field in state.session.currency">
             <FormNumber v-if="typeof (value) === 'number'" :label="'Currency_' + field" :entity_name="field"
-                v-model:value="state.session.currency[field]"
-                class="mx-auto shadow-[rgba(0,0,0,0.5)_0px_4px_16px]" />
+                v-model:value="state.session.currency[field]" class="mx-auto shadow-[rgba(0,0,0,0.5)_0px_4px_16px]" />
+        </div>-->
+
+        <div v-if="!currency_hidden" v-for="value, field in state.session.currency">
+            <FormAddSubtract v-if="typeof (value) === 'number'" :label="'Currency_' + field" :entity_name="field"
+                v-model:value="state.session.currency[field]" class="mx-auto shadow-[rgba(0,0,0,0.5)_0px_4px_16px]" />
         </div>
 
     </section>
-
 
     <div v-if="!state.isLoading" class="grid grid-cols-1 justify-items-center mx-auto min-w-fit max-w-sm">
         <h1
@@ -316,15 +320,3 @@ function checkHealth() {
     </div>
 
 </template>
-
-<style scoped>
-.no-arrows::-webkit-outer-spin-button,
-.no-arrows::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.no-arrows[type=number] {
-    -moz-appearance: textfield;
-}
-</style>

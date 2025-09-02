@@ -6,7 +6,7 @@ import FormNumber from '@/components/reusable/FormNumber.vue';
 import FormButtonPlusOne from '@/components/FormButtonPlusOne.vue';
 import RepositoryFactory from '@http/RepositoryFactory'
 import MasterPageNavigation from '@/components/MasterPageNavigation.vue';
-import characterCard from '@/components/characterCard.vue';
+import characterCard from '@/components/reusable/characterCard.vue';
 import FormString from '@/components/reusable/FormString.vue';
 
 const sessionId = useRoute().params.sessionId
