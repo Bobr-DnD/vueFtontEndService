@@ -1,9 +1,11 @@
 <script setup>
 import { computed, onMounted, ref, watch, nextTick } from 'vue'
 
-const health = defineModel('health', { type: Number, required: true })
+//const health = defineModel('health', { type: Number, required: true })
+const emit = defineEmits(['changeValue'])
 
 const props = defineProps({
+  health: { type: Number, required: true },
   min: { type: Number, required: true },
   max: { type: Number, required: true },
   step: { type: Number, default: 1 },
@@ -32,7 +34,7 @@ function format(v) {
 }
 
 function select(v) {
-  health.value += v
+  props.health.value += v
 }
 
 function getItemUnderIndicator() {
@@ -59,7 +61,7 @@ function getItemUnderIndicator() {
 
   if (closestIdx !== -1) {
     const delta = items.value[closestIdx]
-    health.value += delta
+    emit('changeValue', delta)
     return delta
   }
 
@@ -83,7 +85,7 @@ async function scrollToValue() {
 }
 
 onMounted(() => nextTick(scrollToValue))
-watch(() => health.value, scrollToValue)
+watch(() => props.health.value, scrollToValue)
 </script>
 
 <template>

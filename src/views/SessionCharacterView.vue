@@ -59,6 +59,21 @@ function addExperience() {
         state.character.perkPoints++;
     }
 }
+
+async function updateHealth(health){
+    state.character.health += health
+
+    try{
+        let res = await RepositoryFactory.update('character', characterId, state.character)
+        console.log(res.data);
+        
+        state.character = res.data
+        
+    }catch(err){
+        console.log(err);
+    }
+    
+}
 </script>
 
 <template>
@@ -149,8 +164,8 @@ function addExperience() {
 
             </div>
 
-            <HorizontalNumberPicker v-model:health="state.character.health" :min="-state.character.health"
-                :max="state.character.maxHealth - state.character.health" />
+            <HorizontalNumberPicker :health="state.character.health" :min="-state.character.health"
+                :max="state.character.maxHealth - state.character.health" @changeValue="updateHealth"/>
 
         </section>
 
