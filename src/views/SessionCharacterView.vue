@@ -1,9 +1,10 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { ArrowDownIcon, ArrowUpIcon, SparklesIcon, CurrencyDollarIcon, FlagIcon, CheckBadgeIcon, ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, ChartBarIcon, BoltIcon, ChevronDoubleUpIcon } from '@heroicons/vue/24/solid'
+import { SparklesIcon, CurrencyDollarIcon, FlagIcon, CheckBadgeIcon, ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, ChartBarIcon, BoltIcon, ChevronDoubleUpIcon } from '@heroicons/vue/24/solid'
 import HorizontalNumberPicker from '@/components/reusable/HorizontalNumberPicker.vue';
 import RepositoryFactory from '@http/RepositoryFactory';
+import { asyncHandler } from '/utils/asyncHandler';
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import SessionViewNavigtaion from '@/components/SessionViewNavigtaion.vue';
 import WeaponRow from '@/components/reusable/WeaponRow.vue';
@@ -36,43 +37,54 @@ let effects_hidden = ref(true)
 let currency_hidden = ref(true)
 let quest_hidden = ref(true)
 const characterId = useRoute().params.characterId
+const sessionId = useRoute().params.sessionId
 
 onMounted(async () => {
-    try {
-        let res = await RepositoryFactory.getById('character', characterId)
-        state.character = res.data
-        res = await RepositoryFactory.getById('session', state.character.session)
-        state.session = res.data
+    const [resCharacter, errCharacter] = await asyncHandler(
+        RepositoryFactory.getById('character', characterId)
+    )
+    const [resSession, errSession] = await asyncHandler(
+        RepositoryFactory.getById('session', sessionId)
+    )
 
-    } catch (err) {
-        console.error(err)
+    if (errCharacter) {
+        console.warn(errCharacter.message)
+        return
     }
-    finally {
-        state.isLoading = false;
+    else if (errSession) {
+        console.warn(errSession.message)
+        return
     }
+    else state.isLoading = false
+
+    state.character = resCharacter.data
+    state.session = resSession.data
 })
 
-function addExperience() {
+async function updateCharacter() {
+    const [res, err] = await asyncHandler(
+        RepositoryFactory.update('character', characterId, state.character)
+    )
+    if (err) {
+        console.warn(err.message)
+        return
+    }
+    return res.data
+}
+
+async function addExperience() {
     state.character.experience++;
     if (state.character.experience >= state.character.experienceToLevelUp) {
         state.character.experience = 0;
         state.character.perkPoints++;
+        state.character.level++;
     }
+    state.character = await updateCharacter()
 }
 
-async function updateHealth(health){
+async function updateHealth(health) {
     state.character.health += health
-
-    try{
-        let res = await RepositoryFactory.update('character', characterId, state.character)
-        console.log(res.data);
-        
-        state.character = res.data
-        
-    }catch(err){
-        console.log(err);
-    }
-    
+    state.character = await updateCharacter()
 }
 </script>
 
@@ -165,7 +177,7 @@ async function updateHealth(health){
             </div>
 
             <HorizontalNumberPicker :health="state.character.health" :min="-state.character.health"
-                :max="state.character.maxHealth - state.character.health" @changeValue="updateHealth"/>
+                :max="state.character.maxHealth - state.character.health" @changeValue="updateHealth" />
 
         </section>
 
@@ -174,9 +186,7 @@ async function updateHealth(health){
             <h2 @click="custom_hidden = !custom_hidden;
             customFields_text === 'Показати додаткові характеристики'
                 ? customFields_text = 'Приховати додаткові характеристики'
-                : customFields_text = 'Показати додаткові характеристики'"
-
-                class="px-4 py-2 text-center text-xl font-univers font-semibold text-ellipsis mb-2 rounded-lg hover:cursor-pointer transition-all duration-500 
+                : customFields_text = 'Показати додаткові характеристики'" class="px-4 py-2 text-center text-xl font-univers font-semibold text-ellipsis mb-2 rounded-lg hover:cursor-pointer transition-all duration-500 
                 ease-in-out select-none grid grid-cols-[40px_1fr_60px] items-center justify-items-center"
                 :class="custom_hidden ? 'bg-darkred-gray text-darkred-dark' : 'bg-darkred-dark text-darkred-light'">
 
@@ -203,7 +213,6 @@ async function updateHealth(health){
         <button @click="effects_hidden = !effects_hidden; effects_text === 'Показати активні ефекти'
             ? (effects_text = 'Приховати активні ефекти')
             : (effects_text = 'Показати активні ефекти')"
-
             class="px-4 py-2 rounded-xl font-univers font-semibold text-xl transition-all duration-500 ease-in-out grid grid-cols-[40px_1fr_60px] items-center justify-items-center"
             :class="effects_hidden ? 'bg-darkred-gray text-darkred-dark' : 'bg-darkred-dark text-darkred-light'">
 
@@ -248,40 +257,13 @@ async function updateHealth(health){
 
     </section>
 
-    <section v-if="state.session.currency" class="w-96 mx-auto my-4">
-
-        <h2 @click="
-            currency_hidden = !currency_hidden;
-        currency_text === 'Показати баланс'
-            ? (currency_text = 'Приховати баланс')
-            : (currency_text = 'Показати баланс')"
-
-            class="px-4 py-2 text-center text-xl font-univers font-semibold mb-2 rounded-lg hover:cursor-pointer transition-all duration-500 
-            ease-in-out select-none grid grid-cols-[40px_1fr_60px] items-center justify-items-center"
-            :class="currency_hidden ? 'bg-darkred-gray text-darkred-dark' : 'bg-darkred-dark text-darkred-light'">
-
-            <CurrencyDollarIcon class="w-8 h-8" />
-            {{ currency_text }}
-            <ChevronDoubleUpIcon class="w-8 h-8 transition-transform duration-300"
-                :class="currency_hidden ? 'rotate-180' : 'rotate-0'" />
-        </h2>
-
-        <div v-if="!currency_hidden" v-for="value, field in state.session.currency">
-            <FormAddSubtract v-if="typeof (value) === 'number'" :label="'Currency_' + field" :entity_name="field"
-                v-model:value="state.session.currency[field]" class="mx-auto shadow-[rgba(0,0,0,0.5)_0px_4px_16px]" />
-        </div>
-
-    </section>
-
-    <section v-if="state.character.quest" class="w-96 mx-auto my-4">
+    <section v-if="state.character.quest && !state.isLoading" class="w-96 mx-auto my-4">
 
         <h2 @click="
             quest_hidden = !quest_hidden;
         quest_text === 'Показати особистий квест'
             ? quest_text = 'Приховати особистий квест'
-            : quest_text = 'Показати особистий квест'"
-
-            class="px-4 py-2 text-center text-xl font-univers font-semibold mb-2 rounded-lg hover:cursor-pointer transition-all duration-500 
+            : quest_text = 'Показати особистий квест'" class="px-4 py-2 text-center text-xl font-univers font-semibold mb-2 rounded-lg hover:cursor-pointer transition-all duration-500 
             ease-in-out select-none grid grid-cols-[40px_1fr_60px] items-center justify-items-center"
             :class="quest_hidden ? 'bg-darkred-gray text-darkred-dark' : 'bg-darkred-dark text-darkred-light'">
 
@@ -317,11 +299,48 @@ async function updateHealth(health){
 
     </section>
 
+    <section v-if="state.session.currency && !state.isLoading" class="w-96 mx-auto my-4">
+
+        <h2 @click="
+            currency_hidden = !currency_hidden;
+        currency_text === 'Показати баланс'
+            ? (currency_text = 'Приховати баланс')
+            : (currency_text = 'Показати баланс')" class="px-4 py-2 text-center text-xl font-univers font-semibold mb-2 rounded-lg hover:cursor-pointer transition-all duration-500 
+            ease-in-out select-none grid grid-cols-[40px_1fr_60px] items-center justify-items-center"
+            :class="currency_hidden ? 'bg-darkred-gray text-darkred-dark' : 'bg-darkred-dark text-darkred-light'">
+
+            <CurrencyDollarIcon class="w-8 h-8" />
+            {{ currency_text }}
+            <ChevronDoubleUpIcon class="w-8 h-8 transition-transform duration-300"
+                :class="currency_hidden ? 'rotate-180' : 'rotate-0'" />
+        </h2>
+
+        <div v-if="!currency_hidden" v-for="value, field in state.session.currency">
+            <FormAddSubtract v-if="typeof (value) === 'number'" :label="'Currency_' + field" :entity_name="field"
+                v-model:value="state.session.currency[field]" class="mx-auto shadow-[rgba(0,0,0,0.5)_0px_4px_16px]" />
+        </div>
+
+    </section>
+
     <div v-if="!state.isLoading" class="grid grid-cols-1 justify-items-center mx-auto min-w-80 max-w-96">
 
-        <!--<h1
-            class="w-80 text-center text-3xl font-bold text-darkred-dark_gray border-b-2 border-t-2 border-darkred-red rounded-lg mx-2 font-gothic">
-            Інвентар</h1>-->
+        <div class="mx-auto">
+
+            <h1 @click="perks_hidden = !perks_hidden"
+                class="mx-auto w-64 my- p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
+            rounded-xl hover:cursor-pointer select-none font-gothic grid grid-cols-[40px_1fr_60px] items-center justify-items-center">
+                <CheckBadgeIcon class="w-8 h-8" />
+                Навчики
+                <ChevronDoubleUpIcon class="w-8 h-8 transition-transform duration-300"
+                    :class="perks_hidden ? 'rotate-180' : 'rotate-0'" />
+            </h1>
+
+        </div>
+
+        <div :class="['grid grid-cols-1 mx-2 w-full', perks_hidden ? 'hidden' : '']">
+            <PerkRow :perks_all="state.session.perks" v-model:perks="state.character.perks"
+                v-model:perkPoints="state.character.perkPoints" />
+        </div>
 
         <div class="mx-auto">
 
@@ -343,7 +362,7 @@ async function updateHealth(health){
             <WeaponRow :weapons_all="state.session.weapons" v-model:weapons="state.character.weapons" />
         </div>
 
-        <div class="mx-auto">
+        <!--<div class="mx-auto">
 
             <h1 @click="armors_hidden = !armors_hidden"
                 class="mx-auto my-3 w-52 p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
@@ -358,7 +377,7 @@ async function updateHealth(health){
 
         <div :class="['grid grid-cols-1 mx-2 w-full', armors_hidden ? 'hidden' : '']">
             <ArmorRow :armors_all="state.session.armors" v-model:armors="state.character.armor" />
-        </div>
+        </div>-->
 
         <div class="mx-auto">
 
@@ -392,24 +411,6 @@ async function updateHealth(health){
 
         <div :class="['grid grid-cols-1 mx-2 w-full', inventories_hidden ? 'hidden' : '']">
             <InventoryRow :inventory_all="state.session.inventories" v-model:inventory="state.character.inventory" />
-        </div>
-
-        <div class="mx-auto">
-
-            <h1 @click="perks_hidden = !perks_hidden"
-                class="mx-auto w-64 my- p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
-            rounded-xl hover:cursor-pointer select-none font-gothic grid grid-cols-[40px_1fr_60px] items-center justify-items-center">
-                <CheckBadgeIcon class="w-8 h-8" />
-                Навчики
-                <ChevronDoubleUpIcon class="w-8 h-8 transition-transform duration-300"
-                    :class="perks_hidden ? 'rotate-180' : 'rotate-0'" />
-            </h1>
-
-        </div>
-
-        <div :class="['grid grid-cols-1 mx-2 w-full', perks_hidden ? 'hidden' : '']">
-            <PerkRow :perks_all="state.session.perks" v-model:perks="state.character.perks"
-                v-model:perkPoints="state.character.perkPoints" />
         </div>
 
     </div>
