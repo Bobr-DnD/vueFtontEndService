@@ -1,5 +1,6 @@
 <script setup>
 import { ref, nextTick } from 'vue'
+import deleteButton from '../reusable/DeleteButton.vue'
 
 const inventory = defineModel('inventory', { type: Array, required: true })
 const props = defineProps({
@@ -59,10 +60,11 @@ function addRow() {
         <div
             class="w-80 p-5 grid grid-cols-1 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-univers">
 
-            <div @click="block_hidden = true"
+            <!--<div @click="block_hidden = true"
                 class="absolute top-2 right-2 px-3 py-1 bg-darkred-red border border-darkred-dark rounded-md text-darkred-light font-bold cursor-pointer hover:bg-darkred-bright transition select-none">
                 ✕
-            </div>
+            </div>-->
+            <deleteButton />
 
             <div class="font-bold text-2xl text-center border-b border-darkred-red pb-2">
                 {{ inventory_selected.name }}

@@ -5,7 +5,7 @@ import { computed, onMounted, ref, watch, nextTick } from 'vue'
 const emit = defineEmits(['changeValue'])
 
 const props = defineProps({
-  health: { type: Number, required: true },
+  value: { type: Number, required: true },
   min: { type: Number, required: true },
   max: { type: Number, required: true },
   step: { type: Number, default: 1 },
@@ -34,7 +34,7 @@ function format(v) {
 }
 
 function select(v) {
-  props.health.value += v
+  props.value.value += v
 }
 
 function getItemUnderIndicator() {
@@ -85,7 +85,7 @@ async function scrollToValue() {
 }
 
 onMounted(() => nextTick(scrollToValue))
-watch(() => props.health.value, scrollToValue)
+watch(() => props.value.value, scrollToValue)
 </script>
 
 <template>

@@ -1,9 +1,12 @@
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
 import { PlusIcon, MinusIcon } from '@heroicons/vue/24/solid'
-const value = defineModel('value', { type: Number, required: true })
 
 const props = defineProps({
+    value: {
+        type: Number,
+        required: true
+    },
     label: {
         type: String,
         required: true
@@ -15,6 +18,8 @@ const props = defineProps({
 
 })
 
+const emit = defineEmits(['updateValue'])
+
 let input = null
 
 onMounted(() => {
@@ -24,14 +29,12 @@ onMounted(() => {
 
 function changeValue(operation) {
 
-    console.log(parseInt(input.value));
-
     switch (operation) {
         case 'plus':
-            value.value += parseInt(input.value)
+            emit('updateValue', props.entity_name, parseInt(input.value))
             break;
         case 'minus':
-            value.value -= parseInt(input.value)
+            emit('updateValue', props.entity_name, -parseInt(input.value))
             break;
     }
 }
@@ -40,10 +43,11 @@ function changeValue(operation) {
 <template>
     <div class="flex flex-wrap items-center justify-start mb-4 border rounded-lg">
 
-        <div class="p-2 w-fit text-darkred-dark font-semibold text-md">{{ entity_name.toUpperCase() }}: {{ value }}</div>
+        <div class="p-2 w-fit text-darkred-dark font-semibold text-md">{{ entity_name.toUpperCase() }}: {{ value }}
+        </div>
 
         <form @submit.prevent class="flex grow justify-end items-center p-4 font-univers rounded-lg">
-            <input  :id="entity_name" type="number" value="0" class="no-arrows bg-darkred-dark_gray max-w-16 text-darkred-light text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
+            <input :id="entity_name" type="number" value="1" class="no-arrows bg-darkred-dark_gray max-w-16 text-darkred-light text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
            focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
         </form>
 

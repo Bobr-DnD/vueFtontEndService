@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router';
 import RepositoryFactory from '@http/RepositoryFactory';
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import SessionViewNavigtaion from '@/components/SessionViewNavigtaion.vue';
-import characterCard from '@/components/reusable/characterCard.vue';
+import characterCard from '@/components/character-page components/characterCard.vue';
 
 const sessionId = useRoute().params.sessionId
 const state = reactive({
