@@ -41,7 +41,7 @@ const sessionId = useRoute().params.sessionId
             <div class="col-span-2">Здоров'я: {{ props.character.health }}/{{ props.character.maxHealth }}</div>
         </div>
 
-        <div class="border-b-2 border-darkred-bright rounded-lg mb-4">
+        <!-- <div class="border-b-2 border-darkred-bright rounded-lg mb-4">
             <div class="text-center border-t-2 border-darkred-bright rounded-lg">Характеристики:</div>
             <div class="flex flex-wrap items-center justify-start">
                 <div class="p-2 grow" v-for="c, index in props.character.characteristics">
@@ -57,7 +57,7 @@ const sessionId = useRoute().params.sessionId
                     <div class="text-start text-lg p-1 border-2 rounded-md border-darkred-dark">• {{ index }}: {{ c }}</div>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 
 </template>

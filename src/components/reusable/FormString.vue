@@ -25,7 +25,7 @@ function changeValue(){
 </script>
 
 <template>
-    <form @submit.prevent class="flex items-center max-w-80 p-4 font-univers mb-4  rounded-xl">
+    <form @submit.prevent class="flex items-center max-w-80 p-4 font-univers mb-2  rounded-xl">
         <label :for="entity_name" class="mr-2 w-full text-darkred-dark font-semibold text-lg tracking-wide">
             {{ entity_name }}:
         </label>

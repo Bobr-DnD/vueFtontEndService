@@ -34,7 +34,7 @@ function addRow() {
 
         <option value="default" class="bg-darkred-dark text-darkred-bright">Додати перк</option>
 
-        <option v-for="perk in props.perks_all" :value="perk.id"
+        <option v-if="perkPoints != 0" v-for="perk in props.perks_all" :value="perk.id"
             class="bg-darkred-dark text-darkred-bright text-clip">
             {{ perk.name }} </option>
 

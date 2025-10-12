@@ -2,6 +2,7 @@
 import { reactive, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import Loader from 'vue-spinner/src/SyncLoader.vue'
+import { CheckBadgeIcon, ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon } from '@heroicons/vue/24/solid'
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
@@ -19,6 +20,7 @@ import CustomFieldsTable from '@/components/character-page components/CustomFiel
 import characterCardSmall from '@/components/character-page components/characterCardSmall.vue';
 import Experience from '@/components/character-page components/Experience.vue';
 import CurrencyTable from '@/components/character-page components/CurrencyTable.vue';
+import HideTittle from '@/components/reusable/HideTittle.vue';
 
 import HorizontalNumberPicker from '@/components/reusable/HorizontalNumberPicker.vue';
 import ProgressiveBar from '@/components/reusable/ProgressiveBar.vue';
@@ -26,16 +28,22 @@ import ProgressiveBar from '@/components/reusable/ProgressiveBar.vue';
 const state = reactive({
     character: {},
     session: {},
-    isLoading: true
+    isLoading: true,
+    connected: false
 })
 
+function testCallback(text) {
 
-let connected = ref(false)
-let weapons_hidden = ref(false)
-let armors_hidden = ref(false)
-let meds_hidden = ref(false)
-let inventories_hidden = ref(false)
+    console.log(text);
+
+}
+
 let perks_hidden = ref(false)
+let weapons_hidden = ref(true)
+let armors_hidden = ref(true)
+let meds_hidden = ref(true)
+let inventories_hidden = ref(true)
+
 const characterId = useRoute().params.characterId
 const sessionId = useRoute().params.sessionId
 
@@ -136,118 +144,47 @@ async function updateCustomFields(fields) {
 
         </section>
 
-        <section class="grid grid-cols-1 gap-2 w-full mx-auto my-4">
+        <section class="grid grid-cols-1 gap-2 w-full mx-auto my-2">
+            
             <EffectsTable :effects="state.character.effects" />
-        </section>
 
-        <section class="w-full mx-auto my-4">
             <QuestsTable :quest="state.character.quest" />
-        </section>
 
-        <section class="w-full mx-auto my-4">
             <CustomFieldsTable :fields="state.character.customFields" @updateFields="updateCustomFields" />
-        </section>
 
-        <section v-if="!state.isLoading" class="w-full mx-auto my-4">
             <CurrencyTable :currency="state.session.currency" @updateCurrency="updateCurrency" />
         </section>
     </div>
 
+    <section v-if="!state.isLoading" class="grid grid-cols-1 justify-items-center mx-auto min-w-80 max-w-96">
 
-    <!--TODO refactor-->
-    
-    <!--<div v-if="!state.isLoading" class="grid grid-cols-1 justify-items-center mx-auto min-w-80 max-w-96">
-
-        <div class="mx-auto">
-
-            <h1 @click="perks_hidden = !perks_hidden"
-                class="mx-auto w-64 my- p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
-            rounded-xl hover:cursor-pointer select-none font-gothic grid grid-cols-[40px_1fr_60px] items-center justify-items-center">
-                <CheckBadgeIcon class="w-8 h-8" />
-                Навчики
-                <ChevronDoubleUpIcon class="w-8 h-8 transition-transform duration-300"
-                    :class="perks_hidden ? 'rotate-180' : 'rotate-0'" />
-            </h1>
-
-        </div>
-
-        <div :class="['grid grid-cols-1 mx-2 w-full', perks_hidden ? 'hidden' : '']">
-            <PerkRow :perks_all="state.session.perks" v-model:perks="state.character.perks"
+        <HideTittle text="Навички" :mainIcon="CheckBadgeIcon" v-model:hidden="perks_hidden" />
+        <div :class="['grid grid-cols-1 w-full', perks_hidden ? 'hidden' : '']">
+            <PerkRow v-if="state.session.perks" :perks_all="state.session.perks" v-model:perks="state.character.perks"
                 v-model:perkPoints="state.character.perkPoints" />
         </div>
 
-        <div class="mx-auto">
-
-            <h1 @click="weapons_hidden = !weapons_hidden" class="mx-auto w-52 my-3 p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray
-             text-center text-3xl font-bold text-darkred-light border-2 rounded-xl
-             hover:cursor-pointer select-none font-gothic grid grid-cols-[40px_1fr_60px]
-             items-center justify-items-center">
-
-                <BoltIcon class="w-8 h-8" />
-                Зброя
-                <ChevronDoubleUpIcon class="w-8 h-8 transition-transform duration-300"
-                    :class="weapons_hidden ? 'rotate-180' : 'rotate-0'" />
-
-            </h1>
-
-        </div>
-
-        <div :class="['grid grid-cols-1 mx-2 w-full py-2', weapons_hidden ? 'hidden' : '']">
+        <HideTittle text="Зброя" :mainIcon="BoltIcon" v-model:hidden="weapons_hidden" />
+        <div :class="['grid grid-cols-1 w-full', weapons_hidden ? 'hidden' : '']">
             <WeaponRow :weapons_all="state.session.weapons" v-model:weapons="state.character.weapons" />
-        </div>-->
-
-    <!--<div class="mx-auto">
-
-            <h1 @click="armors_hidden = !armors_hidden"
-                class="mx-auto my-3 w-52 p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
-            rounded-xl hover:cursor-pointer select-none font-gothic grid grid-cols-[40px_1fr_60px] items-center justify-items-center">
-                <ShieldCheckIcon class="w-8 h-8" />
-                Броня
-                <ChevronDoubleUpIcon class="w-8 h-8 transition-transform duration-300"
-                    :class="armors_hidden ? 'rotate-180' : 'rotate-0'" />
-            </h1>
-
         </div>
 
-        <div :class="['grid grid-cols-1 mx-2 w-full', armors_hidden ? 'hidden' : '']">
+        <HideTittle text="Броня" :mainIcon="ShieldCheckIcon" v-model:hidden="armors_hidden" />
+        <div :class="['grid grid-cols-1 w-full', armors_hidden ? 'hidden' : '']">
             <ArmorRow :armors_all="state.session.armors" v-model:armors="state.character.armor" />
-        </div>-->
-
-    <!--<div class="mx-auto">
-
-            <h1 @click="meds_hidden = !meds_hidden"
-                class="mx-auto my-3 w-80 p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
-            rounded-xl hover:cursor-pointer select-none font-gothic grid grid-cols-[40px_1fr_60px] items-center justify-items-center">
-                <BeakerIcon class="w-8 h-8" />
-                Медикаменти
-                <ChevronDoubleUpIcon class="w-8 h-8 transition-transform duration-300"
-                    :class="meds_hidden ? 'rotate-180' : 'rotate-0'" />
-            </h1>
-
         </div>
 
-        <div :class="['grid grid-cols-1 mx-2 w-full', meds_hidden ? 'hidden' : '']">
+        <HideTittle text="Медикаменти" :mainIcon="BeakerIcon" v-model:hidden="meds_hidden" />
+        <div :class="['grid grid-cols-1 w-full', meds_hidden ? 'hidden' : '']">
             <MedsRow :medicines_all="state.session.medicines" v-model:medicines="state.character.medicines" />
         </div>
 
-        <div class="mx-auto">
-
-            <h1 @click="inventories_hidden = !inventories_hidden"
-                class="mx-auto my-3 w-64 p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
-            rounded-xl hover:cursor-pointer select-none font-gothic grid grid-cols-[40px_1fr_60px] items-center justify-items-center">
-                <ArchiveBoxIcon class="w-8 h-8" />
-                Інвентар
-                <ChevronDoubleUpIcon class="w-8 h-8 transition-transform duration-300"
-                    :class="inventories_hidden ? 'rotate-180' : 'rotate-0'" />
-            </h1>
-
-        </div>
-
-        <div :class="['grid grid-cols-1 mx-2 w-full', inventories_hidden ? 'hidden' : '']">
+        <HideTittle text="Інвентар" :mainIcon="ArchiveBoxIcon" v-model:hidden="inventories_hidden" />
+        <div :class="['grid grid-cols-1 w-full', inventories_hidden ? 'hidden' : '']">
             <InventoryRow :inventory_all="state.session.inventories" v-model:inventory="state.character.inventory" />
         </div>
 
-    </div>-->
+    </section>
 
     <div v-if="state.isLoading" class="text-center py-6">
         <Loader />
