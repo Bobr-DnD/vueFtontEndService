@@ -1,16 +1,20 @@
 <script setup>
 import { ref, nextTick, computed } from 'vue'
-import deleteButton from '../reusable/DeleteButton.vue'
-import groupById from '/utils/itemStacker'
+import { groupById, removeRow, addRow } from '/utils/entityHelper'
+import DeleteButton from '../reusable/DeleteButton.vue'
 
-const inventory = defineModel('inventory', { type: Array, required: true })
 const props = defineProps({
     inventory_all: {
+        type: Array,
+        required: true
+    },
+    inventory: {
         type: Array,
         required: true
     }
 })
 
+const groupedInventories = computed(() => groupById(props.inventory))
 let block_hidden = ref(true)
 let inventory_selected = ref({})
 
@@ -20,32 +24,31 @@ function showDetails(id) {
         block_hidden.value = false
     })
 }
-function deleteRow(index) {
-    inventory.value.splice(index, 1)
-}
-function addRow() {
-    const inventory_one = props.inventory_all.find(w => w.id === event.target.value)
-    inventory.value.push(inventory_one)
+
+function addItem(event) {
+    const id = event.target.value
+    addRow(props.inventory_all, props.inventory, id)
     event.target.value = 'default'
 }
 </script>
 
 <template>
-    <div v-for="inv, index in inventory"
-        class="grid grid-cols-[65%_1fr_30px] p-2 gap-2 items-center justify-items-center font-gothic
+    <div v-for="inv, index in groupedInventories"
+        class="grid grid-cols-[20px_65%_1fr_30px] p-2 gap-2 items-center justify-items-center font-gothic
             bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2 hover:cursor-pointer"
         :id="'Inventory' + `${index + 1}`" @click="showDetails(inv.id)">
 
+        <div class="text-darkred-light row-span-3">×{{ inv.count }}</div>
+
         <div class="p2 text-clip">{{ inv.name }}</div>
+
         <div class="p2 text-clip">Ціна: {{ inv.price }}</div>
 
-        <div @click.stop="deleteRow(index)"
-            class=" p-2 w-full bg-darkred-red rounded-xl border-2 border-darkred-dark text-darkred-light font-medium hover:cursor-pointer select-none">
-            X</div>
+        <DeleteButton @click.stop="removeRow(props.inventory, inv.id)"/>
 
     </div>
 
-    <select name="Inventory" id="Inventory" @change="addRow" :class="['w-full h-12 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
+    <select name="Inventory" id="Inventory" @change="addItem($event)" :class="['w-full h-12 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
         'tracking-wide uppercase shadow-inner outline-none transition-all duration-200 focus:border-darkred-red focus:ring-2 focus:ring-darkred-red',
         'hover:border-darkred-red text-center justify-self-center font-semibold text-lg']">
 

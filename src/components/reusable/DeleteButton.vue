@@ -1,14 +1,9 @@
 <script setup>
-const emit = defineEmits(['deleteRow'])
 
-function deleteRow(){
-    emit('deleteRow')
-}
 </script>
 
 <template>
-    <div @click="deleteRow"
-        class="absolute top-2 right-2 px-3 py-1 bg-darkred-red border border-darkred-dark rounded-md text-darkred-light font-bold cursor-pointer hover:bg-darkred-bright transition select-none">
+    <div class="p-2 w-full bg-darkred-red rounded-xl border-2 border-darkred-dark text-darkred-light font-medium hover:cursor-pointer select-none">
         ✕
     </div>
 </template>

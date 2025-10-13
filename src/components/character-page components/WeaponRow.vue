@@ -1,10 +1,14 @@
 <script setup>
 import { ref, nextTick, computed } from 'vue'
-import groupById from '/utils/itemStacker'
+import { groupById, removeRow, addRow } from '/utils/entityHelper'
+import DeleteButton from '../reusable/DeleteButton.vue'
 
-const weapons = defineModel('weapons', { type: Array, required: true })
 const props = defineProps({
     weapons_all: {
+        type: Array,
+        required: true
+    },
+    weapons: {
         type: Array,
         required: true
     }
@@ -20,12 +24,10 @@ function showDetails(id) {
         block_hidden.value = false
     })
 }
-function deleteRow(index) {
-    weapons.value.splice(index, 1)
-}
-function addRow() {
-    const weapon_one = props.weapons_all.find(w => w.id === event.target.value)
-    weapons.value.push(weapon_one)
+
+function addItem(event) {
+    const id = event.target.value
+    addRow(props.weapons_all, props.weapons, id)
     event.target.value = 'default'
 }
 </script>
@@ -35,17 +37,16 @@ function addRow() {
         class="grid grid-cols-[20px_1fr_1fr_1fr_30px] grid-rows-3 p-2 gap-2 items-center justify-items-center font-gothic
             bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2 hover:cursor-pointer"
         :id="'Weapon' + `${index + 1}`" @click="showDetails(weapon.id)">
-        
+
         <div class="text-darkred-light row-span-3">×{{ weapon.count }}</div>
 
         <div class="col-span-3 p2 text-clip">
             {{ weapon.name }}
-            
+
         </div>
 
-        <div @click.stop="deleteRow(index)"
-            class="row-span-3 p-2 w-full bg-darkred-red rounded-xl border-2 border-darkred-dark text-darkred-light font-medium hover:cursor-pointer select-none">
-            X</div>
+        <DeleteButton @click.stop="removeRow(props.weapons, weapon.id)"
+            class="row-span-3"/>
 
         <div class="col-span-2 p2 text-clip">Урон: {{ weapon.damage }}</div>
 
@@ -59,7 +60,7 @@ function addRow() {
 
     </div>
 
-    <select name="Weapons" id="Weapons" @change="addRow" :class="['w-full h-12 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
+    <select name="Weapons" id="Weapons" @change="addItem($event)" :class="['w-full h-12 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
         'tracking-wide uppercase shadow-inner outline-none transition-all duration-200 focus:border-darkred-red focus:ring-2 focus:ring-darkred-red',
         'hover:border-darkred-red text-center justify-self-center font-semibold text-lg']">
 

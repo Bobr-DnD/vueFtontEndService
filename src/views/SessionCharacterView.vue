@@ -116,6 +116,10 @@ async function updateCustomFields(fields) {
     state.character.customFields = fields
     state.character = await updateCharacter()
 }
+
+async function updateMedicines(fields){
+
+}
 </script>
 
 <template>
@@ -166,23 +170,23 @@ async function updateCustomFields(fields) {
 
         <HideTittle text="Зброя" :mainIcon="BoltIcon" v-model:hidden="weapons_hidden" />
         <div :class="['grid grid-cols-1 w-full', weapons_hidden ? 'hidden' : '']">
-            <WeaponRow :weapons_all="state.session.weapons" v-model:weapons="state.character.weapons" />
+            <WeaponRow :weapons_all="state.session.weapons" :weapons="state.character.weapons" />
         </div>
 
         <HideTittle text="Броня" :mainIcon="ShieldCheckIcon" v-model:hidden="armors_hidden" />
         <div :class="['grid grid-cols-1 w-full', armors_hidden ? 'hidden' : '']">
-            <ArmorRow :armors_all="state.session.armors" v-model:armors="state.character.armor" />
+            <ArmorRow :armors_all="state.session.armors" :armors="state.character.armor" />
         </div>
 
         <HideTittle text="Медикаменти" :mainIcon="BeakerIcon" v-model:hidden="meds_hidden" />
         <div :class="['grid grid-cols-1 w-full', meds_hidden ? 'hidden' : '']">
-            <MedsRow :medicines_all="state.session.medicines" v-model:medicines="state.character.medicines" />
+            <MedsRow :medicines_all="state.session.medicines" :medicines="state.character.medicines" :effects_all="state.session.effects"/>
         </div>
 
         <HideTittle text="Інвентар" :mainIcon="ArchiveBoxIcon" v-model:hidden="inventories_hidden" />
         <div :class="['grid grid-cols-1 w-full', inventories_hidden ? 'hidden' : '']">
-            <InventoryRow :inventory_all="state.session.inventories" v-model:inventory="state.character.inventory" />
-        </div>
+            <InventoryRow :inventory_all="state.session.inventories" :inventory="state.character.inventory" />
+        </div> 
 
     </section>
 

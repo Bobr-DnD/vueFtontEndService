@@ -1,46 +1,49 @@
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, computed } from 'vue'
+import { groupById, removeRow, addRow } from '/utils/entityHelper'
+import DeleteButton from '../reusable/DeleteButton.vue'
 
-const armors = defineModel('armors', { type: Array, required: true })
 const props = defineProps({
     armors_all: {
+        type: Array,
+        required: true
+    },
+    armors: {
         type: Array,
         required: true
     }
 })
 
+const groupedArmors = computed(() => groupById(props.armors))
 let armor_selected = ref({})
 let block_hidden = ref(true)
 
 function showDetails(id) {
     armor_selected.value = props.armors_all.find(w => w.id === id)
-    console.log(armor_selected);
-    
     nextTick(() => {
         block_hidden.value = false
     })
 }
-function deleteRow(index) {
-    armors.value.splice(index, 1)
-}
-function addRow() {
-    const armor_one = props.armors_all.find(w => w.id === event.target.value)
-    armors.value.push(armor_one)
+
+function addItem(event) {
+    const id = event.target.value
+    addRow(props.armors_all, props.armors, id)
     event.target.value = 'default'
 }
 </script>
 
 <template>
-    <div v-for="armor, index in armors"
-        class="grid grid-cols-[1fr_1fr_1fr_1fr_1fr_30px] grid-rows-3 p-2 gap-2 items-center justify-items-center font-gothic
+    <div v-for="armor, index in groupedArmors"
+        class="grid grid-cols-[20px_1fr_1fr_1fr_1fr_1fr_30px] grid-rows-3 p-2 gap-2 items-center justify-items-center font-gothic
             bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2 hover:cursor-pointer"
         :id="'Armor' + `${index + 1}`" @click.prevent="showDetails(armor.id)">
 
+        <div class="text-darkred-light row-span-3">×{{ armor.count }}</div>
+
         <div class="col-span-5 p2 text-clip">{{ armor.name }}</div>
 
-        <div @click.stop="deleteRow(index)"
-            class="row-span-3 p-2 w-full bg-darkred-red rounded-xl border-2 border-darkred-dark text-darkred-light font-medium hover:cursor-pointer select-none">
-            X</div>
+        <DeleteButton @click.stop="removeRow(props.armors, armor.id)"
+            class="row-span-3" />
 
         <div v-if="armor.requirement" class="col-span-3 p2 text-clip">Вимоги:
             {{Object.entries(armor.requirement).map(([key, value]) =>
@@ -56,7 +59,7 @@ function addRow() {
 
     </div>
 
-    <select name="Armors" id="Armors" @change="addRow" :class="['w-full h-12 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
+    <select name="Armors" id="Armors" @change="addItem($event)" :class="['w-full h-12 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
         'tracking-wide uppercase shadow-inner outline-none transition-all duration-200 focus:border-darkred-red focus:ring-2 focus:ring-darkred-red',
         'hover:border-darkred-red text-center justify-self-center font-semibold text-lg']">
 
@@ -87,7 +90,8 @@ function addRow() {
             <div class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Захист: <span
                     class="font-medium">{{ armor_selected.resist }}</span></div>
 
-            <div v-if="armor_selected.requirement" class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Вимога: <span
+            <div v-if="armor_selected.requirement"
+                class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Вимога: <span
                     class="font-medium">{{Object.entries(armor_selected.requirement).map(([key, value]) =>
                         `${key}:${value}`).join(', ')}}</span></div>
 

@@ -1,16 +1,25 @@
 <script setup>
 import { ref, nextTick, computed } from 'vue'
-import groupById from '/utils/itemStacker'
+import { groupById, removeRow, addRow, useItem } from '/utils/entityHelper'
+import DeleteButton from '../reusable/DeleteButton.vue'
+import ApproveButton from '../reusable/ApproveButton.vue'
 
-const medicines = defineModel('medicines', { type: Array, required: true })
 const props = defineProps({
     medicines_all: {
         type: Array,
         required: true
+    },
+    medicines: {
+        type: Array,
+        required: true
+    },
+    effects_all: {
+        type: Array,
+        requied: true
     }
 })
 
-const groupedMedicines = computed(() => groupById(props.medicines_all))
+const groupedMedicines = computed(() => groupById(props.medicines))
 let block_hidden = ref(true)
 let medicine_selected = ref({})
 
@@ -20,18 +29,13 @@ function showDetails(id) {
         block_hidden.value = false
     })
 }
-function deleteRow(index) {
-    medicines.value.splice(index, 1)
-}
-function addRow() {
-    const meds_one = props.medicines_all.find(w => w.id === event.target.value)
-    medicines.value.push(meds_one)
+function addItem(event) {
+    const id = event.target.value
+    addRow(props.medicines_all, props.medicines, id)
     event.target.value = 'default'
 }
-function useItem(index, effect) {
-    medicines.value.splice(index, 1)
-    console.log(effect);
-
+function useMed(medId, effectId) {
+    useItem(props.medicines, props.effects_all, medId, effectId)
 }
 </script>
 
@@ -48,17 +52,12 @@ function useItem(index, effect) {
 
         <div class="p2 text-clip">{{ med.description }}</div>
 
-        <div @click.stop="useItem(index, med.effect)"
-            class="p-2 w-full bg-greenish-dark rounded-xl border-2 border-darkred-dark text-darkred-light font-medium hover:cursor-pointer select-none">
-            ✓</div>
-
-        <div @click.stop="deleteRow(index)"
-            class="p-2 pw-full bg-darkred-red rounded-xl border-2 border-darkred-dark text-darkred-light font-medium hover:cursor-pointer select-none">
-            X</div>
+        <ApproveButton @click.stop="useMed(med.id, med.effect)"/>
+        <DeleteButton @click.stop="removeRow(props.medicines, med.id)"/>
 
     </div>
 
-    <select name="Medicines" id="Medicines" @change="addRow" :class="['w-full h-12 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
+    <select name="Medicines" id="Medicines" @change="addItem($event)" :class="['w-full h-12 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
         'tracking-wide uppercase shadow-inner outline-none transition-all duration-200 focus:border-darkred-red focus:ring-2 focus:ring-darkred-red',
         'hover:border-darkred-red text-center justify-self-center font-semibold text-lg']">
 

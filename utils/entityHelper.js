@@ -1,0 +1,41 @@
+export function groupById(items, idKey = 'id') {
+  const map = new Map()
+
+  items.forEach((item) => {
+    const key = item[idKey]
+    if (map.has(key)) {
+      map.get(key).count++
+    } else {
+      map.set(key, { ...item, count: 1 })
+    }
+  })
+
+  let grouped = Array.from(map.values())
+
+  grouped.sort((a, b) => {
+    const nameA = (a.name || '').toString().toLowerCase()
+    const nameB = (b.name || '').toString().toLowerCase()
+    if (nameA < nameB) return -1
+    if (nameA > nameB) return 1
+    else return 0
+  })
+
+  return grouped
+}
+
+export function removeRow(entityArray, id) {
+  const index = entityArray.findIndex(entity => entity.id === id)
+  if (index !== -1) entityArray.splice(index, 1)
+}
+
+export function addRow(entitiesAll, entitiesArray, id) {
+  const entity = entitiesAll.find(entity => entity.id === id)
+  entitiesArray.push(entity)
+}
+
+export function useItem(entityArray, effectsArray, entityId, effectId) {
+  const index = entityArray.findIndex(entity => entity.id === entityId)
+  if (index !== -1) entityArray.splice(index, 1)
+  const effect = effectsArray.find(effect => effect.id === effectId)
+  effectsArray.push(effect)
+}
