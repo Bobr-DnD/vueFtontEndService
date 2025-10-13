@@ -1,6 +1,7 @@
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, computed } from 'vue'
 import deleteButton from '../reusable/DeleteButton.vue'
+import groupById from '/utils/itemStacker'
 
 const inventory = defineModel('inventory', { type: Array, required: true })
 const props = defineProps({

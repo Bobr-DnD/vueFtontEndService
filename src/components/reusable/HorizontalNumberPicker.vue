@@ -1,15 +1,13 @@
 <script setup>
 import { computed, onMounted, ref, watch, nextTick } from 'vue'
 
-//const health = defineModel('health', { type: Number, required: true })
-const emit = defineEmits(['changeValue'])
-
 const props = defineProps({
   value: { type: Number, required: true },
   min: { type: Number, required: true },
   max: { type: Number, required: true },
   step: { type: Number, default: 1 },
   pad: { type: Number, default: 2 }, // e.g. 2 -> "07"
+  callback: { type: Function, required: true }
 })
 
 const items = computed(() => {
@@ -61,7 +59,7 @@ function getItemUnderIndicator() {
 
   if (closestIdx !== -1) {
     const delta = items.value[closestIdx]
-    emit('changeValue', delta)
+    props.callback(delta)
     return delta
   }
 

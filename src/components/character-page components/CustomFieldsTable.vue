@@ -5,10 +5,9 @@ import FormAddSubtract from '@/components/reusable/FormAddSubtract.vue';
 import FormString from '@/components/reusable/FormString.vue';
 import { ChartBarIcon } from '@heroicons/vue/24/solid';
 
-const emit = defineEmits(['updateFields'])
-
 const props = defineProps({
-    fields: { type: Object, required: true }
+    fields: { type: Object, required: true },
+    callback: {type: Function, required: true}
 })
 
 let custom_hidden = ref(true)
@@ -16,7 +15,7 @@ let custom_hidden = ref(true)
 function updateFields(name, value){
     if(typeof(value) === 'string') props.fields[name] = value
     else props.fields[name] += value
-    emit('updateFields', props.fields)
+    props.callback(props.fields)
 }
 </script>
 

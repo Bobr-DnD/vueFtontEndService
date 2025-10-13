@@ -127,7 +127,7 @@ async function updateCustomFields(fields) {
             :gender="state.character.gender" :class="state.character.class" />
 
         <Experience :exp="state.character.experience" :expMax="state.character.experienceToLevelUp"
-            :perkPoints="state.character.perkPoints" @addExperience="addExperience" />
+            :perkPoints="state.character.perkPoints" :callback="addExperience" />
 
     </div>
 
@@ -140,7 +140,7 @@ async function updateCustomFields(fields) {
             </div>
 
             <HorizontalNumberPicker :value="state.character.health" :min="-state.character.health"
-                :max="state.character.maxHealth - state.character.health" @changeValue="updateHealth" />
+                :max="state.character.maxHealth - state.character.health" :callback="updateHealth" />
 
         </section>
 
@@ -150,9 +150,9 @@ async function updateCustomFields(fields) {
 
             <QuestsTable :quest="state.character.quest" />
 
-            <CustomFieldsTable :fields="state.character.customFields" @updateFields="updateCustomFields" />
+            <CustomFieldsTable :fields="state.character.customFields" :callback="updateCustomFields" />
 
-            <CurrencyTable :currency="state.session.currency" @updateCurrency="updateCurrency" />
+            <CurrencyTable :currency="state.session.currency" :callback="updateCurrency" />
         </section>
     </div>
 

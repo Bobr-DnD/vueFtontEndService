@@ -1,5 +1,6 @@
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, computed } from 'vue'
+import groupById from '/utils/itemStacker'
 
 const weapons = defineModel('weapons', { type: Array, required: true })
 const props = defineProps({
@@ -9,6 +10,7 @@ const props = defineProps({
     }
 })
 
+const groupedWeapons = computed(() => groupById(props.weapons))
 let block_hidden = ref(true)
 let weapon_selected = ref({})
 
@@ -29,12 +31,17 @@ function addRow() {
 </script>
 
 <template>
-    <div v-for="weapon, index in weapons"
-        class="grid grid-cols-[1fr_1fr_1fr_30px] grid-rows-3 p-2 gap-2 items-center justify-items-center font-gothic
+    <div v-for="weapon, index in groupedWeapons"
+        class="grid grid-cols-[20px_1fr_1fr_1fr_30px] grid-rows-3 p-2 gap-2 items-center justify-items-center font-gothic
             bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2 hover:cursor-pointer"
         :id="'Weapon' + `${index + 1}`" @click="showDetails(weapon.id)">
+        
+        <div class="text-darkred-light row-span-3">×{{ weapon.count }}</div>
 
-        <div class="col-span-3 p2 text-clip">{{ weapon.name }}</div>
+        <div class="col-span-3 p2 text-clip">
+            {{ weapon.name }}
+            
+        </div>
 
         <div @click.stop="deleteRow(index)"
             class="row-span-3 p-2 w-full bg-darkred-red rounded-xl border-2 border-darkred-dark text-darkred-light font-medium hover:cursor-pointer select-none">
@@ -64,7 +71,8 @@ function addRow() {
 
     </select>
 
-    <div v-if="!block_hidden" class="fixed inset-0 flex items-center justify-center z-50 bg-black/50" @click="block_hidden = true">
+    <div v-if="!block_hidden" class="fixed inset-0 flex items-center justify-center z-50 bg-black/50"
+        @click="block_hidden = true">
         <div
             class="w-80 p-5 grid grid-cols-2 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-univers">
 

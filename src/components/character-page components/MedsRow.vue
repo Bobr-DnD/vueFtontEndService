@@ -1,5 +1,6 @@
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, computed } from 'vue'
+import groupById from '/utils/itemStacker'
 
 const medicines = defineModel('medicines', { type: Array, required: true })
 const props = defineProps({
@@ -9,6 +10,7 @@ const props = defineProps({
     }
 })
 
+const groupedMedicines = computed(() => groupById(props.medicines_all))
 let block_hidden = ref(true)
 let medicine_selected = ref({})
 
@@ -35,10 +37,12 @@ function useItem(index, effect) {
 
 <template>
 
-    <div v-for="med, index in medicines"
-        class="grid grid-cols-[1fr_1fr_30px_30px] p-2 gap-2 items-center justify-items-center font-gothic
+    <div v-for="med, index in groupedMedicines"
+        class="grid grid-cols-[20px_1fr_1fr_30px_30px] p-2 gap-2 items-center justify-items-center font-gothic
             bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2 hover:cursor-pointer"
         :id="'Medicine' + `${index + 1}`" @click="showDetails(med.id)">
+
+        <div class="text-darkred-light row-span-3">×{{ med.count }}</div>
 
         <div class="p2 text-clip">{{ med.name }}</div>
 

@@ -4,17 +4,16 @@ import FormAddSubtract from '@/components/reusable/FormAddSubtract.vue';
 import HideButton from '../reusable/HideButton.vue';
 import { CurrencyDollarIcon } from '@heroicons/vue/24/solid'
 
-const emit = defineEmits(['updateCurrency'])
-
 const props = defineProps({
-    currency: { type: Object, required: true }
+    currency: { type: Object, required: true },
+    callback: {type: Function, required: true}
 })
 
 let currency_hidden = ref(true)
 
 function updateCurrency(name, value) {
     props.currency[name] += value
-    emit('updateCurrency', props.currency)
+    props.callback(props.currency)
 }
 </script>
 
