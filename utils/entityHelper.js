@@ -38,7 +38,7 @@ export function useItem(entityArray, effectsArray, entityEffects, sessionMove, e
   if (index !== -1) entityArray.splice(index, 1)
   const effect = effectsArray.find(effect => effect.id === effectId)
   entityEffects.push({
-    effectId: effect.id,
+    effect: effect.id,
     deathTime: sessionMove + effect.duration
   })
 }
