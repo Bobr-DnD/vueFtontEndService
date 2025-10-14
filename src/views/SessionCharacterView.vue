@@ -32,12 +32,6 @@ const state = reactive({
     connected: false
 })
 
-function testCallback(text) {
-
-    console.log(text);
-
-}
-
 let perks_hidden = ref(false)
 let weapons_hidden = ref(true)
 let armors_hidden = ref(true)
@@ -67,6 +61,9 @@ onMounted(async () => {
 
     state.character = resCharacter.data
     state.session = resSession.data
+
+    console.log(state.character.effects);
+
 })
 
 async function updateCharacter() {
@@ -117,8 +114,8 @@ async function updateCustomFields(fields) {
     state.character = await updateCharacter()
 }
 
-async function updateMedicines(fields){
-
+async function updateInventory() {
+    state.character = await updateCharacter()
 }
 </script>
 
@@ -149,7 +146,7 @@ async function updateMedicines(fields){
         </section>
 
         <section class="grid grid-cols-1 gap-2 w-full mx-auto my-2">
-            
+
             <EffectsTable :effects="state.character.effects" />
 
             <QuestsTable :quest="state.character.quest" />
@@ -170,23 +167,27 @@ async function updateMedicines(fields){
 
         <HideTittle text="Зброя" :mainIcon="BoltIcon" v-model:hidden="weapons_hidden" />
         <div :class="['grid grid-cols-1 w-full', weapons_hidden ? 'hidden' : '']">
-            <WeaponRow :weapons_all="state.session.weapons" :weapons="state.character.weapons" />
+            <WeaponRow :weapons_all="state.session.weapons" :weapons="state.character.weapons"
+                :callback="updateInventory" />
         </div>
 
         <HideTittle text="Броня" :mainIcon="ShieldCheckIcon" v-model:hidden="armors_hidden" />
         <div :class="['grid grid-cols-1 w-full', armors_hidden ? 'hidden' : '']">
-            <ArmorRow :armors_all="state.session.armors" :armors="state.character.armor" />
+            <ArmorRow :armors_all="state.session.armors" :armors="state.character.armor" :callback="updateInventory" />
         </div>
 
         <HideTittle text="Медикаменти" :mainIcon="BeakerIcon" v-model:hidden="meds_hidden" />
         <div :class="['grid grid-cols-1 w-full', meds_hidden ? 'hidden' : '']">
-            <MedsRow :medicines_all="state.session.medicines" :medicines="state.character.medicines" :effects_all="state.session.effects"/>
+            <MedsRow :medicines_all="state.session.medicines" :medicines="state.character.medicines"
+                :effects_all="state.session.effects" :effects="state.character.effects" :move="state.session.move"
+                :callback="updateInventory" />
         </div>
 
         <HideTittle text="Інвентар" :mainIcon="ArchiveBoxIcon" v-model:hidden="inventories_hidden" />
         <div :class="['grid grid-cols-1 w-full', inventories_hidden ? 'hidden' : '']">
-            <InventoryRow :inventory_all="state.session.inventories" :inventory="state.character.inventory" />
-        </div> 
+            <InventoryRow :inventory_all="state.session.inventories" :inventory="state.character.inventory"
+                :callback="updateInventory" />
+        </div>
 
     </section>
 

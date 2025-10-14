@@ -11,6 +11,10 @@ const props = defineProps({
     weapons: {
         type: Array,
         required: true
+    },
+    callback: {
+        type: Function,
+        required: true
     }
 })
 
@@ -25,9 +29,16 @@ function showDetails(id) {
     })
 }
 
+function removeItem(id){
+    removeRow(props.weapons, id)
+    props.callback(props.weapons)
+}
+
 function addItem(event) {
     const id = event.target.value
     addRow(props.weapons_all, props.weapons, id)
+    props.callback(props.weapons)
+
     event.target.value = 'default'
 }
 </script>
@@ -45,7 +56,7 @@ function addItem(event) {
 
         </div>
 
-        <DeleteButton @click.stop="removeRow(props.weapons, weapon.id)"
+        <DeleteButton @click.stop="removeItem(weapon.id)"
             class="row-span-3"/>
 
         <div class="col-span-2 p2 text-clip">Урон: {{ weapon.damage }}</div>

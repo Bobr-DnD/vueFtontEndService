@@ -11,6 +11,10 @@ const props = defineProps({
     armors: {
         type: Array,
         required: true
+    },
+    callback: {
+        type: Function,
+        required: true
     }
 })
 
@@ -25,9 +29,16 @@ function showDetails(id) {
     })
 }
 
+function removeItem(id){
+    removeRow(props.armors, id)
+    props.callback(props.armors)
+}
+
 function addItem(event) {
     const id = event.target.value
     addRow(props.armors_all, props.armors, id)
+    props.callback(props.armors)
+
     event.target.value = 'default'
 }
 </script>
@@ -42,8 +53,7 @@ function addItem(event) {
 
         <div class="col-span-5 p2 text-clip">{{ armor.name }}</div>
 
-        <DeleteButton @click.stop="removeRow(props.armors, armor.id)"
-            class="row-span-3" />
+        <DeleteButton @click.stop="removeItem(armor.id)" class="row-span-3" />
 
         <div v-if="armor.requirement" class="col-span-3 p2 text-clip">Вимоги:
             {{Object.entries(armor.requirement).map(([key, value]) =>

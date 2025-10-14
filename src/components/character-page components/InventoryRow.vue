@@ -11,6 +11,10 @@ const props = defineProps({
     inventory: {
         type: Array,
         required: true
+    },
+    callback: {
+        type:Function,
+        required: true
     }
 })
 
@@ -25,9 +29,16 @@ function showDetails(id) {
     })
 }
 
+function removeItem(id){
+    removeRow(props.inventory, id)
+    props.callback(props.inventory)
+}
+
 function addItem(event) {
     const id = event.target.value
     addRow(props.inventory_all, props.inventory, id)
+    props.callback(props.inventory)
+
     event.target.value = 'default'
 }
 </script>
@@ -44,7 +55,7 @@ function addItem(event) {
 
         <div class="p2 text-clip">Ціна: {{ inv.price }}</div>
 
-        <DeleteButton @click.stop="removeRow(props.inventory, inv.id)"/>
+        <DeleteButton @click.stop="removeItem(inv.id)"/>
 
     </div>
 

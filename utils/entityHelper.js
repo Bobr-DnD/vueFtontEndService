@@ -33,9 +33,12 @@ export function addRow(entitiesAll, entitiesArray, id) {
   entitiesArray.push(entity)
 }
 
-export function useItem(entityArray, effectsArray, entityId, effectId) {
+export function useItem(entityArray, effectsArray, entityEffects, sessionMove, entityId, effectId) {
   const index = entityArray.findIndex(entity => entity.id === entityId)
   if (index !== -1) entityArray.splice(index, 1)
   const effect = effectsArray.find(effect => effect.id === effectId)
-  effectsArray.push(effect)
+  entityEffects.push({
+    effectId: effect.id,
+    deathTime: sessionMove + effect.duration
+  })
 }

@@ -16,6 +16,18 @@ const props = defineProps({
     effects_all: {
         type: Array,
         requied: true
+    },
+    effects: {
+        type: Array,
+        required: true
+    },
+    move: {
+        type: Number,
+        required: true
+    },
+    callback: {
+        type: Function, 
+        requied: true
     }
 })
 
@@ -29,13 +41,23 @@ function showDetails(id) {
         block_hidden.value = false
     })
 }
+
+function removeItem(id){
+    removeRow(props.medicines, id)
+    props.callback(props.medicines)
+}
+
 function addItem(event) {
     const id = event.target.value
     addRow(props.medicines_all, props.medicines, id)
+    props.callback(props.medicines)
+
     event.target.value = 'default'
 }
+// TODO refactor later for good | wrong saving effects | should work via websockets
 function useMed(medId, effectId) {
-    useItem(props.medicines, props.effects_all, medId, effectId)
+    useItem(props.medicines, props.effects_all, props.effects, props.move, medId, effectId)
+    props.callback(props.medicines)
 }
 </script>
 
@@ -52,8 +74,8 @@ function useMed(medId, effectId) {
 
         <div class="p2 text-clip">{{ med.description }}</div>
 
-        <ApproveButton @click.stop="useMed(med.id, med.effect)"/>
-        <DeleteButton @click.stop="removeRow(props.medicines, med.id)"/>
+        <ApproveButton @click.stop="useMed(med.id, med.effect)" />
+        <DeleteButton @click.stop="removeItem(med.id)" />
 
     </div>
 
