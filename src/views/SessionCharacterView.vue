@@ -61,9 +61,6 @@ onMounted(async () => {
 
     state.character = resCharacter.data
     state.session = resSession.data
-
-    console.log(state.character.effects);
-
 })
 
 async function updateCharacter() {

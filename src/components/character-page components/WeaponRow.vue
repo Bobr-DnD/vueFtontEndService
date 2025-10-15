@@ -23,13 +23,13 @@ let block_hidden = ref(true)
 let weapon_selected = ref({})
 
 function showDetails(id) {
-    weapon_selected.value = props.weapons_all.find(w => w.id === id)
+    weapon_selected.value = props.weapons.find(w => w.id === id)
     nextTick(() => {
         block_hidden.value = false
     })
 }
 
-function removeItem(id){
+function removeItem(id) {
     removeRow(props.weapons, id)
     props.callback(props.weapons)
 }
@@ -56,8 +56,7 @@ function addItem(event) {
 
         </div>
 
-        <DeleteButton @click.stop="removeItem(weapon.id)"
-            class="row-span-3"/>
+        <DeleteButton @click.stop="removeItem(weapon.id)" class="row-span-3" />
 
         <div class="col-span-2 p2 text-clip">Урон: {{ weapon.damage }}</div>
 

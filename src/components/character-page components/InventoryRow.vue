@@ -23,7 +23,7 @@ let block_hidden = ref(true)
 let inventory_selected = ref({})
 
 function showDetails(id) {
-    inventory_selected.value = props.inventory_all.find(w => w.id === id)
+    inventory_selected.value = props.inventory.find(w => w.id === id)
     nextTick(() => {
         block_hidden.value = false
     })
@@ -71,15 +71,14 @@ function addItem(event) {
 
     </select>
 
-    <div v-if="!block_hidden" class="fixed inset-0 flex items-center justify-center z-50 bg-black/50">
+    <div v-if="!block_hidden" class="fixed inset-0 flex items-center justify-center z-50 bg-black/50" @click="block_hidden = true">
         <div
             class="w-80 p-5 grid grid-cols-1 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-univers">
 
-            <!--<div @click="block_hidden = true"
+            <div @click="block_hidden = true"
                 class="absolute top-2 right-2 px-3 py-1 bg-darkred-red border border-darkred-dark rounded-md text-darkred-light font-bold cursor-pointer hover:bg-darkred-bright transition select-none">
                 ✕
-            </div>-->
-            <deleteButton />
+            </div>
 
             <div class="font-bold text-2xl text-center border-b border-darkred-red pb-2">
                 {{ inventory_selected.name }}

@@ -36,7 +36,7 @@ let block_hidden = ref(true)
 let medicine_selected = ref({})
 
 function showDetails(id) {
-    medicine_selected.value = props.medicines_all.find(w => w.id === id)
+    medicine_selected.value = props.medicines.find(w => w.id === id)
     nextTick(() => {
         block_hidden.value = false
     })
@@ -74,7 +74,7 @@ function useMed(medId, effectId) {
 
         <div class="p2 text-clip">{{ med.description }}</div>
 
-        <ApproveButton @click.stop="useMed(med.id, med.effect)" />
+        <ApproveButton @click.stop="useMed(med.id, med.effect.id)" />
         <DeleteButton @click.stop="removeItem(med.id)" />
 
     </div>
@@ -91,7 +91,7 @@ function useMed(medId, effectId) {
 
     </select>
 
-    <div v-if="!block_hidden" class="fixed inset-0 flex items-center justify-center z-50 bg-black/50">
+    <div v-if="!block_hidden" class="fixed inset-0 flex items-center justify-center z-50 bg-black/50" @click="block_hidden = true">
         <div
             class="w-80 p-5 grid grid-cols-2 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-univers">
 

@@ -23,7 +23,7 @@ let armor_selected = ref({})
 let block_hidden = ref(true)
 
 function showDetails(id) {
-    armor_selected.value = props.armors_all.find(w => w.id === id)
+    armor_selected.value = props.armors.find(w => w.id === id)
     nextTick(() => {
         block_hidden.value = false
     })
