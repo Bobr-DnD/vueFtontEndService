@@ -68,7 +68,7 @@ function useMed(medId, effectId) {
             bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2 hover:cursor-pointer"
         :id="'Medicine' + `${index + 1}`" @click="showDetails(med.id)">
 
-        <div class="text-darkred-light row-span-3">×{{ med.count }}</div>
+        <div class="text-darkred-light">×{{ med.count }}</div>
 
         <div class="p2 text-clip">{{ med.name }}</div>
 

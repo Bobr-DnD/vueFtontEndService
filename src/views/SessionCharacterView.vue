@@ -96,9 +96,9 @@ async function addExperience() {
     state.character = await updateCharacter()
 }
 
-async function updateHealth(health) {
-    state.character.health += health
-    state.character = await updateCharacter()
+async function updateHealthFields(health) {
+    //state.character.health += health
+    //state.character = await updateCharacter() //TODO refactor update to dto
 }
 
 async function updateCurrency(currency) {
@@ -131,22 +131,22 @@ async function updateInventory() {
 
     <div v-if="!state.isLoading" class="w-96 mx-auto my-4">
 
-        <section class="mb-2">
+        <section class="mb-2" v-for="h in state.character.health">
 
             <div class="p-1 grow ">
-                <ProgressiveBar :value="state.character.health" :valueMax="state.character.maxHealth" text="Здоров'я" />
+                <ProgressiveBar :value="h.value" :valueMax="h.max" :text="h.name"/>
             </div>
 
-            <HorizontalNumberPicker :value="state.character.health" :min="-state.character.health"
-                :max="state.character.maxHealth - state.character.health" :callback="updateHealth" />
+            <HorizontalNumberPicker :value="h.value" :min="-h.value"
+                :max="h.max - h.value" :callback="updateHealthFields" />
 
         </section>
 
         <section class="grid grid-cols-1 gap-2 w-full mx-auto my-2">
 
-            <EffectsTable :effects="state.character.effects" />
+            <EffectsTable v-if="state.character.effects.length !== 0" :effects="state.character.effects" />
 
-            <QuestsTable :quest="state.character.quest" />
+            <QuestsTable v-if="state.character.quest" :quest="state.character.quest" />
 
             <CustomFieldsTable :fields="state.character.customFields" :callback="updateCustomFields" />
 

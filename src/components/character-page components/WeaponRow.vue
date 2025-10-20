@@ -58,9 +58,11 @@ function addItem(event) {
 
         <DeleteButton @click.stop="removeItem(weapon.id)" class="row-span-3" />
 
-        <div class="col-span-2 p2 text-clip">Урон: {{ weapon.damage }}</div>
+        <div class="col-span-2 p2 text-clip">Урон: {{ weapon.damage[0].damage }}</div>
 
-        <div class="p2 text-clip">Очки дії: {{ weapon.actionPoints }}</div>
+        <div v-if="weapon.actionPoints.min !== undefined || null" class="p2 text-clip">Очки дії: {{
+            weapon.actionPoints.min }}-{{ weapon.actionPoints.max }}</div>
+        <div v-else class="p2 text-clip">Очки дії: {{ weapon.actionPoints.max }}</div>
 
         <div v-if="weapon.requirement" class="col-span-3 p2 text-clip">Вимоги:
             {{Object.entries(weapon.requirement).map(([key, value]) =>
@@ -97,14 +99,29 @@ function addItem(event) {
                 {{ weapon_selected.name }}
             </div>
 
-            <div class="col-span-2 text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Урон: <span>
-                </span class="font-medium">{{ weapon_selected.damage }}</div>
+            <div class="col-span-2 space-y-1 border-t-4 border-b-4 border-darkred-red rounded-xl py-2 px-1">
+                <h3 class="text-center text-lg font-semibold p-1 border-2 border-darkred-dark rounded-xl">Урон:</h3>
+                <div v-for="d in weapon_selected.damage"
+                    class="col-span-2 text-md p-1 border-2 border-darkred-dark rounded-xl text-center">
+                    <span>{{ d.type }}: {{ d.damage }}</span class="font-medium">
+                </div>
+            </div>
 
-            <div class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Дальність: <span
-                    class="font-medium">{{ weapon_selected.range }}</span></div>
 
-            <div class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Очки дії: <span
-                    class="font-medium">{{ weapon_selected.actionPoints }}</span></div>
+
+            <div v-if="weapon_selected.range.min !== undefined || null"
+                class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Дальність: <span
+                    class="font-medium">{{ weapon_selected.range.min }}-{{ weapon_selected.range.max }}</span></div>
+
+            <div v-else class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Дальність: <span
+                    class="font-medium">{{ weapon_selected.range.max }}</span></div>
+
+            <div v-if="weapon_selected.actionPoints.min !== undefined || null"
+                class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Очки дії: {{
+                    weapon_selected.actionPoints.min }}-{{ weapon_selected.actionPoints.max }}</div>
+
+            <div v-else class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Очки дії:
+                {{ weapon_selected.actionPoints.max }}</div>
 
             <div v-if="weapon_selected.requirement"
                 class="col-span-2 text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Вимога: <span
@@ -115,10 +132,11 @@ function addItem(event) {
                 class="col-span-2 text-md p-1 border-2 border-darkred-dark rounded-xl text-center">
                 Ефект: <span class="font-medium">{{ weapon_selected.effect }}</span></div>
 
-            <div class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Тип: <span
-                    class="font-medium">{{ weapon_selected.type }}</span></div>
+            <div v-if="weapon_selected.type" class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">
+                Тип: <span class="font-medium">{{ weapon_selected.type }}</span></div>
 
-            <div class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Специфікація: <span
+            <div v-if="weapon_selected.specific"
+                class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Специфікація: <span
                     class="font-medium">{{ weapon_selected.specific }}</span></div>
 
             <div class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Ціна: <span

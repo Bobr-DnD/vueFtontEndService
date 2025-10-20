@@ -29,16 +29,17 @@ const sessionId = useRoute().params.sessionId
             <div v-else class="font-semibold text-2xl">{{ props.character.name }}</div>
         </div>
 
-        <div class="flex justify-around items-center mb-2 border-b-2 border-darkred-gray rounded-lg">
-            <div>Стать: {{ props.character.gender }}</div>
-            <div>Клас: {{ props.character.class }}</div>
+        <div class="flex flex-wrap justify-around items-center mb-2 space-y-1 text-lg border-b-2 border-darkred-gray rounded-lg">
+            <div class="">Стать: {{ props.character.gender }}</div>
+            <div class="">Клас: {{ props.character.class }}</div>
         </div>
 
+        
         <div
             class="grid auto-rows-max grid-cols-2 items-center justify-items-center mb-3 border-y-2 border-darkred-red rounded-md">
             <div>Рівень: {{ props.character.level }}</div>
             <div>Досвід: {{ props.character.experience }}/{{ props.character.experienceToLevelUp }}</div>
-            <div class="col-span-2">Здоров'я: {{ props.character.health }}/{{ props.character.maxHealth }}</div>
+            <div class="col-span-2" v-for="h in props.character.health">{{ h.name }}: {{ h.value }}/{{ h.max }}</div>
         </div>
 
         <!-- <div class="border-b-2 border-darkred-bright rounded-lg mb-4">
