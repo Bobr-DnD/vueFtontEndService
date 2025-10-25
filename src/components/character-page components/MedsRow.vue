@@ -75,7 +75,7 @@ function useMed(medId, effectId) {
         <div class="p2 text-clip">{{ med.description }}</div>
 
         <ApproveButton @click.stop="useMed(med.id, med.effect.id)" />
-        <DeleteButton @click.stop="removeItem(med.id)" />
+        <DeleteButton @click.stop="removeItem(med.id)" class="w-ful"/>
 
     </div>
 

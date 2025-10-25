@@ -3,8 +3,8 @@ import { reactive, ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router';
 import RepositoryFactory from '@http/RepositoryFactory';
 import Loader from 'vue-spinner/src/SyncLoader.vue'
-import SessionViewNavigtaion from '@/components/SessionViewNavigtaion.vue';
-import characterCard from '@/components/character-page components/characterCard.vue';
+import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaion.vue';
+import characterCard from '@/components/reusable/CharacterCard.vue';
 
 const sessionId = useRoute().params.sessionId
 const state = reactive({

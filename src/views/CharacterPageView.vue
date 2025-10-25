@@ -7,7 +7,7 @@ import { CheckBadgeIcon, ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon }
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
 
-import SessionViewNavigtaion from '@/components/SessionViewNavigtaion.vue';
+import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaion.vue';
 import WeaponRow from '@/components/character-page components/WeaponRow.vue';
 import ArmorRow from '@/components/character-page components/ArmorRow.vue';
 import MedsRow from '@/components/character-page components/MedsRow.vue';
@@ -16,8 +16,8 @@ import PerkRow from '@/components/character-page components/PerkRow.vue';
 
 import EffectsTable from '@/components/character-page components/EffectsTable.vue';
 import QuestsTable from '@/components/character-page components/QuestsTable.vue';
-import CustomFieldsTable from '@/components/character-page components/CustomFieldsTable.vue';
-import characterCardSmall from '@/components/character-page components/characterCardSmall.vue';
+import CustomFieldsTable from '@/components/reusable/CustomFieldsTable.vue';
+import characterCardSmall from '@/components/character-page components/CharacterViewCard.vue';
 import Experience from '@/components/character-page components/Experience.vue';
 import CurrencyTable from '@/components/character-page components/CurrencyTable.vue';
 import HideTittle from '@/components/reusable/HideTittle.vue';

@@ -56,7 +56,7 @@ function addItem(event) {
 
         </div>
 
-        <DeleteButton @click.stop="removeItem(weapon.id)" class="row-span-3" />
+        <DeleteButton @click.stop="removeItem(weapon.id)" class="row-span-3 w-full" />
 
         <div class="col-span-2 p2 text-clip">Урон: {{ weapon.damage[0].damage }}</div>
 

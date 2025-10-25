@@ -1,8 +1,8 @@
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { reactive, onMounted } from 'vue'
 import Loader from 'vue-spinner/src/SyncLoader.vue'
-import Navigation from '@/components/Navigation.vue'
-import SessionCard from '@/components/SessionCard.vue'
+import Navigation from '@/components/navigations/Navigation.vue'
+import SessionCard from '@/components/reusable/SessionCard.vue'
 import RepositoryFactory from '@http/RepositoryFactory'
 
 const state = reactive({

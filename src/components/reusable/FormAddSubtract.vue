@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, watch } from 'vue'
+import { onMounted } from 'vue'
 import { PlusIcon, MinusIcon } from '@heroicons/vue/24/solid'
 
 const props = defineProps({
@@ -19,11 +19,13 @@ const props = defineProps({
         type: Number,
         required: false,
         default: 1
+    },
+    callback: {
+        type: Function,
+        required: true
     }
 
 })
-
-const emit = defineEmits(['updateValue'])
 
 let input = null
 
@@ -36,10 +38,10 @@ function changeValue(operation) {
 
     switch (operation) {
         case 'plus':
-            emit('updateValue', props.entity_name, parseInt(input.value))
+            props.callback(props.entity_name, parseInt(input.value))
             break;
         case 'minus':
-            emit('updateValue', props.entity_name, -parseInt(input.value))
+            props.callback(props.entity_name, -parseInt(input.value))
             break;
     }
 }

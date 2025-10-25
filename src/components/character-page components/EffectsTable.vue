@@ -42,7 +42,7 @@ let effects_hidden = ref(true)
             </div>
 
             <div class="text-md font-medium px-2 py-1 rounded-lg bg-darkred-dark">
-                {{ effect.deathTime }}
+                {{ effect.timeLeft }}
             </div>
         </div>
     </div>

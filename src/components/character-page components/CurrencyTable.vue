@@ -21,7 +21,7 @@ function updateCurrency(name, value) {
     <HideButton textShow="Показати баланс" textHide="Приховати баланс" v-model:hidden="currency_hidden" :mainIcon="CurrencyDollarIcon"/>
 
     <div v-if="!currency_hidden" v-for="value, field in props.currency" class="space-y-2 font-univers">
-        <FormAddSubtract v-if="typeof (value) === 'number'" :value="value" :label="'Currency_' + field" @updateValue="updateCurrency"
+        <FormAddSubtract v-if="typeof (value) === 'number'" :value="value" :label="'Currency_' + field" :callback="updateCurrency"
             :entity_name="field" class="mx-auto shadow-[rgba(0,0,0,0.5)_0px_4px_16px]" />
     </div>
 </template>

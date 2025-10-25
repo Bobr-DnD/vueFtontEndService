@@ -22,12 +22,12 @@ function updateFields(name, value){
 <template>
     <HideButton textShow="Показати додаткові характеристики" textHide="Приховати додаткові характеристики" v-model:hidden="custom_hidden" :mainIcon="ChartBarIcon"/>
 
-    <div v-if="!custom_hidden" v-for="value, field in props.fields">
-        <FormString v-if="typeof (value) === 'string'" :label="'CustomFields_' + field" :entity_name="field" :value="props.fields[field]" 
-        @updateValue="updateFields" class="mx-auto shadow-[rgba(0,0,0,0.5)_0px_4px_16px]" />
+    <div v-if="!custom_hidden" v-for="value, name in props.fields">
+        <FormString v-if="typeof (value) === 'string'" :label="'CustomFields_' + name" :entity_name="name" :value="props.fields[name]" 
+        :callback="updateFields" class="mx-auto shadow-[rgba(0,0,0,0.5)_0px_4px_16px]" />
 
-        <FormAddSubtract v-if="typeof (value) === 'number'" :label="'CustomFields_' + field" :entity_name="field" :value="props.fields[field]"
-        @updateValue="updateFields" class="mx-auto shadow-[rgba(0,0,0,0.5)_0px_4px_16px]"/>
+        <FormAddSubtract v-if="typeof (value) === 'number'" :label="'CustomFields_' + name" :entity_name="name" :value="props.fields[name]"
+        :callback="updateFields" class="mx-auto shadow-[rgba(0,0,0,0.5)_0px_4px_16px]"/>
 
     </div>
 </template>

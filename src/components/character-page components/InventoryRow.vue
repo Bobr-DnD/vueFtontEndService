@@ -55,7 +55,7 @@ function addItem(event) {
 
         <div class="p2 text-clip">Ціна: {{ inv.price }}</div>
 
-        <DeleteButton @click.stop="removeItem(inv.id)"/>
+        <DeleteButton @click.stop="removeItem(inv.id)" class="w-full"/>
 
     </div>
 

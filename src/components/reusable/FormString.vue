@@ -1,10 +1,8 @@
 <script setup>
 import ApproveButton from './ApproveButton.vue';
 
-const emit = defineEmits(['updateValue'])
-
 const props = defineProps({
-    value:{
+    value: {
         type: String,
         required: true
     },
@@ -15,12 +13,15 @@ const props = defineProps({
     entity_name: {
         type: String,
         required: true
+    },
+    callback: {
+        type: Function, 
+        required: true
     }
 })
 
-function changeValue(){
-    const value = document.getElementById(props.entity_name).value
-    emit('updateValue', props.entity_name, value)
+function changeValue() {
+    props.callback(props.entity_name, value)
 }
 </script>
 
@@ -31,8 +32,8 @@ function changeValue(){
         </label>
         <input :id="entity_name" type="text" :value="value" class="bg-darkred-gray max-w-28 text-darkred-light text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
            focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
-        
-        <ApproveButton @click="changeValue" class="w-16 flex justify-center items-center ml-2"/>
+
+        <ApproveButton @click="changeValue" class="w-16 flex justify-center items-center ml-2" />
     </form>
 
 
