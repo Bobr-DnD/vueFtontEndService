@@ -60,7 +60,7 @@ function addItem(event) {
 
         <div class="col-span-2 p2 text-clip">Урон: {{ weapon.damage[0].damage }}</div>
 
-        <div v-if="weapon.actionPoints.min !== undefined || null" class="p2 text-clip">Очки дії: {{
+        <div v-if="weapon.actionPoints.min !== null" class="p2 text-clip">Очки дії: {{
             weapon.actionPoints.min }}-{{ weapon.actionPoints.max }}</div>
         <div v-else class="p2 text-clip">Очки дії: {{ weapon.actionPoints.max }}</div>
 
@@ -109,14 +109,14 @@ function addItem(event) {
 
 
 
-            <div v-if="weapon_selected.range.min !== undefined || null"
+            <div v-if="weapon_selected.range.min !== null"
                 class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Дальність: <span
                     class="font-medium">{{ weapon_selected.range.min }}-{{ weapon_selected.range.max }}</span></div>
 
             <div v-else class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Дальність: <span
                     class="font-medium">{{ weapon_selected.range.max }}</span></div>
 
-            <div v-if="weapon_selected.actionPoints.min !== undefined || null"
+            <div v-if="weapon_selected.actionPoints.min !== null"
                 class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Очки дії: {{
                     weapon_selected.actionPoints.min }}-{{ weapon_selected.actionPoints.max }}</div>
 

@@ -2,9 +2,17 @@
 import { computed, onMounted, ref, watch, nextTick } from 'vue'
 
 const props = defineProps({
+  title: { type: String, required: true },
   value: { type: Number, required: true },
   min: { type: Number, required: true },
   max: { type: Number, required: true },
+  colors: {
+    type: Array, default: [
+      "#3E5F44",
+      "#FABC3F",
+      "#8E1616"
+    ]
+  },
   step: { type: Number, default: 1 },
   pad: { type: Number, default: 2 }, // e.g. 2 -> "07"
   callback: { type: Function, required: true }
@@ -59,7 +67,7 @@ function getItemUnderIndicator() {
 
   if (closestIdx !== -1) {
     const delta = items.value[closestIdx]
-    props.callback(delta)
+    props.callback(delta, props.title)
     return delta
   }
 
@@ -87,7 +95,7 @@ watch(() => props.value.value, scrollToValue)
 </script>
 
 <template>
-  <div class="w-full max-w-md mx-auto font-gothic">
+  <div class="w-full max-w-md mx-auto font-gothic" :id="props.title">
     <!-- Track -->
     <div ref="scroller" class="relative flex gap-4 overflow-x-auto no-scrollbar px-6 py-3
              snap-x snap-mandatory scroll-p-1 select-none">
@@ -114,12 +122,15 @@ watch(() => props.value.value, scrollToValue)
 
   <div class="w-full flex items-center justify-center font-gothic">
     <button @click="getItemUnderIndicator" class="mx-auto p-2 w-32 h-16 border-2 rounded-xl text-darkred-light text-3xl font-medium
-           bg-gradient-to-r from-darkred-dark_gray via-greenish-dark to-darkred-dark_gray
-           bg-[length:200%_200%] animate-gradient-pulse">
+           bg-[length:200%_200%] animate-gradient-pulse" :style="{
+            '--from': colors[2],
+            '--via': colors[1],
+            '--to': colors[0],
+            backgroundImage: `linear-gradient(to right, var(--from), var(--via), var(--to))`
+          }">
       OK
     </button>
   </div>
-
 </template>
 
 <style>
@@ -130,5 +141,23 @@ watch(() => props.value.value, scrollToValue)
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+@keyframes gradient-pulse {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient-pulse {
+  animation: gradient-pulse 4s ease infinite;
 }
 </style>

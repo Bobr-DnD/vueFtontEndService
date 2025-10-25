@@ -32,7 +32,7 @@ const state = reactive({
     connected: false
 })
 
-let perks_hidden = ref(false)
+let perks_hidden = ref(Boolean)
 let weapons_hidden = ref(true)
 let armors_hidden = ref(true)
 let meds_hidden = ref(true)
@@ -62,6 +62,16 @@ onMounted(async () => {
     state.character = resCharacter.data
     state.session = resSession.data
 })
+
+state.character.perks !== undefined ? perks_hidden.value = false :  perks_hidden.value = true
+
+function checkObjectFieldExisting(field){
+    return (field !== undefined && field !== null)
+}
+
+function checkArrayFieldExisting(field){
+    return field.length
+}
 
 async function updateCharacter() {
     const [res, err] = await asyncHandler(
@@ -96,9 +106,12 @@ async function addExperience() {
     state.character = await updateCharacter()
 }
 
-async function updateHealthFields(health) {
-    //state.character.health += health
-    //state.character = await updateCharacter() //TODO refactor update to dto
+async function updateHealthFields(value, title) {
+    const item = state.character.health.find(h => h.name === title)
+    if (item) {
+        item.value += value
+    }
+    state.character = await updateCharacter() //TODO refactor update to dto
 }
 
 async function updateCurrency(currency) {
@@ -122,7 +135,7 @@ async function updateInventory() {
     <div v-if="!state.isLoading" class="w-80 mx-auto my-6 space-y-2 font-univers">
 
         <characterCardSmall :name="state.character.name" :characteristics="state.character.characteristics"
-            :gender="state.character.gender" :class="state.character.class" />
+            :gender="state.character.gender" :class="state.character.class" :race="state.character.race" />
 
         <Experience :exp="state.character.experience" :expMax="state.character.experienceToLevelUp"
             :perkPoints="state.character.perkPoints" :callback="addExperience" />
@@ -133,58 +146,72 @@ async function updateInventory() {
 
         <section class="mb-2" v-for="h in state.character.health">
 
-            <div class="p-1 grow ">
-                <ProgressiveBar :value="h.value" :valueMax="h.max" :text="h.name"/>
+            <div class="p-1 grow">
+                <ProgressiveBar :value="h.value" :valueMax="h.max" :text="h.name" :colors="h.colors"/>
             </div>
 
-            <HorizontalNumberPicker :value="h.value" :min="-h.value"
-                :max="h.max - h.value" :callback="updateHealthFields" />
+            <HorizontalNumberPicker :value="h.value" :min="-h.value" :max="h.max - h.value" :colors="h.colors"
+                :callback="updateHealthFields" :title="h.name" />
 
         </section>
 
         <section class="grid grid-cols-1 gap-2 w-full mx-auto my-2">
 
-            <EffectsTable v-if="state.character.effects.length !== 0" :effects="state.character.effects" />
+            <EffectsTable v-if="checkArrayFieldExisting(state.character.effects)" :effects="state.character.effects" />
 
-            <QuestsTable v-if="state.character.quest" :quest="state.character.quest" />
+            <QuestsTable v-if="checkObjectFieldExisting(state.character.quest)" :quest="state.character.quest" />
 
-            <CustomFieldsTable :fields="state.character.customFields" :callback="updateCustomFields" />
+            <CustomFieldsTable v-if="checkObjectFieldExisting(state.character.customFields)" :fields="state.character.customFields"
+                :callback="updateCustomFields" />
 
-            <CurrencyTable :currency="state.session.currency" :callback="updateCurrency" />
+            <CurrencyTable v-if="checkObjectFieldExisting(state.session.currency)" :currency="state.session.currency"
+                :callback="updateCurrency" />
         </section>
     </div>
 
     <section v-if="!state.isLoading" class="grid grid-cols-1 justify-items-center mx-auto min-w-80 max-w-96">
 
-        <HideTittle text="Навички" :mainIcon="CheckBadgeIcon" v-model:hidden="perks_hidden" />
-        <div :class="['grid grid-cols-1 w-full', perks_hidden ? 'hidden' : '']">
-            <PerkRow v-if="state.session.perks" :perks_all="state.session.perks" v-model:perks="state.character.perks"
-                v-model:perkPoints="state.character.perkPoints" />
-        </div>
+        <section>
+            <HideTittle text="Навички" :mainIcon="CheckBadgeIcon" v-model:hidden="perks_hidden" />
+            <div :class="['grid grid-cols-1 w-full', perks_hidden ? 'hidden' : '']">
+                <PerkRow v-if="state.session.perks" :perks_all="state.session.perks"
+                    v-model:perks="state.character.perks" v-model:perkPoints="state.character.perkPoints" />
+            </div>
+        </section>
 
-        <HideTittle text="Зброя" :mainIcon="BoltIcon" v-model:hidden="weapons_hidden" />
-        <div :class="['grid grid-cols-1 w-full', weapons_hidden ? 'hidden' : '']">
-            <WeaponRow :weapons_all="state.session.weapons" :weapons="state.character.weapons"
-                :callback="updateInventory" />
-        </div>
+        <section>
+            <HideTittle text="Зброя" :mainIcon="BoltIcon" v-model:hidden="weapons_hidden" />
+            <div :class="['grid grid-cols-1 w-full', weapons_hidden ? 'hidden' : '']">
+                <WeaponRow :weapons_all="state.session.weapons" :weapons="state.character.weapons"
+                    :callback="updateInventory" />
+            </div>
+        </section>
 
-        <HideTittle text="Броня" :mainIcon="ShieldCheckIcon" v-model:hidden="armors_hidden" />
-        <div :class="['grid grid-cols-1 w-full', armors_hidden ? 'hidden' : '']">
-            <ArmorRow :armors_all="state.session.armors" :armors="state.character.armor" :callback="updateInventory" />
-        </div>
+        <section>
+            <HideTittle text="Броня" :mainIcon="ShieldCheckIcon" v-model:hidden="armors_hidden" />
+            <div :class="['grid grid-cols-1 w-full', armors_hidden ? 'hidden' : '']">
+                <ArmorRow :armors_all="state.session.armors" :armors="state.character.armor"
+                    :callback="updateInventory" />
+            </div>
+        </section>
 
-        <HideTittle text="Медикаменти" :mainIcon="BeakerIcon" v-model:hidden="meds_hidden" />
-        <div :class="['grid grid-cols-1 w-full', meds_hidden ? 'hidden' : '']">
-            <MedsRow :medicines_all="state.session.medicines" :medicines="state.character.medicines"
-                :effects_all="state.session.effects" :effects="state.character.effects" :move="state.session.move"
-                :callback="updateInventory" />
-        </div>
+        <section>
+            <HideTittle text="Медикаменти" :mainIcon="BeakerIcon" v-model:hidden="meds_hidden" />
+            <div :class="['grid grid-cols-1 w-full', meds_hidden ? 'hidden' : '']">
+                <MedsRow :medicines_all="state.session.medicines" :medicines="state.character.medicines"
+                    :effects_all="state.session.effects" :effects="state.character.effects" :move="state.session.move"
+                    :callback="updateInventory" />
+            </div>
+        </section>
 
-        <HideTittle text="Інвентар" :mainIcon="ArchiveBoxIcon" v-model:hidden="inventories_hidden" />
-        <div :class="['grid grid-cols-1 w-full', inventories_hidden ? 'hidden' : '']">
-            <InventoryRow :inventory_all="state.session.inventories" :inventory="state.character.inventory"
-                :callback="updateInventory" />
-        </div>
+        <section>
+            <HideTittle text="Інвентар" :mainIcon="ArchiveBoxIcon" v-model:hidden="inventories_hidden" />
+            <div :class="['grid grid-cols-1 w-full', inventories_hidden ? 'hidden' : '']">
+                <InventoryRow :inventory_all="state.session.inventories" :inventory="state.character.inventory"
+                    :callback="updateInventory" />
+            </div>
+        </section>
+
 
     </section>
 

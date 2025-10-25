@@ -1,10 +1,31 @@
 <script setup>
+import { computed, toRaw } from 'vue';
 
 const props = defineProps({
-    value: {type: Number, required: true},
-    valueMax: {type: Number, required: true},
-    text: {type: String, required: true}
+    value: { type: Number, required: true },
+    valueMax: { type: Number, required: true },
+    text: { type: String, required: true },
+    colors: {
+        type: Array, default: [
+            "#8E1616",
+            "#FABC3F",
+            "#3E5F44"
+        ]
+    }
 })
+
+const ratio = computed(() => props.value / props.valueMax)
+
+const barColor = computed(() => {
+  if (ratio.value > 0.75) return props.colors[0]
+  if (ratio.value > 0.4) return props.colors[1]
+  return props.colors[2]
+})
+
+const barStyle = computed(() => ({
+  width: `${ratio.value * 100}%`,
+  backgroundColor: barColor.value
+}))
 </script>
 
 <template>
@@ -14,11 +35,7 @@ const props = defineProps({
         </div>
 
         <div class="w-full h-5 bg-gray-300 rounded overflow-hidden">
-            <div class="h-full transition-all duration-300" :class="{
-                'bg-green-500': props.value / props.valueMax > 0.6,
-                'bg-yellow-400': props.value / props.valueMax <= 0.6 && props.value / props.valueMax > 0.3,
-                'bg-red-500': props.value / props.valueMax <= 0.3
-            }" :style="{ width: (props.value / props.valueMax * 100) + '%' }"></div>
+            <div class="h-full transition-all duration-300 ease-in-out" :style="barStyle"></div>
         </div>
 
     </div>

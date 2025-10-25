@@ -2,6 +2,7 @@
 const props = defineProps({
     name: {type: String, required: true},
     gender: {type: String, required: true},
+    race: {type: String, required: true},
     class: {type: String, required: true},
     characteristics: {type: Object, required: true},
 })
@@ -21,6 +22,9 @@ const props = defineProps({
         </div>
         <div class="grow text-center text-darkred-light font-medium text-lg">
             Клас: <span class="font-semibold">{{ props.class }}</span>
+        </div>
+        <div class="grow text-center text-darkred-light font-medium text-lg">
+            Раса: <span class="font-semibold">{{ props.race }}</span>
         </div>
     </div>
 

@@ -45,11 +45,11 @@ function addItem(event) {
 
 <template>
     <div v-for="inv, index in groupedInventories"
-        class="grid grid-cols-[20px_65%_1fr_30px] p-2 gap-2 items-center justify-items-center font-gothic
+        class="grid grid-cols-[20px_1fr_1fr_30px] p-2 gap-2 items-center justify-items-center font-gothic
             bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2 hover:cursor-pointer"
         :id="'Inventory' + `${index + 1}`" @click="showDetails(inv.id)">
 
-        <div class="text-darkred-light row-span-3">×{{ inv.count }}</div>
+        <div class="text-darkred-light">×{{ inv.count }}</div>
 
         <div class="p2 text-clip">{{ inv.name }}</div>
 
@@ -84,7 +84,7 @@ function addItem(event) {
                 {{ inventory_selected.name }}
             </div>
 
-            <div class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Опис: <span
+            <div v-if="inventory_selected.description" class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Опис: <span
                     class="font-medium">{{ inventory_selected.description }}</span></div>
 
             <div class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Ціна: <span
