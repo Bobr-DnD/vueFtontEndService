@@ -85,7 +85,7 @@ async function addEffect(character_id, effect_id) {
   state.session.characters.forEach(ch => {
     
     if (ch.id === character_id){
-      ch.effects.push({id:effect_id, timeLeft:state.session.move + effect.duration, effect: effect})
+      ch.effects.push({id:effect_id, timeLeft:effect.duration, effect: effect})
       //TODO add dto check and update on api
     }
   })
