@@ -4,3 +4,9 @@ export function toEffectObjectField(effect) {
     timeLeft: effect.timeLeft
   };
 }
+
+export function toCustomFieldObjectField(customField) {
+  return {
+    [customField.name]: customField.value
+  }
+}
