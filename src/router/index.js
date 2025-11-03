@@ -3,7 +3,8 @@ import HomeView from "@/views/HomeView.vue";
 import Sessions from "@/views/SessionsView.vue";
 import SessionView from "@/views/SingleSessionView.vue";
 import NotFoundView from '@/components/reusable/NotFoundView.vue'
-import SessionCharacterView from "@/views/CharacterPageView.vue";
+import CharacterPageView from "@/views/CharacterPageView.vue";
+import SessionCharacterView from "@/views/SessionCharacterView.vue";
 
 import AdminPageView from "@/views/AdminPageView.vue";
 
@@ -31,6 +32,11 @@ const router = createRouter({
         //     component: AdminSessionConfView
         // },
         {
+            path: '/admin/session/:sessionId/characters',
+            name: 'session_characters_editor',
+            component: SessionCharacterView
+        },
+        {
             path: '/session/:sessionId',
             name: 'session',
             component: SessionView
@@ -38,7 +44,7 @@ const router = createRouter({
         {
             path: '/session/:sessionId/character/:characterId',
             name: 'session_character',
-            component: SessionCharacterView
+            component: CharacterPageView
         },
         {
             path: '/:catchAll(.*)',

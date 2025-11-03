@@ -33,6 +33,12 @@ const sessionId = useRoute().params.sessionId
             Сесія
         </RouterLink>
 
+        <RouterLink :to="'/admin/session/' + sessionId + '/characters'" class="relative text-darkred-bright font-semibold tracking-wide
+           after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[3px]
+           after:bg-darkred-bright hover:after:w-full after:transition-[width] after:duration-400 after:ease-out">
+            Персонажі
+        </RouterLink>
+
         <RouterLink :to="'/admin/session/' + sessionId" class="relative text-darkred-bright font-semibold tracking-wide
            after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[3px]
            after:bg-darkred-bright hover:after:w-full after:transition-[width] after:duration-400 after:ease-out">
