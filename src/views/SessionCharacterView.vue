@@ -4,7 +4,8 @@ import { reactive, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
-import PlusButton from '@/components/reusable/PlusButton.vue';
+import PlusButton from '@/components/reusable/PlusButton.vue'
+import TextFieldEditor from '@/components/reusable/TextFieldEditor.vue';
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
@@ -15,7 +16,7 @@ const state = reactive({
 })
 
 const sessionId = useRoute().params.sessionId
-let selected_character = ref({})
+let selected_character = ref({id: 'empty'})
 
 onMounted(async () => {
     const [resSession, errSession] = await asyncHandler(
@@ -28,9 +29,6 @@ onMounted(async () => {
     else state.isLoading = false
 
     state.session = resSession.data
-    selected_character.value = state.session.characters[0]
-    console.log(selected_character.value);
-
 })
 
 function selectCharacter(character) {
@@ -55,9 +53,7 @@ function selectCharacter(character) {
             :class="selected_character.id === 'empty' ? 'bg-darkred-gray text-darkred-light' : 'bg-darkred-light'" />
     </div>
 
-    <div>
-        
-    </div>
+    <TextFieldEditor placeholder="Ім'я" fieldName="name" :value="selected_character.name"/>
 
     <div v-if="state.isLoading" class="text-center py-6">
         <Loader />
