@@ -10,3 +10,7 @@ export function toCustomFieldObjectField(customField) {
     [customField.name]: customField.value
   }
 }
+
+export function character(character){
+  
+}

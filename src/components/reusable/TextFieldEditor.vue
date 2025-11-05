@@ -1,28 +1,54 @@
 <script setup>
-import { PencilSquareIcon, CheckCircleIcon } from '@heroicons/vue/24/outline';
-import { ref } from 'vue';
+import { ref, nextTick, watch } from 'vue'
+import { PencilSquareIcon, CheckCircleIcon } from '@heroicons/vue/24/solid'
 
 const props = defineProps({
     placeholder: { type: String, required: true },
-    value: { type: String, required: false },
-    fieldName: {type: String, required: true}
+    fieldName: { type: String, required: true },
+    value: { type:  [String, Number], default: '' },
+    callback: { type: Function, required: true },
+    type: {type: String, default: 'text'}
 })
 
-let fieldReadonly = ref(true)
+const fieldReadonly = ref(true)
+let editableValue = ref(props.value)
+const inputEl = ref(null)
 
-function editField() {
-    fieldReadonly.value = !fieldReadonly.value
+watch(() => props.value, (newValue) => {
+    editableValue.value = newValue
+})
+
+const editField = async () => {
+    fieldReadonly.value = false
+    await nextTick()
+    inputEl.value.focus()
 }
 
+const saveField = () => {
+    fieldReadonly.value = true
+    let inputValue;
+    if (props.type === 'text') inputValue = inputEl.value.value
+    else inputValue = parseInt(inputEl.value.value)
+    props.callback(props.fieldName, inputValue)
+
+}
 </script>
 
 <template>
-    <div class="flex items-center m-2 space-x-2">
-        <form submit.prevent action="" class="">
-            <input type="text" :disabled="fieldReadonly" :placeholder="props.placeholder" :value="props.value"
-                class="w-min-fit p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg"> <!-- disabled doesnt work-->
+    <div class="grid grid-cols-[max-content_40px_40px] items-center justify-items-start justify-start m-2 space-x-2">
+        <form @submit.prevent class="flex items-center space-x-2">
+            <label :for="props.fieldName" class="p-1 text-xl font-gothic">{{ props.placeholder }}:</label>
+            <input :ref="'inputEl'" :id="props.fieldName" :type="props.type" :value="editableValue" :disabled="fieldReadonly" :name="props.fieldName"
+                :placeholder="props.placeholder" class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark
+               disabled:bg-darkred-dark_gray disabled:text-darkred-light/60 transition-all duration-200" />
         </form>
-        <PencilSquareIcon class="w-10 hover:cursor-pointer hover:text-greenish-mid" @click="editField" :class="!fieldReadonly ? 'text-greenish-mid' : ''"/>
-        <CheckCircleIcon class="w-10 hover:cursor-pointer hover:text-greenish-mid" />
+
+        <PencilSquareIcon class="w-8 h-8 hover:cursor-pointer transition-colors"
+            :class="fieldReadonly ? 'text-darkred-dark hover:text-greenish-mid' : 'text-greenish-mid'"
+            @click="editField" />
+
+        <CheckCircleIcon v-if="!fieldReadonly"
+            class="w-8 h-8 hover:cursor-pointer text-greenish-mid transition-colors hover:text-greenish-light"
+            @click="saveField" />
     </div>
 </template>
