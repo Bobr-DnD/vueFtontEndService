@@ -5,7 +5,11 @@ import { useRoute } from 'vue-router';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
 import PlusButton from '@/components/reusable/PlusButton.vue'
-import TextFieldEditor from '@/components/reusable/TextFieldEditor.vue';
+import SingleFieldEditor from '@/components/reusable/SingleFieldEditor.vue';
+import ImageEditor from '@/components/reusable/ImageEditor.vue';
+import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
+import CustomFieldsTable from '@/components/reusable/CustomFieldsTable.vue';
+import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
@@ -37,6 +41,11 @@ function selectCharacter(character) {
 
 async function updateCharacter(field, value) {
     selected_character.value[field] = value
+    console.log(selected_character.value);
+}
+
+function checkObjectFieldExisting(field){
+    return (field !== undefined && field !== null)
 }
 
 </script>
@@ -54,27 +63,41 @@ async function updateCharacter(field, value) {
            hover:bg-darkred-gray relative overflow-hidden group"
             :class="selected_character.id === 'empty' ? 'bg-darkred-gray text-darkred-light' : 'bg-darkred-light'" />
     </div>
-    <div v-if="!state.isLoading" class="grid grid-flow-col-dense grid-rows-3">
-        <!-- <TextFieldEditor placeholder="Картинка(temp заглушка)" fieldName="image" :value="selected_character.image"
-            :callback="updateCharacter" class="row-span-2"/> -->
-        <TextFieldEditor placeholder="Ім'я" fieldName="name" :value="selected_character.name"
-            :callback="updateCharacter" class="w-fit" />
-        <TextFieldEditor placeholder="Стать" fieldName="gender" :value="selected_character.gender"
-            :callback="updateCharacter" class="w-fit" />
-        <TextFieldEditor placeholder="Клас" fieldName="class" :value="selected_character.class"
-            :callback="updateCharacter" class="w-fit" />
-        <TextFieldEditor placeholder="Раса" fieldName="race" :value="selected_character.race"
-            :callback="updateCharacter" class="w-fit" />
-        <TextFieldEditor placeholder="Рівень" fieldName="level" :value="selected_character.level"
-            :callback="updateCharacter" type="number" class="w-fit" />
-        <TextFieldEditor placeholder="Очки перків" fieldName="perkPoints" :value="selected_character.perkPoints"
-            :callback="updateCharacter" type="number" class="w-fit" />
-        <TextFieldEditor placeholder="Досвід" fieldName="experience" :value="selected_character.experience"
-            :callback="updateCharacter" type="number" class="w-fit" />
-        <TextFieldEditor placeholder="К-сть досвіду для рівня" fieldName="experienceToLevelUp" :value="selected_character.experienceToLevelUp"
-            :callback="updateCharacter" type="number" class="w-fit" />
-    </div>
 
+    <section v-if="!state.isLoading" class="m-4 grid grid-cols-[25%_75%] gap-2">
+
+        <div>
+            <ImageEditor class="w-full mt-4" />
+            <TextAreaEditor fieldName="playerNotes" name="Записки гравця" :value="selected_character.playerNotes"
+                :callback="updateCharacter" />
+            <TextAreaEditor fieldName="adminNotes" name="Записки майстра" :value="selected_character.adminNotes"
+                :callback="updateCharacter" />
+        </div>
+
+        <div class="grid grid-cols-2 auto-rows-min gap-x-4">
+
+            <SingleFieldEditor placeholder="Ім'я" fieldName="name" :value="selected_character.name"
+                :callback="updateCharacter" class="w-full" />
+            <SingleFieldEditor placeholder="Стать" fieldName="gender" :value="selected_character.gender"
+                :callback="updateCharacter" class="w-full" />
+            <SingleFieldEditor placeholder="Клас" fieldName="class" :value="selected_character.class"
+                :callback="updateCharacter" class="w-full" />
+            <SingleFieldEditor placeholder="Раса" fieldName="race" :value="selected_character.race"
+                :callback="updateCharacter" class="w-full" />
+            <SingleFieldEditor placeholder="Рівень" fieldName="level" :value="selected_character.level"
+                :callback="updateCharacter" type="number" class="w-full" />
+            <SingleFieldEditor placeholder="Очки перків" fieldName="perkPoints" :value="selected_character.perkPoints"
+                :callback="updateCharacter" type="number" class="w-full" />
+            <SingleFieldEditor placeholder="Досвід" fieldName="experience" :value="selected_character.experience"
+                :callback="updateCharacter" type="number" class="w-full" />
+            <SingleFieldEditor placeholder="К-сть досвіду для рівня" fieldName="experienceToLevelUp"
+                :value="selected_character.experienceToLevelUp" :callback="updateCharacter" type="number"
+                class="w-full" />
+        </div>
+
+    </section>
+
+    <ObjectFieldsEditor :name="'CustomFields'"/>
 
     <div v-if="state.isLoading" class="text-center py-6">
         <Loader />

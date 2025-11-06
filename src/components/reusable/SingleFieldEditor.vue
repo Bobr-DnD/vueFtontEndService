@@ -35,20 +35,20 @@ const saveField = () => {
 </script>
 
 <template>
-    <div class="grid grid-cols-[max-content_40px_40px] items-center justify-items-start justify-start m-2 space-x-2">
-        <form @submit.prevent class="flex items-center space-x-2">
-            <label :for="props.fieldName" class="p-1 text-xl font-gothic">{{ props.placeholder }}:</label>
+    <div class="grid grid-cols-[1fr_40px_40px] items-center justify-items-start justify-start p-2 space-x-2">
+        <form @submit.prevent class="flex flex-col items-start justify-center w-full">
+            <label :for="props.fieldName" class="text-lg font-gothic">{{ props.placeholder }}:</label>
             <input :ref="'inputEl'" :id="props.fieldName" :type="props.type" :value="editableValue" :disabled="fieldReadonly" :name="props.fieldName"
-                :placeholder="props.placeholder" class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark
+                :placeholder="props.placeholder" class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full
                disabled:bg-darkred-dark_gray disabled:text-darkred-light/60 transition-all duration-200" />
         </form>
 
-        <PencilSquareIcon class="w-8 h-8 hover:cursor-pointer transition-colors"
+        <PencilSquareIcon class="w-8 h-8 hover:cursor-pointer transition-colors self-end mb-1"
             :class="fieldReadonly ? 'text-darkred-dark hover:text-greenish-mid' : 'text-greenish-mid'"
             @click="editField" />
 
         <CheckCircleIcon v-if="!fieldReadonly"
-            class="w-8 h-8 hover:cursor-pointer text-greenish-mid transition-colors hover:text-greenish-light"
+            class="w-8 h-8 hover:cursor-pointer text-greenish-mid transition-colors hover:text-greenish-light self-end mb-1"
             @click="saveField" />
     </div>
 </template>
