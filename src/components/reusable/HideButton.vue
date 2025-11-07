@@ -1,7 +1,6 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { ChevronDoubleUpIcon } from '@heroicons/vue/24/solid'
-import HideTittle from './HideTittle.vue';
 
 const props = defineProps({
     textShow : {
@@ -21,8 +20,12 @@ const props = defineProps({
 })
 
 const text = ref(props.textShow)
-if (props.hidden) text.value = props.textHide
-else text.value = props.textShow
+
+watch(() => props.hidden, (newValue) => {
+    if (newValue) text.value = props.textShow
+    else text.value = props.textHide
+})
+
 </script>
 
 <template>
@@ -34,7 +37,5 @@ else text.value = props.textShow
         {{ text }}
         <ChevronDoubleUpIcon class="w-8 h-8 transition-transform duration-300"
             :class="props.hidden ? 'rotate-180' : 'rotate-0'" />
-
-            <h1>{{ hidden }}</h1>
     </button>
 </template>

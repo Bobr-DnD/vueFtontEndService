@@ -1,20 +1,14 @@
 <script setup>
-import { ref } from 'vue';
-import HideButton from '../reusable/HideButton.vue';
-import { FlagIcon } from '@heroicons/vue/24/solid'
 
 const props = defineProps({
-    quest: {type: Object, required: true}
+    quests: {type: Object, required: true}
 })
 
-let quest_hidden = ref(true)
 
 </script>
 
 <template>
-    <HideButton textShow="Показати особистий квест" textHide="Приховати особистий квест" v-model:hidden="quest_hidden" :mainIcon="FlagIcon"/>
-
-    <div v-if="!quest_hidden" class="border-2 rounded-lg border-darkred-dark_gray p-1">
+    <div class="border-2 rounded-lg border-darkred-dark_gray p-1">
 
         <div class="w-full text-center text-2xl font-semibold font-gothic">
             {{ props.quest.name }}

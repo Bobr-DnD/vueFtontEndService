@@ -42,3 +42,11 @@ export function useItem(entityArray, effectsArray, entityEffects, sessionMove, e
     deathTime: sessionMove + effect.duration
   })
 }
+
+export function checkObjectFieldExisting(field) {
+    return (field !== undefined && field !== null)
+}
+
+export function checkArrayFieldExisting(field) {
+    return field.length
+}

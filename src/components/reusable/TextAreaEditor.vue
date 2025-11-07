@@ -24,7 +24,8 @@ onMounted(() => {
 })
 
 watch(() => props.value, (newValue) => {
-    editableValue.value = newValue
+    editableValue.value = newValue || ''
+    fieldReadonly.value = true
 })
 
 const editField = async () => {

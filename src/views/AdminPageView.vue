@@ -2,7 +2,10 @@
 import { onMounted, reactive, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { asyncHandler } from '/utils/asyncHandler';
-import { removeRow, addRow } from '/utils/entityHelper'
+import { removeRow } from '/utils/entityHelper'
+import { checkObjectFieldExisting} from '/utils/entityHelper'
+import { toEffectObjectField } from '/utils/objects.dto.js';
+
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import FormAddSubtract from '@/components/reusable/FormAddSubtract.vue';
 import RepositoryFactory from '@http/RepositoryFactory'
@@ -11,7 +14,6 @@ import characterCard from '@/components/reusable/CharacterCard.vue';
 import ButtonGrayAnimated from '@/components/reusable/ButtonGrayAnimated.vue';
 import EffectsTableAdmin from '@/components/admin-page components/EffectsTableAdmin.vue';
 import CustomFieldsTable from '@/components/reusable/CustomFieldsTable.vue';
-import { toEffectObjectField } from '/utils/objects.dto.js';
 
 const sessionId = useRoute().params.sessionId
 const state = reactive({
@@ -48,14 +50,6 @@ function getEffects(characters) {
       })
     })
   })
-}
-
-function checkObjectFieldExisting(field) {
-  return (field !== undefined && field !== null)
-}
-
-function checkArrayFieldExisting(field) {
-  return field.length
 }
 
 async function updateSession() {

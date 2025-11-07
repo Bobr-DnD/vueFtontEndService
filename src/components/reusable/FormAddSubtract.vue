@@ -48,26 +48,28 @@ function changeValue(operation) {
 </script>
 
 <template>
-    <div class="flex flex-wrap items-center justify-start mb-2 border rounded-lg">
+    <div class="grid grid-cols-[1fr_104px] font-gothic">
 
-        <div class="p-2 w-fit text-darkred-dark font-semibold text-md">{{ entity_name.toUpperCase() }}: {{ value }}
-        </div>
+        <section>
 
-        <form @submit.prevent class="flex grow justify-end items-center p-4 font-univers rounded-lg">
-            <input :id="entity_name" type="number" :value="default_number" class="no-arrows bg-darkred-dark_gray max-w-16 text-darkred-light text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
+            <form @submit.prevent class="flex flex-col items-start justify-center w-full p-2 font-gothic rounded-lg">
+                <label :for="entity_name" class="w-full text-darkred-dark font-semibold text-lg tracking-wide">{{ entity_name.toUpperCase() }}: {{ value }}</label>
+                <input :id="entity_name" type="number" :value="default_number" class="no-arrows h-11 bg-darkred-dark_gray w-full text-darkred-light text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
            focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
-        </form>
+            </form>
 
-        <section class="flex items-center justify-end">
+        </section>
 
-            <button class="p-2">
+        <section class="flex items-center justify-center gap-2 self-end py-2 pr-2">
+
+            <button class="">
                 <PlusIcon @click="changeValue('plus')"
-                    class="w-10 h-10 p-2 border-2 bg-darkred-dark text-darkred-light border-darkred-red rounded-lg" />
+                    class="w-11 h-11 p-2 border-2 bg-darkred-dark text-darkred-light border-darkred-red rounded-lg" />
             </button>
 
-            <button class="p-2">
+            <button class="">
                 <MinusIcon @click="changeValue('minus')"
-                    class="w-10 h-10 p-2 border-2 bg-darkred-dark text-darkred-light border-darkred-red rounded-lg" />
+                    class="w-11 h-11 p-2 border-2 bg-darkred-dark text-darkred-light border-darkred-red rounded-lg" />
             </button>
 
         </section>

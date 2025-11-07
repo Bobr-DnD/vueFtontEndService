@@ -2,10 +2,12 @@
 import { reactive, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import Loader from 'vue-spinner/src/SyncLoader.vue'
-import { CheckBadgeIcon, ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, ChartBarIcon } from '@heroicons/vue/24/solid'
+import { CheckBadgeIcon, ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, ChartBarIcon, SparklesIcon, FlagIcon, CurrencyDollarIcon } from '@heroicons/vue/24/solid'
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
+import { checkArrayFieldExisting, checkObjectFieldExisting } from '/utils/entityHelper'
+import { toCustomFieldObjectField } from '/utils/objects.dto';
 
 import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaion.vue';
 import WeaponRow from '@/components/character-page components/WeaponRow.vue';
@@ -22,6 +24,8 @@ import Experience from '@/components/character-page components/Experience.vue';
 import CurrencyTable from '@/components/character-page components/CurrencyTable.vue';
 import HideTittle from '@/components/reusable/HideTittle.vue';
 import HideButton from '@/components/reusable/HideButton.vue';
+import PlusButton from '@/components/reusable/PlusButton.vue';
+import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
 
 import HorizontalNumberPicker from '@/components/reusable/HorizontalNumberPicker.vue';
 import ProgressiveBar from '@/components/reusable/ProgressiveBar.vue';
@@ -33,7 +37,11 @@ const state = reactive({
     connected: false
 })
 
+let effects_hidden = ref(true)
+let quests_hidden = ref(true)
+let currency_hidden = ref(true)
 let custom_hidden = ref(true)
+let custom_modal_hidden = ref(true)
 let perks_hidden = ref(Boolean)
 let weapons_hidden = ref(true)
 let armors_hidden = ref(true)
@@ -67,13 +75,7 @@ onMounted(async () => {
 
 state.character.perks !== undefined ? perks_hidden.value = false : perks_hidden.value = true
 
-function checkObjectFieldExisting(field) {
-    return (field !== undefined && field !== null)
-}
 
-function checkArrayFieldExisting(field) {
-    return field.length
-}
 
 async function updateCharacter() {
     const [res, err] = await asyncHandler(
@@ -121,6 +123,11 @@ async function updateCurrency(currency) {
     state.session = await updateSession()
 }
 
+async function addCustomField(name, value) {
+    Object.assign(state.character.customFields, toCustomFieldObjectField({ name, value }))
+    state.character = await updateCharacter()
+}
+
 async function updateCustomFields(fields) {
     state.character.customFields = fields
     state.character = await updateCharacter()
@@ -159,19 +166,51 @@ async function updateInventory() {
 
         <section class="grid grid-cols-1 gap-2 w-full mx-auto my-2">
 
-            <EffectsTable v-if="checkArrayFieldExisting(state.character.effects)" :effects="state.character.effects" />
 
-            <QuestsTable v-if="checkObjectFieldExisting(state.character.quest)" :quest="state.character.quest" />
-            <div>
-                <HideButton textShow="Показати додаткові характеристики" textHide="Приховати додаткові характеристики"
-                    :hidden="custom_hidden" :mainIcon="ChartBarIcon" @click="custom_hidden = !custom_hidden" />
-                <CustomFieldsTable v-if="checkObjectFieldExisting(state.character.customFields) && !custom_hidden"
-                    :fields="state.character.customFields" :callback="updateCustomFields" />
+            <div class="">
+                <HideButton v-if="checkArrayFieldExisting(state.character.effects)" class="w-full mb-2"
+                    textShow="Показати ефекти" textHide="Приховати ефекти" :hidden="effects_hidden"
+                    :mainIcon="SparklesIcon" @click="effects_hidden = !effects_hidden" />
+                <EffectsTable v-if="checkArrayFieldExisting(state.character.effects) && !effects_hidden"
+                    :effects="state.character.effects" />
+            </div>
+
+            <div class="">
+                <HideButton v-if="checkObjectFieldExisting(state.character.quest)" class="w-full"
+                    textShow="Показати особистий квест" textHide="Приховати особистий квест" :hidden="quests_hidden"
+                    :mainIcon="FlagIcon" @click="quests_hidden = !quests_hidden" />
+                <QuestsTable v-if="checkObjectFieldExisting(state.character.quest) && !quests_hidden"
+                    :quests="state.character.quests" />
             </div>
 
 
-            <CurrencyTable v-if="checkObjectFieldExisting(state.session.currency)" :currency="state.session.currency"
-                :callback="updateCurrency" />
+            <div class="">
+                <HideButton v-if="checkObjectFieldExisting(state.character.customFields)" class="w-full"
+                    textShow="Показати додаткові характеристики" textHide="Приховати додаткові характеристики"
+                    :hidden="custom_hidden" :mainIcon="ChartBarIcon" @click="custom_hidden = !custom_hidden" />
+
+                <CustomFieldsTable v-if="checkObjectFieldExisting(state.character.customFields) && !custom_hidden"
+                    :fields="state.character.customFields" :callback="updateCustomFields" />
+
+                <PlusButton v-if="checkObjectFieldExisting(state.character.customFields) && !custom_hidden" @click="custom_modal_hidden = !custom_modal_hidden" class="w-16 mx-auto text-center border-4 border-darkred-dark rounded-lg 
+           transition-all duration-300 ease-out hover:cursor-pointer
+           bg-gradient-to-br from-darkred-dark to-darkred-light
+           hover:from-darkred-red hover:to-darkred-dark relative overflow-hidden group" />
+
+                <ObjectFieldsEditor v-if="!custom_modal_hidden && !custom_hidden" :name="'CustomFields_'"
+                    :fields="state.character.customFields" :callback="addCustomField" />
+
+            </div>
+
+            <div class="">
+                <HideButton v-if="checkObjectFieldExisting(state.session.currency)" class="w-full"
+                    textShow="Показати баланс" textHide="Приховати баланс" :hidden="currency_hidden"
+                    :mainIcon="CurrencyDollarIcon" @click="currency_hidden = !currency_hidden" />
+                <CurrencyTable v-if="checkObjectFieldExisting(state.session.currency) && !currency_hidden"
+                    :currency="state.session.currency" :callback="updateCurrency" />
+            </div>
+
+
         </section>
     </div>
 
