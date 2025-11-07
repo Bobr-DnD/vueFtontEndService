@@ -93,11 +93,12 @@ function checkObjectFieldExisting(field){
             <SingleFieldEditor placeholder="К-сть досвіду для рівня" fieldName="experienceToLevelUp"
                 :value="selected_character.experienceToLevelUp" :callback="updateCharacter" type="number"
                 class="w-full" />
+            <ObjectFieldsEditor :name="'CustomFields'"/>
         </div>
 
     </section>
 
-    <ObjectFieldsEditor :name="'CustomFields'"/>
+    
 
     <div v-if="state.isLoading" class="text-center py-6">
         <Loader />
