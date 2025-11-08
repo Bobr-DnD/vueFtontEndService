@@ -13,8 +13,8 @@ import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
 import ProgressiveBar from '@/components/reusable/ProgressiveBar.vue';
 import HorizontalNumberPicker from '@/components/reusable/HorizontalNumberPicker.vue';
 import EffectsTableAdmin from '@/components/admin-page components/EffectsTableAdmin.vue';
-import { CheckBadgeIcon, ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon} from '@heroicons/vue/24/solid'
-import HideTittle from '@/components/reusable/HideTittle.vue';
+import { ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon } from '@heroicons/vue/24/solid'
+import TittleRed from '@/components/reusable/TittleRed.vue';
 import WeaponRow from '@/components/character-page components/WeaponRow.vue';
 import ArmorRow from '@/components/character-page components/ArmorRow.vue';
 import MedsRow from '@/components/character-page components/MedsRow.vue';
@@ -32,7 +32,7 @@ const state = reactive({
 })
 
 const sessionId = useRoute().params.sessionId
-let selected_character = ref({ id: 'empty' })
+let selected_character = ref({ id: 'empty' }) //TODO create via dto
 const activeTab = ref('base')
 
 const tabs = [
@@ -40,7 +40,6 @@ const tabs = [
     { id: 'main', label: 'Головні характеристики' },
     { id: 'health', label: "Здоров'я" },
     { id: 'inventory', label: 'Інвентар' },
-    { id: 'effects', label: 'Ефекти' },
     { id: 'image', label: 'Картинка' }
 ]
 
@@ -59,6 +58,8 @@ onMounted(async () => {
 
 function selectCharacter(character) {
     selected_character.value = character
+    console.log(selected_character.value.weapons);
+
 }
 
 async function updateCharacter(field, value) {
@@ -99,24 +100,30 @@ async function updateHealthFields(value, title) {
 }
 
 async function addEffect(character_id, effect_id) {
-  const effect = state.session.effects.find(e => e.id === effect_id)
-  
-  state.session.characters.forEach(ch => {
-    
-    if (ch.id === character_id){
-      ch.effects.push({id:effect_id, timeLeft:effect.duration, effect: effect})
-      //TODO add dto check and update on api
-    }
-  })
+    const effect = state.session.effects.find(e => e.id === effect_id)
+
+    state.session.characters.forEach(ch => {
+
+        if (ch.id === character_id) {
+            ch.effects.push({ id: effect_id, timeLeft: effect.duration, effect: effect })
+            //TODO add dto check and update on api
+        }
+    })
 
 }
 async function removeEffect(character_id, effect_id) {
-  state.session.characters.forEach(ch => {
-    if (ch.id === character_id){
-      removeRow(ch.effects, effect_id)
-      //TODO add update on api
-    }
-  })
+    state.session.characters.forEach(ch => {
+        if (ch.id === character_id) {
+            removeRow(ch.effects, effect_id)
+            //TODO add update on api
+        }
+    })
+}
+
+async function updateInventory() {
+    console.log(selected_character.value);
+
+    //selected_character.value = await updateCharacter()
 }
 
 </script>
@@ -149,6 +156,16 @@ async function removeEffect(character_id, effect_id) {
 
         <div :id="tabs[0].id" v-if="activeTab === tabs[0].id" class="grid grid-cols-2 auto-rows-min gap-x-4">
 
+            <ImageEditor class="w-full" />
+
+            <div>
+                <TextAreaEditor fieldName="playerNotes" name="Записки гравця" :value="selected_character.playerNotes"
+                    :callback="updateCharacter" />
+                <TextAreaEditor fieldName="adminNotes" name="Записки майстра" :value="selected_character.adminNotes"
+                    :callback="updateCharacter" />
+            </div>
+
+
             <SingleFieldEditor placeholder="Ім'я" fieldName="name" :value="selected_character.name"
                 :callback="updateCharacter" class="w-full" />
             <SingleFieldEditor placeholder="Стать" fieldName="gender" :value="selected_character.gender"
@@ -167,15 +184,10 @@ async function removeEffect(character_id, effect_id) {
                 :value="selected_character.experienceToLevelUp" :callback="updateCharacter" type="number"
                 class="w-full" />
 
-            <TextAreaEditor fieldName="playerNotes" name="Записки гравця" :value="selected_character.playerNotes"
-                :callback="updateCharacter" />
-            <TextAreaEditor fieldName="adminNotes" name="Записки майстра" :value="selected_character.adminNotes"
-                :callback="updateCharacter" />
-
-
         </div>
 
         <div :id="tabs[1].id" v-if="activeTab === tabs[1].id" class="grid grid-cols-2 auto-rows-min gap-x-4">
+
             <div class="mt-6 h-min p-2 border-2 rounded-md">
                 <h1 class="font-gothic font-medium text-2xl">Список кастомних полей:</h1>
                 <CustomFieldsTable v-if="checkObjectFieldExisting(selected_character.customFields)"
@@ -194,6 +206,7 @@ async function removeEffect(character_id, effect_id) {
                 <ObjectFieldsEditor name="Characteristics_" :fields="selected_character.characteristics"
                     :callback="addCharacterCharacteristic" />
             </div>
+
         </div>
 
         <div :id="tabs[2].id" v-if="activeTab === tabs[2].id" class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-2">
@@ -210,54 +223,43 @@ async function removeEffect(character_id, effect_id) {
         </div>
 
         <div :id="tabs[3].id" v-if="activeTab === tabs[3].id" class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-2">
-            <section>
-            <HideTittle text="Навички" :mainIcon="CheckBadgeIcon" v-model:hidden="perks_hidden" />
-            <div :class="['grid grid-cols-1 w-full', perks_hidden ? 'hidden' : '']">
-                <PerkRow v-if="state.session.perks" :perks_all="state.session.perks"
-                    v-model:perks="selected_character.perks" v-model:perkPoints="selected_character.perkPoints" />
-            </div>
-        </section>
 
-        <section>
-            <HideTittle text="Зброя" :mainIcon="BoltIcon" v-model:hidden="weapons_hidden" />
-            <div :class="['grid grid-cols-1 w-full', weapons_hidden ? 'hidden' : '']">
-                <WeaponRow :weapons_all="state.session.weapons" :weapons="selected_character.weapons"
-                    :callback="updateInventory" />
-            </div>
-        </section>
+            <section class="border rounded-lg p-2">
+                <TittleRed text="Зброя" :mainIcon="BoltIcon" />
+                <div class="grid grid-cols-1 w-full">
+                    <WeaponRow :weapons_all="state.session.weapons" :weapons="selected_character.weapons"
+                        :callback="updateInventory" />
+                </div>
+            </section>
 
-        <section>
-            <HideTittle text="Броня" :mainIcon="ShieldCheckIcon" v-model:hidden="armors_hidden" />
-            <div :class="['grid grid-cols-1 w-full', armors_hidden ? 'hidden' : '']">
-                <ArmorRow :armors_all="state.session.armors" :armors="selected_character.armor"
-                    :callback="updateInventory" />
-            </div>
-        </section>
+            <section class="border rounded-lg p-2">
+                <TittleRed text="Броня" :mainIcon="ShieldCheckIcon" />
+                <div class="grid grid-cols-1 w-full">
+                    <ArmorRow :armors_all="state.session.armors" :armors="selected_character.armor"
+                        :callback="updateInventory" />
+                </div>
+            </section>
 
-        <section>
-            <HideTittle text="Медикаменти" :mainIcon="BeakerIcon" v-model:hidden="meds_hidden" />
-            <div :class="['grid grid-cols-1 w-full', meds_hidden ? 'hidden' : '']">
-                <MedsRow :medicines_all="state.session.medicines" :medicines="selected_character.medicines"
-                    :effects_all="state.session.effects" :effects="state.character.effects" :move="state.session.move"
-                    :callback="updateInventory" />
-            </div>
-        </section>
+            <section class="border rounded-lg p-2">
+                <TittleRed text="Медикаменти" :mainIcon="BeakerIcon" />
+                <div class="grid grid-cols-1 w-full">
+                    <MedsRow :medicines_all="state.session.medicines" :medicines="selected_character.medicines"
+                        :effects_all="state.session.effects" :effects="selected_character.effects"
+                        :move="state.session.move" :callback="updateInventory" />
+                </div>
+            </section>
 
-        <section>
-            <HideTittle text="Інвентар" :mainIcon="ArchiveBoxIcon" v-model:hidden="inventories_hidden" />
-            <div :class="['grid grid-cols-1 w-full', inventories_hidden ? 'hidden' : '']">
-                <InventoryRow :inventory_all="state.session.inventories" :inventory="selected_character.inventory"
-                    :callback="updateInventory" />
-            </div>
-        </section>
+            <section class="border rounded-lg p-2">
+                <TittleRed text="Інвентар" :mainIcon="ArchiveBoxIcon" />
+                <div class="grid grid-cols-1 w-ful">
+                    <InventoryRow :inventory_all="state.session.inventories" :inventory="selected_character.inventory"
+                        :callback="updateInventory" />
+                </div>
+            </section>
+
         </div>
 
-        <div :id="tabs[4].id" v-if="activeTab === tabs[4].id" class="">
-            <EffectsTableAdmin :characters="state.session.characters" :effects="state.session.effects"
-                :callback-add="addEffect" :callback-remove="removeEffect" />
-        </div>
-
-        <div :id="tabs[5].id" v-if="activeTab === tabs[5].id" class="flex justify-center items-start">
+        <div :id="tabs[4].id" v-if="activeTab === tabs[4].id" class="flex justify-center items-start">
             <ImageEditor class="w-auto" />
         </div>
 

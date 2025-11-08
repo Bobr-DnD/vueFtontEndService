@@ -1,6 +1,7 @@
 <script setup>
 import { ref, nextTick, watch, onMounted } from 'vue'
-import { PencilSquareIcon, CheckCircleIcon } from '@heroicons/vue/24/solid'
+import { PencilIcon } from '@heroicons/vue/24/solid'
+import { CheckCircleIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
     fieldName: { type: String, required: true },
@@ -44,23 +45,26 @@ const saveField = () => {
 
 
 <template>
-    <div class="grid grid-cols-[1fr_40px_40px] items-center justify-items-start justify-start p-2 space-x-2">
+    <div class="grid grid-cols-[1fr_44px_44px] auto-rows-min gap-2 items-center justify-items-start justify-start p-2">
+        
         <form @submit.prevent class="flex flex-col items-start justify-center w-full">
             <label :for="props.fieldName" class="text-lg font-gothic">{{ props.name }}:</label>
             <textarea :ref="'areaEl'" :name="props.fieldName" :id="props.fieldName" :value="editableValue" :disabled="fieldReadonly"
-                class="w-full min-h-24 max-h-80 overflow-y-hidden resize-none
+                class="w-full h-fit max-h-80 overflow-y-hidden resize-none
                 p-3 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light
                 font-univers text-base transition-all duration-300 ease-in-out focus:outline-none focus:ring-2
                 focus:ring-darkred-red focus:border-darkred-red placeholder:text-darkred-light/60
                 hover:border-darkred-red/70" placeholder="Введіть текст..."></textarea>
         </form>
 
-        <PencilSquareIcon class="w-8 h-8 hover:cursor-pointer transition-colors self-start mb-1"
-            :class="fieldReadonly ? 'text-darkred-dark hover:text-greenish-mid' : 'text-greenish-mid'"
-            @click="editField" />
+        <div
+            class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl">
+            <PencilIcon class="w-4 h-4 text-darkred-light hover:cursor-pointer" @click="editField" />
+        </div>
 
-        <CheckCircleIcon v-if="!fieldReadonly"
-            class="w-8 h-8 hover:cursor-pointer text-greenish-mid transition-colors hover:text-greenish-light self-start mb-1"
-            @click="saveField" />
+        <div v-if="!fieldReadonly"
+            class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl">
+            <CheckCircleIcon class="w-7 h-7 hover:cursor-pointer text-darkred-light" @click="saveField" />
+        </div>
     </div>
 </template>

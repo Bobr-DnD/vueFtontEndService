@@ -15,7 +15,7 @@ function addRow() {
     perkPoints.value--;
 }
 </script>
-
+<!-- TODO REFACTOR -->
 <template>
     <div v-for="perk, index in perks" class="grid grid-cols-1 p-2 gap-2 items-center justify-items-start font-gothic
             bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2"

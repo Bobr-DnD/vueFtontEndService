@@ -226,7 +226,7 @@ async function updateCharacterNotes(field, value){
         <section>
             <HideTittle text="Навички" :mainIcon="CheckBadgeIcon" v-model:hidden="perks_hidden" />
             <div :class="['grid grid-cols-1 w-full', perks_hidden ? 'hidden' : '']">
-                <PerkRow v-if="state.session.perks" :perks_all="state.session.perks"
+                <PerkRow v-if="state.session.perks" :perks_all="state.session.perks" 
                     v-model:perks="state.character.perks" v-model:perkPoints="state.character.perkPoints" />
             </div>
         </section>
