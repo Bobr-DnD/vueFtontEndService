@@ -26,6 +26,7 @@ import HideTittle from '@/components/reusable/HideTittle.vue';
 import HideButton from '@/components/reusable/HideButton.vue';
 import PlusButton from '@/components/reusable/PlusButton.vue';
 import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
+import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
 
 import HorizontalNumberPicker from '@/components/reusable/HorizontalNumberPicker.vue';
 import ProgressiveBar from '@/components/reusable/ProgressiveBar.vue';
@@ -136,6 +137,12 @@ async function updateCustomFields(fields) {
 async function updateInventory() {
     state.character = await updateCharacter()
 }
+
+async function updateCharacterNotes(field, value){
+    state.character[field] = value;
+    state.character = await updateCharacter()
+}
+
 </script>
 
 <template>
@@ -258,6 +265,11 @@ async function updateInventory() {
         </section>
 
 
+    </section>
+
+    <section class="mx-auto min-w-80 max-w-96">
+        <TextAreaEditor fieldName="playerNotes" name="Записки гравця" :value="state.character.playerNotes"
+                :callback="updateCharacterNotes" />
     </section>
 
     <div v-if="state.isLoading" class="text-center py-6">
