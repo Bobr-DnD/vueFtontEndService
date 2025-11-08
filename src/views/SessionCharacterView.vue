@@ -210,7 +210,46 @@ async function removeEffect(character_id, effect_id) {
         </div>
 
         <div :id="tabs[3].id" v-if="activeTab === tabs[3].id" class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-2">
-            
+            <section>
+            <HideTittle text="Навички" :mainIcon="CheckBadgeIcon" v-model:hidden="perks_hidden" />
+            <div :class="['grid grid-cols-1 w-full', perks_hidden ? 'hidden' : '']">
+                <PerkRow v-if="state.session.perks" :perks_all="state.session.perks"
+                    v-model:perks="selected_character.perks" v-model:perkPoints="selected_character.perkPoints" />
+            </div>
+        </section>
+
+        <section>
+            <HideTittle text="Зброя" :mainIcon="BoltIcon" v-model:hidden="weapons_hidden" />
+            <div :class="['grid grid-cols-1 w-full', weapons_hidden ? 'hidden' : '']">
+                <WeaponRow :weapons_all="state.session.weapons" :weapons="selected_character.weapons"
+                    :callback="updateInventory" />
+            </div>
+        </section>
+
+        <section>
+            <HideTittle text="Броня" :mainIcon="ShieldCheckIcon" v-model:hidden="armors_hidden" />
+            <div :class="['grid grid-cols-1 w-full', armors_hidden ? 'hidden' : '']">
+                <ArmorRow :armors_all="state.session.armors" :armors="selected_character.armor"
+                    :callback="updateInventory" />
+            </div>
+        </section>
+
+        <section>
+            <HideTittle text="Медикаменти" :mainIcon="BeakerIcon" v-model:hidden="meds_hidden" />
+            <div :class="['grid grid-cols-1 w-full', meds_hidden ? 'hidden' : '']">
+                <MedsRow :medicines_all="state.session.medicines" :medicines="selected_character.medicines"
+                    :effects_all="state.session.effects" :effects="state.character.effects" :move="state.session.move"
+                    :callback="updateInventory" />
+            </div>
+        </section>
+
+        <section>
+            <HideTittle text="Інвентар" :mainIcon="ArchiveBoxIcon" v-model:hidden="inventories_hidden" />
+            <div :class="['grid grid-cols-1 w-full', inventories_hidden ? 'hidden' : '']">
+                <InventoryRow :inventory_all="state.session.inventories" :inventory="selected_character.inventory"
+                    :callback="updateInventory" />
+            </div>
+        </section>
         </div>
 
         <div :id="tabs[4].id" v-if="activeTab === tabs[4].id" class="">
