@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue'
-import ApproveButton from './ApproveButton.vue'
+import ApproveButton from './Buttons/ApproveButton.vue'
 
 const props = defineProps({
     name: { type: String, required: true },

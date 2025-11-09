@@ -4,7 +4,8 @@ import { reactive, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
-import PlusButton from '@/components/reusable/PlusButton.vue'
+import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
+import PlusButton from '@/components/reusable/Buttons/PlusButton.vue'
 import SingleFieldEditor from '@/components/reusable/SingleFieldEditor.vue';
 import ImageEditor from '@/components/reusable/ImageEditor.vue';
 import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
@@ -12,9 +13,7 @@ import CustomFieldsTable from '@/components/reusable/CustomFieldsTable.vue';
 import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
 import ProgressiveBar from '@/components/reusable/ProgressiveBar.vue';
 import HorizontalNumberPicker from '@/components/reusable/HorizontalNumberPicker.vue';
-import EffectsTableAdmin from '@/components/admin-page components/EffectsTableAdmin.vue';
-import { ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon } from '@heroicons/vue/24/solid'
-import TittleRed from '@/components/reusable/TittleRed.vue';
+import { ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
 import WeaponRow from '@/components/character-page components/WeaponRow.vue';
 import ArmorRow from '@/components/character-page components/ArmorRow.vue';
 import MedsRow from '@/components/character-page components/MedsRow.vue';
@@ -24,7 +23,7 @@ import PerkRow from '@/components/character-page components/PerkRow.vue';
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
 import { checkObjectFieldExisting } from '/utils/entityHelper';
-import { toCustomFieldObjectField } from '/utils/objects.dto';
+import { toCustomFieldObjectField, toEmptyCharacterObject } from '/utils/objects.dto';
 
 const state = reactive({
     session: {},
@@ -32,15 +31,25 @@ const state = reactive({
 })
 
 const sessionId = useRoute().params.sessionId
-let selected_character = ref({ id: 'empty' }) //TODO create via dto
+let selected_character = ref(toEmptyCharacterObject({})) //TODO create via dto
+selected_character.value.id = 'empty'
+
 const activeTab = ref('base')
+const activeInventory = ref('')
 
 const tabs = [
     { id: 'base', label: 'Базові характеристики' },
     { id: 'main', label: 'Головні характеристики' },
     { id: 'health', label: "Здоров'я" },
-    { id: 'inventory', label: 'Інвентар' },
-    { id: 'image', label: 'Картинка' }
+    { id: 'inventory', label: 'Інвентар' }
+]
+
+const inventories = [
+    { id: 'weapon', label: 'Зброя', icon: BoltIcon },
+    { id: 'armor', label: 'Броня', icon: ShieldCheckIcon },
+    { id: 'medicine', label: 'Медикаметни', icon: BeakerIcon },
+    { id: 'inventory', label: 'Інвентар', icon: ArchiveBoxIcon },
+    { id: 'perk', label: 'Перки', icon: CheckBadgeIcon }
 ]
 
 onMounted(async () => {
@@ -57,9 +66,11 @@ onMounted(async () => {
 })
 
 function selectCharacter(character) {
-    selected_character.value = character
-    console.log(selected_character.value.weapons);
-
+    if (character.id === 'empty') {
+        selected_character.value = toEmptyCharacterObject({})
+        selected_character.value.id = 'empty'
+    }
+    else selected_character.value = character
 }
 
 async function updateCharacter(field, value) {
@@ -72,11 +83,7 @@ async function updateCharacterCharacteristic(fields) {
 }
 
 async function addCharacterCharacteristic(name, value) {
-    if (selected_character.value.characteristics) Object.assign(selected_character.value.characteristics, toCustomFieldObjectField({ name, value }))
-    else {
-        selected_character.value.characteristics = {} //TODO refactor later
-        Object.assign(selected_character.value.characteristics, toCustomFieldObjectField({ name, value }))
-    }
+    Object.assign(selected_character.value.characteristics, toCustomFieldObjectField({ name, value }))
 }
 
 async function updateCustomFields(fields) {
@@ -84,11 +91,9 @@ async function updateCustomFields(fields) {
 }
 
 async function addCustomField(name, value) {
-    if (selected_character.value.customFields) Object.assign(selected_character.value.customFields, toCustomFieldObjectField({ name, value }))
-    else {
-        selected_character.value.customFields = {} //TODO refactor later
-        Object.assign(selected_character.value.customFields, toCustomFieldObjectField({ name, value }))
-    }
+    console.log(selected_character.value.customFields);
+
+    Object.assign(selected_character.value.customFields, toCustomFieldObjectField({ name, value }))
 }
 
 async function updateHealthFields(value, title) {
@@ -99,31 +104,17 @@ async function updateHealthFields(value, title) {
     //selected_character.value = await updateCharacter() //TODO refactor update to dto
 }
 
-async function addEffect(character_id, effect_id) {
-    const effect = state.session.effects.find(e => e.id === effect_id)
-
-    state.session.characters.forEach(ch => {
-
-        if (ch.id === character_id) {
-            ch.effects.push({ id: effect_id, timeLeft: effect.duration, effect: effect })
-            //TODO add dto check and update on api
-        }
-    })
-
-}
-async function removeEffect(character_id, effect_id) {
-    state.session.characters.forEach(ch => {
-        if (ch.id === character_id) {
-            removeRow(ch.effects, effect_id)
-            //TODO add update on api
-        }
-    })
-}
-
 async function updateInventory() {
     console.log(selected_character.value);
 
     //selected_character.value = await updateCharacter()
+}
+
+async function addPerk(){
+    console.log(selected_character.value.perks);
+    
+    // state.character.perkPoints--;
+    // state.character = await updateCharacter()
 }
 
 </script>
@@ -134,27 +125,22 @@ async function updateInventory() {
     <MasterPageNavigation />
 
     <div v-if="!state.isLoading" class="flex items-center justify-center space-x-4 m-2">
-        <div class="p-2 border-4 border-darkred-dark_gray  rounded-lg text-3xl font-gothic hover:bg-darkred-gray hover:cursor-pointer transition-colors duration-200"
-            :class="selected_character.id === character.id ? 'bg-darkred-gray' : 'bg-darkred-light'"
-            v-for="character in state.session.characters" @click="selectCharacter(character)">{{ character.name }}</div>
+        <GraySelectorButton v-for="character in state.session.characters" @click="selectCharacter(character)"
+            :id="character.id" :label="character.name"
+            :active="selected_character.id === character.id ? true : false" />
         <PlusButton @click="selectCharacter({ id: 'empty' })" class="w-16 mx-auto text-center border-4 border-darkred-dark rounded-lg hover:cursor-pointer
            hover:bg-darkred-gray relative overflow-hidden group"
             :class="selected_character.id === 'empty' ? 'bg-darkred-gray text-darkred-light' : 'bg-darkred-light'" />
     </div>
 
-
-
     <section v-if="!state.isLoading" class="m-4 mr-8 grid grid-cols-[25%_75%] gap-2">
 
         <div class="p-4 w-full flex flex-col justify-start gap-2 font-gothic">
-            <button v-for="tab in tabs" :id="tab.id" @click="activeTab = tab.id"
-                :class="activeTab === tab.id ? 'bg-darkred-gray' : ''"
-                class="p-2 border-4 border-darkred-dark_gray  rounded-lg text-xl font-gothic hover:bg-darkred-gray hover:cursor-pointer transition-colors duration-200">
-                {{ tab.label }}
-            </button>
+            <GraySelectorButton v-for="tab in tabs" @click="activeTab = tab.id" :id="tab.id" :label="tab.label"
+                :active="activeTab === tab.id ? true : false" />
         </div>
 
-        <div :id="tabs[0].id" v-if="activeTab === tabs[0].id" class="grid grid-cols-2 auto-rows-min gap-x-4">
+        <div id="base" v-if="activeTab === 'base'" class="grid grid-cols-2 auto-rows-min gap-x-4">
 
             <ImageEditor class="w-full" />
 
@@ -186,7 +172,7 @@ async function updateInventory() {
 
         </div>
 
-        <div :id="tabs[1].id" v-if="activeTab === tabs[1].id" class="grid grid-cols-2 auto-rows-min gap-x-4">
+        <div id="main" v-if="activeTab === 'main'" class="grid grid-cols-2 auto-rows-min gap-x-4">
 
             <div class="mt-6 h-min p-2 border-2 rounded-md">
                 <h1 class="font-gothic font-medium text-2xl">Список кастомних полей:</h1>
@@ -209,7 +195,7 @@ async function updateInventory() {
 
         </div>
 
-        <div :id="tabs[2].id" v-if="activeTab === tabs[2].id" class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-2">
+        <div id="health" v-if="activeTab === 'health'" class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-2">
 
             <div v-for="h in selected_character.health">
                 <div class="p-1 grow">
@@ -222,26 +208,29 @@ async function updateInventory() {
 
         </div>
 
-        <div :id="tabs[3].id" v-if="activeTab === tabs[3].id" class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-2">
+        <div id="inventory" v-if="activeTab === 'inventory'" class="flex flex-col items-center gap-y-4">
 
-            <section class="border rounded-lg p-2">
-                <TittleRed text="Зброя" :mainIcon="BoltIcon" />
+            <section class="flex gap-2 self-start">
+                <GraySelectorButton v-for="inv in inventories" @click="activeInventory = inv.id" :id="inv.id"
+                    :label="inv.label" :active="activeInventory === inv.id ? true : false" />
+            </section>
+
+            <section id="weapon" v-if="activeInventory === 'weapon'" class="border rounded-lg p-2 w-[600px]">
                 <div class="grid grid-cols-1 w-full">
                     <WeaponRow :weapons_all="state.session.weapons" :weapons="selected_character.weapons"
                         :callback="updateInventory" />
                 </div>
             </section>
 
-            <section class="border rounded-lg p-2">
-                <TittleRed text="Броня" :mainIcon="ShieldCheckIcon" />
+            <section id="armor" v-if="activeInventory === 'armor'" class="border rounded-lg p-2 w-[600px]">
                 <div class="grid grid-cols-1 w-full">
                     <ArmorRow :armors_all="state.session.armors" :armors="selected_character.armor"
                         :callback="updateInventory" />
                 </div>
             </section>
 
-            <section class="border rounded-lg p-2">
-                <TittleRed text="Медикаменти" :mainIcon="BeakerIcon" />
+            <section id="medicine" v-if="activeInventory === 'medicine'" class="border rounded-lg p-2 w-[600px]">
+
                 <div class="grid grid-cols-1 w-full">
                     <MedsRow :medicines_all="state.session.medicines" :medicines="selected_character.medicines"
                         :effects_all="state.session.effects" :effects="selected_character.effects"
@@ -249,23 +238,23 @@ async function updateInventory() {
                 </div>
             </section>
 
-            <section class="border rounded-lg p-2">
-                <TittleRed text="Інвентар" :mainIcon="ArchiveBoxIcon" />
+            <section id="inventory" v-if="activeInventory === 'inventory'" class="border rounded-lg p-2 w-[600px]">
                 <div class="grid grid-cols-1 w-ful">
                     <InventoryRow :inventory_all="state.session.inventories" :inventory="selected_character.inventory"
                         :callback="updateInventory" />
                 </div>
             </section>
 
-        </div>
+            <section id="perk" v-if="activeInventory === 'perk'" class="border rounded-lg p-2 w-[600px]">
+                <div class="grid grid-cols-1 w-ful">
+                    <PerkRow v-if="state.session.perks" :perks_all="state.session.perks" 
+                    :perks="selected_character.perks" :perkPoints="1" :callback="addPerk" />
+                </div>
+            </section>
 
-        <div :id="tabs[4].id" v-if="activeTab === tabs[4].id" class="flex justify-center items-start">
-            <ImageEditor class="w-auto" />
         </div>
 
     </section>
-
-
 
     <div v-if="state.isLoading" class="text-center py-6">
         <Loader />

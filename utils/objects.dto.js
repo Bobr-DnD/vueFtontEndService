@@ -11,23 +11,23 @@ export function toCustomFieldObjectField(customField) {
   }
 }
 
-export function character(character) {
+export function toEmptyCharacterObject(character) {
   return {
-    name: character.name,
-    image: character.image,
-    gender: character.gender || null,
-    class: character.class || null,
-    race: character.race || null,
+    name: character.name || '',
+    image: character.image || '',
+    gender: character.gender || '',
+    class: character.class || '',
+    race: character.race || '',
     level: character.level || 0,
     experience: character.experience || 0,
-    experienceToLevelUp: character.experienceToLevelUp || 10,
+    experienceToLevelUp: character.experienceToLevelUp || 0,
     perkPoints: character.perkPoints || 0,
     health: character.health || [],
-    characteristics: character.characteristics || null,
-    customFiels: character.customFiels || null,
-    effects: character.effects || null,
-    adminNotes: character.adminNotes || null,
-    playerNotes: character.playerNotes || null,
+    characteristics: character.characteristics || {},
+    customFields: character.customFields || {},
+    effects: character.effects || [],
+    adminNotes: character.adminNotes || '',
+    playerNotes: character.playerNotes || '',
     session: character.session,
     quests: character.quests || [],
     weapons: character.weapons || [],

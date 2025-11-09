@@ -1,7 +1,7 @@
 <script setup>
 import { ref, nextTick, computed } from 'vue'
 import { groupById, removeRow, addRow } from '/utils/entityHelper'
-import DeleteButton from '../reusable/DeleteButton.vue'
+import DeleteButton from '../reusable/Buttons/DeleteButton.vue'
 
 const props = defineProps({
     weapons_all: {

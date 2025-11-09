@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import DeleteButton from '@/components/reusable/DeleteButton.vue';
+import DeleteButton from '@/components/reusable/Buttons/DeleteButton.vue';
 
 const props = defineProps({
     characters: {

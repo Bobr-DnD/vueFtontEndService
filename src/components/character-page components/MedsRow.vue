@@ -1,8 +1,8 @@
 <script setup>
 import { ref, nextTick, computed } from 'vue'
 import { groupById, removeRow, addRow, useItem } from '/utils/entityHelper'
-import DeleteButton from '../reusable/DeleteButton.vue'
-import ApproveButton from '../reusable/ApproveButton.vue'
+import DeleteButton from '../reusable/Buttons/DeleteButton.vue'
+import ApproveButton from '../reusable/Buttons/ApproveButton.vue'
 
 const props = defineProps({
     medicines_all: {
@@ -18,7 +18,7 @@ const props = defineProps({
         requied: true
     },
     effects: {
-        type: Array,
+        type: [Array, null],
         required: true
     },
     move: {

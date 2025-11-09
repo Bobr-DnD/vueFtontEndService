@@ -1,7 +1,7 @@
 <script setup>
 import FormAddSubtract from '@/components/reusable/FormAddSubtract.vue';
 import FormString from '@/components/reusable/FormString.vue';
-import DeleteButton from './DeleteButton.vue';
+import DeleteButton from './Buttons/DeleteButton.vue';
 
 const props = defineProps({
     fields: { type: Object, required: true },

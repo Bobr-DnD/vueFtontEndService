@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import ApproveButton from './ApproveButton.vue';
+import ApproveButton from './Buttons/ApproveButton.vue';
 
 let textEl = ref('')
 

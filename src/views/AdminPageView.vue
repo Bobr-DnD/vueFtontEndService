@@ -11,7 +11,7 @@ import FormAddSubtract from '@/components/reusable/FormAddSubtract.vue';
 import RepositoryFactory from '@http/RepositoryFactory'
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
 import characterCard from '@/components/reusable/CharacterCard.vue';
-import ButtonGrayAnimated from '@/components/reusable/ButtonGrayAnimated.vue';
+import ButtonGrayAnimated from '@/components/reusable/Buttons/ButtonGrayAnimated.vue';
 import EffectsTableAdmin from '@/components/admin-page components/EffectsTableAdmin.vue';
 import CustomFieldsTable from '@/components/reusable/CustomFieldsTable.vue';
 
