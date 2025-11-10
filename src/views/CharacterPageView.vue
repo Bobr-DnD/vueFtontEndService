@@ -272,7 +272,7 @@ async function updateCharacterNotes(field, value){
 
     </section>
 
-    <section class="mx-auto min-w-80 max-w-96">
+    <section v-if="!state.isLoading" class="mx-auto min-w-80 max-w-96">
         <TextAreaEditor fieldName="playerNotes" name="Записки гравця" :value="state.character.playerNotes"
                 :callback="updateCharacterNotes" />
     </section>
