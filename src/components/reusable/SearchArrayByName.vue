@@ -6,9 +6,18 @@ const props = defineProps({
     array: {
         type: Array,
         required: true
+    },
+    label: {
+        type: String,
+        required: true
+    },
+    callback: {
+        type: Function,
+        required: true
     }
 })
 
+const label = `🔍 Пошук ${props.label} ...`
 const searchQuery = ref('')
 
 const filteredArray = computed(() => {
@@ -25,7 +34,7 @@ const filteredArray = computed(() => {
     <div class="w-full flex flex-col items-center gap-4 p-4">
 
         <div class="w-full flex items-center gap-2">
-            <input v-model="searchQuery" type="text" placeholder="🔍 Пошук перку..." class="w-full p-3 rounded-md bg-fallout.blackish text-fallout.sand border-2 border-fallout.red
+            <input v-model="searchQuery" type="text" :placeholder="label" class="w-full p-3 rounded-md bg-fallout.blackish text-fallout.sand border-2 border-fallout.red
                font-gothic text-lg focus:outline-none focus:ring-2 focus:ring-fallout.red
                placeholder-fallout.sand/40 transition-all duration-200" />
             <button v-if="searchQuery" @click="searchQuery = ''"
@@ -34,7 +43,7 @@ const filteredArray = computed(() => {
             </button>
         </div>
 
-        <div v-if="filteredArray.length > 0" class="w-full grid grid-cols-1 grid-rows-2 gap-3">
+        <div v-if="filteredArray.length > 0" class="w-full grid grid-cols-1 gap-3 h-96 overflow-y-scroll">
             <div v-for="el in filteredArray" :key="el.id" class="grid grid-cols-[1fr_64px] p-2 gap-2 items-center justify-items-start font-gothic
             bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium">
                 <div>
@@ -46,7 +55,7 @@ const filteredArray = computed(() => {
                             class="text-orange-orange">Навичка</sup></div>
                     <div v-else class="p2 text-clip">{{ el.name }}</div>
                 </div>
-                <ApproveButton class="w-16 row-span-2" />
+                <ApproveButton @click="props.callback(el)" class="w-16 row-span-2" />
                 <div v-if="el.effect.description">{{ el.effect.description }}</div>
 
 

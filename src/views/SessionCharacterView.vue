@@ -19,6 +19,8 @@ import ArmorRow from '@/components/character-page components/ArmorRow.vue';
 import MedsRow from '@/components/character-page components/MedsRow.vue';
 import InventoryRow from '@/components/character-page components/InventoryRow.vue';
 import PerkRow from '@/components/character-page components/PerkRow.vue';
+import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
+import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
@@ -110,9 +112,9 @@ async function updateInventory() {
     //selected_character.value = await updateCharacter()
 }
 
-async function addPerk(){
+async function addPerk() {
     console.log(selected_character.value.perks);
-    
+
     // state.character.perkPoints--;
     // state.character = await updateCharacter()
 }
@@ -138,6 +140,8 @@ async function addPerk(){
         <div class="p-4 w-full flex flex-col justify-start gap-2 font-gothic">
             <GraySelectorButton v-for="tab in tabs" @click="activeTab = tab.id" :id="tab.id" :label="tab.label"
                 :active="activeTab === tab.id ? true : false" />
+            <AprroveButtonWithText class="w-full" text="Підтвердити" />
+            <RejectButtonWithText class="w-full" text="Відминити" />
         </div>
 
         <div id="base" v-if="activeTab === 'base'" class="grid grid-cols-2 auto-rows-min gap-x-4">
@@ -247,8 +251,8 @@ async function addPerk(){
 
             <section id="perk" v-if="activeInventory === 'perk'" class="border rounded-lg p-2 w-[600px]">
                 <div class="grid grid-cols-1 w-ful">
-                    <PerkRow v-if="state.session.perks" :perks_all="state.session.perks" 
-                    :perks="selected_character.perks" :perkPoints="1" :callback="addPerk" />
+                    <PerkRow v-if="state.session.perks" :perks_all="state.session.perks"
+                        :perks="selected_character.perks" :perkPoints="1" :callback="addPerk" />
                 </div>
             </section>
 

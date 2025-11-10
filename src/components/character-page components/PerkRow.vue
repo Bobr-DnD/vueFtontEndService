@@ -21,10 +21,9 @@ const props = defineProps({
     }
 })
 
-function addItem(event) {
-    addRow(props.perks_all, props.perks, event.target.value);
-    props.callback();
-    event.target.value = 'default';
+function addPerk(perk) {
+    addRow(props.perks_all, props.perks, perk.id);
+    //props.callback();
 }
 </script>
 <!-- TODO REFACTOR -->
@@ -44,9 +43,11 @@ function addItem(event) {
 
     </div>
 
-    <button>Додати Перк</button>
+    <button
+        class="p-2 bg-orange-orange text-darkred-light rounded-lg w-1/2 flex justify-self-center justify-center items-center">
+        Додати перки</button>
 
 
-    <SearchArrayByName :array="perks_all"/>
+    <SearchArrayByName :array="perks_all" label="перку" :callback="addPerk" />
 
 </template>
