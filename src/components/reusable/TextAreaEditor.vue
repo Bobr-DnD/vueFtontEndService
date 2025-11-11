@@ -14,15 +14,15 @@ const fieldReadonly = ref(true)
 let editableValue = ref(props.value)
 const areaEl = ref(null)
 
-onMounted(() => {
-  const el = document.getElementById(props.fieldName)
+const autoResize = () => {
+  const el = areaEl.value
   if (el) {
-    el.addEventListener('input', () => {
-      el.style.height = 'auto'
-      el.style.height = el.scrollHeight + 'px'
-    })
+    el.style.height = 'auto'
+    el.style.height = el.scrollHeight + 'px'
   }
-})
+}
+
+onMounted(autoResize)
 
 watch(() => props.value, (newValue) => {
     editableValue.value = newValue || ''
@@ -50,7 +50,7 @@ const saveField = () => {
         <form @submit.prevent class="flex flex-col items-start justify-center w-full">
             <label :for="props.fieldName" class="text-lg font-gothic">{{ props.name }}:</label>
             <textarea :ref="'areaEl'" :name="props.fieldName" :id="props.fieldName" :value="editableValue" :disabled="fieldReadonly"
-                class="w-full h-fit max-h-80 overflow-y-hidden resize-none
+                class="w-full h-fit overflow-y-hidden resize-none
                 p-3 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light
                 font-univers text-base transition-all duration-300 ease-in-out focus:outline-none focus:ring-2
                 focus:ring-darkred-red focus:border-darkred-red placeholder:text-darkred-light/60
@@ -58,13 +58,13 @@ const saveField = () => {
         </form>
 
         <div
-            class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl">
-            <PencilIcon class="w-4 h-4 text-darkred-light hover:cursor-pointer" @click="editField" />
+            class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl hover:cursor-pointer" @click="editField">
+            <PencilIcon class="w-4 h-4 text-darkred-light" />
         </div>
 
         <div v-if="!fieldReadonly"
-            class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl">
-            <CheckCircleIcon class="w-7 h-7 hover:cursor-pointer text-darkred-light" @click="saveField" />
+            class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl hover:cursor-pointer" @click="saveField">
+            <CheckCircleIcon class="w-7 h-7 text-darkred-light" />
         </div>
     </div>
 </template>

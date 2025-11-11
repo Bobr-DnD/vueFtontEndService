@@ -197,14 +197,14 @@ async function updateCharacterNotes(field, value){
 
 
             <div class="">
-                <HideButton v-if="checkObjectFieldExisting(state.character.customFields)" class="w-full"
+                <HideButton class="w-full"
                     textShow="Показати додаткові характеристики" textHide="Приховати додаткові характеристики"
                     :hidden="custom_hidden" :mainIcon="ChartBarIcon" @click="custom_hidden = !custom_hidden" />
 
-                <CustomFieldsTable v-if="checkObjectFieldExisting(state.character.customFields) && !custom_hidden"
+                <CustomFieldsTable v-if="!custom_hidden"
                     :fields="state.character.customFields" :callback="updateCustomFields" />
 
-                <PlusButton v-if="checkObjectFieldExisting(state.character.customFields) && !custom_hidden" @click="custom_modal_hidden = !custom_modal_hidden" class="w-16 mx-auto text-center border-4 border-darkred-dark rounded-lg 
+                <PlusButton v-if="!custom_hidden" @click="custom_modal_hidden = !custom_modal_hidden" class="w-16 mt-2 mx-auto text-center border-4 border-darkred-dark rounded-lg 
            transition-all duration-300 ease-out hover:cursor-pointer
            bg-gradient-to-br from-darkred-dark to-darkred-light
            hover:from-darkred-red hover:to-darkred-dark relative overflow-hidden group" />

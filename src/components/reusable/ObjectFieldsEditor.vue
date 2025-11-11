@@ -29,7 +29,12 @@ function switchTypeField(event) {
 }
 
 function addField() {
-    props.callback(input_name.value.value, input_value.value.value)
+    let value
+
+    if (value_field_string.value) value = input_value.value.value
+    else if (!value_field_string.value) value = parseInt(input_value.value.value)
+    
+    props.callback(input_name.value.value, value)
 }
 
 </script>

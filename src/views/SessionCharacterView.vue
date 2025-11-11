@@ -21,6 +21,7 @@ import InventoryRow from '@/components/character-page components/InventoryRow.vu
 import PerkRow from '@/components/character-page components/PerkRow.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
+import HealthFieldsEditor from '@/components/admin-page components/HealthFieldsEditor.vue';
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
@@ -156,7 +157,7 @@ async function addPerk() {
             </div>
 
 
-            <SingleFieldEditor placeholder="Ім'я" fieldName="name" :value="selected_character.name"
+            <SingleFieldEditor placeholder="Ім'я(обов'язкове поле)" fieldName="name" :value="selected_character.name"
                 :callback="updateCharacter" class="w-full" />
             <SingleFieldEditor placeholder="Стать" fieldName="gender" :value="selected_character.gender"
                 :callback="updateCharacter" class="w-full" />
@@ -209,6 +210,8 @@ async function addPerk() {
                 <HorizontalNumberPicker :value="h.value" :min="-h.value" :max="h.max - h.value" :colors="h.colors"
                     :callback="updateHealthFields" :title="h.name" />
             </div>
+
+            <HealthFieldsEditor name="Health" class="col-span-2"/>
 
         </div>
 

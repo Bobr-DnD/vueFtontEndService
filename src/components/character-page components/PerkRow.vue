@@ -34,6 +34,8 @@ function addPerk(perk) {
 
         <div v-if="perk.type === 'perk'" class="p2 text-clip">Назва: {{ perk.name }} <sup
                 class="text-greenish-mid">Перк</sup></div>
+        <div v-if="perk.type === 'antiperk'" class="p2 text-clip">Назва: {{ perk.name }} <sup
+                class="text-darkred-bright">Антиперк</sup></div>
         <div v-if="perk.type === 'status'" class="p2 text-clip">Назва: {{ perk.name }} <sup
                 class="text-orange-gold">Статус</sup></div>
         <div v-if="perk.type === 'skill'" class="p2 text-clip">Назва: {{ perk.name }} <sup
@@ -43,11 +45,10 @@ function addPerk(perk) {
 
     </div>
 
-    <button
+    <!-- <button
         class="p-2 bg-orange-orange text-darkred-light rounded-lg w-1/2 flex justify-self-center justify-center items-center">
-        Додати перки</button>
+        Додати перки</button> -->
 
-
-    <SearchArrayByName :array="perks_all" label="перку" :callback="addPerk" />
+    <!-- <SearchArrayByName :array="perks_all" label="перку" :callback="addPerk" /> -->
 
 </template>

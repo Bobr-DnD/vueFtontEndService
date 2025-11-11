@@ -33,33 +33,38 @@ const filteredArray = computed(() => {
 <template>
     <div class="w-full flex flex-col items-center gap-4 p-4">
 
-        <div class="w-full flex items-center gap-2">
+        <div class="w-full grid grid-cols-[1fr_56px] items-center gap-2">
             <input v-model="searchQuery" type="text" :placeholder="label" class="w-full p-3 rounded-md bg-fallout.blackish text-fallout.sand border-2 border-fallout.red
                font-gothic text-lg focus:outline-none focus:ring-2 focus:ring-fallout.red
                placeholder-fallout.sand/40 transition-all duration-200" />
             <button v-if="searchQuery" @click="searchQuery = ''"
-                class="px-3 py-2 bg-fallout.red text-fallout.sand rounded-md font-bold text-xl hover:bg-fallout.sand hover:text-fallout.blackish transition-all">
+                class="px-3 py-2 w-14 bg-fallout.red text-fallout.sand rounded-md font-bold text-xl hover:bg-fallout.sand hover:text-fallout.blackish transition-all">
                 ✖
             </button>
         </div>
 
-        <div v-if="filteredArray.length > 0" class="w-full grid grid-cols-1 gap-3 h-96 overflow-y-scroll">
-            <div v-for="el in filteredArray" :key="el.id" class="grid grid-cols-[1fr_64px] p-2 gap-2 items-center justify-items-start font-gothic
+        <div v-if="filteredArray.length > 0" class="w-full grid grid-cols-1 h-96 overflow-y-scroll">
+            <section class="flex flex-col gap-2">
+
+                <div v-for="el in filteredArray" :key="el.id" class="grid grid-cols-[1fr_64px] h-fit p-2 gap-2 items-center justify-items-start font-gothic
             bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium">
-                <div>
-                    <div v-if="el.type === 'perk'" class="p2 text-clip">{{ el.name }} <sup
-                            class="text-greenish-mid">Перк</sup></div>
-                    <div v-else-if="el.type === 'status'" class="p2 text-clip">{{ el.name }} <sup
-                            class="text-orange-gold">Статус</sup></div>
-                    <div v-else-if="el.type === 'skill'" class="p2 text-clip">{{ el.name }} <sup
-                            class="text-orange-orange">Навичка</sup></div>
-                    <div v-else class="p2 text-clip">{{ el.name }}</div>
+
+                    <div>
+                        <div v-if="el.type === 'perk'" class="p2 text-clip">{{ el.name }} <sup
+                                class="text-greenish-mid">Перк</sup></div>
+                        <div v-else-if="el.type === 'status'" class="p2 text-clip">{{ el.name }} <sup
+                                class="text-orange-gold">Статус</sup></div>
+                        <div v-else-if="el.type === 'skill'" class="p2 text-clip">{{ el.name }} <sup
+                                class="text-orange-orange">Навичка</sup></div>
+                        <div v-else class="p2 text-clip">{{ el.name }}</div>
+                    </div>
+
+                    <ApproveButton @click="props.callback(el)" class="w-16 row-span-2" />
+
+                    <div v-if="el.effect.description">{{ el.effect.description }}</div>
+
                 </div>
-                <ApproveButton @click="props.callback(el)" class="w-16 row-span-2" />
-                <div v-if="el.effect.description">{{ el.effect.description }}</div>
-
-
-            </div>
+            </section>
 
         </div>
 

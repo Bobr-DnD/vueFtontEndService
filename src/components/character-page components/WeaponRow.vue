@@ -58,7 +58,8 @@ function addItem(event) {
 
         <DeleteButton @click.stop="removeItem(weapon.id)" class="row-span-3 w-full" />
 
-        <div class="col-span-2 p2 text-clip">Урон: {{ weapon.damage[0].damage }}</div>
+        <div v-if="weapon.damage.length > 0" class="col-span-2 p2 text-clip">Урон: {{ weapon.damage[0].damage }}</div>
+        <div v-else class="col-span-2 p2 text-clip">Урон відсутній</div>
 
         <div v-if="weapon.actionPoints.min !== null" class="p2 text-clip">Очки дії: {{
             weapon.actionPoints.min }}-{{ weapon.actionPoints.max }}</div>
@@ -101,10 +102,11 @@ function addItem(event) {
 
             <div class="col-span-2 space-y-1 border-t-4 border-b-4 border-darkred-red rounded-xl py-2 px-1">
                 <h3 class="text-center text-lg font-semibold p-1 border-2 border-darkred-dark rounded-xl">Урон:</h3>
-                <div v-for="d in weapon_selected.damage"
+                <div v-if="weapon_selected.damage.length > 0" v-for="d in weapon_selected.damage"
                     class="col-span-2 text-md p-1 border-2 border-darkred-dark rounded-xl text-center">
                     <span>{{ d.type }}: {{ d.damage }}</span class="font-medium">
                 </div>
+                <div v-else class="col-span-2 text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Урон відсутній</div>
             </div>
 
 
