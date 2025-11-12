@@ -30,7 +30,7 @@ watch(() => props.value, (newValue) => {
 })
 
 const editField = async () => {
-    fieldReadonly.value = false
+    fieldReadonly.value = !fieldReadonly.value
 }
 
 const saveField = () => {

@@ -29,7 +29,7 @@ function showDetails(id) {
     })
 }
 
-function removeItem(id){
+function removeItem(id) {
     removeRow(props.armors, id)
     props.callback(props.armors)
 }
@@ -53,7 +53,9 @@ function addItem(event) {
 
         <div class="col-span-5 p2 text-clip">{{ armor.name }}</div>
 
-        <DeleteButton @click.stop="removeItem(armor.id)" class="row-span-3 w-full" />
+        <DeleteButton :disabled="false"
+            :class="false ? 'bg-darkred-light text-darkred-dark' : 'bg-darkred-red text-darkred-light'"
+            @click.stop="removeItem(armor.id)" class="row-span-3 w-full" />
 
         <div v-if="armor.requirement" class="col-span-3 p2 text-clip">Вимоги:
             {{Object.entries(armor.requirement).map(([key, value]) =>

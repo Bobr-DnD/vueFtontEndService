@@ -6,7 +6,7 @@ import DeleteButton from './Buttons/DeleteButton.vue';
 const props = defineProps({
     fields: { type: Object, required: true },
     callback: { type: Function, required: true },
-    field_removable: { type: Boolean, required: false }
+    field_removable: { type: Boolean, required: false, default: false }
 })
 
 function updateFields(name, value) {
@@ -24,8 +24,7 @@ function removeField(value) {
 </script>
 
 <template>
-    <div v-for="value, name in props.fields"
-        :class="props.field_removable ? 'grid grid-cols-[1fr_44px] justify-center items-center' : ''">
+    <div v-for="value, name in props.fields" :class="'grid grid-cols-[1fr_44px] justify-center items-center'">
 
         <FormString v-if="typeof (value) === 'string'" :label="'CustomFields_' + name" :entity_name="name"
             :value="props.fields[name]" :callback="updateFields" class="w-full mx-auto" />
@@ -33,7 +32,8 @@ function removeField(value) {
         <FormAddSubtract v-if="typeof (value) === 'number'" :label="'CustomFields_' + name" :entity_name="name"
             :value="props.fields[name]" :callback="updateFields" class="w-full mx-auto" />
 
-        <DeleteButton v-if="props.field_removable"
+        <DeleteButton :disabled="!props.field_removable"
+            :class="!props.field_removable ? 'bg-darkred-light text-darkred-dark' : 'bg-darkred-red text-darkred-light'"
             class="flex justify-center items-center text-xl w-11 h-11 mb-2 self-end" @click="removeField(value)" />
     </div>
 </template>

@@ -13,7 +13,7 @@ const props = defineProps({
         required: true
     },
     callback: {
-        type:Function,
+        type: Function,
         required: true
     }
 })
@@ -29,7 +29,7 @@ function showDetails(id) {
     })
 }
 
-function removeItem(id){
+function removeItem(id) {
     removeRow(props.inventory, id)
     props.callback(props.inventory)
 }
@@ -55,7 +55,9 @@ function addItem(event) {
 
         <div class="p2 text-clip">Ціна: {{ inv.price }}</div>
 
-        <DeleteButton @click.stop="removeItem(inv.id)" class="w-full"/>
+        <DeleteButton :disabled="false"
+            :class="false ? 'bg-darkred-light text-darkred-dark' : 'bg-darkred-red text-darkred-light'"
+            @click.stop="removeItem(inv.id)" class="w-full" />
 
     </div>
 
@@ -71,7 +73,8 @@ function addItem(event) {
 
     </select>
 
-    <div v-if="!block_hidden" class="fixed inset-0 flex items-center justify-center z-50 bg-black/50" @click="block_hidden = true">
+    <div v-if="!block_hidden" class="fixed inset-0 flex items-center justify-center z-50 bg-black/50"
+        @click="block_hidden = true">
         <div
             class="w-80 p-5 grid grid-cols-1 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-univers">
 
@@ -84,7 +87,8 @@ function addItem(event) {
                 {{ inventory_selected.name }}
             </div>
 
-            <div v-if="inventory_selected.description" class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Опис: <span
+            <div v-if="inventory_selected.description"
+                class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Опис: <span
                     class="font-medium">{{ inventory_selected.description }}</span></div>
 
             <div class="text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Ціна: <span

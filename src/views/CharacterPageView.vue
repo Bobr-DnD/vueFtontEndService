@@ -202,7 +202,7 @@ async function updateCharacterNotes(field, value){
                     :hidden="custom_hidden" :mainIcon="ChartBarIcon" @click="custom_hidden = !custom_hidden" />
 
                 <CustomFieldsTable v-if="!custom_hidden"
-                    :fields="state.character.customFields" :callback="updateCustomFields" />
+                    :fields="state.character.customFields" :callback="updateCustomFields" :field_removable="true" />
 
                 <PlusButton v-if="!custom_hidden" @click="custom_modal_hidden = !custom_modal_hidden" class="w-16 mt-2 mx-auto text-center border-4 border-darkred-dark rounded-lg 
            transition-all duration-300 ease-out md:hover:cursor-pointer

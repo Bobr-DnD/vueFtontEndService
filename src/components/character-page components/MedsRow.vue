@@ -26,7 +26,7 @@ const props = defineProps({
         required: true
     },
     callback: {
-        type: Function, 
+        type: Function,
         requied: true
     }
 })
@@ -42,7 +42,7 @@ function showDetails(id) {
     })
 }
 
-function removeItem(id){
+function removeItem(id) {
     removeRow(props.medicines, id)
     props.callback(props.medicines)
 }
@@ -74,8 +74,10 @@ function useMed(medId, effectId) {
 
         <div class="p2 text-clip">{{ med.description }}</div>
 
-        <ApproveButton @click.stop="useMed(med.id, med.effect.id)" class="w-full"/>
-        <DeleteButton @click.stop="removeItem(med.id)" class="w-full"/>
+        <ApproveButton @click.stop="useMed(med.id, med.effect.id)" class="w-full" />
+        <DeleteButton :disabled="false"
+            :class="false ? 'bg-darkred-light text-darkred-dark' : 'bg-darkred-red text-darkred-light'"
+            @click.stop="removeItem(med.id)" class="w-full" />
 
     </div>
 
@@ -91,7 +93,8 @@ function useMed(medId, effectId) {
 
     </select>
 
-    <div v-if="!block_hidden" class="fixed inset-0 flex items-center justify-center z-50 bg-black/50" @click="block_hidden = true">
+    <div v-if="!block_hidden" class="fixed inset-0 flex items-center justify-center z-50 bg-black/50"
+        @click="block_hidden = true">
         <div
             class="w-80 p-5 grid grid-cols-2 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-univers">
 

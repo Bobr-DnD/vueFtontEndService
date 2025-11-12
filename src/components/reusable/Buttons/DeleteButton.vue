@@ -3,7 +3,7 @@
 </script>
 
 <template>
-    <div class="p-2 bg-darkred-red rounded-xl border-2 border-darkred-dark text-darkred-light md:hover:cursor-pointer select-none">
+    <button class="p-2 rounded-xl border-2 border-darkred-dark select-none">
         ✕
-    </div>
+    </button>
 </template>

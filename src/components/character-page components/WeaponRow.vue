@@ -56,7 +56,9 @@ function addItem(event) {
 
         </div>
 
-        <DeleteButton @click.stop="removeItem(weapon.id)" class="row-span-3 w-full" />
+        <DeleteButton :disabled="false"
+            :class="false ? 'bg-darkred-light text-darkred-dark' : 'bg-darkred-red text-darkred-light'"
+            @click.stop="removeItem(weapon.id)" class="row-span-3 w-full" />
 
         <div v-if="weapon.damage.length > 0" class="col-span-2 p2 text-clip">Урон: {{ weapon.damage[0].damage }}</div>
         <div v-else class="col-span-2 p2 text-clip">Урон відсутній</div>
@@ -106,7 +108,8 @@ function addItem(event) {
                     class="col-span-2 text-md p-1 border-2 border-darkred-dark rounded-xl text-center">
                     <span>{{ d.type }}: {{ d.damage }}</span class="font-medium">
                 </div>
-                <div v-else class="col-span-2 text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Урон відсутній</div>
+                <div v-else class="col-span-2 text-md p-1 border-2 border-darkred-dark rounded-xl text-center">Урон
+                    відсутній</div>
             </div>
 
 
