@@ -18,7 +18,7 @@ import { RouterLink } from 'vue-router';
     </p>
 
     <RouterLink to="/"
-      class="mt-8 px-6 py-3 rounded-2xl bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold shadow-lg shadow-yellow-900/50 transition-all duration-200 hover:scale-105">
+      class="mt-8 px-6 py-3 rounded-2xl bg-yellow-500 md:hover:bg-yellow-400 text-gray-900 font-bold shadow-lg shadow-yellow-900/50 transition-all duration-200 md:hover:scale-105">
       Back to Safety
     </RouterLink>
   </div>

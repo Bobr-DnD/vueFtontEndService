@@ -38,7 +38,7 @@ const filteredArray = computed(() => {
                font-gothic text-lg focus:outline-none focus:ring-2 focus:ring-fallout.red
                placeholder-fallout.sand/40 transition-all duration-200" />
             <button v-if="searchQuery" @click="searchQuery = ''"
-                class="px-3 py-2 w-14 bg-fallout.red text-fallout.sand rounded-md font-bold text-xl hover:bg-fallout.sand hover:text-fallout.blackish transition-all">
+                class="px-3 py-2 w-14 bg-fallout.red text-fallout.sand rounded-md font-bold text-xl md:hover:bg-fallout.sand md:hover:text-fallout.blackish transition-all">
                 ✖
             </button>
         </div>

@@ -31,7 +31,7 @@ const props = defineProps({
 
         <div class="flex flex-col gap-3 w-full">
             <button v-for="entity in entities" :key="entity"
-                class="w-full text-left px-4 py-2 rounded-md bg-darkred-bright text-darkred-dark hover:bg-darkred-red hover:text-white transition-all duration-300 shadow-md">
+                class="w-full text-left px-4 py-2 rounded-md bg-darkred-bright text-darkred-dark md:hover:bg-darkred-red md:hover:text-white transition-all duration-300 shadow-md">
                 {{ entity }}
             </button>
         </div>

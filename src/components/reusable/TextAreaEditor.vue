@@ -54,16 +54,16 @@ const saveField = () => {
                 p-3 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light
                 font-univers text-base transition-all duration-300 ease-in-out focus:outline-none focus:ring-2
                 focus:ring-darkred-red focus:border-darkred-red placeholder:text-darkred-light/60
-                hover:border-darkred-red/70" placeholder="Введіть текст..."></textarea>
+                md:hover:border-darkred-red/70" placeholder="Введіть текст..."></textarea>
         </form>
 
         <div
-            class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl hover:cursor-pointer" @click="editField">
+            class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl md:hover:cursor-pointer" @click="editField">
             <PencilIcon class="w-4 h-4 text-darkred-light" />
         </div>
 
         <div v-if="!fieldReadonly"
-            class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl hover:cursor-pointer" @click="saveField">
+            class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl md:hover:cursor-pointer" @click="saveField">
             <CheckCircleIcon class="w-7 h-7 text-darkred-light" />
         </div>
     </div>

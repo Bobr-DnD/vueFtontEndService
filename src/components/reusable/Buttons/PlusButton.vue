@@ -4,5 +4,5 @@ import { PlusIcon } from '@heroicons/vue/24/solid';
 
 <template>
     <div><PlusIcon class="w-14 h-14 text-center rounded-lg transition-transform duration-300
-             group-hover:rotate-90 group-hover:text-darkred-light"/></div>
+             group-md:hover:rotate-90 group-md:hover:text-darkred-light"/></div>
 </template>

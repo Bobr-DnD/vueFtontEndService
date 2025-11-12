@@ -47,12 +47,12 @@ const saveField = () => {
 
         <div
             class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl">
-            <PencilIcon class="w-4 h-4 text-darkred-light hover:cursor-pointer" @click="editField" />
+            <PencilIcon class="w-4 h-4 text-darkred-light md:hover:cursor-pointer" @click="editField" />
         </div>
 
         <div v-if="!fieldReadonly"
             class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl">
-            <CheckCircleIcon class="w-7 h-7 hover:cursor-pointer text-darkred-light" @click="saveField" />
+            <CheckCircleIcon class="w-7 h-7 md:hover:cursor-pointer text-darkred-light" @click="saveField" />
         </div>
 
     </div>

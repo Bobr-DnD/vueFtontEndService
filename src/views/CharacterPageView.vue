@@ -205,9 +205,9 @@ async function updateCharacterNotes(field, value){
                     :fields="state.character.customFields" :callback="updateCustomFields" />
 
                 <PlusButton v-if="!custom_hidden" @click="custom_modal_hidden = !custom_modal_hidden" class="w-16 mt-2 mx-auto text-center border-4 border-darkred-dark rounded-lg 
-           transition-all duration-300 ease-out hover:cursor-pointer
+           transition-all duration-300 ease-out md:hover:cursor-pointer
            bg-gradient-to-br from-darkred-dark to-darkred-light
-           hover:from-darkred-red hover:to-darkred-dark relative overflow-hidden group" />
+           md:hover:from-darkred-red md:hover:to-darkred-dark relative overflow-hidden group" />
 
                 <ObjectFieldsEditor v-if="!custom_modal_hidden && !custom_hidden" :name="'CustomFields_'"
                     :fields="state.character.customFields" :callback="addCustomField" />

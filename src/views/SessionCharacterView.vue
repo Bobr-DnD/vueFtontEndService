@@ -131,8 +131,8 @@ async function addPerk() {
         <GraySelectorButton v-for="character in state.session.characters" @click="selectCharacter(character)"
             :id="character.id" :label="character.name"
             :active="selected_character.id === character.id ? true : false" />
-        <PlusButton @click="selectCharacter({ id: 'empty' })" class="w-16 mx-auto text-center border-4 border-darkred-dark rounded-lg hover:cursor-pointer
-           hover:bg-darkred-gray relative overflow-hidden group"
+        <PlusButton @click="selectCharacter({ id: 'empty' })" class="w-16 mx-auto text-center border-4 border-darkred-dark rounded-lg md:hover:cursor-pointer
+           md:hover:bg-darkred-gray relative overflow-hidden group"
             :class="selected_character.id === 'empty' ? 'bg-darkred-gray text-darkred-light' : 'bg-darkred-light'" />
     </div>
 

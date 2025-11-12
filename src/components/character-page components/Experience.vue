@@ -23,8 +23,8 @@ const props = defineProps({
         </div>
 
         <div class="p-1 grow"> <button @click="callback()" class="w-full h-full p-2 rounded-lg border-2 border-darkred-red bg-darkred-dark_gray 
-                text-darkred-light font-semibold tracking-wide hover:bg-darkred-red hover:text-darkred-light active:bg-darkred-bright active:scale-95 
-                transition-all duration-200 ease-in-out Fshadow-md hover:shadow-lg">
+                text-darkred-light font-semibold tracking-wide md:hover:bg-darkred-red md:hover:text-darkred-light active:bg-darkred-bright active:scale-95 
+                transition-all duration-200 ease-in-out Fshadow-md md:hover:shadow-lg">
                 +1 досвід </button> </div>
     </div>
 </template>

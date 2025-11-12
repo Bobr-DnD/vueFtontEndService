@@ -104,7 +104,7 @@ watch(() => props.value.value, scrollToValue)
 
       <!-- numbers -->
       <div v-for="(v, i) in items" :key="v" :ref="el => itemRefs[i] = el" class="snap-center shrink-0 w-14 h-14 grid place-items-center rounded-xl border transition-all duration-200 cursor-pointer bg-white text-gray-800 
-        border-gray-300 dark:bg-zinc-900 dark:text-zinc-100 dark:border-zinc-700 dark:hover:border-zinc-500">
+        border-gray-300 dark:bg-zinc-900 dark:text-zinc-100 dark:border-zinc-700 dark:md:hover:border-zinc-500">
 
         <span class="text-xl font-semibold tabular-nums">{{ format(v) }}</span>
 

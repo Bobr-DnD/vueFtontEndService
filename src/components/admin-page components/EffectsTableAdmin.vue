@@ -52,7 +52,7 @@ function changeCharacter(event) {
     </select>
 
     <button @click="props.callbackAdd(character_id, effect_id)" class="px-6 py-3 my-2 rounded-xl border-4 border-darkred-red text-darkred-dark font-univers font-semibold text-lg
-         hover:bg-darkred-red hover:text-darkred-light transition-colors duration-300">Додати еффект</button>
+         md:hover:bg-darkred-red md:hover:text-darkred-light transition-colors duration-300">Додати еффект</button>
 
     <div class="bg-darkred-gray rounded-lg shadow-[rgba(0,0,0,0.5)_0px_8px_20px_4px] p-4 my-4 text-darkred-light">
 

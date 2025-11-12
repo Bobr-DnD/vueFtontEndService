@@ -65,7 +65,7 @@ function useMed(medId, effectId) {
 
     <div v-for="med, index in groupedMedicines"
         class="grid grid-cols-[20px_1fr_1fr_30px_30px] p-2 gap-2 items-center justify-items-center font-gothic
-            bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2 hover:cursor-pointer"
+            bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2 md:hover:cursor-pointer"
         :id="'Medicine' + `${index + 1}`" @click="showDetails(med.id)">
 
         <div class="text-darkred-light">×{{ med.count }}</div>
@@ -81,7 +81,7 @@ function useMed(medId, effectId) {
 
     <select name="Medicines" id="Medicines" @change="addItem($event)" :class="['w-full h-12 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
         'tracking-wide uppercase shadow-inner outline-none transition-all duration-200 focus:border-darkred-red focus:ring-2 focus:ring-darkred-red',
-        'hover:border-darkred-red text-center justify-self-center font-semibold text-lg']">
+        'md:hover:border-darkred-red text-center justify-self-center font-semibold text-lg']">
 
         <option value="default" class="bg-darkred-dark text-darkred-bright">Виберіть медикамент</option>
 
@@ -96,7 +96,7 @@ function useMed(medId, effectId) {
             class="w-80 p-5 grid grid-cols-2 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-univers">
 
             <div @click="block_hidden = true"
-                class="absolute top-2 right-2 px-3 py-1 bg-darkred-red border border-darkred-dark rounded-md text-darkred-light font-bold cursor-pointer hover:bg-darkred-bright transition select-none">
+                class="absolute top-2 right-2 px-3 py-1 bg-darkred-red border border-darkred-dark rounded-md text-darkred-light font-bold cursor-pointer md:hover:bg-darkred-bright transition select-none">
                 ✕
             </div>
 

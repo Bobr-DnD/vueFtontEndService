@@ -9,7 +9,7 @@ const props = defineProps({
 
 <template>
     <div
-        class="p-2 bg-darkred-red hover:bg-darkred-red/75 rounded-xl border-2 border-darkred-dark text-darkred-light font-medium hover:cursor-pointer select-none text-center">
+        class="p-2 bg-darkred-red md:hover:bg-darkred-red/75 rounded-xl border-2 border-darkred-dark text-darkred-light font-medium md:hover:cursor-pointer select-none text-center">
         {{ props.text }}
     </div>
 </template>
