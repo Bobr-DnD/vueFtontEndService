@@ -2,6 +2,7 @@
 import { ref, nextTick, computed } from 'vue'
 import { groupById, removeRow, addRow } from '/utils/entityHelper'
 import DeleteButton from '../reusable/Buttons/DeleteButton.vue'
+import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue'
 
 const props = defineProps({
     inventory_all: {
@@ -56,7 +57,7 @@ function addItem(event) {
         <div class="p2 text-clip">Ціна: {{ inv.price }}</div>
 
         <DeleteButton :disabled="false"
-            :class="false ? 'bg-darkred-light text-darkred-dark' : 'bg-darkred-red text-darkred-light'"
+            :class="false ? 'bg-darkred-light text-darkred-dark hover:cursor-default' : 'bg-darkred-red text-darkred-light'"
             @click.stop="removeItem(inv.id)" class="w-full" />
 
     </div>
@@ -78,10 +79,7 @@ function addItem(event) {
         <div
             class="w-80 p-5 grid grid-cols-1 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-univers">
 
-            <div @click="block_hidden = true"
-                class="absolute top-2 right-2 px-3 py-1 bg-darkred-red border border-darkred-dark rounded-md text-darkred-light font-bold cursor-pointer md:hover:bg-darkred-bright transition select-none">
-                ✕
-            </div>
+            <CloseButtonRedBG @click="block_hidden = true" />
 
             <div class="font-bold text-2xl text-center border-b border-darkred-red pb-2">
                 {{ inventory_selected.name }}

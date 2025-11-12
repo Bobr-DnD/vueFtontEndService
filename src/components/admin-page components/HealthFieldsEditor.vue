@@ -2,10 +2,15 @@
 import AprroveButtonWithText from '../reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '../reusable/Buttons/RejectButtonWithText.vue';
 import { ref } from 'vue';
+import { toHealthObjectField } from '/utils/objects.dto';
 
 const props = defineProps({
     name: {
         type: String,
+        required: true
+    },
+    callback: {
+        type: Function,
         required: true
     }
 })
@@ -20,20 +25,23 @@ let color_max = ref('')
 let color_mid = ref('')
 
 function addHealthField() {
-    const health = {
-        name: name.value.value,
-        min: min.value.value,
-        max: max.value.value,
-        value: value.value.value,
-        healing: healing.value.value,
-        colors: [color_max.value.value, color_mid.value.value, color_min.value.value]
+    if (name.value.value) {
+        let health = {
+            name: name.value.value,
+            min: parseInt(min.value.value),
+            max: parseInt(max.value.value),
+            value: parseInt(value.value.value),
+            healing: parseInt(healing.value.value),
+            colors: [color_max.value.value, color_mid.value.value, color_min.value.value]
+        }
+
+        health = toHealthObjectField(health)
+        props.callback(health)
     }
-
-    console.log(health);
-
 }
 
 function resetFields() {
+    name.value.value = ''
     min.value.value = 0
     max.value.value = 0
     value.value.value = 0
@@ -50,7 +58,7 @@ function resetFields() {
 
             <section>
                 <label :for="props.name" class="text-lg font-gothic">Назва поля:</label>
-                <input :ref="'name'" :name="props.name" :id="props.name" placeholder="" type="text"
+                <input :ref="'name'" :name="props.name" :id="props.name" placeholder="Обов'язкове поле" type="text"
                     class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full">
             </section>
 

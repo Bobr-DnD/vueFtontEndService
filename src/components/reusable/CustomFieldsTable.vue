@@ -33,7 +33,7 @@ function removeField(value) {
             :value="props.fields[name]" :callback="updateFields" class="w-full mx-auto" />
 
         <DeleteButton :disabled="!props.field_removable"
-            :class="!props.field_removable ? 'bg-darkred-light text-darkred-dark' : 'bg-darkred-red text-darkred-light'"
+            :class="!props.field_removable ? 'bg-darkred-light text-darkred-dark hover:cursor-default' : 'bg-darkred-red text-darkred-light'"
             class="flex justify-center items-center text-xl w-11 h-11 mb-2 self-end" @click="removeField(value)" />
     </div>
 </template>

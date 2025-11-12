@@ -70,7 +70,7 @@ function changeCharacter(event) {
             <div class="p-2 rounded-md w-full text-center">{{ effect.effect.name }}</div>
             <div class="p-2 rounded-md w-full text-center">{{ effect.timeLeft }}</div>
             <DeleteButton :disabled="false"
-                :class="false ? 'bg-darkred-light text-darkred-dark' : 'bg-darkred-red text-darkred-light'"
+                :class="false ? 'bg-darkred-light text-darkred-dark hover:cursor-default' : 'bg-darkred-red text-darkred-light'"
                 @click="props.callbackRemove(character_id, effect.effect.id)" class="text-center w-16" />
 
         </div>

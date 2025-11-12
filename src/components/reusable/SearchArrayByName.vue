@@ -38,12 +38,12 @@ const filteredArray = computed(() => {
                font-gothic text-lg focus:outline-none focus:ring-2 focus:ring-fallout.red
                placeholder-fallout.sand/40 transition-all duration-200" />
             <button v-if="searchQuery" @click="searchQuery = ''"
-                class="px-3 py-2 w-14 bg-fallout.red text-fallout.sand rounded-md font-bold text-xl md:hover:bg-fallout.sand md:hover:text-fallout.blackish transition-all">
+                class="px-3 py-2 w-14 bg-darkred-red text-darkred-light rounded-md font-bold text-xl md:hover:bg-fallout.sand md:hover:text-fallout.blackish transition-all">
                 ✖
             </button>
         </div>
 
-        <div v-if="filteredArray.length > 0" class="w-full grid grid-cols-1 h-96 overflow-y-scroll">
+        <div v-if="filteredArray.length > 0" class="w-full grid grid-cols-1 h-96 overflow-y-scroll no-scrollbar">
             <section class="flex flex-col gap-2">
 
                 <div v-for="el in filteredArray" :key="el.id" class="grid grid-cols-[1fr_64px] h-fit p-2 gap-2 items-center justify-items-start font-gothic
@@ -68,7 +68,7 @@ const filteredArray = computed(() => {
 
         </div>
 
-        <div v-else class="text-darkred-dark text-lg font-gothic italic">
+        <div v-else class="text-lg font-gothic italic text-darkred-light">
             Нічого не знайдено
         </div>
     </div>

@@ -13,7 +13,7 @@ import CustomFieldsTable from '@/components/reusable/CustomFieldsTable.vue';
 import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
 import ProgressiveBar from '@/components/reusable/ProgressiveBar.vue';
 import HorizontalNumberPicker from '@/components/reusable/HorizontalNumberPicker.vue';
-import { ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
+import { ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, CheckBadgeIcon, ChartBarSquareIcon } from '@heroicons/vue/24/solid'
 import WeaponRow from '@/components/character-page components/WeaponRow.vue';
 import ArmorRow from '@/components/character-page components/ArmorRow.vue';
 import MedsRow from '@/components/character-page components/MedsRow.vue';
@@ -73,7 +73,9 @@ function selectCharacter(character) {
         selected_character.value = toEmptyCharacterObject({})
         selected_character.value.id = 'empty'
     }
-    else selected_character.value = character
+    else selected_character.value = toEmptyCharacterObject(character)
+
+    
 }
 
 async function updateCharacter(field, value) {
@@ -107,17 +109,15 @@ async function updateHealthFields(value, title) {
     //selected_character.value = await updateCharacter() //TODO refactor update to dto
 }
 
+async function addHealthField(field) {
+    console.log(field);
+    selected_character.value.health.push(field)
+}
+
 async function updateInventory() {
     console.log(selected_character.value);
 
     //selected_character.value = await updateCharacter()
-}
-
-async function addPerk() {
-    console.log(selected_character.value.perks);
-
-    // state.character.perkPoints--;
-    // state.character = await updateCharacter()
 }
 
 </script>
@@ -211,7 +211,7 @@ async function addPerk() {
                     :callback="updateHealthFields" :title="h.name" />
             </div>
 
-            <HealthFieldsEditor name="Health" class="col-span-2"/>
+            <HealthFieldsEditor name="Health" class="col-span-2" :callback="addHealthField" />
 
         </div>
 
@@ -253,9 +253,10 @@ async function addPerk() {
             </section>
 
             <section id="perk" v-if="activeInventory === 'perk'" class="border rounded-lg p-2 w-[600px]">
-                <div class="grid grid-cols-1 w-ful">
+                <div class="grid grid-cols-1 w-full">
                     <PerkRow v-if="state.session.perks" :perks_all="state.session.perks"
-                        :perks="selected_character.perks" :perkPoints="1" :callback="addPerk" />
+                        :perks="selected_character.perks" :perkPoints="1" :callback="updateInventory"
+                        :removable="true" />
                 </div>
             </section>
 

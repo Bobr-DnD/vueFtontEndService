@@ -31,6 +31,8 @@ watch(() => props.value, (newValue) => {
 
 const editField = async () => {
     fieldReadonly.value = !fieldReadonly.value
+    await nextTick()
+    areaEl.value.focus()
 }
 
 const saveField = () => {

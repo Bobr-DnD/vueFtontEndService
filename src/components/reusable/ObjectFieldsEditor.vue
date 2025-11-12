@@ -5,7 +5,7 @@ import ApproveButton from './Buttons/ApproveButton.vue'
 const props = defineProps({
     name: { type: String, required: true },
     fields: { type: Object, required: true, default: {} },
-    callback: {Type: Function, required: true}
+    callback: { Type: Function, required: true }
 })
 
 let value_field_string = ref(true)
@@ -30,11 +30,12 @@ function switchTypeField(event) {
 
 function addField() {
     let value
+    if (value_field_string.value.value !== '' && input_name.value.value != '') {
+        if (value_field_string.value) value = input_value.value.value
+        else if (!value_field_string.value) value = parseInt(input_value.value.value)
 
-    if (value_field_string.value) value = input_value.value.value
-    else if (!value_field_string.value) value = parseInt(input_value.value.value)
-    
-    props.callback(input_name.value.value, value)
+        props.callback(input_name.value.value, value)
+    }
 }
 
 </script>
@@ -54,9 +55,11 @@ function addField() {
                 Значення:
             </label>
             <div class="w-full grid grid-cols-[80%_20%] gap-2">
-                <input :ref="'input_value'" v-if="value_field_string" :id="props.name + 'Value'" type="text" placeholder="Значення" class="w-full font-gothic text-lg text-darkred-dark text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
+                <input :ref="'input_value'" v-if="value_field_string" :id="props.name + 'Value'" type="text"
+                    placeholder="Значення" class="w-full font-gothic text-lg text-darkred-dark text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
            focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
-                <input :ref="'input_value'" v-if="!value_field_string" :id="props.name + 'Value'" type="number" placeholder="0" class="w-full font-gothic text-lg text-darkred-dark text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
+                <input :ref="'input_value'" v-if="!value_field_string" :id="props.name + 'Value'" type="number"
+                    placeholder="0" class="w-full font-gothic text-lg text-darkred-dark text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
            focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
                 <button @click="switchTypeField($event)"
                     class="p-2 w-full border-2 rounded-lg border-darkred-dark font-gothic text-lg">Текст</button>
