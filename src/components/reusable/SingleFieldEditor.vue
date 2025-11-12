@@ -45,14 +45,14 @@ const saveField = () => {
                disabled:bg-darkred-dark_gray disabled:text-darkred-light/60 transition-all duration-200" />
         </form>
 
-        <div
-            class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl">
-            <PencilIcon class="w-4 h-4 text-darkred-light md:hover:cursor-pointer" @click="editField" />
+        <div @click="editField"
+            class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl md:hover:cursor-pointer">
+            <PencilIcon class="w-4 h-4 text-darkred-light md:hover:cursor-pointer"  />
         </div>
 
-        <div v-if="!fieldReadonly"
-            class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl">
-            <CheckCircleIcon class="w-7 h-7 md:hover:cursor-pointer text-darkred-light" @click="saveField" />
+        <div v-if="!fieldReadonly" @click="saveField"
+            class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl md:hover:cursor-pointer">
+            <CheckCircleIcon class="w-7 h-7 md:hover:cursor-pointer text-darkred-light"  />
         </div>
 
     </div>

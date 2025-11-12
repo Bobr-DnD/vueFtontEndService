@@ -13,6 +13,7 @@ export function toCustomFieldObjectField(customField) {
 
 export function toEmptyCharacterObject(character) {
   return {
+    id: character.id || 'empty',
     name: character.name || '',
     image: character.image || '',
     gender: character.gender || '',

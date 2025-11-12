@@ -25,19 +25,28 @@ let color_max = ref('')
 let color_mid = ref('')
 
 function addHealthField() {
-    if (name.value.value) {
-        let health = {
-            name: name.value.value,
-            min: parseInt(min.value.value),
-            max: parseInt(max.value.value),
-            value: parseInt(value.value.value),
-            healing: parseInt(healing.value.value),
-            colors: [color_max.value.value, color_mid.value.value, color_min.value.value]
-        }
-
-        health = toHealthObjectField(health)
-        props.callback(health)
+    if (!name.value.value) {
+        return
     }
+    else if (min.value.value > max.value.value) {
+        return
+    }
+    else if (value.value.value > max.value.value) {
+        value.value.value = max.value.value
+    }
+
+    let health = {
+        name: name.value.value,
+        min: parseInt(min.value.value),
+        max: parseInt(max.value.value),
+        value: parseInt(value.value.value),
+        healing: parseInt(healing.value.value),
+        colors: [color_max.value.value, color_mid.value.value, color_min.value.value]
+    }
+
+    health = toHealthObjectField(health)
+    props.callback(health)
+
 }
 
 function resetFields() {

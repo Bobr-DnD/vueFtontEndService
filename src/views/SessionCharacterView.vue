@@ -1,6 +1,6 @@
 <script setup>
 import Loader from 'vue-spinner/src/SyncLoader.vue'
-import { reactive, onMounted, ref } from 'vue';
+import { reactive, onMounted, ref, computed, toRaw } from 'vue';
 import { useRoute } from 'vue-router';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
@@ -22,6 +22,7 @@ import PerkRow from '@/components/character-page components/PerkRow.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import HealthFieldsEditor from '@/components/admin-page components/HealthFieldsEditor.vue';
+import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
@@ -30,12 +31,13 @@ import { toCustomFieldObjectField, toEmptyCharacterObject } from '/utils/objects
 
 const state = reactive({
     session: {},
-    isLoading: true
+    isLoading: true,
+    unsavedChanges: false
 })
 
 const sessionId = useRoute().params.sessionId
-let selected_character = ref(toEmptyCharacterObject({})) //TODO create via dto
-selected_character.value.id = 'empty'
+const selected_character = ref(toEmptyCharacterObject({}))
+const editingCharacter = ref(selected_character.value.id)
 
 const activeTab = ref('base')
 const activeInventory = ref('')
@@ -63,42 +65,81 @@ onMounted(async () => {
         console.warn(errSession.message)
         return
     }
-    else state.isLoading = false
 
+    state.isLoading = false
     state.session = resSession.data
 })
 
 function selectCharacter(character) {
+    if (state.unsavedChanges) {
+        const confirmSwitch = confirm('Є незбережені зміни. Вийти без збереження?')
+        if (!confirmSwitch) return
+    }
+
+    editingCharacter.value = character.id;
+    state.unsavedChanges = false;
+
     if (character.id === 'empty') {
         selected_character.value = toEmptyCharacterObject({})
-        selected_character.value.id = 'empty'
     }
-    else selected_character.value = toEmptyCharacterObject(character)
+    else selected_character.value = structuredClone(toRaw(character))
+}
 
-    
+function markUnsaved() {
+    if (editingCharacter.value) state.unsavedChanges = true
+}
+
+async function saveCharacter() {
+    if (selected_character.value.id === 'empty') {
+        console.log('Creating character:', selected_character.value)
+        // const [res, err] = await asyncHandler(
+        //     RepositoryFactory.create('character', selected_character.value)
+        // )
+    } else {
+        console.log('Saving changes for:', selected_character.value)
+        // const [res, err] = await asyncHandler(
+        //     RepositoryFactory.update('character', selected_character.value.id, selected_character.value)
+        // )
+        
+    }
+    state.unsavedChanges = false
+}
+
+function discardChanges() {
+    if (!editingCharacter.value) return
+    let current;
+
+    if (editingCharacter.value !== 'empty')
+        current = state.session.characters.find(c => c.id === editingCharacter.value);
+    else current = toEmptyCharacterObject({});
+
+    if (current) selected_character.value = structuredClone(toRaw(current))
+    state.unsavedChanges = false
 }
 
 async function updateCharacter(field, value) {
     selected_character.value[field] = value
-    console.log(selected_character.value);
+    markUnsaved();
 }
 
 async function updateCharacterCharacteristic(fields) {
     selected_character.characteristics = fields
+    markUnsaved();
 }
 
 async function addCharacterCharacteristic(name, value) {
     Object.assign(selected_character.value.characteristics, toCustomFieldObjectField({ name, value }))
+    markUnsaved();
 }
 
 async function updateCustomFields(fields) {
     selected_character.customFields = fields
+    markUnsaved();
 }
 
 async function addCustomField(name, value) {
-    console.log(selected_character.value.customFields);
-
     Object.assign(selected_character.value.customFields, toCustomFieldObjectField({ name, value }))
+    markUnsaved();
 }
 
 async function updateHealthFields(value, title) {
@@ -106,19 +147,19 @@ async function updateHealthFields(value, title) {
     if (item) {
         item.value += value
     }
-    //selected_character.value = await updateCharacter() //TODO refactor update to dto
+    markUnsaved();
 }
 
 async function addHealthField(field) {
-    console.log(field);
     selected_character.value.health.push(field)
+    markUnsaved();
 }
 
 async function updateInventory() {
-    console.log(selected_character.value);
-
-    //selected_character.value = await updateCharacter()
+    markUnsaved();
 }
+
+const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
 
 </script>
 
@@ -141,8 +182,10 @@ async function updateInventory() {
         <div class="p-4 w-full flex flex-col justify-start gap-2 font-gothic">
             <GraySelectorButton v-for="tab in tabs" @click="activeTab = tab.id" :id="tab.id" :label="tab.label"
                 :active="activeTab === tab.id ? true : false" />
-            <AprroveButtonWithText class="w-full" text="Підтвердити" />
-            <RejectButtonWithText class="w-full" text="Відминити" />
+            <AprroveButtonWithText :disabled="!canSave" @click="saveCharacter" class="w-full" text="Підтвердити" />
+            <RejectButtonWithText :disabled="!state.unsavedChanges" @click="discardChanges" class="w-full"
+                text="Відминити" />
+            <UnsavedLabel v-if="state.unsavedChanges" />
         </div>
 
         <div id="base" v-if="activeTab === 'base'" class="grid grid-cols-2 auto-rows-min gap-x-4">
