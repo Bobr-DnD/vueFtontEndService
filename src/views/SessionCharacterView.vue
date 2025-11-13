@@ -92,21 +92,25 @@ function markUnsaved() {
 
 async function saveCharacter() {
 
-    if (selected_character.value.id === 'empty') {
-        console.log('Creating character:', selected_character.value)
-        // const [res, err] = await asyncHandler(
-        //     RepositoryFactory.create('character', selected_character.value)
-        // )
-        notify({ message: 'Персонаж збережений', type: 'success' })
-    } else {
-        console.log('Saving changes for:', selected_character.value)
-        // const [res, err] = await asyncHandler(
-        //     RepositoryFactory.update('character', selected_character.value.id, selected_character.value)
-        // )
-        notify({ message: 'Персонаж оновлений', type: 'success' })
+    if (selected_character.value.name !== '') {
+        if (selected_character.value.id === 'empty') {
+            console.log('Creating character:', selected_character.value)
+            // const [res, err] = await asyncHandler(
+            //     RepositoryFactory.create('character', selected_character.value)
+            // )
+            notify({ message: 'Персонаж збережений', type: 'success' })
+        } else {
+            console.log('Saving changes for:', selected_character.value)
+            // const [res, err] = await asyncHandler(
+            //     RepositoryFactory.update('character', selected_character.value.id, selected_character.value)
+            // )
+            notify({ message: 'Персонаж оновлений', type: 'success' })
 
+        }
+        state.unsavedChanges = false
     }
-    state.unsavedChanges = false
+    else notify({ message: "У персонажа повинно бути ім'я", type: 'error' })
+
 }
 
 function discardChanges() {
@@ -188,8 +192,10 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
         <div class="p-4 w-full flex flex-col justify-start gap-2 font-gothic">
             <GraySelectorButton v-for="tab in tabs" @click="activeTab = tab.id" :id="tab.id" :label="tab.label"
                 :active="activeTab === tab.id ? true : false" />
-            <AprroveButtonWithText @click="saveCharacter" class="w-full" text="Підтвердити" :class="[!state.unsavedChanges && 'pointer-events-none opacity-50']"/>
-            <RejectButtonWithText @click="discardChanges" class="w-full" text="Відминити"  :class="[!canSave && 'pointer-events-none opacity-50']"/>
+            <AprroveButtonWithText @click="saveCharacter" class="w-full" text="Підтвердити"
+                :class="[!state.unsavedChanges && 'pointer-events-none opacity-50']" />
+            <RejectButtonWithText @click="discardChanges" class="w-full" text="Відминити"
+                :class="[!canSave && 'pointer-events-none opacity-50']" />
             <UnsavedLabel v-if="state.unsavedChanges" />
         </div>
 

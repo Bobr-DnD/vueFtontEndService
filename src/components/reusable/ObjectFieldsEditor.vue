@@ -1,6 +1,7 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import ApproveButton from './Buttons/ApproveButton.vue'
+import { notify } from '/utils/notification'
 
 const props = defineProps({
     name: { type: String, required: true },
@@ -35,8 +36,13 @@ function addField() {
         else if (!value_field_string.value) value = parseInt(input_value.value.value)
 
         props.callback(input_name.value.value, value)
+        input_name.value.value = ''
+        input_value.value.value = ''
     }
+    else notify({message: 'Заповніть усі поля', type: 'error'})
 }
+
+const canSave = computed(() => input_name.value.value !== '')
 
 </script>
 
@@ -67,7 +73,6 @@ function addField() {
 
         </form>
 
-        <ApproveButton @click="addField" class="w-32 mx-auto text-2xl" />
-
+        <ApproveButton @click="addField" class="w-32 mx-auto text-2xl"/>
     </div>
 </template>

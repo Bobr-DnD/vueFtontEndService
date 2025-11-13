@@ -3,6 +3,7 @@ import AprroveButtonWithText from '../reusable/Buttons/AprroveButtonWithText.vue
 import RejectButtonWithText from '../reusable/Buttons/RejectButtonWithText.vue';
 import { ref } from 'vue';
 import { toHealthObjectField } from '/utils/objects.dto';
+import { notify } from '/utils/notification';
 
 const props = defineProps({
     name: {
@@ -26,12 +27,15 @@ let color_mid = ref('')
 
 function addHealthField() {
     if (!name.value.value) {
+        notify({message: 'Вкажіть назву поля', type: 'error'})
         return
     }
     else if (min.value.value > max.value.value) {
+        notify({message: 'Мінімальне значення більше за максимальне', type: 'error'})
         return
     }
     else if (value.value.value > max.value.value) {
+        notify({message: 'Нинішнє значення було встановлено на максимальне', type: 'warning'})
         value.value.value = max.value.value
     }
 
@@ -46,7 +50,6 @@ function addHealthField() {
 
     health = toHealthObjectField(health)
     props.callback(health)
-
 }
 
 function resetFields() {
