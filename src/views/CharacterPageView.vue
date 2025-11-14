@@ -8,6 +8,7 @@ import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
 import { checkArrayFieldExisting, checkObjectFieldExisting } from '/utils/entityHelper'
 import { toCustomFieldObjectField } from '/utils/objects.dto';
+import { toEmptyCharacterObject } from '/utils/objects.dto';
 
 import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaion.vue';
 import WeaponRow from '@/components/character-page components/WeaponRow.vue';
@@ -70,7 +71,7 @@ onMounted(async () => {
     }
     else state.isLoading = false
 
-    state.character = resCharacter.data
+    state.character = toEmptyCharacterObject(resCharacter.data)
     state.session = resSession.data
 })
 
@@ -86,7 +87,7 @@ async function updateCharacter() {
         console.warn(err.message)
         return
     }
-    return res.data
+    return toEmptyCharacterObject(res.data)
 }
 
 async function updateSession() {

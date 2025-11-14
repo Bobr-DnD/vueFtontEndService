@@ -13,5 +13,8 @@ export default {
     },
     update(resource, id, data){
         return Repository.patch(`/${resource}/${id}`, data)
+    },
+    delete(resource, id){
+        return Repository.delete(`/${resource}/${id}`)
     }
 }

@@ -93,24 +93,83 @@ function markUnsaved() {
 async function saveCharacter() {
 
     if (selected_character.value.name !== '') {
+        selected_character.value.session = sessionId
+
         if (selected_character.value.id === 'empty') {
-            console.log('Creating character:', selected_character.value)
-            // const [res, err] = await asyncHandler(
-            //     RepositoryFactory.create('character', selected_character.value)
-            // )
+            const [res, err] = await asyncHandler(
+                RepositoryFactory.create('character', selected_character.value)
+            )
+            if (err) {
+                notify({ message: err.message, type: 'error' })
+                return
+            }
+
+            const [resSession, errSession] = await asyncHandler(
+                RepositoryFactory.getById('session', sessionId)
+            )
+            if (errSession) {
+                notify({ message: errSession.message, type: 'error' })
+                return
+            }
+
+            state.session = resSession.data
+            state.unsavedChanges = false
+
             notify({ message: 'Персонаж збережений', type: 'success' })
+            selectCharacter(toEmptyCharacterObject(res.data))
+
         } else {
-            console.log('Saving changes for:', selected_character.value)
-            // const [res, err] = await asyncHandler(
-            //     RepositoryFactory.update('character', selected_character.value.id, selected_character.value)
-            // )
+            const [res, err] = await asyncHandler(
+                RepositoryFactory.update('character', selected_character.value.id, selected_character.value)
+            )
+            if (err) {
+                notify({ message: err.message, type: 'error' })
+                return
+            }
+
+            const [resSession, errSession] = await asyncHandler(
+                RepositoryFactory.getById('session', sessionId)
+            )
+            if (errSession) {
+                notify({ message: errSession.message, type: 'error' })
+                return
+            }
+
+            state.session = resSession.data
+            state.unsavedChanges = false
+
             notify({ message: 'Персонаж оновлений', type: 'success' })
-
+            //selectCharacter(toEmptyCharacterObject(res.data))
         }
-        state.unsavedChanges = false
     }
-    else notify({ message: "У персонажа повинно бути ім'я", type: 'error' })
+    else {
+        notify({ message: "У персонажа повинно бути ім'я", type: 'error' })
+        return
+    }
+}
 
+async function deleteCharacter() {
+    const [res, err] = await asyncHandler(
+        RepositoryFactory.delete('character', selected_character.value.id)
+    )
+    if (err) {
+        notify({ message: err.message, type: 'error' })
+        return
+    }
+
+    const [resSession, errSession] = await asyncHandler(
+        RepositoryFactory.getById('session', sessionId)
+    )
+    if (errSession) {
+        notify({ message: errSession.message, type: 'error' })
+        return
+    }
+
+    state.session = resSession.data
+    state.unsavedChanges = false
+
+    selectCharacter(toEmptyCharacterObject({}))
+    notify({ message: 'Персонаж видалений', type: 'success' })
 }
 
 function discardChanges() {
@@ -192,6 +251,8 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
         <div class="p-4 w-full flex flex-col justify-start gap-2 font-gothic">
             <GraySelectorButton v-for="tab in tabs" @click="activeTab = tab.id" :id="tab.id" :label="tab.label"
                 :active="activeTab === tab.id ? true : false" />
+            <RejectButtonWithText @click="deleteCharacter" class="w-full" text="Видалити персонажа"
+                v-if="selected_character.id !== 'empty'" />
             <AprroveButtonWithText @click="saveCharacter" class="w-full" text="Підтвердити"
                 :class="[!state.unsavedChanges && 'pointer-events-none opacity-50']" />
             <RejectButtonWithText @click="discardChanges" class="w-full" text="Відминити"
