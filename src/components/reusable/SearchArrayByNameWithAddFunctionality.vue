@@ -1,6 +1,11 @@
 <script setup>
 import { ref, computed } from 'vue'
 import ApproveButton from './Buttons/ApproveButton.vue'
+import PerkTable from '../character-page components/EntityTables/PerkTable.vue'
+import WeaponTable from '../character-page components/EntityTables/WeaponTable.vue'
+import ArmorTable from '../character-page components/EntityTables/ArmorTable.vue'
+import MedsTable from '../character-page components/EntityTables/MedsTable.vue'
+import InventoryTable from '../character-page components/EntityTables/InventoryTable.vue'
 
 const props = defineProps({
     array: {
@@ -10,6 +15,12 @@ const props = defineProps({
     label: {
         type: String,
         required: true
+    },
+    type: {
+        type: String,
+        required: true,
+        validator: value =>
+            ['perk', 'weapon', 'armor', 'inventory', 'medicine'].includes(value)
     },
     callback: {
         type: Function,
@@ -49,19 +60,27 @@ const filteredArray = computed(() => {
                 <div v-for="el in filteredArray" :key="el.id" class="grid grid-cols-[1fr_64px] h-fit p-2 gap-2 items-center justify-items-start font-gothic
             bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium">
 
-                    <div>
-                        <div v-if="el.type === 'perk'" class="p2 text-clip">{{ el.name }} <sup
-                                class="text-greenish-mid">Перк</sup></div>
-                        <div v-else-if="el.type === 'status'" class="p2 text-clip">{{ el.name }} <sup
-                                class="text-orange-gold">Статус</sup></div>
-                        <div v-else-if="el.type === 'skill'" class="p2 text-clip">{{ el.name }} <sup
-                                class="text-orange-orange">Навичка</sup></div>
-                        <div v-else class="p2 text-clip">{{ el.name }}</div>
+                    <div v-if="props.type === 'perk'">
+                        <PerkTable :perk="el" :removable="false" />
                     </div>
 
-                    <ApproveButton @click="props.callback(el)" class="w-16 row-span-2" />
+                    <div v-if="props.type === 'weapon'">
+                        <WeaponTable :weapon="el" :removable="false"/>
+                    </div>
 
-                    <div v-if="el.effect.description">{{ el.effect.description }}</div>
+                    <div v-if="props.type === 'armor'">
+                        <ArmorTable :armor="el" :removable="false"/>
+                    </div>
+
+                    <div v-if="props.type === 'inventory'">
+                        <InventoryTable :inv="el" :removable="false"/>
+                    </div>
+
+                    <div v-if="props.type === 'medicine'">
+                        <MedsTable :med="el" :removable="false" :usable="false"/>
+                    </div>
+
+                    <ApproveButton @click="props.callback(el)" class="w-16" />
 
                 </div>
             </section>

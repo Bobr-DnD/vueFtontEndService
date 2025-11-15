@@ -1,8 +1,11 @@
 <script setup>
 import { ref, nextTick, computed } from 'vue'
 import { groupById, removeRow, addRow } from '/utils/entityHelper'
-import DeleteButton from '../reusable/Buttons/DeleteButton.vue'
 import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue'
+import ModalOpenButton from '../reusable/Buttons/ModalOpenButton.vue'
+import SearchArrayByNameWithAddFunctionality from '../reusable/SearchArrayByNameWithAddFunctionality.vue'
+import CloseRedButtonNoBG from '../reusable/Buttons/CloseButtonGrayNoBG.vue'
+import WeaponTable from './EntityTables/WeaponTable.vue'
 
 const props = defineProps({
     weapons_all: {
@@ -20,8 +23,9 @@ const props = defineProps({
 })
 
 const groupedWeapons = computed(() => groupById(props.weapons))
-let block_hidden = ref(true)
-let weapon_selected = ref({})
+const block_hidden = ref(true)
+const modal_hidden = ref(true)
+const weapon_selected = ref({})
 
 function showDetails(id) {
     weapon_selected.value = props.weapons.find(w => w.id === id)
@@ -35,12 +39,9 @@ function removeItem(id) {
     props.callback(props.weapons)
 }
 
-function addItem(event) {
-    const id = event.target.value
-    addRow(props.weapons_all, props.weapons, id)
+function addItem(weapon) {
+    addRow(props.weapons_all, props.weapons, weapon.id)
     props.callback(props.weapons)
-
-    event.target.value = 'default'
 }
 </script>
 
@@ -50,43 +51,27 @@ function addItem(event) {
             bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2 md:hover:cursor-pointer"
         :id="'Weapon' + `${index + 1}`" @click="showDetails(weapon.id)">
 
-        <div class="text-darkred-light row-span-3">×{{ weapon.count }}</div>
-
-        <div class="col-span-3 p2 text-clip">
-            {{ weapon.name }}
-
-        </div>
-
-        <DeleteButton :disabled="false"
-            :class="false ? 'bg-darkred-light text-darkred-dark hover:cursor-default' : 'bg-darkred-red text-darkred-light'"
-            @click.stop="removeItem(weapon.id)" class="row-span-3 w-full" />
-
-        <div v-if="weapon.damage.length > 0" class="col-span-2 p2 text-clip">Урон: {{ weapon.damage[0].damage }}</div>
-        <div v-else class="col-span-2 p2 text-clip">Урон відсутній</div>
-
-        <div v-if="weapon.actionPoints.min !== null" class="p2 text-clip">Очки дії: {{
-            weapon.actionPoints.min }}-{{ weapon.actionPoints.max }}</div>
-        <div v-else class="p2 text-clip">Очки дії: {{ weapon.actionPoints.max }}</div>
-
-        <div v-if="weapon.requirement" class="col-span-3 p2 text-clip">Вимоги:
-            {{Object.entries(weapon.requirement).map(([key, value]) =>
-                `${key}:${value}`).join(',')}}</div>
-
-        <div v-else class="col-span-3 p2 text-clip">Вимоги відсутні</div>
+        <WeaponTable :weapon="weapon" :callback="removeItem" />
 
     </div>
 
-    <select name="Weapons" id="Weapons" @change="addItem($event)" :class="['w-full h-12 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
-        'tracking-wide uppercase shadow-inner outline-none transition-all duration-200 focus:border-darkred-red focus:ring-2 focus:ring-darkred-red',
-        'md:hover:border-darkred-red text-center justify-self-center font-semibold text-lg']">
+    <ModalOpenButton @click="modal_hidden = !modal_hidden" class="justify-self-center" text="Додати зброю" />
 
-        <option value="default" class="bg-darkred-dark text-darkred-bright">Виберіть зброю</option>
+    <div v-if="!modal_hidden" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div class="relative w-[90%] max-w-lg bg-darkred-dark_gray border border-darkred-dark rounded-2xl shadow-xl p-6
+            font-univers transition-all duration-300
+           sm:w-[80%] md:w-[60%] lg:w-[40%]">
 
-        <option v-for="weapon in props.weapons_all" :value="weapon.id"
-            class="bg-darkred-dark text-darkred-bright text-clip">
-            {{ weapon.name }} </option>
+            <CloseRedButtonNoBG @click="modal_hidden = true" />
 
-    </select>
+            <h2 class="text-xl font-gothic text-center mb-4 border-b text-darkred-light border-darkred-dark pb-2">
+                Вибір зброї
+            </h2>
+
+            <SearchArrayByNameWithAddFunctionality :array="props.weapons_all" label="зброї" type="weapon"
+                :callback="addItem" />
+        </div>
+    </div>
 
     <div v-if="!block_hidden" class="fixed inset-0 flex items-center justify-center z-50 bg-black/50"
         @click="block_hidden = true">

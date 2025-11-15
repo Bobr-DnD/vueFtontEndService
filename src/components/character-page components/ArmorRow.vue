@@ -1,8 +1,11 @@
 <script setup>
 import { ref, nextTick, computed } from 'vue'
 import { groupById, removeRow, addRow } from '/utils/entityHelper'
-import DeleteButton from '../reusable/Buttons/DeleteButton.vue'
 import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue'
+import ModalOpenButton from '../reusable/Buttons/ModalOpenButton.vue'
+import SearchArrayByNameWithAddFunctionality from '../reusable/SearchArrayByNameWithAddFunctionality.vue'
+import CloseRedButtonNoBG from '../reusable/Buttons/CloseButtonGrayNoBG.vue'
+import ArmorTable from './EntityTables/ArmorTable.vue'
 
 const props = defineProps({
     armors_all: {
@@ -20,8 +23,9 @@ const props = defineProps({
 })
 
 const groupedArmors = computed(() => groupById(props.armors))
-let armor_selected = ref({})
-let block_hidden = ref(true)
+const armor_selected = ref({})
+const block_hidden = ref(true)
+const modal_hidden = ref(true)
 
 function showDetails(id) {
     armor_selected.value = props.armors.find(w => w.id === id)
@@ -35,12 +39,9 @@ function removeItem(id) {
     props.callback(props.armors)
 }
 
-function addItem(event) {
-    const id = event.target.value
-    addRow(props.armors_all, props.armors, id)
+function addItem(armor) {
+    addRow(props.armors_all, props.armors, armor.id)
     props.callback(props.armors)
-
-    event.target.value = 'default'
 }
 </script>
 
@@ -50,39 +51,27 @@ function addItem(event) {
             bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2 md:hover:cursor-pointer"
         :id="'Armor' + `${index + 1}`" @click.prevent="showDetails(armor.id)">
 
-        <div class="text-darkred-light row-span-3">×{{ armor.count }}</div>
-
-        <div class="col-span-5 p2 text-clip">{{ armor.name }}</div>
-
-        <DeleteButton :disabled="false"
-            :class="false ? 'bg-darkred-light text-darkred-dark hover:cursor-default' : 'bg-darkred-red text-darkred-light'"
-            @click.stop="removeItem(armor.id)" class="row-span-3 w-full" />
-
-        <div v-if="armor.requirement" class="col-span-3 p2 text-clip">Вимоги:
-            {{Object.entries(armor.requirement).map(([key, value]) =>
-                `${key}:${value}`).join(', ')}}</div>
-
-        <div v-else class="col-span-3 p2 text-clip">Вимоги відсутні</div>
-
-        <div class="col-span-2 p2 text-clip">Захист: {{ armor.resist }}</div>
-
-        <div v-if="armor.effect" class="col-span-2 p2 text-clip">Ефект: {{ armor.effect }}</div>
-
-        <div v-else class="col-span-5 p2 text-clip">Ефект відсутній</div>
+        <ArmorTable :armor="armor" :callback="removeItem" />
 
     </div>
 
-    <select name="Armors" id="Armors" @change="addItem($event)" :class="['w-full h-12 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
-        'tracking-wide uppercase shadow-inner outline-none transition-all duration-200 focus:border-darkred-red focus:ring-2 focus:ring-darkred-red',
-        'md:hover:border-darkred-red text-center justify-self-center font-semibold text-lg']">
+    <ModalOpenButton @click="modal_hidden = !modal_hidden" class="justify-self-center" text="Додати броню" />
 
-        <option value="default" class="bg-darkred-dark text-darkred-bright">Виберіть броню</option>
+    <div v-if="!modal_hidden" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div class="relative w-[90%] max-w-lg bg-darkred-dark_gray border border-darkred-dark rounded-2xl shadow-xl p-6
+            font-univers transition-all duration-300
+           sm:w-[80%] md:w-[60%] lg:w-[40%]">
 
-        <option v-for="armor in props.armors_all" :value="armor.id"
-            class="bg-darkred-dark text-darkred-bright text-clip">
-            {{ armor.name }} </option>
+            <CloseRedButtonNoBG @click="modal_hidden = true" />
 
-    </select>
+            <h2 class="text-xl font-gothic text-center mb-4 border-b text-darkred-light border-darkred-dark pb-2">
+                Вибір броні
+            </h2>
+
+            <SearchArrayByNameWithAddFunctionality :array="props.armors_all" label="броні" type="armor"
+                :callback="addItem" />
+        </div>
+    </div>
 
     <div v-if="!block_hidden" class="fixed inset-0 flex items-center justify-center z-50 bg-black/50">
         <div

@@ -1,10 +1,10 @@
 <script setup>
 import { ref, watch } from 'vue';
-import { addRow, removeRow } from '/utils/entityHelper'
-import SearchArrayByName from '../reusable/SearchArrayByName.vue';
-import DeleteButton from '../reusable/Buttons/DeleteButton.vue';
+import { addRow, removeRow, sortByTwoFields } from '/utils/entityHelper'
+import SearchArrayByNameWithAddFunctionality from '../reusable/SearchArrayByNameWithAddFunctionality.vue';
 import ModalOpenButton from '../reusable/Buttons/ModalOpenButton.vue';
 import CloseRedButtonNoBG from '../reusable/Buttons/CloseButtonGrayNoBG.vue';
+import PerkTable from './EntityTables/PerkTable.vue';
 
 const props = defineProps({
     perks_all: {
@@ -32,13 +32,13 @@ const props = defineProps({
 let modal_hidden = ref(true)
 
 watch(() => props.perks, () => {
-    modal_hidden.value = true
+    modal_hidden.value = true //NOTE responsible for autoclosing of a modal, I can forget that shit
+    sortByTwoFields(props.perks, 'type', 'name')
 })
 
 function addPerk(perk) {
     addRow(props.perks_all, props.perks, perk.id);
     props.callback();
-
 }
 
 function removePerk(perk) {
@@ -49,29 +49,16 @@ function removePerk(perk) {
 </script>
 <!-- TODO REFACTOR -->
 <template>
-    <div v-for="perk, index in props.perks" class="grid grid-cols-[1fr_44px] p-2 gap-2 items-center justify-items-start font-gothic
+    <div v-for="perk, index in props.perks" class="grid p-2 gap-2 items-center justify-items-start font-gothic
             bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2"
-        :id="'Perk' + `${index + 1}`">
+        :id="'Perk' + `${index + 1}`"
+        :class="props.removable ? 'grid-cols-[1fr_44px]' : 'grid-cols-[1fr]'">
 
-        <div v-if="perk.type === 'perk'" class="p2 text-clip">Назва: {{ perk.name }} <sup
-                class="text-greenish-mid">Перк</sup></div>
-        <div v-if="perk.type === 'antiperk'" class="p2 text-clip">Назва: {{ perk.name }} <sup
-                class="text-darkred-bright">Антиперк</sup></div>
-        <div v-if="perk.type === 'status'" class="p2 text-clip">Назва: {{ perk.name }} <sup
-                class="text-orange-gold">Статус</sup></div>
-        <div v-if="perk.type === 'skill'" class="p2 text-clip">Назва: {{ perk.name }} <sup
-                class="text-orange-orange">Навичка</sup></div>
-
-        <DeleteButton :disabled="!props.removable"
-            :class="!props.removable ? 'bg-darkred-light text-darkred-dark hover:cursor-default' : 'bg-darkred-red text-darkred-light'"
-            class="flex justify-center row-span-2 h-min-full h-max-12 self-center items-center text-xl w-11"
-            @click="removePerk(perk)" />
-
-        <div class="p2 text-clip">Ефект: {{ perk.effect.description }}</div>
+        <PerkTable :perk="perk" :removable="props.removable" :callback="removePerk" />
 
     </div>
 
-    <ModalOpenButton @click="modal_hidden = !modal_hidden" class="justify-self-center" text="Додати перк" />
+    <ModalOpenButton v-if="props.perkPoints > 0" @click="modal_hidden = !modal_hidden" class="justify-self-center" text="Додати перк" />
 
     <div v-if="!modal_hidden" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
         <div class="relative w-[90%] max-w-lg bg-darkred-dark_gray border border-darkred-dark rounded-2xl shadow-xl p-6
@@ -84,7 +71,7 @@ function removePerk(perk) {
                 Вибір перку
             </h2>
 
-            <SearchArrayByName :array="perks_all" label="перку" :callback="addPerk" />
+            <SearchArrayByNameWithAddFunctionality :array="perks_all" label="перку" type="perk" :callback="addPerk" />
         </div>
     </div>
 

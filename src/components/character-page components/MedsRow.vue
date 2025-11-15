@@ -1,9 +1,11 @@
 <script setup>
 import { ref, nextTick, computed } from 'vue'
 import { groupById, removeRow, addRow, useItem } from '/utils/entityHelper'
-import DeleteButton from '../reusable/Buttons/DeleteButton.vue'
-import ApproveButton from '../reusable/Buttons/ApproveButton.vue'
 import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue'
+import ModalOpenButton from '../reusable/Buttons/ModalOpenButton.vue'
+import SearchArrayByNameWithAddFunctionality from '../reusable/SearchArrayByNameWithAddFunctionality.vue'
+import CloseRedButtonNoBG from '../reusable/Buttons/CloseButtonGrayNoBG.vue'
+import MedsTable from './EntityTables/MedsTable.vue'
 
 const props = defineProps({
     medicines_all: {
@@ -33,8 +35,9 @@ const props = defineProps({
 })
 
 const groupedMedicines = computed(() => groupById(props.medicines))
-let block_hidden = ref(true)
-let medicine_selected = ref({})
+const block_hidden = ref(true)
+const medicine_selected = ref({})
+const modal_hidden = ref(true)
 
 function showDetails(id) {
     medicine_selected.value = props.medicines.find(w => w.id === id)
@@ -48,12 +51,9 @@ function removeItem(id) {
     props.callback(props.medicines)
 }
 
-function addItem(event) {
-    const id = event.target.value
-    addRow(props.medicines_all, props.medicines, id)
+function addItem(medicine) {
+    addRow(props.medicines_all, props.medicines, medicine.id)
     props.callback(props.medicines)
-
-    event.target.value = 'default'
 }
 // TODO refactor later for good | wrong saving effects | should work via websockets
 function useMed(medId, effectId) {
@@ -65,34 +65,31 @@ function useMed(medId, effectId) {
 <template>
 
     <div v-for="med, index in groupedMedicines"
-        class="grid grid-cols-[20px_1fr_1fr_30px_30px] p-2 gap-2 items-center justify-items-center font-gothic
+        class="grid p-2 gap-2 items-center justify-items-start font-gothic
             bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2 md:hover:cursor-pointer"
-        :id="'Medicine' + `${index + 1}`" @click="showDetails(med.id)">
+        :id="'Medicine' + `${index + 1}`" @click="showDetails(med.id)" :class="med.effect ? 'grid-cols-[20px_1fr_1fr_30px_30px]' : 'grid-cols-[20px_1fr_1fr_30px]'">
 
-        <div class="text-darkred-light">×{{ med.count }}</div>
-
-        <div class="p2 text-clip">{{ med.name }}</div>
-
-        <div class="p2 text-clip">{{ med.description }}</div>
-
-        <ApproveButton @click.stop="useMed(med.id, med.effect.id)" class="w-full" />
-        <DeleteButton :disabled="false"
-            :class="false ? 'bg-darkred-light text-darkred-dark hover:cursor-default' : 'bg-darkred-red text-darkred-light'"
-            @click.stop="removeItem(med.id)" class="w-full" />
+        <MedsTable :med="med" :callbackDelete="removeItem" :callbackUse="useMed" />
 
     </div>
 
-    <select name="Medicines" id="Medicines" @change="addItem($event)" :class="['w-full h-12 my-2 px-4 py-2 bg-darkred-light border border-darkred-dark rounded-md text-darkred-dark font-gothic',
-        'tracking-wide uppercase shadow-inner outline-none transition-all duration-200 focus:border-darkred-red focus:ring-2 focus:ring-darkred-red',
-        'md:hover:border-darkred-red text-center justify-self-center font-semibold text-lg']">
+    <ModalOpenButton @click="modal_hidden = !modal_hidden" class="justify-self-center" text="Додати хілку" />
 
-        <option value="default" class="bg-darkred-dark text-darkred-bright">Виберіть медикамент</option>
+    <div v-if="!modal_hidden" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div class="relative w-[90%] max-w-lg bg-darkred-dark_gray border border-darkred-dark rounded-2xl shadow-xl p-6
+            font-univers transition-all duration-300
+           sm:w-[80%] md:w-[60%] lg:w-[40%]">
 
-        <option v-for="med in props.medicines_all" :value="med.id"
-            class="bg-darkred-dark text-darkred-bright text-clip">
-            {{ med.name }} </option>
+            <CloseRedButtonNoBG @click="modal_hidden = true" />
 
-    </select>
+            <h2 class="text-xl font-gothic text-center mb-4 border-b text-darkred-light border-darkred-dark pb-2">
+                Вибір хілок
+            </h2>
+
+            <SearchArrayByNameWithAddFunctionality :array="props.medicines_all" label="хілок" type="medicine"
+                :callback="addItem" />
+        </div>
+    </div>
 
     <div v-if="!block_hidden" class="fixed inset-0 flex items-center justify-center z-50 bg-black/50"
         @click="block_hidden = true">
