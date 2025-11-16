@@ -1,21 +1,23 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, reactive, ref, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router';
 import { asyncHandler } from '/utils/asyncHandler';
 import { removeRow } from '/utils/entityHelper'
 import { checkObjectFieldExisting } from '/utils/entityHelper'
 import { toEffectObjectField, toEmptyCharacterObject } from '/utils/objects.dto.js';
-import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
 
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import FormAddSubtract from '@/components/reusable/FormAddSubtract.vue';
 import RepositoryFactory from '@http/RepositoryFactory'
+import socket from '@ws/webSocket';
+
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
 import characterCard from '@/components/reusable/CharacterCard.vue';
 import ButtonGrayAnimated from '@/components/reusable/Buttons/ButtonGrayAnimated.vue';
 import EffectsTableAdmin from '@/components/admin-page components/EffectsTableAdmin.vue';
 import CustomFieldsTable from '@/components/reusable/CustomFieldsTable.vue';
 import PerkRow from '@/components/character-page components/PerkRow.vue';
+import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
 
 const sessionId = useRoute().params.sessionId
 const state = reactive({
@@ -43,6 +45,11 @@ onMounted(async () => {
   state.session = resSession.data
   getEffects(state.session.characters);
   selected_character.value = toEmptyCharacterObject(state.session.characters[0])
+  socket.emit('session:join', sessionId, {role: 'admin'})
+})
+
+onBeforeUnmount(() => {
+    socket.emit('session:leave', sessionId)
 })
 
 function getEffects(characters) {

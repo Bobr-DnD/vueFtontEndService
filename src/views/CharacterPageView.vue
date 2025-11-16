@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, onMounted } from 'vue';
+import { reactive, ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router';
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import { CheckBadgeIcon, ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, ChartBarIcon, SparklesIcon, FlagIcon, CurrencyDollarIcon } from '@heroicons/vue/24/solid'
@@ -9,6 +9,7 @@ import { asyncHandler } from '/utils/asyncHandler';
 import { checkArrayFieldExisting, checkObjectFieldExisting } from '/utils/entityHelper'
 import { toCustomFieldObjectField } from '/utils/objects.dto';
 import { toEmptyCharacterObject } from '/utils/objects.dto';
+import socket from '@ws/webSocket';
 
 import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaion.vue';
 import WeaponRow from '@/components/character-page components/WeaponRow.vue';
@@ -73,6 +74,11 @@ onMounted(async () => {
 
     state.character = toEmptyCharacterObject(resCharacter.data)
     state.session = resSession.data
+    socket.emit('session:connectCharacter', sessionId, {characterId})
+})
+
+onBeforeUnmount(() => {
+    socket.emit('session:disconnectCharacter', sessionId)
 })
 
 state.character.perks !== undefined ? perks_hidden.value = false : perks_hidden.value = true
@@ -139,12 +145,12 @@ async function updateInventory() {
     state.character = await updateCharacter()
 }
 
-async function addPerk(){
+async function addPerk() {
     state.character.perkPoints--;
     state.character = await updateCharacter()
 }
 
-async function updateCharacterNotes(field, value){
+async function updateCharacterNotes(field, value) {
     state.character[field] = value;
     state.character = await updateCharacter()
 }
@@ -198,12 +204,12 @@ async function updateCharacterNotes(field, value){
 
 
             <div class="">
-                <HideButton class="w-full"
-                    textShow="Показати додаткові характеристики" textHide="Приховати додаткові характеристики"
-                    :hidden="custom_hidden" :mainIcon="ChartBarIcon" @click="custom_hidden = !custom_hidden" />
+                <HideButton class="w-full" textShow="Показати додаткові характеристики"
+                    textHide="Приховати додаткові характеристики" :hidden="custom_hidden" :mainIcon="ChartBarIcon"
+                    @click="custom_hidden = !custom_hidden" />
 
-                <CustomFieldsTable v-if="!custom_hidden"
-                    :fields="state.character.customFields" :callback="updateCustomFields" :field_removable="false" />
+                <CustomFieldsTable v-if="!custom_hidden" :fields="state.character.customFields"
+                    :callback="updateCustomFields" :field_removable="false" />
 
                 <PlusButton v-if="!custom_hidden" @click="custom_modal_hidden = !custom_modal_hidden" class="w-16 mt-2 mx-auto text-center border-4 border-darkred-dark rounded-lg 
            transition-all duration-300 ease-out md:hover:cursor-pointer
@@ -230,15 +236,17 @@ async function updateCharacterNotes(field, value){
     <section v-if="!state.isLoading" class="grid grid-cols-1 justify-items-center mx-auto min-w-80 max-w-96">
 
         <section class="w-full">
-            <ButtonRedHideFunction @click="perks_hidden = !perks_hidden"  text="Навички" :mainIcon="CheckBadgeIcon" :hidden="perks_hidden" />
+            <ButtonRedHideFunction @click="perks_hidden = !perks_hidden" text="Навички" :mainIcon="CheckBadgeIcon"
+                :hidden="perks_hidden" />
             <div :class="['grid grid-cols-1 w-full', perks_hidden ? 'hidden' : '']">
-                <PerkRow v-if="state.session.perks" :perks_all="state.session.perks" 
-                    :perks="state.character.perks" :perkPoints="state.character.perkPoints" :callback="addPerk" :removable="false" />
+                <PerkRow v-if="state.session.perks" :perks_all="state.session.perks" :perks="state.character.perks"
+                    :perkPoints="state.character.perkPoints" :callback="addPerk" :removable="false" />
             </div>
         </section>
 
         <section class="w-full">
-            <ButtonRedHideFunction @click="weapons_hidden = !weapons_hidden" text="Зброя" :mainIcon="BoltIcon" :hidden="weapons_hidden" />
+            <ButtonRedHideFunction @click="weapons_hidden = !weapons_hidden" text="Зброя" :mainIcon="BoltIcon"
+                :hidden="weapons_hidden" />
             <div :class="['grid grid-cols-1 w-full', weapons_hidden ? 'hidden' : '']">
                 <WeaponRow :weapons_all="state.session.weapons" :weapons="state.character.weapons"
                     :callback="updateInventory" />
@@ -246,7 +254,8 @@ async function updateCharacterNotes(field, value){
         </section>
 
         <section class="w-full">
-            <ButtonRedHideFunction @click="armors_hidden = !armors_hidden" text="Броня" :mainIcon="ShieldCheckIcon" :hidden="armors_hidden" />
+            <ButtonRedHideFunction @click="armors_hidden = !armors_hidden" text="Броня" :mainIcon="ShieldCheckIcon"
+                :hidden="armors_hidden" />
             <div :class="['grid grid-cols-1 w-full', armors_hidden ? 'hidden' : '']">
                 <ArmorRow :armors_all="state.session.armors" :armors="state.character.armor"
                     :callback="updateInventory" />
@@ -254,7 +263,8 @@ async function updateCharacterNotes(field, value){
         </section>
 
         <section class="w-full">
-            <ButtonRedHideFunction @click="meds_hidden = !meds_hidden" text="Медикаменти" :mainIcon="BeakerIcon" :hidden="meds_hidden" />
+            <ButtonRedHideFunction @click="meds_hidden = !meds_hidden" text="Медикаменти" :mainIcon="BeakerIcon"
+                :hidden="meds_hidden" />
             <div :class="['grid grid-cols-1 w-full', meds_hidden ? 'hidden' : '']">
                 <MedsRow :medicines_all="state.session.medicines" :medicines="state.character.medicines"
                     :effects_all="state.session.effects" :effects="state.character.effects" :move="state.session.move"
@@ -263,7 +273,8 @@ async function updateCharacterNotes(field, value){
         </section>
 
         <section class="w-full">
-            <ButtonRedHideFunction @click="inventories_hidden = !inventories_hidden" text="Інвентар" :mainIcon="ArchiveBoxIcon" v-model:hidden="inventories_hidden" />
+            <ButtonRedHideFunction @click="inventories_hidden = !inventories_hidden" text="Інвентар"
+                :mainIcon="ArchiveBoxIcon" v-model:hidden="inventories_hidden" />
             <div :class="['grid grid-cols-1 w-full', inventories_hidden ? 'hidden' : '']">
                 <InventoryRow :inventory_all="state.session.inventories" :inventory="state.character.inventory"
                     :callback="updateInventory" />
@@ -275,7 +286,7 @@ async function updateCharacterNotes(field, value){
 
     <section v-if="!state.isLoading" class="mx-auto min-w-80 max-w-96">
         <TextAreaEditor fieldName="playerNotes" name="Записки гравця" :value="state.character.playerNotes"
-                :callback="updateCharacterNotes" />
+            :callback="updateCharacterNotes" />
     </section>
 
     <div v-if="state.isLoading" class="text-center py-6">

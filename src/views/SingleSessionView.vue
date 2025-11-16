@@ -1,7 +1,9 @@
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, onMounted } from 'vue'
 import { useRoute } from 'vue-router';
 import RepositoryFactory from '@http/RepositoryFactory';
+import { asyncHandler } from '/utils/asyncHandler';
+import socket from '@ws/webSocket';
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaion.vue';
 import characterCard from '@/components/reusable/CharacterCard.vue';
@@ -13,16 +15,17 @@ const state = reactive({
 })
 
 onMounted(async () => {
-  try {
-    const res = await RepositoryFactory.getById('session', sessionId)
-    state.session = res.data
+  const [res, err] = await asyncHandler(
+    RepositoryFactory.getById('session', sessionId)
+  )
+  if (err) {
+    console.warn(err.message)
+    return
+  }
+  else state.isLoading = false
 
-  } catch (err) {
-    notify({ message: err.message, type: 'error' })
-  }
-  finally {
-    state.isLoading = false
-  }
+  state.session = res.data
+  socket.emit('session:join', sessionId, { role: 'user' })
 })
 </script>
 

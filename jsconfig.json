@@ -3,6 +3,7 @@
     "baseUrl": ".",
     "paths": {
       "@http/*": ["./HTTPServices"],
+      "@ws/*": ["./WSServices"],
       "@/*": ["./src/*"],
     }
   },
