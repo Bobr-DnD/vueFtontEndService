@@ -49,7 +49,7 @@ const saveField = () => {
 
 
 <template>
-    <div class="grid grid-cols-[1fr_44px_44px] auto-rows-min gap-2 items-center justify-items-start justify-start p-2">
+    <div class="grid auto-rows-min gap-2 items-center justify-items-start justify-start p-2" :class="!fieldReadonly ? 'grid-cols-[1fr_44px_44px]' : 'grid-cols-[1fr_44px]'">
 
         <form @submit.prevent class="flex flex-col items-start justify-center w-full">
             <label :for="props.fieldName" class="text-lg font-gothic">{{ props.name }}:</label>

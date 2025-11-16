@@ -21,7 +21,7 @@ export function toEmptyCharacterObject(character) {
     race: character.race || '',
     level: character.level || 0,
     experience: character.experience || 0,
-    experienceToLevelUp: character.experienceToLevelUp || 0,
+    experienceToLevelUp: character.experienceToLevelUp || 10,
     perkPoints: character.perkPoints || 0,
     health: character.health || [],
     characteristics: character.characteristics || {},

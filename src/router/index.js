@@ -4,7 +4,8 @@ import Sessions from "@/views/SessionsView.vue";
 import SessionView from "@/views/SingleSessionView.vue";
 import NotFoundView from '@/components/reusable/NotFoundView.vue'
 import CharacterPageView from "@/views/CharacterPageView.vue";
-import SessionCharacterView from "@/views/SessionCharacterView.vue";
+import CharacterPageEditor from "@/views/CharacterPageEditor.vue";
+import EntitiesPageEditor from "@/views/EntitiesPageEditor.vue";
 
 import AdminPageView from "@/views/AdminPageView.vue";
 
@@ -26,15 +27,15 @@ const router = createRouter({
             name: 'admin_panel',
             component: AdminPageView
         },
-        // {
-        //     path: '/admin/session/:sessionId',
-        //     name: 'admin_session',
-        //     component: AdminSessionConfView
-        // },
         {
-            path: '/admin/session/:sessionId/characters',
+            path: '/admin/:sessionId/entities',
+            name: 'admin_session',
+            component: EntitiesPageEditor
+        },
+        {
+            path: '/admin/:sessionId/characters',
             name: 'session_characters_editor',
-            component: SessionCharacterView
+            component: CharacterPageEditor
         },
         {
             path: '/session/:sessionId',

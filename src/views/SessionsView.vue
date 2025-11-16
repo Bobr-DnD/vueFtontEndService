@@ -15,7 +15,7 @@ onMounted(async () => {
     const res = await RepositoryFactory.get('session')
     state.sessions = res.data
   } catch (err) {
-    console.error(err)
+    notify({ message: err.message, type: 'error' })
   }
   finally {
     state.isLoading = false

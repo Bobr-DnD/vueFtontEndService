@@ -84,7 +84,7 @@ async function updateCharacter() {
         RepositoryFactory.update('character', characterId, state.character)
     )
     if (err) {
-        console.warn(err.message)
+        notify({ message: err.message, type: 'error' })
         return
     }
     return toEmptyCharacterObject(res.data)
@@ -95,7 +95,7 @@ async function updateSession() {
         RepositoryFactory.update('session', sessionId, state.session)
     )
     if (err) {
-        console.warn(err.message)
+        notify({ message: err.message, type: 'error' })
         return
     }
 

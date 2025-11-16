@@ -18,7 +18,7 @@ onMounted(async () => {
     state.session = res.data
 
   } catch (err) {
-    console.error(err)
+    notify({ message: err.message, type: 'error' })
   }
   finally {
     state.isLoading = false

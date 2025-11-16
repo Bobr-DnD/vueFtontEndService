@@ -50,7 +50,7 @@ function removePerk(perk) {
 
 <template>
 
-    <SearchArrayByNameViewFunctionality :array="props.perks" label="перку" :callback="removePerk" type="perk"/>
+    <SearchArrayByNameViewFunctionality :array="props.perks" label="перку" :callback="removePerk" type="perk" :perkRemovable="props.removable"/>
 
     <ModalOpenButton v-if="props.perkPoints > 0" @click="modal_hidden = !modal_hidden" class="justify-self-center" text="Додати перк" />
 
