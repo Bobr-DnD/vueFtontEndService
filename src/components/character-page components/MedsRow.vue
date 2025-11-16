@@ -5,7 +5,7 @@ import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue'
 import ModalOpenButton from '../reusable/Buttons/ModalOpenButton.vue'
 import SearchArrayByNameWithAddFunctionality from '../reusable/SearchArrayByNameWithAddFunctionality.vue'
 import CloseRedButtonNoBG from '../reusable/Buttons/CloseButtonGrayNoBG.vue'
-import MedsTable from './EntityTables/MedsTable.vue'
+import SearchArrayByNameViewFunctionality from '../reusable/SearchArrayByNameViewFunctionality.vue'
 
 const props = defineProps({
     medicines_all: {
@@ -64,14 +64,8 @@ function useMed(medId, effectId) {
 
 <template>
 
-    <div v-for="med, index in groupedMedicines"
-        class="grid p-2 gap-2 items-center justify-items-start font-gothic
-            bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2 md:hover:cursor-pointer"
-        :id="'Medicine' + `${index + 1}`" @click="showDetails(med.id)" :class="med.effect ? 'grid-cols-[20px_1fr_1fr_30px_30px]' : 'grid-cols-[20px_1fr_1fr_30px]'">
-
-        <MedsTable :med="med" :callbackDelete="removeItem" :callbackUse="useMed" />
-
-    </div>
+    <SearchArrayByNameViewFunctionality :array="groupedMedicines" label="хілок" type="medicine" :callback="removeItem"
+        :callbackMedUse="useMed" :callbackModal="showDetails" />
 
     <ModalOpenButton @click="modal_hidden = !modal_hidden" class="justify-self-center" text="Додати хілку" />
 

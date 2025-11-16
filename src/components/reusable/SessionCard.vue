@@ -41,7 +41,7 @@ function toggleMode() {
             </div>
 
             <div class="p-4 space-y-4 text-darkred-light">
-                <h2 class="text-2xl tracking-wide text-center text-fallout-red font-gothic drop-shadow-md">
+                <h2 class="text-2xl tracking-wide text-center text-darkred-light font-gothic drop-shadow-md">
                     {{ session.name }}
                 </h2>
 
@@ -51,7 +51,7 @@ function toggleMode() {
                 </button>
 
                 <RouterLink :to="url"
-                    class="w-full text-lg font-medium font-gothic inline-flex items-center justify-center py-2.5 px-4 rounded-lg bg-darkred-red md:hover:bg-darkred-bright md:hover:text-darkred-dark active:bg-fallout-dark text-white tracking-wide shadow-lg transition-all duration-200 ease-in-out">
+                    class="w-full text-lg font-medium font-gothic inline-flex items-center justify-center py-2.5 px-4 rounded-lg bg-darkred-red md:hover:bg-darkred-bright active:bg-darkred-dark text-white tracking-wide shadow-lg transition-all duration-200 ease-in-out">
                     Зайти
                 </RouterLink>
             </div>

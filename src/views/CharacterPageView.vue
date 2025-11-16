@@ -229,7 +229,7 @@ async function updateCharacterNotes(field, value){
 
     <section v-if="!state.isLoading" class="grid grid-cols-1 justify-items-center mx-auto min-w-80 max-w-96">
 
-        <section>
+        <section class="w-full">
             <ButtonRedHideFunction @click="perks_hidden = !perks_hidden"  text="Навички" :mainIcon="CheckBadgeIcon" :hidden="perks_hidden" />
             <div :class="['grid grid-cols-1 w-full', perks_hidden ? 'hidden' : '']">
                 <PerkRow v-if="state.session.perks" :perks_all="state.session.perks" 
@@ -237,7 +237,7 @@ async function updateCharacterNotes(field, value){
             </div>
         </section>
 
-        <section>
+        <section class="w-full">
             <ButtonRedHideFunction @click="weapons_hidden = !weapons_hidden" text="Зброя" :mainIcon="BoltIcon" :hidden="weapons_hidden" />
             <div :class="['grid grid-cols-1 w-full', weapons_hidden ? 'hidden' : '']">
                 <WeaponRow :weapons_all="state.session.weapons" :weapons="state.character.weapons"
@@ -245,7 +245,7 @@ async function updateCharacterNotes(field, value){
             </div>
         </section>
 
-        <section>
+        <section class="w-full">
             <ButtonRedHideFunction @click="armors_hidden = !armors_hidden" text="Броня" :mainIcon="ShieldCheckIcon" :hidden="armors_hidden" />
             <div :class="['grid grid-cols-1 w-full', armors_hidden ? 'hidden' : '']">
                 <ArmorRow :armors_all="state.session.armors" :armors="state.character.armor"
@@ -253,7 +253,7 @@ async function updateCharacterNotes(field, value){
             </div>
         </section>
 
-        <section>
+        <section class="w-full">
             <ButtonRedHideFunction @click="meds_hidden = !meds_hidden" text="Медикаменти" :mainIcon="BeakerIcon" :hidden="meds_hidden" />
             <div :class="['grid grid-cols-1 w-full', meds_hidden ? 'hidden' : '']">
                 <MedsRow :medicines_all="state.session.medicines" :medicines="state.character.medicines"
@@ -262,7 +262,7 @@ async function updateCharacterNotes(field, value){
             </div>
         </section>
 
-        <section>
+        <section class="w-full">
             <ButtonRedHideFunction @click="inventories_hidden = !inventories_hidden" text="Інвентар" :mainIcon="ArchiveBoxIcon" v-model:hidden="inventories_hidden" />
             <div :class="['grid grid-cols-1 w-full', inventories_hidden ? 'hidden' : '']">
                 <InventoryRow :inventory_all="state.session.inventories" :inventory="state.character.inventory"

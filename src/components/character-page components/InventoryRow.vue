@@ -6,6 +6,7 @@ import ModalOpenButton from '../reusable/Buttons/ModalOpenButton.vue'
 import SearchArrayByNameWithAddFunctionality from '../reusable/SearchArrayByNameWithAddFunctionality.vue'
 import CloseRedButtonNoBG from '../reusable/Buttons/CloseButtonGrayNoBG.vue'
 import InventoryTable from './EntityTables/InventoryTable.vue'
+import SearchArrayByNameViewFunctionality from '../reusable/SearchArrayByNameViewFunctionality.vue'
 
 const props = defineProps({
     inventory_all: {
@@ -46,14 +47,9 @@ function addItem(inv) {
 </script>
 
 <template>
-    <div v-for="inv, index in groupedInventories"
-        class="grid grid-cols-[20px_1fr_1fr_30px] p-2 gap-2 items-center justify-items-center font-gothic
-            bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2 md:hover:cursor-pointer"
-        :id="'Inventory' + `${index + 1}`" @click="showDetails(inv.id)">
 
-        <InventoryTable :inv="inv" :callback="removeItem" />
-
-    </div>
+    <SearchArrayByNameViewFunctionality :array="groupedInventories" label="по інвентарю" type="inventory"
+        :callback="removeItem" :callbackModal="showDetails" ƒ/>
 
     <ModalOpenButton @click="modal_hidden = !modal_hidden" class="justify-self-center" text="Додати щось в інвентар" />
 

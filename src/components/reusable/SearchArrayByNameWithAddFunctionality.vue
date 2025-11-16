@@ -60,24 +60,26 @@ const filteredArray = computed(() => {
                 <div v-for="el in filteredArray" :key="el.id" class="grid grid-cols-[1fr_64px] h-fit p-2 gap-2 items-center justify-items-start font-gothic
             bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium">
 
-                    <div v-if="props.type === 'perk'">
+                    <div class="grid p-2 gap-2 items-center justify-items-start" v-if="props.type === 'perk'">
                         <PerkTable :perk="el" :removable="false" />
                     </div>
 
-                    <div v-if="props.type === 'weapon'">
-                        <WeaponTable :weapon="el" :removable="false"/>
+                    <div class="grid grid-cols-[1fr_1fr_1fr] grid-rows-3 p-2 gap-2 items-center justify-items-center font-gothic"
+                        v-if="props.type === 'weapon'">
+                        <WeaponTable :weapon="el" :removable="false" />
                     </div>
 
-                    <div v-if="props.type === 'armor'">
-                        <ArmorTable :armor="el" :removable="false"/>
+                    <div class="grid grid-cols-[1fr_1fr_1fr_1fr_1fr] grid-rows-3 p-2 gap-2 items-center justify-items-center font-gothic" v-if="props.type === 'armor'">
+                        <ArmorTable :armor="el" :removable="false" />
                     </div>
 
-                    <div v-if="props.type === 'inventory'">
-                        <InventoryTable :inv="el" :removable="false"/>
+                    <div class="grid grid-cols-[1fr_1fr] p-2 gap-2 items-center justify-items-center font-gothic" v-if="props.type === 'inventory'">
+                        <InventoryTable :inv="el" :removable="false" />
                     </div>
 
-                    <div v-if="props.type === 'medicine'">
-                        <MedsTable :med="el" :removable="false" :usable="false"/>
+                    <div class="grid p-2 gap-2 items-center justify-items-start font-gothic"
+                        v-if="props.type === 'medicine'">
+                        <MedsTable :med="el" :removable="false" :usable="false" />
                     </div>
 
                     <ApproveButton @click="props.callback(el)" class="w-16" />

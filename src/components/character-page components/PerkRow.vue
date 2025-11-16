@@ -4,7 +4,7 @@ import { addRow, removeRow, sortByTwoFields } from '/utils/entityHelper'
 import SearchArrayByNameWithAddFunctionality from '../reusable/SearchArrayByNameWithAddFunctionality.vue';
 import ModalOpenButton from '../reusable/Buttons/ModalOpenButton.vue';
 import CloseRedButtonNoBG from '../reusable/Buttons/CloseButtonGrayNoBG.vue';
-import PerkTable from './EntityTables/PerkTable.vue';
+import SearchArrayByNameViewFunctionality from '../reusable/SearchArrayByNameViewFunctionality.vue';
 
 const props = defineProps({
     perks_all: {
@@ -47,16 +47,10 @@ function removePerk(perk) {
 }
 
 </script>
-<!-- TODO REFACTOR -->
+
 <template>
-    <div v-for="perk, index in props.perks" class="grid p-2 gap-2 items-center justify-items-start font-gothic
-            bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2"
-        :id="'Perk' + `${index + 1}`"
-        :class="props.removable ? 'grid-cols-[1fr_44px]' : 'grid-cols-[1fr]'">
 
-        <PerkTable :perk="perk" :removable="props.removable" :callback="removePerk" />
-
-    </div>
+    <SearchArrayByNameViewFunctionality :array="props.perks" label="перку" :callback="removePerk" type="perk"/>
 
     <ModalOpenButton v-if="props.perkPoints > 0" @click="modal_hidden = !modal_hidden" class="justify-self-center" text="Додати перк" />
 

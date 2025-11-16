@@ -5,7 +5,7 @@ import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue'
 import ModalOpenButton from '../reusable/Buttons/ModalOpenButton.vue'
 import SearchArrayByNameWithAddFunctionality from '../reusable/SearchArrayByNameWithAddFunctionality.vue'
 import CloseRedButtonNoBG from '../reusable/Buttons/CloseButtonGrayNoBG.vue'
-import ArmorTable from './EntityTables/ArmorTable.vue'
+import SearchArrayByNameViewFunctionality from '../reusable/SearchArrayByNameViewFunctionality.vue'
 
 const props = defineProps({
     armors_all: {
@@ -46,14 +46,8 @@ function addItem(armor) {
 </script>
 
 <template>
-    <div v-for="armor, index in groupedArmors"
-        class="grid grid-cols-[20px_1fr_1fr_1fr_1fr_1fr_30px] grid-rows-3 p-2 gap-2 items-center justify-items-center font-gothic
-            bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium my-2 md:hover:cursor-pointer"
-        :id="'Armor' + `${index + 1}`" @click.prevent="showDetails(armor.id)">
 
-        <ArmorTable :armor="armor" :callback="removeItem" />
-
-    </div>
+    <SearchArrayByNameViewFunctionality :array="groupedArmors" label="броні" :callback="removeItem" :callbackModal="showDetails" type="armor" />
 
     <ModalOpenButton @click="modal_hidden = !modal_hidden" class="justify-self-center" text="Додати броню" />
 

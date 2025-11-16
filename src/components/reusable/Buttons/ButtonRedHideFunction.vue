@@ -17,7 +17,7 @@ const props = defineProps({
 
 <template>
     <h1
-        class="mx-auto w-min my- p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
+        class="mx-auto p-2 bg-gradient-to-tr from-darkred-bright to-darkred-dark_gray text-center text-3xl font-bold text-darkred-light border-2 
             rounded-xl md:hover:cursor-pointer select-none font-gothic grid grid-cols-[40px_1fr_60px] items-center justify-items-center">
         <mainIcon class="w-8 h-8" />
         {{ text }}
