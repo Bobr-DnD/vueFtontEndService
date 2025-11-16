@@ -3,7 +3,7 @@ import { reactive, onMounted } from 'vue'
 import { useRoute } from 'vue-router';
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
-import socket from '@ws/webSocket';
+
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaion.vue';
 import characterCard from '@/components/reusable/CharacterCard.vue';
@@ -25,7 +25,6 @@ onMounted(async () => {
   else state.isLoading = false
 
   state.session = res.data
-  socket.emit('session:join', sessionId, { role: 'user' })
 })
 </script>
 

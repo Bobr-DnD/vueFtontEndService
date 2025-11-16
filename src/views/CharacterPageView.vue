@@ -9,7 +9,7 @@ import { asyncHandler } from '/utils/asyncHandler';
 import { checkArrayFieldExisting, checkObjectFieldExisting } from '/utils/entityHelper'
 import { toCustomFieldObjectField } from '/utils/objects.dto';
 import { toEmptyCharacterObject } from '/utils/objects.dto';
-import socket from '@ws/webSocket';
+import { socket } from '@ws/webSocket';
 
 import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaion.vue';
 import WeaponRow from '@/components/character-page components/WeaponRow.vue';
@@ -36,8 +36,7 @@ import ProgressiveBar from '@/components/reusable/ProgressiveBar.vue';
 const state = reactive({
     character: {},
     session: {},
-    isLoading: true,
-    connected: false
+    isLoading: true
 })
 
 let effects_hidden = ref(true)
@@ -53,6 +52,11 @@ let inventories_hidden = ref(true)
 
 const characterId = useRoute().params.characterId
 const sessionId = useRoute().params.sessionId
+
+socket.on('session:join', (session) => {
+    if (session?.members?.some(member => member[0] === socket.id)) return
+    socket.emit('session:connectCharacter', sessionId, { characterId })
+})
 
 onMounted(async () => {
     const [resCharacter, errCharacter] = await asyncHandler(
@@ -74,11 +78,12 @@ onMounted(async () => {
 
     state.character = toEmptyCharacterObject(resCharacter.data)
     state.session = resSession.data
-    socket.emit('session:connectCharacter', sessionId, {characterId})
+    socket.emit('session:connectCharacter', sessionId, { characterId })
 })
 
 onBeforeUnmount(() => {
     socket.emit('session:disconnectCharacter', sessionId)
+    socket.off('session:join')
 })
 
 state.character.perks !== undefined ? perks_hidden.value = false : perks_hidden.value = true

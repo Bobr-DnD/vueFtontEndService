@@ -9,10 +9,8 @@ import { toEffectObjectField, toEmptyCharacterObject } from '/utils/objects.dto.
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import FormAddSubtract from '@/components/reusable/FormAddSubtract.vue';
 import RepositoryFactory from '@http/RepositoryFactory'
-import socket from '@ws/webSocket';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
-import characterCard from '@/components/reusable/CharacterCard.vue';
 import ButtonGrayAnimated from '@/components/reusable/Buttons/ButtonGrayAnimated.vue';
 import EffectsTableAdmin from '@/components/admin-page components/EffectsTableAdmin.vue';
 import CustomFieldsTable from '@/components/reusable/CustomFieldsTable.vue';
@@ -45,11 +43,6 @@ onMounted(async () => {
   state.session = resSession.data
   getEffects(state.session.characters);
   selected_character.value = toEmptyCharacterObject(state.session.characters[0])
-  socket.emit('session:join', sessionId, {role: 'admin'})
-})
-
-onBeforeUnmount(() => {
-    socket.emit('session:leave', sessionId)
 })
 
 function getEffects(characters) {

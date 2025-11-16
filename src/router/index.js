@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "@/views/HomeView.vue";
+import AdminGenericView from "@/views/AdminGenericView.vue";
+import SessionGenericView from "@/views/SessionGenericView.vue";
 import Sessions from "@/views/SessionsView.vue";
 import SessionView from "@/views/SingleSessionView.vue";
 import NotFoundView from '@/components/reusable/NotFoundView.vue'
@@ -24,28 +26,42 @@ const router = createRouter({
         },
         {
             path: '/admin/:sessionId',
-            name: 'admin_panel',
-            component: AdminPageView
-        },
-        {
-            path: '/admin/:sessionId/entities',
-            name: 'admin_session',
-            component: EntitiesPageEditor
-        },
-        {
-            path: '/admin/:sessionId/characters',
-            name: 'session_characters_editor',
-            component: CharacterPageEditor
+            name: 'admin',
+            component: AdminGenericView,
+            children:[
+                {
+                    path: '',
+                    name: 'admin_panel',
+                    component: AdminPageView
+                },
+                {
+                    path: 'characters',
+                    name: 'characters_editor',
+                    component: CharacterPageEditor
+                },
+                {
+                    path: 'entities',
+                    name: 'entities_editor',
+                    component: EntitiesPageEditor
+                }
+            ]
         },
         {
             path: '/session/:sessionId',
             name: 'session',
-            component: SessionView
-        },
-        {
-            path: '/session/:sessionId/character/:characterId',
-            name: 'session_character',
-            component: CharacterPageView
+            component: SessionGenericView,
+            children: [
+                {
+                    path: '',
+                    name: 'session_characters',
+                    component: SessionView
+                },
+                {
+                    path: 'character/:characterId',
+                    name: 'session_character_view',
+                    component: CharacterPageView
+                }
+            ]
         },
         {
             path: '/:catchAll(.*)',
