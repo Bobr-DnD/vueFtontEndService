@@ -4,6 +4,7 @@ import Loader from 'vue-spinner/src/SyncLoader.vue'
 import Navigation from '@/components/navigations/Navigation.vue'
 import SessionCard from '@/components/reusable/SessionCard.vue'
 import RepositoryFactory from '@http/RepositoryFactory'
+import { notify } from '/utils/notification'
 
 const state = reactive({
   sessions: [],
