@@ -83,7 +83,7 @@ function selectCharacter(character) {
     if (character.id === 'empty') {
         selected_character.value = toEmptyCharacterObject({})
     }
-    else selected_character.value = structuredClone(toRaw(character))
+    else selected_character.value = toEmptyCharacterObject(structuredClone(toRaw(character)))
 }
 
 function markUnsaved() {
@@ -265,21 +265,16 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
             <ImageEditor class="w-full" />
 
             <div>
-                <TextAreaEditor fieldName="playerNotes" name="Записки гравця" :value="selected_character.playerNotes"
-                    :callback="updateCharacter" />
-                <TextAreaEditor fieldName="adminNotes" name="Записки майстра" :value="selected_character.adminNotes"
-                    :callback="updateCharacter" />
+                <SingleFieldEditor placeholder="Ім'я(обов'язкове поле)" fieldName="name"
+                    :value="selected_character.name" :callback="updateCharacter" class="w-full" />
+                <SingleFieldEditor placeholder="Стать" fieldName="gender" :value="selected_character.gender"
+                    :callback="updateCharacter" class="w-full" />
+                <SingleFieldEditor placeholder="Клас" fieldName="class" :value="selected_character.class"
+                    :callback="updateCharacter" class="w-full" />
+                <SingleFieldEditor placeholder="Раса" fieldName="race" :value="selected_character.race"
+                    :callback="updateCharacter" class="w-full" />
             </div>
 
-
-            <SingleFieldEditor placeholder="Ім'я(обов'язкове поле)" fieldName="name" :value="selected_character.name"
-                :callback="updateCharacter" class="w-full" />
-            <SingleFieldEditor placeholder="Стать" fieldName="gender" :value="selected_character.gender"
-                :callback="updateCharacter" class="w-full" />
-            <SingleFieldEditor placeholder="Клас" fieldName="class" :value="selected_character.class"
-                :callback="updateCharacter" class="w-full" />
-            <SingleFieldEditor placeholder="Раса" fieldName="race" :value="selected_character.race"
-                :callback="updateCharacter" class="w-full" />
             <SingleFieldEditor placeholder="Рівень" fieldName="level" :value="selected_character.level"
                 :callback="updateCharacter" type="number" class="w-full" />
             <SingleFieldEditor placeholder="Очки перків" fieldName="perkPoints" :value="selected_character.perkPoints"
@@ -289,6 +284,11 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
             <SingleFieldEditor placeholder="К-сть досвіду для рівня" fieldName="experienceToLevelUp"
                 :value="selected_character.experienceToLevelUp" :callback="updateCharacter" type="number"
                 class="w-full" />
+
+            <TextAreaEditor fieldName="playerNotes" name="Записки гравця" :value="selected_character.playerNotes"
+                :callback="updateCharacter" />
+            <TextAreaEditor fieldName="adminNotes" name="Записки майстра" :value="selected_character.adminNotes"
+                :callback="updateCharacter" />
 
         </div>
 

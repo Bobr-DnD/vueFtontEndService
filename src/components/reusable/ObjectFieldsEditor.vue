@@ -33,7 +33,7 @@ function addField() {
     let value
     if (value_field_string.value.value !== '' && input_name.value.value != '') {
         if (value_field_string.value) value = input_value.value.value
-        else if (!value_field_string.value) value = parseInt(input_value.value.value)
+        else if (!value_field_string.value) value = parseInt(input_value.value.value) || 1
 
         props.callback(input_name.value.value, value)
         input_name.value.value = ''
@@ -65,7 +65,7 @@ const canSave = computed(() => input_name.value.value !== '')
                     placeholder="Значення" class="w-full font-gothic text-lg text-darkred-dark text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
            focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
                 <input :ref="'input_value'" v-if="!value_field_string" :id="props.name + 'Value'" type="number"
-                    placeholder="0" class="w-full font-gothic text-lg text-darkred-dark text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
+                    :placeholder="0" class="w-full font-gothic text-lg text-darkred-dark text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
            focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
                 <button @click="switchTypeField($event)"
                     class="p-2 w-full border-2 rounded-lg border-darkred-dark font-gothic text-lg">Текст</button>
