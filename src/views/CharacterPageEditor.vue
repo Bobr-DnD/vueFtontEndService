@@ -211,11 +211,15 @@ async function addCustomField(name, value) {
     markUnsaved();
 }
 
-async function updateHealthFields(value, title) {
-    const item = selected_character.value.health.find(h => h.name === title)
+async function updateHealthFields(field) {//TODO finish refactoring | add id to health fields
+    let item = selected_character.value.health.find(h => h.name === field.name)
+
     if (item) {
-        item.value += value
+        item = field
     }
+
+    console.log(selected_character.value.health);
+    
     markUnsaved();
 }
 
@@ -315,16 +319,15 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
 
         </div>
 
-        <div id="health" v-if="activeTab === 'health'" class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-2">
+        <div id="health" v-if="activeTab === 'health'" class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-3">
 
-            <div v-for="h in selected_character.health">
-                <div class="p-1 grow">
-                    <ProgressiveBar :value="h.value" :valueMax="h.max" :text="h.name" :colors="h.colors" />
-                </div>
+            <h1 class="text-2xl font-gothic col-span-2 justify-self-center">Редагування існуючи полей:</h1>
 
-                <HorizontalNumberPicker :value="h.value" :min="-h.value" :max="h.max - h.value" :colors="h.colors"
-                    :callback="updateHealthFields" :title="h.name" />
-            </div>
+            <HealthFieldsEditor v-for="field in selected_character.health" :name="field.name" :min="field.min"
+                :max="field.max" :value="field.value" :healing="field.healing" :colors="field.colors"
+                :placeholder="false" class="col-span-2" :callback="updateHealthFields" />
+
+            <h1 class="text-2xl font-gothic col-span-2 justify-self-center">Створити нове поле:</h1>
 
             <HealthFieldsEditor name="Health" class="col-span-2" :callback="addHealthField" />
 

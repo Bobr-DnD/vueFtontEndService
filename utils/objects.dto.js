@@ -44,7 +44,7 @@ export function toHealthObjectField(health) {
     name: health.name || "Здоров'я",
     min: health.min || 0,
     max: health.max || 25,
-    value: health.value || 25,
+    value: health.value || 0,
     healing: health.healing || 0,
     colors: health.colors || ["#3E5F44", "#FABC3F", "#8E1616"]
   }
