@@ -11,9 +11,7 @@ import ImageEditor from '@/components/reusable/ImageEditor.vue';
 import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
 import CustomFieldsTable from '@/components/reusable/CustomFieldsTable.vue';
 import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
-import ProgressiveBar from '@/components/reusable/ProgressiveBar.vue';
-import HorizontalNumberPicker from '@/components/reusable/HorizontalNumberPicker.vue';
-import { ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, CheckBadgeIcon, ChartBarSquareIcon } from '@heroicons/vue/24/solid'
+import { ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
 import WeaponRow from '@/components/character-page components/WeaponRow.vue';
 import ArmorRow from '@/components/character-page components/ArmorRow.vue';
 import MedsRow from '@/components/character-page components/MedsRow.vue';
@@ -186,49 +184,51 @@ function discardChanges() {
     notify({ message: 'Зміни анульовані', type: 'warning' })
 }
 
-async function updateCharacter(field, value) {
+function updateCharacter(field, value) {
     selected_character.value[field] = value
     markUnsaved();
 }
 
-async function updateCharacterCharacteristic(fields) {
+function updateCharacterCharacteristic(fields) {
     selected_character.characteristics = fields
     markUnsaved();
 }
 
-async function addCharacterCharacteristic(name, value) {
+function addCharacterCharacteristic(name, value) {
     Object.assign(selected_character.value.characteristics, toCustomFieldObjectField({ name, value }))
     markUnsaved();
 }
 
-async function updateCustomFields(fields) {
+function updateCustomFields(fields) {
     selected_character.customFields = fields
     markUnsaved();
 }
 
-async function addCustomField(name, value) {
+function addCustomField(name, value) {
     Object.assign(selected_character.value.customFields, toCustomFieldObjectField({ name, value }))
     markUnsaved();
 }
 
-async function updateHealthFields(field) {//TODO finish refactoring | add id to health fields
-    let item = selected_character.value.health.find(h => h.name === field.name)
+function updateHealthFields(field) {
+    selected_character.value.health =
+        selected_character.value.health.map(h =>
+            h.id === field.id ? field : h
+        )
 
-    if (item) {
-        item = field
-    }
-
-    console.log(selected_character.value.health);
-    
     markUnsaved();
 }
 
-async function addHealthField(field) {
+function deleteHealthField(field) {
+    selected_character.value.health = selected_character.value.health.filter(h => h.id !== field.id)
+    markUnsaved();
+}
+
+function addHealthField(field) {
     selected_character.value.health.push(field)
     markUnsaved();
 }
 
-async function updateInventory() {
+function updateInventory() {
     markUnsaved();
 }
 
@@ -323,13 +323,13 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
 
             <h1 class="text-2xl font-gothic col-span-2 justify-self-center">Редагування існуючи полей:</h1>
 
-            <HealthFieldsEditor v-for="field in selected_character.health" :name="field.name" :min="field.min"
-                :max="field.max" :value="field.value" :healing="field.healing" :colors="field.colors"
-                :placeholder="false" class="col-span-2" :callback="updateHealthFields" />
+            <HealthFieldsEditor v-for="field in selected_character.health" :label="field.name" :health_field="field"
+                class="col-span-2" :callback="updateHealthFields" :callback_remove="deleteHealthField" />
+
 
             <h1 class="text-2xl font-gothic col-span-2 justify-self-center">Створити нове поле:</h1>
 
-            <HealthFieldsEditor name="Health" class="col-span-2" :callback="addHealthField" />
+            <HealthFieldsEditor label="Health" class="col-span-2" :callback="addHealthField" />
 
         </div>
 
