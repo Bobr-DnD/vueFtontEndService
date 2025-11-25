@@ -266,7 +266,7 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
 
         <div id="base" v-if="activeTab === 'base'" class="grid grid-cols-2 auto-rows-min gap-x-4">
 
-            <ImageEditor class="w-full" />
+            <ImageEditor class="w-full" :image="selected_character.image" label="Character image" />
 
             <div>
                 <SingleFieldEditor placeholder="Ім'я(обов'язкове поле)" fieldName="name"

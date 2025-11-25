@@ -1,16 +1,18 @@
 <script setup>
 const props = defineProps({
-    name: {type: String, required: true},
-    gender: {type: String, required: true},
-    race: {type: String, required: true},
-    class: {type: String, required: true},
-    characteristics: {type: Object, required: true},
+    name: { type: String, required: true },
+    image: { type: String, default: '' },
+    gender: { type: String, required: true },
+    race: { type: String, required: true },
+    class: { type: String, required: true },
+    characteristics: { type: Object, required: true },
 })
 </script>
 
 <template>
     <img class="w-full h-64 object-cover rounded-xl border-4 border-darkred-red shadow-md"
-        src="https://placehold.co/400x200?text=Character" alt="Character image" />
+        :src="props.image.length > 0 ? props.image : 'https://placehold.co/400x200?text=Character'"
+        alt="Character image" />
 
     <h1 class="p-2 bg-darkred-dark text-darkred-light text-3xl font-bold text-center rounded-lg shadow font-gothic">
         {{ props.name }}

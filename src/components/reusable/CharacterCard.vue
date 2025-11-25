@@ -19,17 +19,26 @@ const sessionId = useRoute().params.sessionId
 <template>
     <div class="m-4 p-2 rounded-xl border-4 border-darkred-dark font-gothic text-lg h-full w-80">
         <div class="w-full mb-3 flex flex-col items-center">
+
             <RouterLink v-if="props.routing" :to="'/session/' + sessionId + '/character/' + props.character.id"
                 class="w-full">
                 <img class="w-full mb-3 h-32 object-cover rounded-xl border-darkred-red border-4 "
-                    src="https://placehold.co/400x200?text=Character" alt="Character image" />
+                    :src="character.image.length > 0 ? character.image : 'https://placehold.co/400x200?text=Character'"
+                    alt="Character image" />
             </RouterLink>
+
             <img v-else class="w-full mb-3 h-32 object-cover rounded-xl"
-                src="https://placehold.co/400x200?text=Character" alt="Character image" />
+                :src="character.image.legth > 0 ? character.image : 'https://placehold.co/400x200?text=Character'"
+                alt="Character image" />
+
             <RouterLink v-if="props.routing" :to="'/session/' + sessionId + '/character/' + props.character.id"
                 class="font-semibold text-2xl bg-darkred-red text-darkred-light rounded-lg p-2">{{ props.character.name
                 }}</RouterLink>
+
             <div v-else class="font-semibold text-2xl">{{ props.character.name }}</div>
+
+            <h1>{{ character.image.length }}</h1>
+            
         </div>
 
         <!-- <div

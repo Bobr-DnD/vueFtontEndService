@@ -168,7 +168,7 @@ async function updateCharacterNotes(field, value) {
     <div v-if="!state.isLoading" class="w-80 mx-auto my-6 space-y-2 font-univers">
 
         <characterCardSmall :name="state.character.name" :characteristics="state.character.characteristics"
-            :gender="state.character.gender" :class="state.character.class" :race="state.character.race" />
+            :gender="state.character.gender" :class="state.character.class" :race="state.character.race" :image="state.character.image" />
 
         <Experience :exp="state.character.experience" :expMax="state.character.experienceToLevelUp"
             :perkPoints="state.character.perkPoints" :callback="addExperience" />
