@@ -50,3 +50,18 @@ export function toHealthObjectField(health) {
     id: health.id || null
   }
 }
+
+export function toEmptyWeapon(weapon){
+  return {
+    id: weapon.id || 'new',
+    name: weapon.name || '',
+    range: weapon.range || { min: null, max: 1 },
+    actionPoints: weapon.actionPoints || { min: null, max: 1 },
+    damage: weapon.damage || [],
+    adminNotes: weapon.adminNotes || [],
+    requirement: weapon.requirement || '',
+    effect: weapon.effect || '',
+    price: weapon.price || 0,
+    legendary: weapon.legendary || false
+  }
+}

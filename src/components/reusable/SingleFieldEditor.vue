@@ -21,7 +21,7 @@ watch(() => props.value, (newValue) => {
 })
 
 const editField = async () => {
-    fieldReadonly.value = !fieldReadonly.value
+    fieldReadonly.value = false
     await nextTick()
     inputEl.value.focus()
 }

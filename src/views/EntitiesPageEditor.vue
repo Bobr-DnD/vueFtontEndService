@@ -12,6 +12,7 @@ import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
+import Weapon from '@/components/reusable/EntityEditor/Weapon.vue';
 
 const state = reactive({
     session: {},
@@ -24,11 +25,11 @@ const sessionId = useRoute().params.sessionId
 const selected_entity = ref({})
 
 const tabs = [
-    { id: 'perk', label: 'Перки' },
     { id: 'weapon', label: 'Зброя' },
     { id: 'armor', label: 'Броня' },
     { id: 'medicine', label: 'Хілки' },
-    { id: 'inventory', label: 'Інвентар' }
+    { id: 'inventory', label: 'Інвентар' },
+    { id: 'perk', label: 'Перки' },
 ]
 
 onMounted(async () => {
@@ -51,10 +52,10 @@ onMounted(async () => {
 
     <MasterPageNavigation />
 
-    <div class="m-4 grid grid-cols-[150px_1fr] gap-2 items-center justify-start">
-        <div v-if="!state.isLoading" class="w-full flex flex-col items-center gap-2 justify-self-start justify-center">
-            <GraySelectorButton class="w-full" v-for="tab in tabs" @click="selected_entity = tab.id" :id="tab.id" :label="tab.label"
-                :active="selected_entity === tab.id ? true : false" />
+    <div class="m-4 grid grid-cols-1 gap-2 items-center justify-start">
+        <div v-if="!state.isLoading" class="w-full flex flex-wrap justify-center items-center gap-2 justify-self-start">
+            <GraySelectorButton class="w-full basis-32" v-for="tab in tabs" @click="selected_entity = tab.id"
+                :id="tab.id" :label="tab.label" :active="selected_entity === tab.id ? true : false" />
 
             <!-- <AprroveButtonWithText @click="saveCharacter" class="w-full" text="Підтвердити"
                 :class="[!state.unsavedChanges && 'pointer-events-none opacity-50']" />
@@ -62,6 +63,11 @@ onMounted(async () => {
                 :class="[!canSave && 'pointer-events-none opacity-50']" />
             <UnsavedLabel v-if="state.unsavedChanges" /> -->
         </div>
+
+        <div v-if="selected_entity === 'weapon'" class="">
+            <Weapon />
+        </div>
+
     </div>
 
 
