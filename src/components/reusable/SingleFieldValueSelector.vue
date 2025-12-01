@@ -16,18 +16,16 @@ const props = defineProps({
     status: {
         type: Boolean,
         default: false
-    },
-    options: {
-        type: Array,
-        required: true
     }
 })
+
+const options = ['Звичайна', 'Легендарна']
 
 </script>
 
 <template>
-    <div class="flex flex-col items-start justify-center gap-2">
-        <div class="text-lg font-gothic">{{ props.label }}:</div>
+    <div class="flex flex-col items-start justify-center gap-2 p-2">
+        <div class="text-xl font-semibold font-gothic">{{ props.label }}:</div>
 
         <div class="relative w-full">
             
@@ -35,10 +33,10 @@ const props = defineProps({
            borde border-darkred-red/40 shadow-md outline-none cursor-pointer
            transition-all duration-200 focus:border-darkred-red focus:ring-2 focus:ring-darkred-red/40
            hover:bg-darkred-dark/80" :name="props.label" :id="props.field_name"
-                @change="props.callback(props.field_name, $event.target.value)">
+                @change="props.callback(props.field_name, $event.target.value === 'Легендарна' ? true : false )">
 
                 <option class="bg-darkred-dark text-darkred-light hover:bg-darkred-red/20 p-2"
-                    v-for="option in props.options" :value="option" :selected="props.status ? true : false">
+                    v-for="option in options" :value="option" :selected="props.status ? true : false">
                     {{ option }}
                 </option>
 

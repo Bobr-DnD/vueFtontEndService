@@ -58,9 +58,10 @@ export function toEmptyWeapon(weapon){
     range: weapon.range || { min: null, max: 1 },
     actionPoints: weapon.actionPoints || { min: null, max: 1 },
     damage: weapon.damage || [],
-    adminNotes: weapon.adminNotes || [],
-    requirement: weapon.requirement || '',
+    adminNotes: weapon.adminNotes || '',
+    requirement: weapon.requirement || {},
     effect: weapon.effect || '',
+    description: weapon.description || '',
     price: weapon.price || 0,
     legendary: weapon.legendary || false
   }

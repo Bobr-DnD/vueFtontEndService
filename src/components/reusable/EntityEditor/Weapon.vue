@@ -1,8 +1,10 @@
 <script setup>
 import { ref, reactive, watch } from 'vue';
-import SingleFieldEditor from '@/components/reusable/SingleFieldEditor.vue';
 import { toEmptyWeapon } from '/utils/objects.dto';
+import SingleFieldEditor from '@/components/reusable/SingleFieldEditor.vue';
 import SingleFieldValueSelector from '../SingleFieldValueSelector.vue';
+import FormObjectMinMaxFields from '@/components/admin-page components/FormObjectMinMaxFields.vue';
+import FormWeaponDamage from '@/components/admin-page components/FormWeaponDamage.vue';
 
 const props = defineProps({
     weapon: {
@@ -17,14 +19,6 @@ const state = reactive({
 })
 
 function updateWeapon(field, value) {
-    switch (value) {
-        case 'Легендарна':
-            value = true
-            break
-        case 'Звичайна':
-            value = false
-            break
-    }
     props.weapon[field] = value
 
     console.log(props.weapon);
@@ -35,21 +29,27 @@ function updateWeapon(field, value) {
 </script>
 
 <template>
-    <div class="grid grid-cols-4">
-        <SingleFieldEditor class="col-span-2" placeholder="Назва" :value="props.weapon.name" fieldName="name"
-            type="text" :callback="updateWeapon" />
+    <div class="grid grid-cols-4 gap-2">
+        <SingleFieldEditor class="" placeholder="Назва" :value="props.weapon.name" fieldName="name" type="text"
+            :callback="updateWeapon" />
 
-        <SingleFieldValueSelector field_name="legendary" label="Тип зброї" :callback="updateWeapon"
-            :status="props.weapon.legendary" :options="['Звичайна', 'Легендарна']" />
+        <SingleFieldEditor class="" placeholder="Ефект" :value="props.weapon.effect" fieldName="effect" type="text"
+            :callback="updateWeapon" />
+
+        <SingleFieldEditor class="" placeholder="Опис" :value="props.weapon.description" fieldName="description"
+            type="text" :callback="updateWeapon" />
 
         <SingleFieldEditor placeholder="Ціна" :value="props.weapon.price" fieldName="price" type="number"
             :callback="updateWeapon" />
 
-        <SingleFieldEditor class="col-span-2" placeholder="Ефект" :value="props.weapon.effect" fieldName="effect"
-            type="text" :callback="updateWeapon" />
+        <FormObjectMinMaxFields entity_name="Очки дії" :min="weapon.actionPoints.min" :max="weapon.actionPoints.max" />
 
-        <SingleFieldEditor class="col-span-2" placeholder="Опис" :value="props.weapon.description"
-            fieldName="description" type="text" :callback="updateWeapon" />
+        <FormObjectMinMaxFields entity_name="Дальність атаки" :min="weapon.range.min" :max="weapon.range.max" />
+
+        <SingleFieldValueSelector class="self-start" field_name="legendary" label="Тип зброї" :callback="updateWeapon"
+            :status="props.weapon.legendary" />
+
+        <FormWeaponDamage :damage="weapon.damage" entity_name="Damage" />
 
     </div>
 </template>
