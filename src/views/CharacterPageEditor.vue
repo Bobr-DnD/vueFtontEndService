@@ -61,7 +61,7 @@ onMounted(async () => {
         RepositoryFactory.getById('session', sessionId)
     )
     if (errSession) {
-        console.warn(errSession.message)
+        notify({ message: errSession.message, type: 'error' })
         return
     }
 
@@ -232,6 +232,11 @@ function updateInventory() {
     markUnsaved();
 }
 
+function addImage(image){
+    selected_character.value.image = image,
+    markUnsaved()
+}
+
 const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
 
 </script>
@@ -266,9 +271,8 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
 
         <div id="base" v-if="activeTab === 'base'" class="grid grid-cols-2 auto-rows-min gap-x-4">
 
-            <ImageEditor class="w-full" :image="selected_character.image" label="Character image" />
-
-            <div>
+            <ImageEditor class="w-full col-span-2" :image="selected_character.image" label="Character image" :callback="addImage" />
+       
                 <SingleFieldEditor placeholder="Ім'я(обов'язкове поле)" fieldName="name"
                     :value="selected_character.name" :callback="updateCharacter" class="w-full" />
                 <SingleFieldEditor placeholder="Стать" fieldName="gender" :value="selected_character.gender"
@@ -277,7 +281,6 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
                     :callback="updateCharacter" class="w-full" />
                 <SingleFieldEditor placeholder="Раса" fieldName="race" :value="selected_character.race"
                     :callback="updateCharacter" class="w-full" />
-            </div>
 
             <SingleFieldEditor placeholder="Рівень" fieldName="level" :value="selected_character.level"
                 :callback="updateCharacter" type="number" class="w-full" />

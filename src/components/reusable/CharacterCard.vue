@@ -17,17 +17,17 @@ const sessionId = useRoute().params.sessionId
 </script>
 
 <template>
-    <div class="m-4 p-2 rounded-xl border-4 border-darkred-dark font-gothic text-lg h-full w-80">
-        <div class="w-full mb-3 flex flex-col items-center">
+    <div class="m-4 p-2 rounded-xl border-4 border-darkred-dark font-gothic text-lg h-full w-80 flex flex-col gap-3">
+        <div class="w-full flex flex-col items-center gap-3">
 
             <RouterLink v-if="props.routing" :to="'/session/' + sessionId + '/character/' + props.character.id"
                 class="w-full">
-                <img class="w-full mb-3 h-32 object-cover object-top rounded-xl border-darkred-red border-4 "
-                    :src="character.image.length > 0 ? character.image : 'https://placehold.co/400x200?text=Character'"
+                <img class="w-full min-h-auto max-h-80 object-cover object-top rounded-xl border-darkred-red border-4"
+                    :src="character.image? character.image : 'https://placehold.co/400x200?text=Character'"
                     alt="Character image" />
             </RouterLink>
 
-            <img v-else class="w-full mb-3 h-32 object-cover object-top rounded-xl"
+            <img v-else class="w-full h-48 object-cover object-top rounded-xl border-darkred-red border-4"
                 :src="character.image.legth > 0 ? character.image : 'https://placehold.co/400x200?text=Character'"
                 alt="Character image" />
 
