@@ -10,7 +10,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <img class="w-full h-64 object-cover rounded-xl border-4 border-darkred-red shadow-md"
+    <img class="w-full h-64 object-cover object-top rounded-xl border-4 border-darkred-red shadow-md"
         :src="props.image.length > 0 ? props.image : 'https://placehold.co/400x200?text=Character'"
         alt="Character image" />
 

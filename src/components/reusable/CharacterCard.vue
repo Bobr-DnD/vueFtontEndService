@@ -22,12 +22,12 @@ const sessionId = useRoute().params.sessionId
 
             <RouterLink v-if="props.routing" :to="'/session/' + sessionId + '/character/' + props.character.id"
                 class="w-full">
-                <img class="w-full mb-3 h-32 object-cover rounded-xl border-darkred-red border-4 "
+                <img class="w-full mb-3 h-32 object-cover object-top rounded-xl border-darkred-red border-4 "
                     :src="character.image.length > 0 ? character.image : 'https://placehold.co/400x200?text=Character'"
                     alt="Character image" />
             </RouterLink>
 
-            <img v-else class="w-full mb-3 h-32 object-cover rounded-xl"
+            <img v-else class="w-full mb-3 h-32 object-cover object-top rounded-xl"
                 :src="character.image.legth > 0 ? character.image : 'https://placehold.co/400x200?text=Character'"
                 alt="Character image" />
 
@@ -36,8 +36,6 @@ const sessionId = useRoute().params.sessionId
                 }}</RouterLink>
 
             <div v-else class="font-semibold text-2xl">{{ props.character.name }}</div>
-
-            <h1>{{ character.image.length }}</h1>
             
         </div>
 
