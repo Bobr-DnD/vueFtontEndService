@@ -12,11 +12,11 @@ import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
 import CustomFieldsTable from '@/components/reusable/CustomFieldsTable.vue';
 import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
 import { ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
-import WeaponRow from '@/components/character-page components/WeaponRow.vue';
-import ArmorRow from '@/components/character-page components/ArmorRow.vue';
-import MedsRow from '@/components/character-page components/MedsRow.vue';
-import InventoryRow from '@/components/character-page components/InventoryRow.vue';
-import PerkRow from '@/components/character-page components/PerkRow.vue';
+import WeaponTable from '@/components/character-page components/WeaponTable.vue';
+import ArmorTable from '@/components/character-page components/ArmorTable.vue';
+import MedicineTable from '@/components/character-page components/MedicineTable.vue';
+import InventoryTable from '@/components/character-page components/InventoryTable.vue';
+import PerkTable from '@/components/character-page components/PerkTable.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import HealthFieldsEditor from '@/components/admin-page components/HealthFieldsEditor.vue';
@@ -345,14 +345,14 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
 
             <section id="weapon" v-if="activeInventory === 'weapon'" class="border rounded-lg p-2 w-[600px]">
                 <div class="grid grid-cols-1 w-full">
-                    <WeaponRow :weapons_all="state.session.weapons" :weapons="selected_character.weapons"
+                    <WeaponTable :weapons_all="state.session.weapons" :weapons="selected_character.weapons"
                         :callback="updateInventory" />
                 </div>
             </section>
 
             <section id="armor" v-if="activeInventory === 'armor'" class="border rounded-lg p-2 w-[600px]">
                 <div class="grid grid-cols-1 w-full">
-                    <ArmorRow :armors_all="state.session.armors" :armors="selected_character.armor"
+                    <ArmorTable :armors_all="state.session.armors" :armors="selected_character.armor"
                         :callback="updateInventory" />
                 </div>
             </section>
@@ -360,7 +360,7 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
             <section id="medicine" v-if="activeInventory === 'medicine'" class="border rounded-lg p-2 w-[600px]">
 
                 <div class="grid grid-cols-1 w-full">
-                    <MedsRow :medicines_all="state.session.medicines" :medicines="selected_character.medicines"
+                    <MedicineTable :medicines_all="state.session.medicines" :medicines="selected_character.medicines"
                         :effects_all="state.session.effects" :effects="selected_character.effects"
                         :move="state.session.move" :callback="updateInventory" />
                 </div>
@@ -368,14 +368,14 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
 
             <section id="inventory" v-if="activeInventory === 'inventory'" class="border rounded-lg p-2 w-[600px]">
                 <div class="grid grid-cols-1 w-ful">
-                    <InventoryRow :inventory_all="state.session.inventories" :inventory="selected_character.inventory"
+                    <InventoryTable :inventory_all="state.session.inventories" :inventory="selected_character.inventory"
                         :callback="updateInventory" />
                 </div>
             </section>
 
             <section id="perk" v-if="activeInventory === 'perk'" class="border rounded-lg p-2 w-[600px]">
                 <div class="grid grid-cols-1 w-full">
-                    <PerkRow v-if="state.session.perks" :perks_all="state.session.perks"
+                    <PerkTable v-if="state.session.perks" :perks_all="state.session.perks"
                         :perks="selected_character.perks" :perkPoints="1" :callback="updateInventory"
                         :removable="true" />
                 </div>

@@ -10,8 +10,8 @@ const props = defineProps({
 </script>
 
 <template>
-    <img class="w-full min-h-auto max-h-96 object-cover object-top rounded-xl border-4 border-darkred-red shadow-md"
-        :src="props.image ? props.image : 'https://placehold.co/400x200?text=Character'"
+    <img class="w-full h-96 object-cover object-top rounded-xl border-4 border-darkred-red shadow-md"
+        :src="props.image ? props.image : 'https://placehold.co/400x400?text=Character'"
         alt="Character image" />
 
     <h1 class="p-2 bg-darkred-dark text-darkred-light text-3xl font-bold text-center rounded-lg shadow font-gothic">

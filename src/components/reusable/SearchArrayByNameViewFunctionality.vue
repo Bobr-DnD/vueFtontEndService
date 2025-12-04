@@ -1,10 +1,11 @@
 <script setup>
 import { ref, computed } from 'vue'
-import WeaponTable from '../character-page components/EntityTables/WeaponTable.vue'
-import ArmorTable from '../character-page components/EntityTables/ArmorTable.vue'
-import PerkTable from '../character-page components/EntityTables/PerkTable.vue'
-import MedsTable from '../character-page components/EntityTables/MedsTable.vue'
-import InventoryTable from '../character-page components/EntityTables/InventoryTable.vue'
+import { XMarkIcon } from '@heroicons/vue/24/outline'
+import WeaponRowView from '../character-page components/EntityRows/WeaponRowView.vue'
+import ArmorRowView from '../character-page components/EntityRows/ArmorRowView.vue'
+import PerkRowView from '../character-page components/EntityRows/PerkRowView.vue'
+import MedicineRowView from '../character-page components/EntityRows/MedicineRowView.vue'
+import InventoryRowView from '../character-page components/EntityRows/InventoryRowView.vue'
 
 const props = defineProps({
     array: {
@@ -56,13 +57,13 @@ const filteredArray = computed(() => {
 <template>
     <div class="w-full flex flex-col items-center gap-4 p-2">
 
-        <div class="w-full grid grid-cols-[1fr_56px] items-center gap-2">
-            <input v-model="searchQuery" type="text" :placeholder="label" class="w-full p-3 rounded-md bg-fallout.blackish text-fallout.sand border-2 border-fallout.red
-               font-gothic text-lg focus:outline-none focus:ring-2 focus:ring-fallout.red
-               placeholder-fallout.sand/40 transition-all duration-200" />
+        <div class="w-full grid items-center gap-2" :class="searchQuery ? 'grid-cols-[1fr_56px]' : 'grid-cols-1'">
+            <input v-model="searchQuery" type="text" :placeholder="label" class="w-full p-3 rounded-md bg-darkred-dark text-darkred-light border-2 border-darkred-red
+               font-gothic text-lg focus:outline-none focus:ring-2 focus:ring-darkred-red
+               placeholder-darkred-light/80 transition-all duration-200" />
             <button v-if="searchQuery" @click="searchQuery = ''"
-                class="px-3 py-2 w-14 bg-darkred-red text-darkred-light rounded-md font-bold text-xl md:hover:bg-fallout.sand md:hover:text-fallout.blackish transition-all">
-                ✖
+                class="px-3 py-2 w-14 flex justify-center items-center bg-darkred-red text-darkred-light rounded-md font-bold text-xl md:hover:bg-darkred-bright md:hover:text-darkred-dark transition-all">
+                <XMarkIcon class="h-8 w-8"/>
             </button>
         </div>
 
@@ -75,28 +76,28 @@ const filteredArray = computed(() => {
 
                     <div class="w-full grid p-2 gap-2 items-center justify-items-start font-gothic" :class="props.perkRemovable ? 'grid-cols-[1fr_44px]' : 'grid-cols-1'"
                         v-if="props.type === 'perk'">
-                        <PerkTable :perk="el" :callback="props.callback" :removable="props.perkRemovable" />
+                        <PerkRowView :perk="el" :callback="props.callback" :removable="props.perkRemovable" />
                     </div>
 
                     <div class="w-full grid grid-cols-[20px_1fr_1fr_1fr_30px] grid-rows-3 p-2 gap-2 items-center justify-items-center font-gothic md:hover:cursor-pointer"
                         v-if="props.type === 'weapon'" @click="props.callbackModal(el.id)">
-                        <WeaponTable :weapon="el" :callback="props.callback" />
+                        <WeaponRowView :weapon="el" :callback="props.callback" />
                     </div>
 
                     <div class="w-full grid grid-cols-[20px_1fr_1fr_1fr_1fr_1fr_30px] grid-rows-3 p-2 gap-2 items-center justify-items-center font-gothic md:hover:cursor-pointer"
                         v-if="props.type === 'armor'" @click="props.callbackModal(el.id)">
-                        <ArmorTable :armor="el" :callback="props.callback" />
+                        <ArmorRowView :armor="el" :callback="props.callback" />
                     </div>
 
                     <div class="w-full grid grid-cols-[20px_1fr_1fr_30px] p-2 gap-2 items-center justify-items-center font-gothic md:hover:cursor-pointer"
                         v-if="props.type === 'inventory'" @click="props.callbackModal(el.id)">
-                        <InventoryTable :inv="el" :callback="props.callback" />
+                        <InventoryRowView :inv="el" :callback="props.callback" />
                     </div>
 
                     <div class="w-full grid p-2 gap-2 items-center justify-items-start font-gothic md:hover:cursor-pointer"
                         :class="el.effect ? 'grid-cols-[20px_1fr_1fr_30px_30px]' : 'grid-cols-[20px_1fr_1fr_30px]'"
                         v-if="props.type === 'medicine'" @click="props.callbackModal(el.id)">
-                        <MedsTable :med="el" :callbackDelete="props.callback" :callbackUse="props.callbackMedUse" />
+                        <MedicineRowView :med="el" :callbackDelete="props.callback" :callbackUse="props.callbackMedUse" />
                     </div>
 
                 </div>

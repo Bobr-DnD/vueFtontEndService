@@ -34,9 +34,9 @@ const props = defineProps({
 <template>
     <div v-if="props.med.count" class="text-darkred-light">×{{ props.med.count }}</div>
 
-    <div class="p2 text-clip">{{ props.med.name }}</div>
+    <div class="p-2 text-clip">{{ props.med.name }}</div>
 
-    <div class="p2 text-clip">{{ props.med.description }}</div>
+    <div class="p-2 text-clip">{{ props.med.description }}</div>
 
     <ApproveButton v-if="props.usable && med.effect" @click.stop="props.callbackUse(props.med.id, props.med.effect.id)" class="w-full" />
     <DeleteButton v-if="props.removable" :disabled="!props.removable"

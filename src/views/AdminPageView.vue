@@ -14,7 +14,7 @@ import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.
 import ButtonGrayAnimated from '@/components/reusable/Buttons/ButtonGrayAnimated.vue';
 import EffectsTableAdmin from '@/components/admin-page components/EffectsTableAdmin.vue';
 import CustomFieldsTable from '@/components/reusable/CustomFieldsTable.vue';
-import PerkRow from '@/components/character-page components/PerkRow.vue';
+import PerkRow from '@/components/character-page components/PerkTable.vue';
 import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
 
 const sessionId = useRoute().params.sessionId

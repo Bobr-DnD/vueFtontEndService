@@ -35,8 +35,8 @@ function toggleMode() {
         <div
             class="max-w-sm w-full m-6 rounded-xl shadow-lg overflow-hidden border-4 border-darkred-red bg-darkred-dark">
             <div class="relative">
-                <img class="w-full h-auto object-cover object-top border-b-4 border-darkred-light"
-                    :src="props.session.image ? props.session.image : 'https://placehold.co/400x200?text=Session'" alt="Session image" />
+                <img class="w-full h-96 object-cover object-top border-b-4 border-darkred-light"
+                    :src="props.session.image ? props.session.image : 'https://placehold.co/400x400?text=Session'" alt="Session image" />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent"></div>
             </div>
 

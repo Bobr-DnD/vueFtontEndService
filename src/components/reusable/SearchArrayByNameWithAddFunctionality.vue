@@ -1,11 +1,11 @@
 <script setup>
 import { ref, computed } from 'vue'
 import ApproveButton from './Buttons/ApproveButton.vue'
-import PerkTable from '../character-page components/EntityTables/PerkTable.vue'
-import WeaponTable from '../character-page components/EntityTables/WeaponTable.vue'
-import ArmorTable from '../character-page components/EntityTables/ArmorTable.vue'
-import MedsTable from '../character-page components/EntityTables/MedsTable.vue'
-import InventoryTable from '../character-page components/EntityTables/InventoryTable.vue'
+import PerkRowView from '../character-page components/EntityRows/PerkRowView.vue'
+import WeaponRowView from '../character-page components/EntityRows/WeaponRowView.vue'
+import ArmorRowView from '../character-page components/EntityRows/ArmorRowView.vue'
+import MedicineRowView from '../character-page components/EntityRows/MedicineRowView.vue'
+import InventoryRowView from '../character-page components/EntityRows/InventoryRowView.vue'
 
 const props = defineProps({
     array: {
@@ -44,13 +44,13 @@ const filteredArray = computed(() => {
 <template>
     <div class="w-full flex flex-col items-center gap-4 p-4">
 
-        <div class="w-full grid grid-cols-[1fr_56px] items-center gap-2">
-            <input v-model="searchQuery" type="text" :placeholder="label" class="w-full p-3 rounded-md bg-fallout.blackish text-fallout.sand border-2 border-fallout.red
-               font-gothic text-lg focus:outline-none focus:ring-2 focus:ring-fallout.red
-               placeholder-fallout.sand/40 transition-all duration-200" />
+        <div class="w-full grid items-center gap-2" :class="searchQuery ? 'grid-cols-[1fr_56px]' : 'grid-cols-1'">
+            <input v-model="searchQuery" type="text" :placeholder="label" class="w-full p-3 rounded-md bg-darkred-dark text-darkred-light border-2 border-darkred-red
+               font-gothic text-lg focus:outline-none focus:ring-2 focus:ring-darkred-red
+               placeholder-darkred-light/80 transition-all duration-200" />
             <button v-if="searchQuery" @click="searchQuery = ''"
-                class="px-3 py-2 w-14 bg-darkred-red text-darkred-light rounded-md font-bold text-xl md:hover:bg-fallout.sand md:hover:text-fallout.blackish transition-all">
-                ✖
+                class="px-3 py-2 w-14 bg-darkred-red text-darkred-light rounded-md font-bold text-xl md:hover:bg-darkred-light md:hover:text-darkred-dark transition-all">
+                ✕
             </button>
         </div>
 
@@ -61,25 +61,25 @@ const filteredArray = computed(() => {
             bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium">
 
                     <div class="grid p-2 gap-2 items-center justify-items-start" v-if="props.type === 'perk'">
-                        <PerkTable :perk="el" :removable="false" />
+                        <PerkRowView :perk="el" :removable="false" />
                     </div>
 
                     <div class="grid grid-cols-[1fr_1fr_1fr] grid-rows-3 p-2 gap-2 items-center justify-items-center font-gothic"
                         v-if="props.type === 'weapon'">
-                        <WeaponTable :weapon="el" :removable="false" />
+                        <WeaponRowView :weapon="el" :removable="false" />
                     </div>
 
                     <div class="grid grid-cols-[1fr_1fr_1fr_1fr_1fr] grid-rows-3 p-2 gap-2 items-center justify-items-center font-gothic" v-if="props.type === 'armor'">
-                        <ArmorTable :armor="el" :removable="false" />
+                        <ArmorRowView :armor="el" :removable="false" />
                     </div>
 
                     <div class="grid grid-cols-[1fr_1fr] p-2 gap-2 items-center justify-items-center font-gothic" v-if="props.type === 'inventory'">
-                        <InventoryTable :inv="el" :removable="false" />
+                        <InventoryRowView :inv="el" :removable="false" />
                     </div>
 
                     <div class="grid p-2 gap-2 items-center justify-items-start font-gothic"
                         v-if="props.type === 'medicine'">
-                        <MedsTable :med="el" :removable="false" :usable="false" />
+                        <MedicineRowView :med="el" :removable="false" :usable="false" />
                     </div>
 
                     <ApproveButton @click="props.callback(el)" class="w-16" />

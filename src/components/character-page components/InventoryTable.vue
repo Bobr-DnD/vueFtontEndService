@@ -5,7 +5,6 @@ import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue'
 import ModalOpenButton from '../reusable/Buttons/ModalOpenButton.vue'
 import SearchArrayByNameWithAddFunctionality from '../reusable/SearchArrayByNameWithAddFunctionality.vue'
 import CloseRedButtonNoBG from '../reusable/Buttons/CloseButtonGrayNoBG.vue'
-import InventoryTable from './EntityTables/InventoryTable.vue'
 import SearchArrayByNameViewFunctionality from '../reusable/SearchArrayByNameViewFunctionality.vue'
 
 const props = defineProps({

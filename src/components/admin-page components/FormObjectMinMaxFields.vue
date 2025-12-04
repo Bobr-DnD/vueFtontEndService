@@ -1,6 +1,7 @@
 <script setup>
 import { ref, nextTick } from 'vue';
 import { PencilIcon, CheckCircleIcon } from '@heroicons/vue/24/solid';
+import { notify } from '/utils/notification';
 
 const props = defineProps({
     entity_name: {
@@ -14,6 +15,10 @@ const props = defineProps({
     max: {
         type: Number,
         default: 1
+    },
+    callback: {
+        type: Function,
+        required: true
     }
 })
 
@@ -46,6 +51,15 @@ function saveField(button) {
             maxReadonly.value = true
             break
     }
+    let min = null
+    if (min) min = parseInt(minInput.value.value)
+    let max = parseInt(maxInput.value.value)
+    if (min >= max) {
+        max = min + 1
+        notify({ message: 'Мінімальне значення більше за максимальне', type: 'error' })
+    }
+
+    props.callback(min, max)
 }
 
 </script>
@@ -69,7 +83,9 @@ function saveField(button) {
                 <div class="w-full grid items-end gap-2"
                     :class="minReadonly ? 'grid-cols-[1fr_44px]' : 'grid-cols-[1fr_44px_44px]'">
 
-                    <input :ref="'minInput'" :id="entity_name + 'min'" type="number" :value="props.min" placeholder="0" :disabled="minReadonly" class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full
+                    <input :ref="'minInput'" :id="entity_name + 'min'" type="number" :value="props.min" placeholder="значення відстунє"
+                        :disabled="minReadonly"
+                        class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full
                disabled:bg-darkred-dark_gray disabled:text-darkred-light placeholder-darkred-light/60 transition-all duration-200" />
 
                     <div @click="editField('min')"
@@ -96,7 +112,9 @@ function saveField(button) {
                 <div class="w-full grid items-end gap-2"
                     :class="maxReadonly ? 'grid-cols-[1fr_44px]' : 'grid-cols-[1fr_44px_44px]'">
 
-                    <input :ref="'maxInput'" :id="entity_name + 'max'" type="number" :value="props.max" placeholder="0" :disabled="maxReadonly" class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full
+                    <input :ref="'maxInput'" :id="entity_name + 'max'" type="number" :value="props.max" placeholder="0"
+                        :disabled="maxReadonly"
+                        class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full
                disabled:bg-darkred-dark_gray disabled:text-darkred-light placeholder-darkred-light/60 transition-all duration-200" />
 
                     <div @click="editField('max')"
