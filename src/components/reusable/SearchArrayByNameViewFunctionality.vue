@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
+import { groupById } from '/utils/entityHelper'
 import WeaponRowView from '../character-page components/EntityRows/WeaponRowView.vue'
 import ArmorRowView from '../character-page components/EntityRows/ArmorRowView.vue'
 import PerkRowView from '../character-page components/EntityRows/PerkRowView.vue'
@@ -45,9 +46,11 @@ const label = `🔍 Пошук ${props.label} ...`
 const searchQuery = ref('')
 
 const filteredArray = computed(() => {
-    if (!searchQuery.value.trim()) return props.array
+    const groupedArray = groupById(props.array)
+
+    if (!searchQuery.value.trim()) return groupedArray
     const query = searchQuery.value.toLowerCase()
-    return props.array.filter(el =>
+    return groupedArray.filter(el =>
         el.name.toLowerCase().includes(query)
     )
 })

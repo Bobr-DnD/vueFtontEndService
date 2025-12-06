@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import ApproveButton from './Buttons/ApproveButton.vue'
-import PerkRowView from '../character-page components/EntityRows/PerkRowView.vue'
+import PerkRowSelect from '../character-page components/EntityRows/PerkRowSelect.vue'
 import WeaponRowView from '../character-page components/EntityRows/WeaponRowView.vue'
 import ArmorRowView from '../character-page components/EntityRows/ArmorRowView.vue'
 import MedicineRowView from '../character-page components/EntityRows/MedicineRowView.vue'
@@ -58,28 +58,28 @@ const filteredArray = computed(() => {
             <section class="flex flex-col gap-2">
 
                 <div v-for="el in filteredArray" :key="el.id" class="grid grid-cols-[1fr_64px] h-fit p-2 gap-2 items-center justify-items-start font-gothic
-            bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium">
+            bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium overflow-hidden text-ellipsis">
 
                     <div class="grid p-2 gap-2 items-center justify-items-start" v-if="props.type === 'perk'">
-                        <PerkRowView :perk="el" :removable="false" />
+                        <PerkRowSelect :perk="el" />
                     </div>
 
                     <div class="grid grid-cols-[1fr_1fr_1fr] grid-rows-3 p-2 gap-2 items-center justify-items-center font-gothic"
                         v-if="props.type === 'weapon'">
-                        <WeaponRowView :weapon="el" :removable="false" />
+                        <!-- <WeaponRowView :weapon="el" :removable="false" /> -->
                     </div>
 
                     <div class="grid grid-cols-[1fr_1fr_1fr_1fr_1fr] grid-rows-3 p-2 gap-2 items-center justify-items-center font-gothic" v-if="props.type === 'armor'">
-                        <ArmorRowView :armor="el" :removable="false" />
+                        <!-- <ArmorRowView :armor="el" :removable="false" /> -->
                     </div>
 
                     <div class="grid grid-cols-[1fr_1fr] p-2 gap-2 items-center justify-items-center font-gothic" v-if="props.type === 'inventory'">
-                        <InventoryRowView :inv="el" :removable="false" />
+                        <!-- <InventoryRowView :inv="el" :removable="false" /> -->
                     </div>
 
                     <div class="grid p-2 gap-2 items-center justify-items-start font-gothic"
                         v-if="props.type === 'medicine'">
-                        <MedicineRowView :med="el" :removable="false" :usable="false" />
+                        <!-- <MedicineRowView :med="el" :removable="false" :usable="false" /> -->
                     </div>
 
                     <ApproveButton @click="props.callback(el)" class="w-16" />

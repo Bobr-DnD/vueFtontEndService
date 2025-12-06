@@ -1,20 +1,31 @@
 <script setup>
 
 const props = defineProps({
-    quests: {type: Object, required: true}
+    quests: { type: Object, required: true }
 })
 
 
 </script>
 
 <template>
-    <div class="border-2 rounded-lg border-darkred-dark_gray p-1">
-
-        <div class="w-full text-center text-2xl font-semibold font-gothic">
-            {{ props.quest.name }}
+    <div v-for="quest in props.quests"
+        class="border-2 rounded-lg border-darkred-dark_gray p-2 font-gothic overflow-hidden text-ellipsis">
+        <div class="flex flex-col gap-1">
+            <div class="w-full text-center text-2xl font-semibold">
+                {{ quest.name }}
+            </div>
+            <div class="w-full text-xl font-normal">
+                Опис: {{ quest.description }}
+            </div>
+            <div class="w-full text-xl font-normal">
+                Винагорода: {{ quest.reward }}
+            </div>
+            <div v-if="quest.steps.length !== 0" class="w-full text-xl font-normal">
+                Кроки:
+            </div>
         </div>
 
-        <div v-for="step in props.quest.steps" class="text-md font-univers font-medium">
+        <div v-for="step in quest.steps" class="text-lg font-normal indent-4">
 
             <div v-if="step.status === 'fail'">
                 • <span class="line-through decoration-2 decoration-darkred-red">{{ step.name }}</span>

@@ -26,11 +26,11 @@ const props = defineProps({
          bg-darkred-dark_gray  border-darkred-gray rounded-xl shadow-sm text-darkred-light">
 
             <div class="text-lg font-semibold">
-                {{ effect.effect.name }}
+                {{ effect.name }}
             </div>
 
             <div class="text-sm">
-                {{ effect.effect.description }}
+                {{ effect.description }}
             </div>
 
             <div class="text-md font-medium px-2 py-1 rounded-lg bg-darkred-dark">

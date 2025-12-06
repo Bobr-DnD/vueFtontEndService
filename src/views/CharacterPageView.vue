@@ -88,8 +88,6 @@ onBeforeUnmount(() => {
 
 state.character.perks !== undefined ? perks_hidden.value = false : perks_hidden.value = true
 
-
-
 async function updateCharacter() {
     const [res, err] = await asyncHandler(
         RepositoryFactory.update('character', characterId, state.character)
@@ -168,7 +166,8 @@ async function updateCharacterNotes(field, value) {
     <div v-if="!state.isLoading" class="w-80 mx-auto my-6 space-y-2 font-univers">
 
         <characterCardSmall :name="state.character.name" :characteristics="state.character.characteristics"
-            :gender="state.character.gender" :class="state.character.class" :race="state.character.race" :image="state.character.image" />
+            :gender="state.character.gender" :class="state.character.class" :race="state.character.race"
+            :image="state.character.image" />
 
         <Experience :exp="state.character.experience" :expMax="state.character.experienceToLevelUp"
             :perkPoints="state.character.perkPoints" :callback="addExperience" />
@@ -199,11 +198,11 @@ async function updateCharacterNotes(field, value) {
                     :effects="state.character.effects" />
             </div>
 
-            <div class="">
-                <HideButton v-if="checkObjectFieldExisting(state.character.quest)" class="w-full"
-                    textShow="Показати особистий квест" textHide="Приховати особистий квест" :hidden="quests_hidden"
-                    :mainIcon="FlagIcon" @click="quests_hidden = !quests_hidden" />
-                <QuestsTable v-if="checkObjectFieldExisting(state.character.quest) && !quests_hidden"
+            <div class="flex flex-col gap-2">
+                <HideButton v-if="checkArrayFieldExisting(state.character.quests)" class="w-full"
+                    textShow="Показати квести" textHide="Приховати квести" :hidden="quests_hidden" :mainIcon="FlagIcon"
+                    @click="quests_hidden = !quests_hidden" />
+                <QuestsTable v-if="checkArrayFieldExisting(state.character.quests) && !quests_hidden"
                     :quests="state.character.quests" />
             </div>
 
@@ -243,13 +242,14 @@ async function updateCharacterNotes(field, value) {
         <section class="w-full">
             <ButtonRedHideFunction @click="perks_hidden = !perks_hidden" text="Навички" :mainIcon="CheckBadgeIcon"
                 :hidden="perks_hidden" />
-            <div :class="['grid grid-cols-1 w-full', perks_hidden ? 'hidden' : '']">
-                <PerkTable v-if="state.session.perks" :perks_all="state.session.perks" :perks="state.character.perks"
-                    :perkPoints="state.character.perkPoints" :callback="addPerk" :removable="false" />
+            <div :class="['grid gird-cols-1 w-full', perks_hidden ? 'hidden' : '']">
+                <PerkTable v-if="state.session.perks" :session_perks="state.session.perks"
+                    :character_perks="state.character.perks" :perkPoints="state.character.perkPoints"
+                    :callback="addPerk" :removable="false" />
             </div>
         </section>
 
-        <section class="w-full">
+        <!--<section class="w-full">
             <ButtonRedHideFunction @click="weapons_hidden = !weapons_hidden" text="Зброя" :mainIcon="BoltIcon"
                 :hidden="weapons_hidden" />
             <div :class="['grid grid-cols-1 w-full', weapons_hidden ? 'hidden' : '']">
@@ -284,8 +284,7 @@ async function updateCharacterNotes(field, value) {
                 <InventoryTable :inventory_all="state.session.inventories" :inventory="state.character.inventory"
                     :callback="updateInventory" />
             </div>
-        </section>
-
+        </section>-->
 
     </section>
 

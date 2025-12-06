@@ -152,8 +152,8 @@ async function addPerk() {
     </div>
 
     <div class="w-96 mx-auto" :class="'shrink-' + state.session.characters.count">
-      <PerkRow :perks_all="state.session.perks" :perks="selected_character.perks" :perkPoints="1" :callback="addPerk"
-        :removable="true" />
+      <PerkRow :session_perks="state.session.perks" :character_perks="selected_character.perks" :perkPoints="1"
+        :callback="addPerk" :removable="true" />
     </div>
 
   </div>

@@ -23,6 +23,19 @@ export function groupById(items, idKey = 'id') {
   return grouped
 }
 
+export function filterPerksByRank(perks, allPerks) {
+  const grouped = groupById(perks);
+
+  const filtered = allPerks.filter(all =>
+    !grouped.some(p => p.id === all.id && p.count === p.ranks)
+  );
+
+  allPerks.length = 0;
+  allPerks.push(...filtered);
+
+  return allPerks;
+}
+
 export function removeRow(entityArray, id) {
   const index = entityArray.findIndex(entity => entity.id === id)
   if (index !== -1) entityArray.splice(index, 1)
@@ -44,19 +57,19 @@ export function useItem(entityArray, effectsArray, entityEffects, sessionMove, e
 }
 
 export function checkObjectFieldExisting(field) {
-    return (field !== undefined && field !== null)
+  return (field !== undefined && field !== null)
 }
 
 export function checkArrayFieldExisting(field) {
-    return field.length
+  return field.length
 }
 
-export function sortByTwoFields(array, primaryField, secondaryField){
-    array.sort((a, b) => {
-        const keyA = `${a[primaryField]}-${a[secondaryField]}`
-        const keyB = `${b[primaryField]}-${b[secondaryField]}`
-        return keyA.localeCompare(keyB, 'uk')
-    })
+export function sortByTwoFields(array, primaryField, secondaryField) {
+  array.sort((a, b) => {
+    const keyA = `${a[primaryField]}-${a[secondaryField]}`
+    const keyB = `${b[primaryField]}-${b[secondaryField]}`
+    return keyA.localeCompare(keyB, 'uk')
+  })
 
-    return array
+  return array
 }
