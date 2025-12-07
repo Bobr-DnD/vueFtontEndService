@@ -12,10 +12,6 @@ import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
 import CustomFieldsTable from '@/components/reusable/CustomFieldsTable.vue';
 import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
 import { ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
-import WeaponTable from '@/components/character-page components/WeaponTable.vue';
-import ArmorTable from '@/components/character-page components/ArmorTable.vue';
-import MedicineTable from '@/components/character-page components/MedicineTable.vue';
-import InventoryTable from '@/components/character-page components/InventoryTable.vue';
 import PerkTable from '@/components/character-page components/PerkTable.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
@@ -342,36 +338,6 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
             <section class="flex gap-2 self-start">
                 <GraySelectorButton v-for="inv in inventories" @click="activeInventory = inv.id" :id="inv.id"
                     :label="inv.label" :active="activeInventory === inv.id ? true : false" />
-            </section>
-
-            <section id="weapon" v-if="activeInventory === 'weapon'" class="border rounded-lg p-2 w-[600px]">
-                <div class="grid grid-cols-1 w-full">
-                    <WeaponTable :weapons_all="state.session.weapons" :weapons="selected_character.weapons"
-                        :callback="updateInventory" />
-                </div>
-            </section>
-
-            <section id="armor" v-if="activeInventory === 'armor'" class="border rounded-lg p-2 w-[600px]">
-                <div class="grid grid-cols-1 w-full">
-                    <ArmorTable :armors_all="state.session.armors" :armors="selected_character.armor"
-                        :callback="updateInventory" />
-                </div>
-            </section>
-
-            <section id="medicine" v-if="activeInventory === 'medicine'" class="border rounded-lg p-2 w-[600px]">
-
-                <div class="grid grid-cols-1 w-full">
-                    <MedicineTable :medicines_all="state.session.medicines" :medicines="selected_character.medicines"
-                        :effects_all="state.session.effects" :effects="selected_character.effects"
-                        :move="state.session.move" :callback="updateInventory" />
-                </div>
-            </section>
-
-            <section id="inventory" v-if="activeInventory === 'inventory'" class="border rounded-lg p-2 w-[600px]">
-                <div class="grid grid-cols-1 w-ful">
-                    <InventoryTable :inventory_all="state.session.inventories" :inventory="selected_character.inventory"
-                        :callback="updateInventory" />
-                </div>
             </section>
 
             <section id="perk" v-if="activeInventory === 'perk'" class="border rounded-lg p-2 w-[600px]">

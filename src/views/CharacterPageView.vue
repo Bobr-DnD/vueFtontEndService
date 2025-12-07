@@ -10,14 +10,11 @@ import { checkArrayFieldExisting, checkObjectFieldExisting } from '/utils/entity
 import { toCustomFieldObjectField } from '/utils/objects.dto';
 import { toEmptyCharacterObject } from '/utils/objects.dto';
 import { socket } from '@ws/webSocket';
+import { notify } from '/utils/notification';
 
 import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaion.vue';
-import WeaponTable from '@/components/character-page components/WeaponTable.vue';
-import ArmorTable from '@/components/character-page components/ArmorTable.vue';
-import MedicineTable from '@/components/character-page components/MedicineTable.vue';
-import InventoryTable from '@/components/character-page components/InventoryTable.vue';
 import PerkTable from '@/components/character-page components/PerkTable.vue';
-
+import EntityTable from '@/components/character-page components/EntityTable.vue';
 import EffectsTable from '@/components/character-page components/EffectsTable.vue';
 import QuestsTable from '@/components/character-page components/QuestsTable.vue';
 import CustomFieldsTable from '@/components/reusable/CustomFieldsTable.vue';
@@ -144,7 +141,9 @@ async function updateCustomFields(fields) {
     state.character = await updateCharacter()
 }
 
-async function updateInventory() {
+async function updateEntities() {
+    console.log(state.character.entities.length);
+    
     state.character = await updateCharacter()
 }
 
@@ -237,7 +236,7 @@ async function updateCharacterNotes(field, value) {
         </section>
     </div>
 
-    <section v-if="!state.isLoading" class="grid grid-cols-1 justify-items-center mx-auto min-w-80 max-w-96">
+    <section v-if="!state.isLoading" class="grid grid-cols-1 gap-2 justify-items-center mx-auto min-w-80 max-w-96">
 
         <section class="w-full">
             <ButtonRedHideFunction @click="perks_hidden = !perks_hidden" text="Навички" :mainIcon="CheckBadgeIcon"
@@ -249,42 +248,10 @@ async function updateCharacterNotes(field, value) {
             </div>
         </section>
 
-        <!--<section class="w-full">
-            <ButtonRedHideFunction @click="weapons_hidden = !weapons_hidden" text="Зброя" :mainIcon="BoltIcon"
-                :hidden="weapons_hidden" />
-            <div :class="['grid grid-cols-1 w-full', weapons_hidden ? 'hidden' : '']">
-                <WeaponTable :weapons_all="state.session.weapons" :weapons="state.character.weapons"
-                    :callback="updateInventory" />
-            </div>
+        <section v-if="state.character.entities"  class="w-full flex flex-col gap-2">
+            <EntityTable :character_entities="state.character.entities" :session_entities="state.session.entities"
+                :types="state.session.entityTypes" :callback="updateEntities"/>
         </section>
-
-        <section class="w-full">
-            <ButtonRedHideFunction @click="armors_hidden = !armors_hidden" text="Броня" :mainIcon="ShieldCheckIcon"
-                :hidden="armors_hidden" />
-            <div :class="['grid grid-cols-1 w-full', armors_hidden ? 'hidden' : '']">
-                <ArmorTable :armors_all="state.session.armors" :armors="state.character.armor"
-                    :callback="updateInventory" />
-            </div>
-        </section>
-
-        <section class="w-full">
-            <ButtonRedHideFunction @click="meds_hidden = !meds_hidden" text="Медикаменти" :mainIcon="BeakerIcon"
-                :hidden="meds_hidden" />
-            <div :class="['grid grid-cols-1 w-full', meds_hidden ? 'hidden' : '']">
-                <MedicineTable :medicines_all="state.session.medicines" :medicines="state.character.medicines"
-                    :effects_all="state.session.effects" :effects="state.character.effects" :move="state.session.move"
-                    :callback="updateInventory" />
-            </div>
-        </section>
-
-        <section class="w-full">
-            <ButtonRedHideFunction @click="inventories_hidden = !inventories_hidden" text="Інвентар"
-                :mainIcon="ArchiveBoxIcon" v-model:hidden="inventories_hidden" />
-            <div :class="['grid grid-cols-1 w-full', inventories_hidden ? 'hidden' : '']">
-                <InventoryTable :inventory_all="state.session.inventories" :inventory="state.character.inventory"
-                    :callback="updateInventory" />
-            </div>
-        </section>-->
 
     </section>
 

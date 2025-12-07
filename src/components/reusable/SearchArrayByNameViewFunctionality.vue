@@ -2,11 +2,7 @@
 import { ref, computed } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import { groupById } from '/utils/entityHelper'
-import WeaponRowView from '../character-page components/EntityRows/WeaponRowView.vue'
-import ArmorRowView from '../character-page components/EntityRows/ArmorRowView.vue'
 import PerkRowView from '../character-page components/EntityRows/PerkRowView.vue'
-import MedicineRowView from '../character-page components/EntityRows/MedicineRowView.vue'
-import InventoryRowView from '../character-page components/EntityRows/InventoryRowView.vue'
 
 const props = defineProps({
     array: {
@@ -80,27 +76,6 @@ const filteredArray = computed(() => {
                     <div class="w-full grid p-2 gap-2 items-center justify-items-start font-gothic" :class="props.perkRemovable ? 'grid-cols-[1fr_44px]' : 'grid-cols-1'"
                         v-if="props.type === 'perk'">
                         <PerkRowView :perk="el" :callback="props.callback" :removable="props.perkRemovable" />
-                    </div>
-
-                    <div class="w-full grid grid-cols-[20px_1fr_1fr_1fr_30px] grid-rows-3 p-2 gap-2 items-center justify-items-center font-gothic md:hover:cursor-pointer"
-                        v-if="props.type === 'weapon'" @click="props.callbackModal(el.id)">
-                        <WeaponRowView :weapon="el" :callback="props.callback" />
-                    </div>
-
-                    <div class="w-full grid grid-cols-[20px_1fr_1fr_1fr_1fr_1fr_30px] grid-rows-3 p-2 gap-2 items-center justify-items-center font-gothic md:hover:cursor-pointer"
-                        v-if="props.type === 'armor'" @click="props.callbackModal(el.id)">
-                        <ArmorRowView :armor="el" :callback="props.callback" />
-                    </div>
-
-                    <div class="w-full grid grid-cols-[20px_1fr_1fr_30px] p-2 gap-2 items-center justify-items-center font-gothic md:hover:cursor-pointer"
-                        v-if="props.type === 'inventory'" @click="props.callbackModal(el.id)">
-                        <InventoryRowView :inv="el" :callback="props.callback" />
-                    </div>
-
-                    <div class="w-full grid p-2 gap-2 items-center justify-items-start font-gothic md:hover:cursor-pointer"
-                        :class="el.effect ? 'grid-cols-[20px_1fr_1fr_30px_30px]' : 'grid-cols-[20px_1fr_1fr_30px]'"
-                        v-if="props.type === 'medicine'" @click="props.callbackModal(el.id)">
-                        <MedicineRowView :med="el" :callbackDelete="props.callback" :callbackUse="props.callbackMedUse" />
                     </div>
 
                 </div>

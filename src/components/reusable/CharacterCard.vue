@@ -28,7 +28,7 @@ const sessionId = useRoute().params.sessionId
             </RouterLink>
 
             <img v-else class="w-full h-96 object-cover object-top rounded-xl border-darkred-red border-4"
-                :src="character.image.legth > 0 ? character.image : 'https://placehold.co/400x400?text=Character'"
+                :src="character.image ? character.image : 'https://placehold.co/400x400?text=Character'"
                 alt="Character image" />
 
             <RouterLink v-if="props.routing" :to="'/session/' + sessionId + '/character/' + props.character.id"

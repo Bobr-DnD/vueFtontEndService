@@ -24,7 +24,7 @@ const props = defineProps({
                 {{ session_name }}
             </h2>
             <img class="w-full h-40 object-cover border-4 border-darkred-bright rounded-lg shadow-lg"
-               :src="props.session_image.length > 0 ? props.session_image : 'https://placehold.co/400x200?text=Session'" alt="Session image" />
+               :src="props.session_image ? props.session_image : 'https://placehold.co/400x200?text=Session'" alt="Session image" />
         </div>
 
         <hr class="w-full h-[2px] bg-darkred-red border-0 mb-6" />

@@ -31,11 +31,8 @@ export function toEmptyCharacterObject(character) {
     playerNotes: character.playerNotes || '',
     session: character.session,
     quests: character.quests || [],
-    weapons: character.weapons || [],
-    armor: character.armor || [],
     perks: character.perks || [],
-    medicines: character.medicines || [],
-    inventory: character.inventory || []
+    entities: character.entities || []
   }
 }
 

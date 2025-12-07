@@ -2,10 +2,6 @@
 import { ref, computed } from 'vue'
 import ApproveButton from './Buttons/ApproveButton.vue'
 import PerkRowSelect from '../character-page components/EntityRows/PerkRowSelect.vue'
-import WeaponRowView from '../character-page components/EntityRows/WeaponRowView.vue'
-import ArmorRowView from '../character-page components/EntityRows/ArmorRowView.vue'
-import MedicineRowView from '../character-page components/EntityRows/MedicineRowView.vue'
-import InventoryRowView from '../character-page components/EntityRows/InventoryRowView.vue'
 
 const props = defineProps({
     array: {
@@ -62,24 +58,6 @@ const filteredArray = computed(() => {
 
                     <div class="grid p-2 gap-2 items-center justify-items-start" v-if="props.type === 'perk'">
                         <PerkRowSelect :perk="el" />
-                    </div>
-
-                    <div class="grid grid-cols-[1fr_1fr_1fr] grid-rows-3 p-2 gap-2 items-center justify-items-center font-gothic"
-                        v-if="props.type === 'weapon'">
-                        <!-- <WeaponRowView :weapon="el" :removable="false" /> -->
-                    </div>
-
-                    <div class="grid grid-cols-[1fr_1fr_1fr_1fr_1fr] grid-rows-3 p-2 gap-2 items-center justify-items-center font-gothic" v-if="props.type === 'armor'">
-                        <!-- <ArmorRowView :armor="el" :removable="false" /> -->
-                    </div>
-
-                    <div class="grid grid-cols-[1fr_1fr] p-2 gap-2 items-center justify-items-center font-gothic" v-if="props.type === 'inventory'">
-                        <!-- <InventoryRowView :inv="el" :removable="false" /> -->
-                    </div>
-
-                    <div class="grid p-2 gap-2 items-center justify-items-start font-gothic"
-                        v-if="props.type === 'medicine'">
-                        <!-- <MedicineRowView :med="el" :removable="false" :usable="false" /> -->
                     </div>
 
                     <ApproveButton @click="props.callback(el)" class="w-16" />
