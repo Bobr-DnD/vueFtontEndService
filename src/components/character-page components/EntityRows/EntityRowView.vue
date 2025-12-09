@@ -27,7 +27,7 @@ function closeModal(){
 
 <template>
     <div class="w-full">
-        <div @click="modal_hidden = !modal_hidden" class="p-2 w-full bg-darkred-dark text-darkred-light border-2 rounded-2xl border-darkred-red 
+        <div @click="modal_hidden = !modal_hidden" class="p-2 w-full bg-darkred-dark text-darkred-light border-2 rounded-2xl
             grid grid-cols-4 gap-1 justify-items-center items-center font-univers font-medium text-lg md:hover:cursor-pointer">
 
             <div class="col-span-4 text-xl font-semibold">{{ props.entity.name }}</div>

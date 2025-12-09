@@ -113,7 +113,7 @@ const props = defineProps({
 
             <div class="p-1 w-full grid grid-cols-2 gap-2 rounded-lg">
                 <AprroveButtonWithText text="Додати" @click="props.callback_add(entity)"/>
-                <RejectButtonWithText text="Видалити" @click="props.callback_delete(entity)"/>
+                <RejectButtonWithText text="Видалити" @click="props.callback_delete(entity); props.callback_close()"/>
             </div>
 
 

@@ -33,5 +33,5 @@ const props = defineProps({
         class="flex justify-center row-span-2 h-min-full h-max-12 self-center items-center text-xl w-11"
         @click="props.callback(props.perk)" />
 
-    <div class="p2 text-clip">Ефект: {{ props.perk.descriptions[props.perk.count - 1] }}</div>
+    <div class="p2 text-clip">Опис: {{ props.perk.descriptions[props.perk.count - 1] }}</div>
 </template>

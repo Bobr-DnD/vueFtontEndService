@@ -17,12 +17,6 @@ const props = defineProps({
         type: Boolean,
         default: false
     },
-    type: {
-        type: String,
-        required: true,
-        validator: value =>
-            ['perk', 'weapon', 'armor', 'inventory', 'medicine'].includes(value)
-    },
     callback: {
         type: Function,
         required: true
@@ -73,8 +67,7 @@ const filteredArray = computed(() => {
                 <div v-for="el in filteredArray" :key="el.id" class="grid grid-cols-1 h-fit p-2 gap-2 items-center justify-items-start font-gothic
             bg-darkred-dark_gray border-2 border-darkred-red rounded-lg text-darkred-light text-sm font-medium">
 
-                    <div class="w-full grid p-2 gap-2 items-center justify-items-start font-gothic" :class="props.perkRemovable ? 'grid-cols-[1fr_44px]' : 'grid-cols-1'"
-                        v-if="props.type === 'perk'">
+                    <div class="w-full grid p-2 gap-2 items-center justify-items-start font-gothic" :class="props.perkRemovable ? 'grid-cols-[1fr_44px]' : 'grid-cols-1'">
                         <PerkRowView :perk="el" :callback="props.callback" :removable="props.perkRemovable" />
                     </div>
 

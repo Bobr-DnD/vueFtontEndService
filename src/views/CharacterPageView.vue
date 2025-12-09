@@ -142,8 +142,6 @@ async function updateCustomFields(fields) {
 }
 
 async function updateEntities() {
-    console.log(state.character.entities.length);
-    
     state.character = await updateCharacter()
 }
 
@@ -248,7 +246,7 @@ async function updateCharacterNotes(field, value) {
             </div>
         </section>
 
-        <section v-if="state.character.entities"  class="w-full flex flex-col gap-2">
+        <section v-if="state.character.entities"  class="w-full flex flex-col gap-1">
             <EntityTable :character_entities="state.character.entities" :session_entities="state.session.entities"
                 :types="state.session.entityTypes" :callback="updateEntities"/>
         </section>
