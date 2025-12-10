@@ -9,7 +9,7 @@ import PlusButton from '@/components/reusable/Buttons/PlusButton.vue'
 import SingleFieldEditor from '@/components/reusable/SingleFieldEditor.vue';
 import ImageEditor from '@/components/reusable/ImageEditor.vue';
 import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
-import CustomFieldsTable from '@/components/reusable/CustomFieldsTable.vue';
+import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
 import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
 import { ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
 import PerkTable from '@/components/character-page components/PerkTable.vue';
@@ -21,7 +21,7 @@ import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
 import { checkObjectFieldExisting } from '/utils/entityHelper';
-import { toCustomFieldObjectField, toEmptyCharacterObject } from '/utils/objects.dto';
+import { toCustomFieldObjectField, toNewCharacterObject } from '/utils/objects.dto';
 import { notify } from '/utils/notification';
 
 const state = reactive({
@@ -31,7 +31,7 @@ const state = reactive({
 })
 
 const sessionId = useRoute().params.sessionId
-const selected_character = ref(toEmptyCharacterObject({}))
+const selected_character = ref(toNewCharacterObject({}))
 const editingCharacter = ref(selected_character.value.id)
 
 const activeTab = ref('base')
@@ -75,9 +75,9 @@ function selectCharacter(character) {
     state.unsavedChanges = false;
 
     if (character.id === 'empty') {
-        selected_character.value = toEmptyCharacterObject({})
+        selected_character.value = toNewCharacterObject({})
     }
-    else selected_character.value = toEmptyCharacterObject(structuredClone(toRaw(character)))
+    else selected_character.value = toNewCharacterObject(structuredClone(toRaw(character)))
 }
 
 function markUnsaved() {
@@ -110,7 +110,7 @@ async function saveCharacter() {
             state.unsavedChanges = false
 
             notify({ message: 'Персонаж збережений', type: 'success' })
-            selectCharacter(toEmptyCharacterObject(res.data))
+            selectCharacter(toNewCharacterObject(res.data))
 
         } else {
             const [res, err] = await asyncHandler(
@@ -133,7 +133,7 @@ async function saveCharacter() {
             state.unsavedChanges = false
 
             notify({ message: 'Персонаж оновлений', type: 'success' })
-            //selectCharacter(toEmptyCharacterObject(res.data))
+            //selectCharacter(toNewCharacterObject(res.data))
         }
     }
     else {
@@ -162,7 +162,7 @@ async function deleteCharacter() {
     state.session = resSession.data
     state.unsavedChanges = false
 
-    selectCharacter(toEmptyCharacterObject({}))
+    selectCharacter(toNewCharacterObject({}))
     notify({ message: 'Персонаж видалений', type: 'success' })
 }
 
@@ -172,7 +172,7 @@ function discardChanges() {
 
     if (editingCharacter.value !== 'empty')
         current = state.session.characters.find(c => c.id === editingCharacter.value);
-    else current = toEmptyCharacterObject({});
+    else current = toNewCharacterObject({});
 
     if (current) selected_character.value = structuredClone(toRaw(current))
     state.unsavedChanges = false
@@ -246,7 +246,7 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
         <GraySelectorButton v-for="character in state.session.characters" @click="selectCharacter(character)"
             :id="character.id" :label="character.name"
             :active="selected_character.id === character.id ? true : false" />
-        <PlusButton @click="selectCharacter({ id: 'empty' })" class="w-16 mx-auto text-center border-4 border-darkred-dark rounded-lg md:hover:cursor-pointer
+        <PlusButton @click="selectCharacter({ id: 'empty' })" class="w-16 h-14  mx-auto text-center border-4 border-darkred-dark rounded-lg md:hover:cursor-pointer
            md:hover:bg-darkred-gray relative overflow-hidden group"
             :class="selected_character.id === 'empty' ? 'bg-darkred-gray text-darkred-light' : 'bg-darkred-light'" />
     </div>
@@ -298,18 +298,18 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
 
         <div id="main" v-if="activeTab === 'main'" class="grid grid-cols-2 auto-rows-min gap-x-4">
 
-            <div class="mt-6 h-min p-2 border-2 rounded-md">
+            <div class="mt-6 h-min p-2 border-2 rounded-md flex flex-col gap-2">
                 <h1 class="font-gothic font-medium text-2xl">Список кастомних полей:</h1>
-                <CustomFieldsTable v-if="checkObjectFieldExisting(selected_character.customFields)"
+                <ObjectFieldsTable v-if="checkObjectFieldExisting(selected_character.customFields)"
                     :fields="selected_character.customFields" :callback="updateCustomFields" :field_removable="true" />
                 <h1 class="font-gothic font-medium text-2xl">Додати нове поле:</h1>
                 <ObjectFieldsEditor name="CustomFields_" :fields="selected_character.customFields"
                     :callback="addCustomField" />
             </div>
 
-            <div class="mt-6 h-min p-2 border-2 rounded-md">
+            <div class="mt-6 h-min p-2 border-2 rounded-md flex flex-col gap-2">
                 <h1 class="font-gothic font-medium text-2xl">Список Характеристик:</h1>
-                <CustomFieldsTable v-if="checkObjectFieldExisting(selected_character.characteristics)"
+                <ObjectFieldsTable v-if="checkObjectFieldExisting(selected_character.characteristics)"
                     :fields="selected_character.characteristics" :callback="updateCharacterCharacteristic"
                     :field_removable="true" />
                 <h1 class="font-gothic font-medium text-2xl">Додати нову харакетристику:</h1>

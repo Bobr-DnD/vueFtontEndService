@@ -9,10 +9,6 @@ const props = defineProps({
         type: String,
         required: true
     },
-    label: {
-        type: String,
-        required: true
-    },
     entity_name: {
         type: String,
         required: true

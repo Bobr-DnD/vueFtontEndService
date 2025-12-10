@@ -8,6 +8,7 @@ import NotFoundView from '@/components/reusable/NotFoundView.vue'
 import CharacterPageView from "@/views/CharacterPageView.vue";
 import CharacterPageEditor from "@/views/CharacterPageEditor.vue";
 import EntitiesPageEditor from "@/views/EntitiesPageEditor.vue";
+import SessionPageEditor from "@/views/SessionPageEditor.vue";
 
 import AdminPageView from "@/views/AdminPageView.vue";
 
@@ -31,8 +32,8 @@ const router = createRouter({
             children:[
                 {
                     path: '',
-                    name: 'admin_panel',
-                    component: AdminPageView
+                    name: 'session_editor',
+                    component: SessionPageEditor
                 },
                 {
                     path: 'characters',

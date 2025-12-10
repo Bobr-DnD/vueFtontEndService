@@ -97,23 +97,26 @@ const props = defineProps({
 
             <div class="p-1 w-full rounded-lg bg-darkred-light text-darkred-dark flex-col flex-wrap gap-1">
 
-                <div v-if="props.entity.price" class="rounded-lg odd:bg-darkred-light even:bg-darkred-light_gray py-1 px-2">
+                <div v-if="props.entity.price"
+                    class="rounded-lg odd:bg-darkred-light even:bg-darkred-light_gray py-1 px-2">
                     Ціна: {{ props.entity.price }}
                 </div>
 
-                <div v-if="props.entity.rarity" class="rounded-lg odd:bg-darkred-light even:bg-darkred-light_gray py-1 px-2">
+                <div v-if="props.entity.rarity"
+                    class="rounded-lg odd:bg-darkred-light even:bg-darkred-light_gray py-1 px-2">
                     Рідкість: {{ props.entity.rarity }}
                 </div>
 
-                <div v-if="props.entity.usage" class="rounded-lg odd:bg-darkred-light even:bg-darkred-light_gray py-1 px-2">
+                <div v-if="props.entity.usage"
+                    class="rounded-lg odd:bg-darkred-light even:bg-darkred-light_gray py-1 px-2">
                     К-сть використань: {{ props.entity.usage }}
                 </div>
 
             </div>
 
             <div class="p-1 w-full grid grid-cols-2 gap-2 rounded-lg">
-                <AprroveButtonWithText text="Додати" @click="props.callback_add(entity)"/>
-                <RejectButtonWithText text="Видалити" @click="props.callback_delete(entity); props.callback_close()"/>
+                <AprroveButtonWithText text="Додати" @click="props.callback_add(entity)" />
+                <RejectButtonWithText text="Видалити" @click="props.callback_delete(entity); props.callback_close()" />
             </div>
 
 

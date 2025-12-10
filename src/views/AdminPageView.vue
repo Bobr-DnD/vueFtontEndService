@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router';
 import { asyncHandler } from '/utils/asyncHandler';
 import { removeRow } from '/utils/entityHelper'
 import { checkObjectFieldExisting } from '/utils/entityHelper'
-import { toEffectObjectField, toEmptyCharacterObject } from '/utils/objects.dto.js';
+import { toNewCharacterObject } from '/utils/objects.dto.js';
 
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import FormAddSubtract from '@/components/reusable/FormAddSubtract.vue';
@@ -13,7 +13,7 @@ import RepositoryFactory from '@http/RepositoryFactory'
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
 import ButtonGrayAnimated from '@/components/reusable/Buttons/ButtonGrayAnimated.vue';
 import EffectsTableAdmin from '@/components/admin-page components/EffectsTableAdmin.vue';
-import CustomFieldsTable from '@/components/reusable/CustomFieldsTable.vue';
+import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
 import PerkRow from '@/components/character-page components/PerkTable.vue';
 import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
 
@@ -42,7 +42,7 @@ onMounted(async () => {
 
   state.session = resSession.data
   getEffects(state.session.characters);
-  selected_character.value = toEmptyCharacterObject(state.session.characters[0])
+  selected_character.value = toNewCharacterObject(state.session.characters[0])
 })
 
 function getEffects(characters) {
@@ -74,7 +74,7 @@ async function updateCharacter(character) {
     notify({ message: err.message, type: 'error' })
     return
   }
-  return toEmptyCharacterObject(res.data)
+  return toNewCharacterObject(res.data)
 }
 
 async function updateMove(name, value) {
@@ -129,11 +129,11 @@ async function addPerk() {
 
   </div>
 
-  <CustomFieldsTable v-if="checkObjectFieldExisting(state.session.customFields)" :fields="state.character.customFields"
+  <ObjectFieldsTable v-if="checkObjectFieldExisting(state.session.customFields)" :fields="state.character.customFields"
     :callback="updateCustomFields" />
 
   <div v-if="!state.isLoading && moveShowed" class="flex items-center justify-center">
-    <FormAddSubtract label="Move" entity_name="Хід" :value="state.session.move" :callback="updateMove" />
+    <FormAddSubtract entity_name="Хід" :value="state.session.move" :callback="updateMove" />
   </div>
 
   <div v-if="!state.isLoading && effectsShowed" class="flex flex-col flex-wrap items-center justify-center my-6">

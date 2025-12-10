@@ -147,7 +147,7 @@ function resetFields() {
 
         <section class="flex items-center justify-start mt-2 gap-4">
 
-            <AprroveButtonWithText :text="field_exists ? 'Редагувати' : 'Додати'"
+            <AprroveButtonWithText :text="field_exists ? 'Зберегти' : 'Додати'"
                 class="w-32 h-12 flex justify-center items-center" @click="addHealthField" />
 
             <RejectButtonWithText v-if="!field_exists" text="Очистити"

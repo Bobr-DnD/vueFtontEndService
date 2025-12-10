@@ -7,10 +7,6 @@ const props = defineProps({
         type: Number,
         required: true
     },
-    label: {
-        type: String,
-        required: true
-    },
     entity_name: {
         type: String,
         required: true

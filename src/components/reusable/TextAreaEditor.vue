@@ -58,7 +58,7 @@ const saveField = () => {
             <textarea :ref="'areaEl'" :name="props.fieldName" :id="props.fieldName" :value="editableValue" @input="autoResize"
                 :disabled="fieldReadonly" class="w-full h-fit max-h-[500px] overflow-y-scroll no-scrollbar resize-none
                 p-3 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light
-                font-univers text-base transition-all duration-300 ease-in-out focus:outline-none focus:ring-2
+                font-gothic text-base transition-all duration-300 ease-in-out focus:outline-none focus:ring-2
                 focus:ring-darkred-red focus:border-darkred-red placeholder:text-darkred-light/60
                 md:hover:border-darkred-red/70" placeholder="Введіть текст..."></textarea>
         </form>

@@ -11,7 +11,7 @@ export function toCustomFieldObjectField(customField) {
   }
 }
 
-export function toEmptyCharacterObject(character) {
+export function toNewCharacterObject(character) {
   return {
     id: character.id || 'empty',
     name: character.name || '',
@@ -48,18 +48,24 @@ export function toHealthObjectField(health) {
   }
 }
 
-export function toEmptyWeapon(weapon){
+export function toNewSession(session){
   return {
-    id: weapon.id || 'new',
-    name: weapon.name || '',
-    range: weapon.range || { min: null, max: 1 },
-    actionPoints: weapon.actionPoints || { min: null, max: 1 },
-    damage: weapon.damage || [],
-    adminNotes: weapon.adminNotes || '',
-    requirement: weapon.requirement || {},
-    effect: weapon.effect || '',
-    description: weapon.description || '',
-    price: weapon.price || 0,
-    legendary: weapon.legendary || false
+    id: session.id || 'new',
+    name: session.name || '',
+    image: session.image || null,
+    move: session.move || 0,
+    customFields: session.customFields || {},
+    adminNotes: session.adminNotes || null,
+    entityTypes: session.entityTypes || [],
+    enemyTypes: session.enemyTypes || [],
+    characteristicsList: session.characteristicsList || [],
+    currencyTypes: session.currencyTypes || [],
+    characters: session.characters || [],
+    entities: session.entities || [],
+    enemies: session.enemies || [],
+    perks: session.perks || [],
+    effects :session.effects || [],
+    fractions: session.fractions || [],
+    quests: session.quests || []
   }
 }

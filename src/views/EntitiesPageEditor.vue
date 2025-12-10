@@ -12,7 +12,6 @@ import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
-import Weapon from '@/components/reusable/EntityEditor/Weapon.vue';
 
 const state = reactive({
     session: {},
@@ -64,9 +63,9 @@ onMounted(async () => {
             <UnsavedLabel v-if="state.unsavedChanges" /> -->
         </div>
 
-        <div v-if="selected_entity === 'weapon'" class="">
+        <!-- <div v-if="selected_entity === 'weapon'" class="">
             <Weapon />
-        </div>
+        </div> -->
 
     </div>
 

@@ -8,7 +8,7 @@ import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
 import { checkArrayFieldExisting, checkObjectFieldExisting } from '/utils/entityHelper'
 import { toCustomFieldObjectField } from '/utils/objects.dto';
-import { toEmptyCharacterObject } from '/utils/objects.dto';
+import { toNewCharacterObject } from '/utils/objects.dto';
 import { socket } from '@ws/webSocket';
 import { notify } from '/utils/notification';
 
@@ -17,12 +17,13 @@ import PerkTable from '@/components/character-page components/PerkTable.vue';
 import EntityTable from '@/components/character-page components/EntityTable.vue';
 import EffectsTable from '@/components/character-page components/EffectsTable.vue';
 import QuestsTable from '@/components/character-page components/QuestsTable.vue';
-import CustomFieldsTable from '@/components/reusable/CustomFieldsTable.vue';
+import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
 import characterCardSmall from '@/components/character-page components/CharacterViewCard.vue';
 import Experience from '@/components/character-page components/Experience.vue';
 import CurrencyTable from '@/components/character-page components/CurrencyTable.vue';
 import ButtonRedHideFunction from '@/components/reusable/Buttons/ButtonRedHideFunction.vue';
 import HideButton from '@/components/reusable/Buttons/HideButton.vue';
+import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue';
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue';
 import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
 import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
@@ -73,7 +74,7 @@ onMounted(async () => {
     }
     else state.isLoading = false
 
-    state.character = toEmptyCharacterObject(resCharacter.data)
+    state.character = toNewCharacterObject(resCharacter.data)
     state.session = resSession.data
     socket.emit('session:connectCharacter', sessionId, { characterId })
 })
@@ -93,7 +94,7 @@ async function updateCharacter() {
         notify({ message: err.message, type: 'error' })
         return
     }
-    return toEmptyCharacterObject(res.data)
+    return toNewCharacterObject(res.data)
 }
 
 async function updateSession() {
@@ -187,8 +188,8 @@ async function updateCharacterNotes(field, value) {
         <section class="grid grid-cols-1 gap-2 w-full mx-auto my-2">
 
 
-            <div class="">
-                <HideButton v-if="checkArrayFieldExisting(state.character.effects)" class="w-full mb-2"
+            <div class="flex flex-col gap-2">
+                <HideButton v-if="checkArrayFieldExisting(state.character.effects)" class="w-full"
                     textShow="Показати ефекти" textHide="Приховати ефекти" :hidden="effects_hidden"
                     :mainIcon="SparklesIcon" @click="effects_hidden = !effects_hidden" />
                 <EffectsTable v-if="checkArrayFieldExisting(state.character.effects) && !effects_hidden"
@@ -204,25 +205,40 @@ async function updateCharacterNotes(field, value) {
             </div>
 
 
-            <div class="">
+            <div class="flex flex-col gap-2">
                 <HideButton class="w-full" textShow="Показати додаткові характеристики"
                     textHide="Приховати додаткові характеристики" :hidden="custom_hidden" :mainIcon="ChartBarIcon"
                     @click="custom_hidden = !custom_hidden" />
 
-                <CustomFieldsTable v-if="!custom_hidden" :fields="state.character.customFields"
+                <ObjectFieldsTable v-if="!custom_hidden" :fields="state.character.customFields"
                     :callback="updateCustomFields" :field_removable="false" />
 
-                <PlusButton v-if="!custom_hidden" @click="custom_modal_hidden = !custom_modal_hidden" class="w-16 mt-2 mx-auto text-center border-4 border-darkred-dark rounded-lg 
+                <PlusButton v-if="!custom_hidden" @click="custom_modal_hidden = !custom_modal_hidden" class="w-16 h-14 mt-2 mx-auto text-center border-4 border-darkred-dark rounded-lg 
            transition-all duration-300 ease-out md:hover:cursor-pointer
            bg-gradient-to-br from-darkred-dark to-darkred-light
            md:hover:from-darkred-red md:hover:to-darkred-dark relative overflow-hidden group" />
 
-                <ObjectFieldsEditor v-if="!custom_modal_hidden && !custom_hidden" :name="'CustomFields_'"
-                    :fields="state.character.customFields" :callback="addCustomField" />
+                <div @click="custom_modal_hidden = true" v-if="!custom_modal_hidden && !custom_hidden"
+                    class="fixed inset-0 flex items-center justify-center z-50 bg-darkred-dark/50 md:hover:cursor-pointer">
+
+                    <div @click.stop
+                        class="max-w-[480px] w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl bg-darkred-dark relative">
+                        <div class="">
+                            <CloseButtonRedBG @click="custom_modal_hidden = true" />
+                        </div>
+
+
+                        <ObjectFieldsEditor class="hover:cursor-default" :name="'CustomFields_'"
+                            :fields="state.character.customFields" :callback="addCustomField" />
+
+                    </div>
+
+                </div>
+
 
             </div>
 
-            <div class="">
+            <div class="flex flex-col gap-2">
                 <HideButton v-if="checkObjectFieldExisting(state.session.currency)" class="w-full"
                     textShow="Показати баланс" textHide="Приховати баланс" :hidden="currency_hidden"
                     :mainIcon="CurrencyDollarIcon" @click="currency_hidden = !currency_hidden" />
@@ -246,9 +262,9 @@ async function updateCharacterNotes(field, value) {
             </div>
         </section>
 
-        <section v-if="state.character.entities"  class="w-full flex flex-col gap-1">
+        <section v-if="state.character.entities" class="w-full flex flex-col gap-1">
             <EntityTable :character_entities="state.character.entities" :session_entities="state.session.entities"
-                :types="state.session.entityTypes" :callback="updateEntities"/>
+                :types="state.session.entityTypes" :callback="updateEntities" />
         </section>
 
     </section>

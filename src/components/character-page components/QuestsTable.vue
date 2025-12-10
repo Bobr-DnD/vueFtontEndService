@@ -9,7 +9,7 @@ const props = defineProps({
 
 <template>
     <div v-for="quest in props.quests"
-        class="border-2 rounded-lg border-darkred-dark_gray p-2 font-gothic overflow-hidden text-ellipsis">
+        class="border-2 rounded-lg border-darkred-light_gray p-2 font-gothic overflow-hidden text-ellipsis">
         <div class="flex flex-col gap-1">
             <div class="w-full text-center text-2xl font-semibold">
                 {{ quest.name }}

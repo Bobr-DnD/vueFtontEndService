@@ -24,13 +24,13 @@ function removeField(value) {
 </script>
 
 <template>
-    <div v-for="value, name in props.fields" class='grid justify-center items-center' :class="props.field_removable ? 'grid-cols-[1fr_44px]' : 'grid-cols-1'">
+    <div v-for="value, name in props.fields" class='grid justify-center items-center p-2 border-2 rounded-lg border-darkred-light_gray' :class="props.field_removable ? 'grid-cols-[1fr_44px]' : 'grid-cols-1'">
 
-        <FormString v-if="typeof (value) === 'string'" :label="'CustomFields_' + name" :entity_name="name"
+        <FormString v-if="typeof (value) === 'string'" :entity_name="name"
             :value="props.fields[name]" :callback="updateFields" class="w-full mx-auto" />
 
-        <FormAddSubtract v-if="typeof (value) === 'number'" :label="'CustomFields_' + name" :entity_name="name"
-            :value="props.fields[name]" :callback="updateFields" class="w-full mx-auto" />
+        <FormAddSubtract v-if="typeof (value) === 'number'"  :entity_name="name"
+            :value="props.fields[name]" :callback="updateFields" class="w-full mx-auto " />
 
         <DeleteButton v-if="props.field_removable"
             :class="!props.field_removable ? 'bg-darkred-light text-darkred-dark hover:cursor-default' : 'bg-darkred-red text-darkred-light'"
