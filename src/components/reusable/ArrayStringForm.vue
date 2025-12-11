@@ -5,6 +5,7 @@ import AprroveButtonWithText from './Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from './Buttons/RejectButtonWithText.vue';
 import PlusButton from './Buttons/PlusButton.vue';
 import DeleteButton from './Buttons/DeleteButton.vue';
+import IconsDropdown from './IconsDropdown.vue';
 
 const props = defineProps({
     array: {
@@ -57,7 +58,7 @@ function removeItem(id) {
     if (index !== -1) arrayLocal.value.splice(index, 1)
 
     console.log(`${arrayLocal.value.length}   ${originalArray.length}`);
-    
+
 }
 
 function updateItem(id) {
@@ -74,29 +75,38 @@ function discardChanges() {
     arrayLocal.value = structuredClone(originalArray)
 }
 
+function updateIcon(id, iconName) {
+    arrayLocal.value.forEach(el => {
+        if (el.id === id) el.icon = iconName
+    })
+}
+
 </script>
 
 <template>
     <div>
 
-        <section class="grid grid-cols-1 gap-2">
-            <h1 class="text-2xl font-gothic">{{ props.label }}:</h1>
+        <section class="grid grid-cols-1 gap-2 font-gothic">
+
+            <h1 class="text-2xl ">{{ props.label }}:</h1>
+            
+            <h1 v-if="arrayLocal.length === 0" class="text-xl ">Пусто</h1>
+
             <div v-for="item in arrayLocal" :key="item.id" class="grid gap-4"
-                :class="props.set_icon ? 'grid-cols-[1fr_40px]' : 'grid-cols-[1fr_40px]'">
+                :class="props.set_icon ? 'grid-cols-[1fr_120px_40px]' : 'grid-cols-[1fr_40px]'">
                 <input :ref="el => inputRefs[item.id] = el" :id="item.id" type="text" :value="item.name"
                     placeholder="Назва" @input="updateItem(item.id)"
-                    class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
+                    class="p-1 border-4 text-lg border-darkred-dark rounded-lg text-darkred-dark w-full focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
 
-
+                <IconsDropdown v-if="props.set_icon" :icon="item.icon" :field_id="item.id" :callback="updateIcon" />
 
                 <DeleteButton class="bg-darkred-red text-darkred-light" @click="removeItem(item.id)" />
-
 
             </div>
 
             <div class="flex gap-2">
 
-                <PlusButton class="w-11 h-11 text-center border-4 border-darkred-dark rounded-lg md:hover:cursor-pointer
+                <PlusButton class="w-11 h-full text-center border-4 border-darkred-dark rounded-lg md:hover:cursor-pointer
            md:hover:bg-darkred-gray relative overflow-hidden group" @click="addItem" />
 
                 <AprroveButtonWithText text="Зберегти" @click="updateArray"

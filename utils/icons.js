@@ -1,5 +1,4 @@
-import { CheckBadgeIcon, ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, ChartBarIcon, SparklesIcon, FlagIcon, CurrencyDollarIcon, SunIcon, MoonIcon } from '@heroicons/vue/24/solid'
-
+import { CheckBadgeIcon, ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, ChartBarIcon, SparklesIcon, FlagIcon, CurrencyDollarIcon, SunIcon, MoonIcon, CurrencyEuroIcon, BanknotesIcon, FireIcon, HeartIcon, MapIcon, MapPinIcon, LightBulbIcon, MegaphoneIcon, MusicalNoteIcon, StarIcon, TrophyIcon } from '@heroicons/vue/24/solid'
 
 export const iconsList = [
     {
@@ -30,9 +29,46 @@ export const iconsList = [
         id: 'currencyDollar', icon: CurrencyDollarIcon
     },
     {
+        id: 'currencyEuro', icon: CurrencyEuroIcon
+    },
+    {
+        id: 'banknotes', icon: BanknotesIcon
+    },
+    {
         id: 'sun', icon: SunIcon
     },
     {
-        if: 'moon', icon: MoonIcon
+        id: 'moon', icon: MoonIcon
+    },
+    {
+        id: 'fire', icon: FireIcon
+    },
+    {
+        id: 'heart', icon: HeartIcon
+    },
+    {
+        id: 'map', icon: MapIcon
+    },
+    {
+        id: 'mapPin', icon: MapPinIcon
+    },
+    {
+        id: 'lightBulb', icon: LightBulbIcon
+    },
+    {
+        id: 'musicalNote', icon: MusicalNoteIcon
+    },
+    {
+        id: 'megaphone', icon: MegaphoneIcon
+    },
+    {
+        id: 'star', icon: StarIcon
+    },
+    {
+        id: 'trophy', icon: TrophyIcon
     }
 ]
+
+export function returnIcon(name) {
+    return iconsList.find(icon => icon.id === name)
+}

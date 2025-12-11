@@ -97,6 +97,8 @@ function updateCustomFields(fields) {
 
 function updateStringArray(field, array) {
     editedSession.value[field] = array
+    console.log(editedSession.value[field]);
+
     markUnsaved()
     console.log(editedSession.value[field]);
 }
@@ -127,25 +129,43 @@ function updateStringArray(field, array) {
                 <SingleFieldEditor :value="editedSession.name" placeholder="Назва сесії" fieldName="name"
                     :callback="updateSession" type="text" />
 
-                <SingleFieldEditor :value="editedSession.move" placeholder="Хід сесії" fieldName="move"
+                <SingleFieldEditor :value="editedSession.move" placeholder="Хід" fieldName="move"
                     :callback="updateSession" type="number" />
 
                 <TextAreaEditor class="col-span-2" fieldName="adminNotes" name="Записки майстра"
                     :value="editedSession.adminNotes" :callback="updateSession" />
 
-                <!-- <div class="">
+
+                <h1 class="col-span-2 font-gothic font-medium text-2xl">Список кастомних полей:</h1>
+
                 <ObjectFieldsTable :field_removable="true" :fields="editedSession.customFields"
                     :callback="updateCustomFields" />
 
-                <ObjectFieldsEditor name="customFields" :fields="editedSession.customFields"
-                    :callback="addCustomField" />
-            </div> -->
+
+                <div class="col-span-2">
+
+                    <ObjectFieldsEditor name="customFields" :fields="editedSession.customFields"
+                        :callback="addCustomField" />
+                </div>
 
             </div>
 
-            <div v-if="activeTab === 'types'" class="grid grid-cols-2 gap-2">
+            <div v-if="activeTab === 'types'" class="grid grid-cols-2 gap-4">
                 <ArrayStringForm :array="editedSession.entityTypes" label="Інвентар" array_name="entityTypes"
-                    :callback="updateStringArray" :set_icon="true"/>
+                    :callback="updateStringArray" :set_icon="true" />
+
+                <ArrayStringForm :array="editedSession.currencyTypes" label="Валюти" array_name="currencyTypes"
+                    :callback="updateStringArray" :set_icon="true" />
+
+                <ArrayStringForm :array="editedSession.characteristicsList" label="Характеристики"
+                    array_name="characteristicsList" :callback="updateStringArray" :set_icon="false" />
+
+                <ArrayStringForm :array="editedSession.enemyTypes" label="Вороги" array_name="enemyTypes"
+                    :callback="updateStringArray" :set_icon="false" />
+
+                
+
+
             </div>
 
         </section>

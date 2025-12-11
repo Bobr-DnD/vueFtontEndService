@@ -1,49 +1,67 @@
 <script setup>
 import { ref } from 'vue'
-import { iconsList } from 'utils/icons'
+import { iconsList, returnIcon } from '@utils/icons'
+import CloseButtonRedBG from './Buttons/CloseButtonRedBG.vue'
 
 const props = defineProps({
     icon: {
         type: String,
         required: true
+    },
+    field_id: {
+        type: String,
+        required: true
+    },
+    callback: {
+        type: Function,
+        required: true
     }
 })
 
-const emit = defineEmits(['update:modelValue'])
-
+const icon_local = ref(returnIcon(structuredClone(props.icon)))
 const open = ref(false)
 
-function selectOption(option) {
-    emit('update:modelValue', option.value)
+function selectOption(id) {
+    icon_local.value = returnIcon(id)
     open.value = false
+    props.callback(props.field_id, id)
 }
+
 </script>
-<!-- TODO rewrite this piece of shit -->
+
 <template>
     <div class="relative w-full">
-        <!-- Selected -->
         <button @click="open = !open" class="w-full flex items-center gap-2 px-3 py-2 border border-darkred-dark rounded-md
              bg-darkred-dark_gray text-darkred-light hover:bg-darkred-dark transition">
 
-            <component v-if="props.options.find(o => o.value === props.modelValue)?.icon"
-                :is="props.options.find(o => o.value === props.modelValue).icon" class="w-5 h-5" />
+            <component :is="icon_local.icon" />
 
             <span>
-                {{props.options.find(o => o.value === props.modelValue)?.label || "Select..."}}
+                Змінити
             </span>
 
         </button>
 
-        <!-- Dropdown -->
-        <div v-if="open" class="absolute mt-1 w-full rounded-md bg-darkred-dark_gray border border-darkred-dark
-             shadow-lg z-50 flex flex-col py-1">
+        <div v-if="open" @click="open = false"
+            class="fixed inset-0 flex items-center justify-center z-50 bg-darkred-dark/50 md:hover:cursor-pointer">
+            <div @click.stop
+                class="max-w-[480px] w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-gothic md:hover:cursor-default">
 
-            <button v-for="option in props.options" :key="option.value" @click="selectOption(option)" class="flex items-center gap-2 px-3 py-2 text-left hover:bg-darkred-light_gray
-               text-darkred-light transition">
+                <div class="flex flex-wrap justify-center gap-4">
+                    <div class="w-full h-8">
+                        <CloseButtonRedBG @click="open = false" />
+                    </div>
 
-                <component :is="option.icon" class="w-5 h-5" />
+                    <div v-for="icon in iconsList" :key="icon.id" @click=selectOption(icon.id)
+                        class="md:hover:cursor-pointer">
 
-            </button>
+                        <component :is="icon.icon" class="w-12 h-12 p-2 border-2 rounded-lg border-darkred-gray" />
+
+                    </div>
+
+                </div>
+            </div>
         </div>
+
     </div>
 </template>
