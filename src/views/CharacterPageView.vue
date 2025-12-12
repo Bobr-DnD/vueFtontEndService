@@ -170,7 +170,7 @@ async function updateCharacterNotes(field, value) {
 
     <div v-if="!state.isLoading" class="w-96 mx-auto my-4">
 
-        <section class="mb-2" v-for="h in state.character.health">
+        <section class="mb-2" v-for="h in state.character.health" :key="h.id">
 
             <div class="p-1 grow">
                 <ProgressiveBar :value="h.value" :valueMax="h.max" :text="h.name" :colors="h.colors" />

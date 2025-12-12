@@ -53,7 +53,7 @@ onMounted(async () => {
 
     <div class="m-4 grid grid-cols-1 gap-2 items-center justify-start">
         <div v-if="!state.isLoading" class="w-full flex flex-wrap justify-center items-center gap-2 justify-self-start">
-            <GraySelectorButton class="w-full basis-32" v-for="tab in tabs" @click="selected_entity = tab.id"
+            <GraySelectorButton class="w-full basis-32" v-for="tab in tabs" :key="tab.id" @click="selected_entity = tab.id"
                 :id="tab.id" :label="tab.label" :active="selected_entity === tab.id ? true : false" />
 
             <!-- <AprroveButtonWithText @click="saveCharacter" class="w-full" text="Підтвердити"

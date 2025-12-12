@@ -41,7 +41,7 @@ function closeModal(){
                 <div class="basis-full text-center text-xl">Характеристики: </div>
 
                 <div class="p-1 w-full bg-darkred-light rounded-lg text-darkred-dark flex flex-col gap-1">
-                    <div v-for="value, name in props.entity.characteristics"
+                    <div v-for="value, name in props.entity.characteristics" :key="Math.random().toString(24).slice(2)"
                         class="py-1 px-2 rounded-lg even:bg-darkred-light_gray ">
                         {{ name }}: {{ value }}
                     </div>
@@ -54,7 +54,7 @@ function closeModal(){
                 <div class="basis-full text-center text-xl">Вимоги: </div>
 
                 <div class="p-1 w-full bg-darkred-light rounded-lg text-darkred-dark flex flex-col gap-1">
-                    <div v-for="value, name in props.entity.requirement"
+                    <div v-for="value, name in props.entity.requirement" :key="Math.random().toString(24).slice(2)"
                         class="py-1 px-2 rounded-lg even:bg-darkred-light_gray ">
                         {{ name }}: {{ value }}
                     </div>

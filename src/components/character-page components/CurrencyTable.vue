@@ -19,7 +19,7 @@ function updateCurrency(name, value) {
 </script>
 
 <template>
-    <div v-for="currency, index in props.currency_array"
+    <div v-for="currency, index in props.currency_array" :key="currency.id"
         class="p-2 space-y-2 font-univers border-2 rounded-lg border-darkred-light_gray">
 
         <FormAddSubtract v-if="typeof (currency.value) === 'number'" :value="currency.value" :callback="updateCurrency"

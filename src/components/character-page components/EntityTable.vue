@@ -76,7 +76,7 @@ function getFilteredSessionEntities(type) {
 
 <template>
 
-    <section v-for="type in types" class="w-full flex flex-col gap-1 items-center justify-center">
+    <section v-for="type in types" :key="Math.random().toString(24).slice(2)" class="w-full flex flex-col gap-1 items-center justify-center">
         <ButtonRedHideFunction class="w-full" @click="type.hidden = !type.hidden" :text="type.name"
             :mainIcon="type.icon" :hidden="type.hidden" />
 
@@ -89,7 +89,7 @@ function getFilteredSessionEntities(type) {
 
 
         <div class="w-full max-h-[680px] overflow-y-scroll no-scrollbar flex flex-col gap-1">
-            <EntityRowView v-if="!type.hidden" v-for="entity in getFilteredCharacterEntities(type)" :entity="entity"
+            <EntityRowView v-if="!type.hidden" v-for="entity in getFilteredCharacterEntities(type)" :key="entity.name" :entity="entity"
                 :callback_add="addEntity" :callback_remove="removeEntity" />
         </div>
 
@@ -123,7 +123,7 @@ function getFilteredSessionEntities(type) {
                     </div>
                 </div>
 
-                <div v-for="entity in getFilteredSessionEntities(type)"
+                <div v-for="entity in getFilteredSessionEntities(type)" :key="entity.name"
                     class="grid grid-cols-[1fr_100px_64px] items-center px-2 py-1 rounded-lg font-univers text-lg odd:bg-darkred-gray">
                     <div>
                         {{ entity.name }}

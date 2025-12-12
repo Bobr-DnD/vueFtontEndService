@@ -50,7 +50,7 @@ const props = defineProps({
                 <div class="basis-full text-center text-xl">Характеристики: </div>
 
                 <div class="p-1 w-full bg-darkred-light rounded-lg text-darkred-dark flex flex-col gap-1">
-                    <div v-for="value, name in props.entity.characteristics"
+                    <div v-for="value, name in props.entity.characteristics" :key="Math.random().toString(24).slice(2)"
                         class="py-1 px-2 rounded-lg even:bg-darkred-light_gray ">
                         {{ name }}: {{ value }}
                     </div>
@@ -63,7 +63,7 @@ const props = defineProps({
                 <div class="basis-full text-center text-xl">Вимоги: </div>
 
                 <div class="p-1 w-full bg-darkred-light rounded-lg text-darkred-dark flex flex-col gap-1">
-                    <div v-for="value, name in props.entity.requirement"
+                    <div v-for="value, name in props.entity.requirement" :key="Math.random().toString(24).slice(2)"
                         class="py-1 px-2 rounded-lg even:bg-darkred-light_gray ">
                         {{ name }}: {{ value }}
                     </div>
@@ -81,7 +81,7 @@ const props = defineProps({
                         <div>Опис</div>
                     </div>
 
-                    <div v-for="value in props.entity.effects"
+                    <div v-for="value in props.entity.effects" :key="Math.random().toString(24).slice(2)"
                         class="py-1 px-2 rounded-lg even:bg-darkred-light_gray grid grid-cols-2">
                         <div>
                             {{ value.name }}:

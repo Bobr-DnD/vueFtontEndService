@@ -26,7 +26,7 @@ onMounted(async () => {
 
 <template>
   <Navigation />
-  <SessionCard v-if="!state.isLoading" v-for="session in state.sessions" :id="session.id" :session="session" />
+  <SessionCard v-if="!state.isLoading" v-for="session in state.sessions" :key="session.id" :id="session.id" :session="session" />
 
   <div v-if="state.isLoading" class="text-center py-6">
     <Loader />

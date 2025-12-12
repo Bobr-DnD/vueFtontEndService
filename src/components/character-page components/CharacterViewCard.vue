@@ -37,7 +37,7 @@ const character_fields = computed(() => props.gender || props.class ||props.race
     <section>
         <h2 class="text-center text-2xl font-bold text-darkred-red mb-1">Характеристики</h2>
         <div class="flex flex-wrap items-center justify-center gap-2">
-            <div v-for="c, index in props.characteristics"
+            <div v-for="c, index in props.characteristics" :key="Math.random().toString(24).slice(2)"
                 class="grow p-2 text-center rounded-lg border-2 border-darkred-red bg-darkred-dark text-darkred-light font-semibold">
                 {{ index }} — {{ c }}
             </div>

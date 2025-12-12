@@ -147,7 +147,7 @@ async function addPerk() {
     class="flex flex-col items-center gap-2 justify-center flex-wrap mt-5">
 
     <div class="flex justify-center items-center gap-2">
-      <GraySelectorButton v-for="character in state.session.characters" @click="selected_character = character"
+      <GraySelectorButton v-for="character in state.session.characters":key="character.id" @click="selected_character = character"
         :id="character.id" :label="character.name" :active="selected_character.id === character.id ? true : false" />
     </div>
 

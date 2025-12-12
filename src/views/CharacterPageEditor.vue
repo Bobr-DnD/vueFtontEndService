@@ -42,6 +42,7 @@ const tabs = [
     { id: 'base', label: 'Базові характеристики' },
     { id: 'custom', label: 'Кастомні поля' },
     { id: 'health', label: "Здоров'я" },
+    { id: 'quests', label: 'Квести' },
     { id: 'inventory', label: 'Інвентар' }
 ]
 
@@ -244,7 +245,7 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
     <MasterPageNavigation />
 
     <div v-if="!state.isLoading" class="flex items-center justify-center space-x-4 m-2">
-        <GraySelectorButton v-for="character in state.session.characters" @click="selectCharacter(character)"
+        <GraySelectorButton v-for="character in state.session.characters" :key="character.id" @click="selectCharacter(character)"
             :id="character.id" :label="character.name"
             :active="selected_character.id === character.id ? true : false" />
         <PlusButton @click="selectCharacter({ id: 'empty' })" class="w-16 h-14  mx-auto text-center border-4 border-darkred-dark rounded-lg md:hover:cursor-pointer
@@ -255,7 +256,7 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
     <section v-if="!state.isLoading" class="m-4 mr-8 grid grid-cols-[25%_75%] gap-2">
 
         <div class="p-4 w-full flex flex-col justify-start gap-2 font-gothic">
-            <GraySelectorButton v-for="tab in tabs" @click="activeTab = tab.id" :id="tab.id" :label="tab.label"
+            <GraySelectorButton v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id" :id="tab.id" :label="tab.label"
                 :active="activeTab === tab.id ? true : false" />
             <RejectButtonWithText @click="deleteCharacter" class="w-full" text="Видалити персонажа"
                 v-if="selected_character.id !== 'empty'" />
@@ -322,7 +323,7 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
 
             <h1 class="text-2xl font-gothic col-span-2 justify-self-center">Редагування існуючи полей:</h1>
 
-            <HealthFieldsEditor v-for="field in selected_character.health" :label="field.name" :health_field="field"
+            <HealthFieldsEditor v-for="field in selected_character.health" :key="field.id" :label="field.name" :health_field="field"
                 class="col-span-2" :callback="updateHealthFields" :callback_remove="deleteHealthField" />
 
 
@@ -332,20 +333,11 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
 
         </div>
 
+        <div id="quests" v-if="activeTab === 'quests'" class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-3">
+
+        </div>
+
         <div id="inventory" v-if="activeTab === 'inventory'" class="flex flex-col items-center gap-y-4">
-
-            <section class="flex gap-2 self-start">
-                <GraySelectorButton v-for="inv in inventories" @click="activeInventory = inv.id" :id="inv.id"
-                    :label="inv.label" :active="activeInventory === inv.id ? true : false" />
-            </section>
-
-            <section id="perk" v-if="activeInventory === 'perk'" class="border rounded-lg p-2 w-[600px]">
-                <div class="grid grid-cols-1 w-full">
-                    <PerkTable v-if="state.session.perks" :session_perks="state.session.perks"
-                        :character_perks="selected_character.perks" :perkPoints="1" :callback="updateInventory"
-                        :removable="true" />
-                </div>
-            </section>
 
         </div>
 

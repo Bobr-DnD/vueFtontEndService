@@ -30,7 +30,7 @@ const props = defineProps({
         <hr class="w-full h-[2px] bg-darkred-red border-0 mb-6" />
 
         <div class="flex flex-col gap-3 w-full">
-            <button v-for="entity in entities" :key="entity"
+            <button v-for="entity in entities" :key="Math.random().toString(24).slice(2)"
                 class="w-full text-left px-4 py-2 rounded-md bg-darkred-bright text-darkred-dark md:hover:bg-darkred-red md:hover:text-white transition-all duration-300 shadow-md">
                 {{ entity }}
             </button>

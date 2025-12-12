@@ -31,7 +31,7 @@ onMounted(async () => {
 <template>
   <SessionViewNavigtaion />
   <div v-if="!state.isLoading" class="flex items-start justify-center flex-wrap mt-5">
-    <characterCard v-for="character in state.session.characters" :character="character" :routing="true" />
+    <characterCard v-for="character in state.session.characters" :key="character.id" :character="character" :routing="true" />
   </div>
 
   <div v-if="state.isLoading" class="text-center py-6">

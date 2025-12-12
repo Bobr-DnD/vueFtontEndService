@@ -112,7 +112,7 @@ function updateStringArray(field, array) {
 
     <div class="grid grid-cols-[25%_1fr]">
         <section class="p-4 w-full flex flex-col justify-start gap-2 font-gothic">
-            <GraySelectorButton v-for="tab in tabs" @click="activeTab = tab.id" :id="tab.id" :label="tab.label"
+            <GraySelectorButton v-for="tab in tabs" @click="activeTab = tab.id" :key="tab.id" :id="tab.id" :label="tab.label"
                 :active="activeTab === tab.id ? true : false" />
             <AprroveButtonWithText @click="saveSession" class="w-full" text="Підтвердити"
                 :class="[!state.unsavedChanges && 'pointer-events-none opacity-50']" />

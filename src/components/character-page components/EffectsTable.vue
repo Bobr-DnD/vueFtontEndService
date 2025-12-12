@@ -22,7 +22,7 @@ const props = defineProps({
             </div>
         </div>
 
-        <div v-for="effect in props.effects" class="grid grid-cols-[1fr_1fr_80px] gap-2 p-3 justify-items-center items-center
+        <div v-for="effect in props.effects" :key=effect.id class="grid grid-cols-[1fr_1fr_80px] gap-2 p-3 justify-items-center items-center
          bg-darkred-dark_gray  border-darkred-gray rounded-xl shadow-sm text-darkred-light">
 
             <div class="text-lg font-semibold">

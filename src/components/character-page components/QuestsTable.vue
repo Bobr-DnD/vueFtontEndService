@@ -8,7 +8,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <div v-for="quest in props.quests"
+    <div v-for="quest in props.quests" :key="quest.id"
         class="border-2 rounded-lg border-darkred-light_gray p-2 font-gothic overflow-hidden text-ellipsis">
         <div class="flex flex-col gap-1">
             <div class="w-full text-center text-2xl font-semibold">
@@ -25,7 +25,7 @@ const props = defineProps({
             </div>
         </div>
 
-        <div v-for="step in quest.steps" class="text-lg font-normal indent-4">
+        <div v-for="step in quest.steps" :key="Math.random().toString(24).slice(2)" class="text-lg font-normal indent-4">
 
             <div v-if="step.status === 'fail'">
                 • <span class="line-through decoration-2 decoration-darkred-red">{{ step.name }}</span>

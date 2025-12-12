@@ -36,7 +36,7 @@ const options = ['Звичайна', 'Легендарна']
                 @change="props.callback(props.field_name, $event.target.value === 'Легендарна' ? true : false )">
 
                 <option class="bg-darkred-dark text-darkred-light hover:bg-darkred-red/20 p-2"
-                    v-for="option in options" :value="option" :selected="props.status ? true : false">
+                    v-for="option in options" :key="option" :value="option" :selected="props.status ? true : false">
                     {{ option }}
                 </option>
 

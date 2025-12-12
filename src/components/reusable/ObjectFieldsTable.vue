@@ -24,7 +24,7 @@ function removeField(value) {
 </script>
 
 <template>
-    <div v-for="value, name in props.fields" class='grid justify-center items-center p-2 border-2 rounded-lg border-darkred-light_gray' :class="props.field_removable ? 'grid-cols-[1fr_44px]' : 'grid-cols-1'">
+    <div v-for="value, name in props.fields" :key="Math.random().toString(24).slice(2)" class='grid justify-center items-center p-2 border-2 rounded-lg border-darkred-light_gray' :class="props.field_removable ? 'grid-cols-[1fr_44px]' : 'grid-cols-1'">
 
         <FormString v-if="typeof (value) === 'string'" :entity_name="name"
             :value="props.fields[name]" :callback="updateFields" class="w-full mx-auto" />

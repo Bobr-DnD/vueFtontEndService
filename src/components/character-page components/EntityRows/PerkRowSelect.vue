@@ -23,7 +23,7 @@ const props = defineProps({
             <div class="font-normal">
                 Рівні перку:
             </div>
-            <div class="font-normal" v-for="description, index in props.perk.descriptions">
+            <div class="font-normal" v-for="description, index in props.perk.descriptions" :key="Math.random().toString(24).slice(2)">
                 {{ index+1 }} -> {{ description }}
             </div>
         </div>

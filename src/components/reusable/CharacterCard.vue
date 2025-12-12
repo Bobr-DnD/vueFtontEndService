@@ -49,13 +49,13 @@ const sessionId = useRoute().params.sessionId
             class="grid auto-rows-max grid-cols-2 items-center justify-items-center mb-3 border-y-2 border-darkred-red rounded-md">
             <div>Рівень: {{ props.character.level }}</div>
             <div>Досвід: {{ props.character.experience }}/{{ props.character.experienceToLevelUp }}</div>
-            <div class="col-span-2" v-for="h in props.character.health">{{ h.name }}: {{ h.value }}/{{ h.max }}</div>
+            <div class="col-span-2" v-for="h in props.character.health" :key="h.id">{{ h.name }}: {{ h.value }}/{{ h.max }}</div>
         </div>
 
         <div v-if="!props.routing" class="border-b-2 border-darkred-bright rounded-lg mb-4">
             <div class="text-center border-t-2 border-darkred-bright rounded-lg">Характеристики:</div>
             <div class="flex flex-wrap items-center justify-start">
-                <div class="p-2 grow" v-for="c, index in props.character.characteristics">
+                <div class="p-2 grow" v-for="c, index in props.character.characteristics" :key="Math.random().toString(24).slice(2)">
                     <div class="p-1 text-center border-2 rounded-md border-darkred-dark">{{ index }} - {{ c }}</div>
                 </div>
             </div>
