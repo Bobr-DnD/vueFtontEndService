@@ -1,6 +1,5 @@
 <script setup>
 import { ref } from 'vue';
-import { ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, } from '@heroicons/vue/24/solid'
 import ButtonRedHideFunction from '../reusable/Buttons/ButtonRedHideFunction.vue';
 import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue';
 import ApproveButton from '../reusable/Buttons/ApproveButton.vue';
@@ -8,6 +7,7 @@ import RejectButtonWithText from '../reusable/Buttons/RejectButtonWithText.vue';
 import EntityRowView from './EntityRows/EntityRowView.vue';
 import ModalOpenButton from '../reusable/Buttons/ModalOpenButton.vue';
 import { addRow, removeRow } from '/utils/entityHelper';
+import { returnIcon } from '@utils/icons';
 import { notify } from '/utils/notification';
 
 const props = defineProps({
@@ -30,6 +30,7 @@ const props = defineProps({
 })
 
 const types = ref([])
+
 types.value = props.types.map(type => {
     return {
         name: type.name,
@@ -77,7 +78,7 @@ function getFilteredSessionEntities(type) {
 
     <section v-for="type in types" class="w-full flex flex-col gap-1 items-center justify-center">
         <ButtonRedHideFunction class="w-full" @click="type.hidden = !type.hidden" :text="type.name"
-            :mainIcon="BeakerIcon" :hidden="type.hidden" />
+            :mainIcon="type.icon" :hidden="type.hidden" />
 
         <div v-if="!type.hidden" class="w-full flex gap-2 font-gothic">
             <input v-model="type.search" placeholder="Пошук ..."

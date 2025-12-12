@@ -1,6 +1,7 @@
 <script setup>
-import { onMounted } from 'vue'
+import { ref } from 'vue'
 import { PlusIcon, MinusIcon } from '@heroicons/vue/24/solid'
+import { returnIcon } from '@utils/icons'
 
 const props = defineProps({
     value: {
@@ -19,25 +20,26 @@ const props = defineProps({
     callback: {
         type: Function,
         required: true
+    },
+    icon: {
+        type: String,
+        default: null
     }
 
 })
 
-let input = null
-
-onMounted(() => {
-    input = document.getElementById(props.entity_name)
-
-})
+const input = ref(null)
 
 function changeValue(operation) {
 
+    const value = parseInt(input.value.value) || 1
+    
     switch (operation) {
         case 'plus':
-            props.callback(props.entity_name, parseInt(input.value))
+            props.callback(props.entity_name, value)
             break;
         case 'minus':
-            props.callback(props.entity_name, -parseInt(input.value))
+            props.callback(props.entity_name, -value)
             break;
     }
 }
@@ -45,12 +47,20 @@ function changeValue(operation) {
 
 <template>
     <div class="grid grid-cols-[1fr_104px] font-gothic p-2 gap-2">
-        <label :for="entity_name" class="w-full col-span-2 overflow-hidden text-ellipsis text-darkred-dark font-semibold text-lg tracking-wide">{{
-            entity_name.toUpperCase() }}: {{ value }}</label>
+
+        <label :for="entity_name"
+            class="w-full col-span-2 flex gap-2 overflow-hidden text-ellipsis text-darkred-dark font-semibold text-lg tracking-wide">
+
+            <span v-if="props.icon">
+                <component :is="returnIcon(props.icon).icon" class="w-6 h-6" />
+            </span>
+
+            {{ entity_name.toUpperCase() }}: {{ value }}</label>
+
         <section class="">
 
             <form @submit.prevent class="flex flex-col items-start justify-center w-full font-gothic rounded-lg">
-                <input :id="entity_name" type="number" :value="default_number" class="no-arrows h-11 bg-darkred-dark_gray w-full text-darkred-light text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
+                <input :ref="'input'" :id="entity_name" type="number" :value="default_number" class="no-arrows h-11 bg-darkred-dark_gray w-full text-darkred-light text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
            focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
             </form>
 

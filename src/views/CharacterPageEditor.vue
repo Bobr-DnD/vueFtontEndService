@@ -17,6 +17,7 @@ import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWi
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import HealthFieldsEditor from '@/components/admin-page components/HealthFieldsEditor.vue';
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
+import CurrencyTable from '@/components/character-page components/CurrencyTable.vue';
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
@@ -39,7 +40,7 @@ const activeInventory = ref('')
 
 const tabs = [
     { id: 'base', label: 'Базові характеристики' },
-    { id: 'main', label: 'Головні характеристики' },
+    { id: 'custom', label: 'Кастомні поля' },
     { id: 'health', label: "Здоров'я" },
     { id: 'inventory', label: 'Інвентар' }
 ]
@@ -190,9 +191,9 @@ function updateCharacterCharacteristic(fields) {
     markUnsaved();
 }
 
-function addCharacterCharacteristic(name, value) {
-    Object.assign(selected_character.value.characteristics, toCustomFieldObjectField({ name, value }))
-    markUnsaved();
+function updateCurrency(fields) {
+    selectCharacter.currency = fields
+    markUnsaved()
 }
 
 function updateCustomFields(fields) {
@@ -265,7 +266,7 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
             <UnsavedLabel v-if="state.unsavedChanges" />
         </div>
 
-        <div id="base" v-if="activeTab === 'base'" class="grid grid-cols-2 auto-rows-min gap-x-4">
+        <div id="base" v-if="activeTab === 'base'" class="grid grid-cols-2 auto-rows-min gap-4">
 
             <ImageEditor class="w-full col-span-2" :image="selected_character.image" label="Character image"
                 :callback="addImage" />
@@ -294,28 +295,26 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
             <TextAreaEditor fieldName="adminNotes" name="Записки майстра" :value="selected_character.adminNotes"
                 :callback="updateCharacter" />
 
+            <h1 class="col-span-2 font-gothic font-medium text-2xl">Список основних характеистик:</h1>
+
+            <ObjectFieldsTable v-if="checkObjectFieldExisting(selected_character.characteristics)"
+                :fields="selected_character.characteristics" :callback="updateCharacterCharacteristic" />
+
+            <h1 class="col-span-2 font-gothic font-medium text-2xl">Список фінансів:</h1>
+
+            <CurrencyTable :currency_array="selected_character.currency" :callback="updateCurrency" />
+
         </div>
 
-        <div id="main" v-if="activeTab === 'main'" class="grid grid-cols-2 auto-rows-min gap-x-4">
+        <div id="custom" v-if="activeTab === 'custom'" class="grid grid-cols-2 auto-rows-min gap-x-4">
 
-            <div class="mt-6 h-min p-2 border-2 rounded-md flex flex-col gap-2">
-                <h1 class="font-gothic font-medium text-2xl">Список кастомних полей:</h1>
-                <ObjectFieldsTable v-if="checkObjectFieldExisting(selected_character.customFields)"
-                    :fields="selected_character.customFields" :callback="updateCustomFields" :field_removable="true" />
-                <h1 class="font-gothic font-medium text-2xl">Додати нове поле:</h1>
-                <ObjectFieldsEditor name="CustomFields_" :fields="selected_character.customFields"
-                    :callback="addCustomField" />
-            </div>
+            <h1 class="col-span-2 font-gothic font-medium text-2xl">Список кастомних полей:</h1>
+            <ObjectFieldsTable v-if="checkObjectFieldExisting(selected_character.customFields)"
+                :fields="selected_character.customFields" :callback="updateCustomFields" :field_removable="true" />
 
-            <div class="mt-6 h-min p-2 border-2 rounded-md flex flex-col gap-2">
-                <h1 class="font-gothic font-medium text-2xl">Список Характеристик:</h1>
-                <ObjectFieldsTable v-if="checkObjectFieldExisting(selected_character.characteristics)"
-                    :fields="selected_character.characteristics" :callback="updateCharacterCharacteristic"
-                    :field_removable="true" />
-                <h1 class="font-gothic font-medium text-2xl">Додати нову харакетристику:</h1>
-                <ObjectFieldsEditor name="Characteristics_" :fields="selected_character.characteristics"
-                    :callback="addCharacterCharacteristic" />
-            </div>
+            <h1 class="col-span-2 font-gothic font-medium text-2xl">Додати нове поле:</h1>
+            <ObjectFieldsEditor class="col-span-2" name="CustomFields_" :fields="selected_character.customFields"
+                :callback="addCustomField" />
 
         </div>
 

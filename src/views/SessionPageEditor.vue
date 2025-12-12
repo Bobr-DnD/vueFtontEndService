@@ -163,9 +163,6 @@ function updateStringArray(field, array) {
                 <ArrayStringForm :array="editedSession.enemyTypes" label="Вороги" array_name="enemyTypes"
                     :callback="updateStringArray" :set_icon="false" />
 
-                
-
-
             </div>
 
         </section>

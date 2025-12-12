@@ -2,7 +2,7 @@
 import { reactive, ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router';
 import Loader from 'vue-spinner/src/SyncLoader.vue'
-import { CheckBadgeIcon, ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, ChartBarIcon, SparklesIcon, FlagIcon, CurrencyDollarIcon } from '@heroicons/vue/24/solid'
+import { ChartBarIcon, SparklesIcon, FlagIcon, BanknotesIcon } from '@heroicons/vue/24/solid'
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
@@ -42,11 +42,7 @@ let quests_hidden = ref(true)
 let currency_hidden = ref(true)
 let custom_hidden = ref(true)
 let custom_modal_hidden = ref(true)
-let perks_hidden = ref(Boolean)
-let weapons_hidden = ref(true)
-let armors_hidden = ref(true)
-let meds_hidden = ref(true)
-let inventories_hidden = ref(true)
+let perks_hidden = ref(true)
 
 const characterId = useRoute().params.characterId
 const sessionId = useRoute().params.sessionId
@@ -127,9 +123,9 @@ async function updateHealthFields(value, title) {
     state.character = await updateCharacter() //TODO refactor update to dto
 }
 
-async function updateCurrency(currency) {
-    state.session.currency = currency
-    state.session = await updateSession()
+function updateCurrency(fields) {
+    state.character.currency = fields
+    markUnsaved()
 }
 
 async function addCustomField(name, value) {
@@ -239,11 +235,10 @@ async function updateCharacterNotes(field, value) {
             </div>
 
             <div class="flex flex-col gap-2">
-                <HideButton v-if="checkObjectFieldExisting(state.session.currency)" class="w-full"
+                <HideButton v-if="checkObjectFieldExisting(state.character.currency)" class="w-full"
                     textShow="Показати баланс" textHide="Приховати баланс" :hidden="currency_hidden"
-                    :mainIcon="CurrencyDollarIcon" @click="currency_hidden = !currency_hidden" />
-                <CurrencyTable v-if="checkObjectFieldExisting(state.session.currency) && !currency_hidden"
-                    :currency="state.session.currency" :callback="updateCurrency" />
+                    :mainIcon="BanknotesIcon" @click="currency_hidden = !currency_hidden" />
+                <CurrencyTable v-if="!currency_hidden" :currency_array="state.character.currency" :callback="updateCurrency" />
             </div>
 
 
@@ -253,7 +248,7 @@ async function updateCharacterNotes(field, value) {
     <section v-if="!state.isLoading" class="grid grid-cols-1 gap-2 justify-items-center mx-auto min-w-80 max-w-96">
 
         <section class="w-full">
-            <ButtonRedHideFunction @click="perks_hidden = !perks_hidden" text="Навички" :mainIcon="CheckBadgeIcon"
+            <ButtonRedHideFunction @click="perks_hidden = !perks_hidden" text="Навички" mainIcon="checkBadge"
                 :hidden="perks_hidden" />
             <div :class="['grid gird-cols-1 w-full', perks_hidden ? 'hidden' : '']">
                 <PerkTable v-if="state.session.perks" :session_perks="state.session.perks"

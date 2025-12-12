@@ -44,13 +44,17 @@ arrayLocal.value = props.array.map(el => {
 })
 
 function addItem() {
-    arrayLocal.value.push({
-        id: Math.random().toString(24).slice(2),
-        name: '',
-        icon: iconsList[0].id
-    })
-
-    console.log(`${arrayLocal.value.length}   ${originalArray.length}`);
+    if (props.set_icon)
+        arrayLocal.value.push({
+            id: Math.random().toString(24).slice(2),
+            name: '',
+            icon: iconsList[0].id
+        })
+    else
+        arrayLocal.value.push({
+            id: Math.random().toString(24).slice(2),
+            name: ''
+        })
 }
 
 function removeItem(id) {
@@ -89,7 +93,7 @@ function updateIcon(id, iconName) {
         <section class="grid grid-cols-1 gap-2 font-gothic">
 
             <h1 class="text-2xl ">{{ props.label }}:</h1>
-            
+
             <h1 v-if="arrayLocal.length === 0" class="text-xl ">Пусто</h1>
 
             <div v-for="item in arrayLocal" :key="item.id" class="grid gap-4"
