@@ -27,6 +27,7 @@ import { checkObjectFieldExisting } from '/utils/entityHelper';
 import { toCustomFieldObjectField, toNewCharacterObject } from '/utils/objects.dto';
 import { notify } from '/utils/notification';
 import { checkArrayFieldExisting } from '@utils/entityHelper';
+import PerkTable from '@/components/character-page components/PerkTable.vue';
 
 const state = reactive({
     session: {},
@@ -46,7 +47,7 @@ const tabs = [
     { id: 'custom', label: 'Кастомні поля' },
     { id: 'health', label: "Здоров'я" },
     { id: 'quests&effects', label: 'Квести та еффекти' },
-    { id: 'perks', label: 'Перки&Навички' },
+    { id: 'perks', label: 'Перки' },
     { id: 'inventory', label: 'Інвентар' }
 ]
 
@@ -186,24 +187,34 @@ function discardChanges() {
     notify({ message: 'Зміни анульовані', type: 'warning' })
 }
 
-function updateCharacter(field, value) {
+function updateCharacterField(field, value) {
     selected_character.value[field] = value
     markUnsaved();
 }
 
 function updateCharacterCharacteristic(fields) {
-    selected_character.characteristics = fields
+    selected_character.value.characteristics = fields
     markUnsaved();
 }
 
 function updateCurrency(fields) {
-    selectCharacter.currency = fields
+    selected_character.value.currency = fields
     markUnsaved()
 }
 
 function updateCustomFields(fields) {
-    selected_character.customFields = fields
+    selected_character.value.customFields = fields
     markUnsaved();
+}
+
+function updateEffects(effects) {
+    selected_character.value.effects = effects
+    markUnsaved()
+}
+
+function updateQuests(quests) {
+    selected_character.value.quests = quests
+    markUnsaved()
 }
 
 function addCustomField(name, value) {
@@ -234,13 +245,7 @@ function updateInventory() {
     markUnsaved();
 }
 
-function updateEffects(effects) {
-    selected_character.effects = effects
-    markUnsaved()
-}
-
-function updateQuests(quests) {
-    selected_character.quests = quests
+function updatePerks() {
     markUnsaved()
 }
 
@@ -287,28 +292,28 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
                 :callback="addImage" />
 
             <SingleFieldEditor placeholder="Ім'я(обов'язкове поле)" fieldName="name" :value="selected_character.name"
-                :callback="updateCharacter" class="w-full" />
+                :callback="updateCharacterField" class="w-full" />
             <SingleFieldEditor placeholder="Стать" fieldName="gender" :value="selected_character.gender"
-                :callback="updateCharacter" class="w-full" />
+                :callback="updateCharacterField" class="w-full" />
             <SingleFieldEditor placeholder="Клас" fieldName="class" :value="selected_character.class"
-                :callback="updateCharacter" class="w-full" />
+                :callback="updateCharacterField" class="w-full" />
             <SingleFieldEditor placeholder="Раса" fieldName="race" :value="selected_character.race"
-                :callback="updateCharacter" class="w-full" />
+                :callback="updateCharacterField" class="w-full" />
 
             <SingleFieldEditor placeholder="Рівень" fieldName="level" :value="selected_character.level"
-                :callback="updateCharacter" type="number" class="w-full" />
+                :callback="updateCharacterField" type="number" class="w-full" />
             <SingleFieldEditor placeholder="Очки перків" fieldName="perkPoints" :value="selected_character.perkPoints"
-                :callback="updateCharacter" type="number" class="w-full" />
+                :callback="updateCharacterField" type="number" class="w-full" />
             <SingleFieldEditor placeholder="Досвід" fieldName="experience" :value="selected_character.experience"
-                :callback="updateCharacter" type="number" class="w-full" />
+                :callback="updateCharacterField" type="number" class="w-full" />
             <SingleFieldEditor placeholder="К-сть досвіду для рівня" fieldName="experienceToLevelUp"
-                :value="selected_character.experienceToLevelUp" :callback="updateCharacter" type="number"
+                :value="selected_character.experienceToLevelUp" :callback="updateCharacterField" type="number"
                 class="w-full" />
 
             <TextAreaEditor fieldName="playerNotes" name="Записки гравця" :value="selected_character.playerNotes"
-                :callback="updateCharacter" />
+                :callback="updateCharacterField" />
             <TextAreaEditor fieldName="adminNotes" name="Записки майстра" :value="selected_character.adminNotes"
-                :callback="updateCharacter" />
+                :callback="updateCharacterField" />
 
             <Header1 class="col-span-2 justify-self-center" label="Список основних характеистик:" />
 
@@ -375,6 +380,9 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
 
         <div id="perks" v-if="activeTab === 'perks'" class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-3">
 
+            <!-- <PerkTable :session_perks="state.session.perks" :character_perks="selected_character.perks" :perkPoints="1"
+                :callback="updatePerks" :removable="true" /> -->
+                
         </div>
 
         <div id="inventory" v-if="activeTab === 'inventory'" class="flex flex-col items-center gap-y-4">

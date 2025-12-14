@@ -106,7 +106,7 @@ function getFilteredSessionEntities(type) {
 
                 <CloseButtonRedBG @click="type.modal_hidden = true" />
 
-                <div v-if="!type.hidden" class="w-[90%] flex gap-2">
+                <div v-if="!type.hidden" class="w-[85%] flex gap-2">
                     <input v-model="type.searchGlobal" placeholder="Пошук ..."
                         class="h-12 w-full p-2 rounded-lg bg-darkred-light text-darkred-dark placeholder:text-darkred-dark_gray font-gothic" />
 

@@ -19,10 +19,6 @@ const props = defineProps({
 
 const modal_hidden = ref(true)
 
-function closeModal(){
-    modal_hidden.value = true
-}
-
 </script>
 
 <template>

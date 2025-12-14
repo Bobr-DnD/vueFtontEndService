@@ -248,7 +248,7 @@ async function updateCharacterNotes(field, value) {
 
     <section v-if="!state.isLoading" class="grid grid-cols-1 gap-2 justify-items-center mx-auto min-w-80 max-w-96">
 
-        <section class="w-full">
+        <!-- <section class="w-full">
             <ButtonRedHideFunction @click="perks_hidden = !perks_hidden" text="Навички" mainIcon="checkBadge"
                 :hidden="perks_hidden" />
             <div :class="['grid gird-cols-1 w-full', perks_hidden ? 'hidden' : '']">
@@ -256,9 +256,14 @@ async function updateCharacterNotes(field, value) {
                     :character_perks="state.character.perks" :perkPoints="state.character.perkPoints"
                     :callback="addPerk" :removable="false" />
             </div>
+        </section> -->
+
+        <section class="w-full flex flex-col gap-1">
+            <PerkTable :session_perks="state.session.perks" :character_perks="state.character.perks"
+                :perkPoints="state.character.perkPoints" :callback="addPerk" />
         </section>
 
-        <section v-if="state.character.entities" class="w-full flex flex-col gap-1">
+        <section class="w-full flex flex-col gap-1">
             <EntityTable :character_entities="state.character.entities" :session_entities="state.session.entities"
                 :types="state.session.entityTypes" :callback="updateEntities" />
         </section>

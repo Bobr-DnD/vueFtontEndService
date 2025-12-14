@@ -26,14 +26,16 @@ export function groupById(items, idKey = 'id') {
 export function filterPerksByRank(perks, allPerks) {
   const grouped = groupById(perks);
 
-  const filtered = allPerks.filter(all =>
-    !grouped.some(p => p.id === all.id && p.count === p.ranks)
-  );
+  return allPerks
+    .map(perk => {
+      const found = grouped.find(p => p.id === perk.id);
 
-  allPerks.length = 0;
-  allPerks.push(...filtered);
-
-  return allPerks;
+      return {
+        ...perk,
+        count: found?.count ?? 0
+      };
+    })
+    .filter(perk => perk.count < perk.ranks);
 }
 
 export function removeRow(entityArray, id) {

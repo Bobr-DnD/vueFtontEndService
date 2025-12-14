@@ -1,11 +1,13 @@
 <script setup>
-import { ref, watch } from 'vue';
-import { addRow, removeRow, sortByTwoFields, filterPerksByRank } from '/utils/entityHelper'
+import { ref, watch, computed } from 'vue';
+import { addRow, removeRow, sortByTwoFields, filterPerksByRank, groupById } from '/utils/entityHelper'
 import { notify } from '/utils/notification';
-import SearchArrayByNameWithAddFunctionality from '../reusable/SearchArrayByNameWithAddFunctionality.vue';
 import ModalOpenButton from '../reusable/Buttons/ModalOpenButton.vue';
-import CloseRedButtonNoBG from '../reusable/Buttons/CloseButtonGrayNoBG.vue';
-import SearchArrayByNameViewFunctionality from '../reusable/SearchArrayByNameViewFunctionality.vue';
+import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue';
+import ApproveButton from '../reusable/Buttons/ApproveButton.vue';
+import RejectButtonWithText from '../reusable/Buttons/RejectButtonWithText.vue';
+import ButtonRedHideFunction from '../reusable/Buttons/ButtonRedHideFunction.vue';
+import PerkRowView from './EntityRows/PerkRowView.vue';
 
 const props = defineProps({
     session_perks: {
@@ -30,49 +32,108 @@ const props = defineProps({
     }
 })
 
-let modal_hidden = ref(true)
-filterPerksByRank(props.character_perks, props.session_perks)
+const modalHidden = ref(true)
+const perksHidden = ref(true)
+const characterPerksSearchQuery = ref('')
+const sessionPerksSearchQuery = ref('')
 
 watch(() => props.character_perks, () => {
-    modal_hidden.value = true //NOTE responsible for autoclosing of a modal, I can forget that shit
+    modalHidden.value = true //NOTE responsible for autoclosing of a modal, I can forget that shit
     filterPerksByRank(props.character_perks, props.session_perks)
     sortByTwoFields(props.character_perks, 'type', 'name')
     sortByTwoFields(props.session_perks, 'type', 'name')
 })
 
+const filteredCharacterArray = computed(() => {
+    const groupedArray = groupById(props.character_perks)
+
+    if (!characterPerksSearchQuery.value.trim()) return groupedArray
+    const query = characterPerksSearchQuery.value.toLowerCase()
+    return groupedArray.filter(el =>
+        el.name.toLowerCase().includes(query)
+    )
+})
+
+const filteredSessionArray = computed(() => {
+    const filteredArray = filterPerksByRank(props.character_perks, props.session_perks)
+
+    if (!sessionPerksSearchQuery.value.trim()) return filteredArray
+    const query = sessionPerksSearchQuery.value.toLowerCase()
+    return filteredArray.filter(el =>
+        el.name.toLowerCase().includes(query)
+    )
+})
+
 function addPerk(perk) {
     addRow(props.session_perks, props.character_perks, perk.id);
     props.callback();
-    notify({message: `Додано перк: ${perk.name}`, type: 'info'})
+    notify({ message: `Додано перк: ${perk.name}`, type: 'info' })
 }
 
 function removePerk(perk) {
     removeRow(props.character_perks, perk.id)
     props.callback()
-    notify({message: `Видалено перк: ${perk.name}`, type: 'info'})
+    notify({ message: `Видалено перк: ${perk.name}`, type: 'info' })
 }
 
 </script>
 
 <template>
 
-    <SearchArrayByNameViewFunctionality :array="props.character_perks" label="перку" :callback="removePerk" type="perk" :perkRemovable="props.removable"/>
+    <div class="w-full space-y-1 font-gothic">
 
-    <ModalOpenButton v-if="props.perkPoints > 0" @click="modal_hidden = !modal_hidden" class="justify-self-center" text="Додати перк" />
+        <ButtonRedHideFunction class="w-full" @click="perksHidden = !perksHidden" text="Перки" mainIcon="checkBadge"
+            :hidden="perksHidden" />
 
-    <div v-if="!modal_hidden" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div class="relative w-[90%] max-w-lg bg-darkred-dark_gray border border-darkred-dark rounded-2xl shadow-xl p-6
-            font-univers transition-all duration-300
-           sm:w-[80%] md:w-[60%] lg:w-[40%]">
+        <div v-if="!perksHidden" class="w-full flex gap-2">
+            <input v-model="characterPerksSearchQuery" placeholder="Пошук ..."
+                class="h-12 w-full p-2 rounded-lg bg-darkred-dark_gray text-darkred-light" />
 
-            <CloseRedButtonNoBG @click="modal_hidden = true" />
-
-            <h2 class="text-xl font-gothic text-center mb-4 border-b text-darkred-light border-darkred-dark pb-2">
-                Вибір перку
-            </h2>
-
-            <SearchArrayByNameWithAddFunctionality :array="session_perks" label="перку" type="perk" :callback="addPerk" />
+            <RejectButtonWithText v-if="characterPerksSearchQuery" @click="characterPerksSearchQuery = ''"
+                text="Очистити" />
         </div>
+
+        <div v-if="!perksHidden" class="flex flex-col gap-1">
+            <PerkRowView v-for="perk in filteredCharacterArray" :perk="perk" :callback="removePerk" :removable="true" />
+
+        </div>
+
+        <div v-if="!perksHidden" class="w-full flex justify-center">
+            <ModalOpenButton @click="modalHidden = false" class="mx-auto" text="Додати перк" />
+        </div>
+
+
+        <div v-if="!modalHidden" @click="modalHidden = true"
+            class="w-full p-2 fixed inset-0 flex flex-col gap-1 items-center justify-center z-50 bg-darkred-dark/50 md:hover:cursor-pointer text-darkred-light">
+
+            <div @click.stop
+                class="max-w-[480px] w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-gothic md:hover:cursor-default">
+
+                <CloseButtonRedBG @click="modalHidden = true" />
+
+                <div v-if="!perksHidden" class="w-[85%] flex gap-2">
+                    <input v-model="sessionPerksSearchQuery" placeholder="Пошук ..."
+                        class="h-12 w-full p-2 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+
+                    <RejectButtonWithText v-if="sessionPerksSearchQuery" @click="sessionPerksSearchQuery = ''"
+                        text="Очистити" />
+                </div>
+
+
+                <div v-for="perk in filteredSessionArray"
+                    class="grid grid-cols-[1fr_40px] gap-2 odd:bg-darkred-gray p-2 rounded-lg">
+                    <div>Назва: {{ perk.name }}</div>
+
+                    <ApproveButton @click="addPerk(perk)" class="row-span-2 flex justify-center items-center" />
+
+                    <div>Опис: {{ perk.descriptions[perk.count] }}</div>
+
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
 
 </template>
