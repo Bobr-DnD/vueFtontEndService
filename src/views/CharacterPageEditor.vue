@@ -12,18 +12,21 @@ import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
 import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
 import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
 import { ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
-import PerkTable from '@/components/character-page components/PerkTable.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import HealthFieldsEditor from '@/components/admin-page components/HealthFieldsEditor.vue';
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
 import CurrencyTable from '@/components/character-page components/CurrencyTable.vue';
+import EffectsTableEditor from '@/components/admin-page components/EffectsTableEditor.vue';
+import QuestsTableEditor from '@/components/admin-page components/QuestsTableEditor.vue';
+import Header1 from '@/components/reusable/Titles/Header1.vue';
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
 import { checkObjectFieldExisting } from '/utils/entityHelper';
 import { toCustomFieldObjectField, toNewCharacterObject } from '/utils/objects.dto';
 import { notify } from '/utils/notification';
+import { checkArrayFieldExisting } from '@utils/entityHelper';
 
 const state = reactive({
     session: {},
@@ -42,7 +45,8 @@ const tabs = [
     { id: 'base', label: 'Базові характеристики' },
     { id: 'custom', label: 'Кастомні поля' },
     { id: 'health', label: "Здоров'я" },
-    { id: 'quests', label: 'Квести' },
+    { id: 'quests&effects', label: 'Квести та еффекти' },
+    { id: 'perks', label: 'Перки&Навички' },
     { id: 'inventory', label: 'Інвентар' }
 ]
 
@@ -230,6 +234,16 @@ function updateInventory() {
     markUnsaved();
 }
 
+function updateEffects(effects) {
+    selected_character.effects = effects
+    markUnsaved()
+}
+
+function updateQuests(quests) {
+    selected_character.quests = quests
+    markUnsaved()
+}
+
 function addImage(image) {
     selected_character.value.image = image
     markUnsaved()
@@ -245,19 +259,19 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
     <MasterPageNavigation />
 
     <div v-if="!state.isLoading" class="flex items-center justify-center space-x-4 m-2">
-        <GraySelectorButton v-for="character in state.session.characters" :key="character.id" @click="selectCharacter(character)"
-            :id="character.id" :label="character.name"
+        <GraySelectorButton v-for="character in state.session.characters" :key="character.id"
+            @click="selectCharacter(character)" :id="character.id" :label="character.name"
             :active="selected_character.id === character.id ? true : false" />
-        <PlusButton @click="selectCharacter({ id: 'empty' })" class="w-16 h-14  mx-auto text-center border-4 border-darkred-dark rounded-lg md:hover:cursor-pointer
-           md:hover:bg-darkred-gray relative overflow-hidden group"
+        <PlusButton @click="selectCharacter({ id: 'empty' })" class="w-16 h-14 border-4 border-darkred-dark rounded-lg
+           md:hover:bg-darkred-gray group"
             :class="selected_character.id === 'empty' ? 'bg-darkred-gray text-darkred-light' : 'bg-darkred-light'" />
     </div>
 
     <section v-if="!state.isLoading" class="m-4 mr-8 grid grid-cols-[25%_75%] gap-2">
 
         <div class="p-4 w-full flex flex-col justify-start gap-2 font-gothic">
-            <GraySelectorButton v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id" :id="tab.id" :label="tab.label"
-                :active="activeTab === tab.id ? true : false" />
+            <GraySelectorButton v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id" :id="tab.id"
+                :label="tab.label" :active="activeTab === tab.id ? true : false" />
             <RejectButtonWithText @click="deleteCharacter" class="w-full" text="Видалити персонажа"
                 v-if="selected_character.id !== 'empty'" />
             <AprroveButtonWithText @click="saveCharacter" class="w-full" text="Підтвердити"
@@ -296,24 +310,34 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
             <TextAreaEditor fieldName="adminNotes" name="Записки майстра" :value="selected_character.adminNotes"
                 :callback="updateCharacter" />
 
-            <h1 class="col-span-2 font-gothic font-medium text-2xl">Список основних характеистик:</h1>
+            <Header1 class="col-span-2 justify-self-center" label="Список основних характеистик:" />
+
+            <Header1 v-if="!checkArrayFieldExisting(selected_character.characteristics)" class="col-span-2"
+                label="Пусто" />
 
             <ObjectFieldsTable v-if="checkObjectFieldExisting(selected_character.characteristics)"
                 :fields="selected_character.characteristics" :callback="updateCharacterCharacteristic" />
 
-            <h1 class="col-span-2 font-gothic font-medium text-2xl">Список фінансів:</h1>
+            <Header1 class="col-span-2 justify-self-center" label="Список фінансів:" />
+
+            <Header1 v-if="!checkArrayFieldExisting(selected_character.currency)" class="col-span-2" label="Пусто" />
 
             <CurrencyTable :currency_array="selected_character.currency" :callback="updateCurrency" />
 
         </div>
 
-        <div id="custom" v-if="activeTab === 'custom'" class="grid grid-cols-2 auto-rows-min gap-x-4">
+        <div id="custom" v-if="activeTab === 'custom'" class="grid grid-cols-2 auto-rows-min gap-4">
 
-            <h1 class="col-span-2 font-gothic font-medium text-2xl">Список кастомних полей:</h1>
+            <Header1 class="col-span-2 font-medium" label="Список кастомних полей:" />
+
+            <Header1 v-if="!checkArrayFieldExisting(selected_character.customFields)" class="col-span-2"
+                label="Пусто" />
+
             <ObjectFieldsTable v-if="checkObjectFieldExisting(selected_character.customFields)"
                 :fields="selected_character.customFields" :callback="updateCustomFields" :field_removable="true" />
 
-            <h1 class="col-span-2 font-gothic font-medium text-2xl">Додати нове поле:</h1>
+            <Header1 class="col-span-w font-medium" label="Додати нове поле:" />
+
             <ObjectFieldsEditor class="col-span-2" name="CustomFields_" :fields="selected_character.customFields"
                 :callback="addCustomField" />
 
@@ -321,19 +345,35 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
 
         <div id="health" v-if="activeTab === 'health'" class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-3">
 
-            <h1 class="text-2xl font-gothic col-span-2 justify-self-center">Редагування існуючи полей:</h1>
 
-            <HealthFieldsEditor v-for="field in selected_character.health" :key="field.id" :label="field.name" :health_field="field"
-                class="col-span-2" :callback="updateHealthFields" :callback_remove="deleteHealthField" />
+            <Header1 class="col-span-2 justify-self-center font-medium" label="Редагування існуючи полей:" />
 
+            <Header1 v-if="!checkArrayFieldExisting(selected_character.health)" class="col-span-2" label="Пусто" />
 
-            <h1 class="text-2xl font-gothic col-span-2 justify-self-center">Створити нове поле:</h1>
+            <HealthFieldsEditor v-for="field in selected_character.health" :key="field.id" :label="field.name"
+                :health_field="field" class="col-span-2" :callback="updateHealthFields"
+                :callback_remove="deleteHealthField" />
+
+            <Header1 class="col-span-2 justify-self-center font-medium" label="Створити нове поле::" />
 
             <HealthFieldsEditor label="Health" class="col-span-2" :callback="addHealthField" />
 
         </div>
 
-        <div id="quests" v-if="activeTab === 'quests'" class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-3">
+        <div id="quests&effects" v-if="activeTab === 'quests&effects'"
+            class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-3">
+
+            <Header1 class="justify-self-center" label="Еффекти:" />
+            <Header1 class="justify-self-center" label="Квести:" />
+
+            <EffectsTableEditor :sessionEffects="state.session.effects" :character_effects="selected_character.effects"
+                :callback="updateEffects" />
+
+            <QuestsTableEditor class="flex flex-col gap-2" :session_quests="state.session.quests"
+                :character_quests="selected_character.quests" :callback="updateQuests" />
+        </div>
+
+        <div id="perks" v-if="activeTab === 'perks'" class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-3">
 
         </div>
 

@@ -6,6 +6,7 @@ import RejectButtonWithText from './Buttons/RejectButtonWithText.vue';
 import PlusButton from './Buttons/PlusButton.vue';
 import DeleteButton from './Buttons/DeleteButton.vue';
 import IconsDropdown from './IconsDropdown.vue';
+import Header1 from './Titles/Header1.vue';
 
 const props = defineProps({
     array: {
@@ -93,7 +94,6 @@ function updateIcon(id, iconName) {
         <section class="grid grid-cols-1 gap-2 font-gothic">
 
             <h1 class="text-2xl ">{{ props.label }}:</h1>
-
             <h1 v-if="arrayLocal.length === 0" class="text-xl ">Пусто</h1>
 
             <div v-for="item in arrayLocal" :key="item.id" class="grid gap-4"

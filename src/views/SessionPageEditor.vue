@@ -19,6 +19,7 @@ import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
 import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
 import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
 import ArrayStringForm from '@/components/reusable/ArrayStringForm.vue';
+import Header1 from '@/components/reusable/Titles/Header1.vue';
 
 const state = reactive({
     session: {},
@@ -112,8 +113,8 @@ function updateStringArray(field, array) {
 
     <div class="grid grid-cols-[25%_1fr]">
         <section class="p-4 w-full flex flex-col justify-start gap-2 font-gothic">
-            <GraySelectorButton v-for="tab in tabs" @click="activeTab = tab.id" :key="tab.id" :id="tab.id" :label="tab.label"
-                :active="activeTab === tab.id ? true : false" />
+            <GraySelectorButton v-for="tab in tabs" @click="activeTab = tab.id" :key="tab.id" :id="tab.id"
+                :label="tab.label" :active="activeTab === tab.id ? true : false" />
             <AprroveButtonWithText @click="saveSession" class="w-full" text="Підтвердити"
                 :class="[!state.unsavedChanges && 'pointer-events-none opacity-50']" />
             <RejectButtonWithText @click="discardChanges" class="w-full" text="Відминити"
@@ -129,14 +130,13 @@ function updateStringArray(field, array) {
                 <SingleFieldEditor :value="editedSession.name" placeholder="Назва сесії" fieldName="name"
                     :callback="updateSession" type="text" />
 
-                <SingleFieldEditor :value="editedSession.move" placeholder="Хід" fieldName="move"
-                    :callback="updateSession" type="number" />
+                <!-- <SingleFieldEditor :value="editedSession.move" placeholder="Хід" fieldName="move"
+                    :callback="updateSession" type="number" /> -->
 
                 <TextAreaEditor class="col-span-2" fieldName="adminNotes" name="Записки майстра"
                     :value="editedSession.adminNotes" :callback="updateSession" />
 
-
-                <h1 class="col-span-2 font-gothic font-medium text-2xl">Список кастомних полей:</h1>
+                <Header1 class="col-span-2 font-medium" label="Список кастомних полей" />
 
                 <ObjectFieldsTable :field_removable="true" :fields="editedSession.customFields"
                     :callback="updateCustomFields" />

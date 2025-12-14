@@ -6,7 +6,7 @@ import { ChartBarIcon, SparklesIcon, FlagIcon, BanknotesIcon } from '@heroicons/
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
-import { checkArrayFieldExisting, checkObjectFieldExisting } from '/utils/entityHelper'
+import { checkArrayFieldExisting } from '/utils/entityHelper'
 import { toCustomFieldObjectField } from '/utils/objects.dto';
 import { toNewCharacterObject } from '/utils/objects.dto';
 import { socket } from '@ws/webSocket';
@@ -235,10 +235,11 @@ async function updateCharacterNotes(field, value) {
             </div>
 
             <div class="flex flex-col gap-2">
-                <HideButton v-if="checkObjectFieldExisting(state.character.currency)" class="w-full"
+                <HideButton v-if="checkArrayFieldExisting(state.character.currency)" class="w-full"
                     textShow="Показати баланс" textHide="Приховати баланс" :hidden="currency_hidden"
                     :mainIcon="BanknotesIcon" @click="currency_hidden = !currency_hidden" />
-                <CurrencyTable v-if="!currency_hidden" :currency_array="state.character.currency" :callback="updateCurrency" />
+                <CurrencyTable v-if="!currency_hidden" :currency_array="state.character.currency"
+                    :callback="updateCurrency" />
             </div>
 
 

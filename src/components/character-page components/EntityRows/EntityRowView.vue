@@ -1,5 +1,5 @@
 <script setup>
-import EntityModal from './EntityModal.vue';
+import EntityModal from '../EntityModals/EntityModal.vue';
 import { ref } from 'vue';
 
 const props = defineProps({
@@ -65,7 +65,7 @@ function closeModal(){
         </div>
 
         <EntityModal v-if="!modal_hidden" :entity="props.entity" :callback_add="props.callback_add"
-            :callback_delete="props.callback_remove" :callback_close="closeModal"/>
+            :callback_delete="props.callback_remove" :callback_close="() => modal_hidden = true"/>
     </div>
 
 </template>

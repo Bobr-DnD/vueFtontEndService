@@ -12,7 +12,7 @@ import RepositoryFactory from '@http/RepositoryFactory'
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
 import ButtonGrayAnimated from '@/components/reusable/Buttons/ButtonGrayAnimated.vue';
-import EffectsTableAdmin from '@/components/admin-page components/EffectsTableAdmin.vue';
+import EffectsTableAdmin from '@/components/admin-page components/EffectsTableControlPanel.vue';
 import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
 import PerkRow from '@/components/character-page components/PerkTable.vue';
 import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
