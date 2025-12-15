@@ -4,7 +4,6 @@ import { reactive, onMounted, ref, computed, toRaw } from 'vue';
 import { useRoute } from 'vue-router';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
-import { ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
 import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue'
 import SingleFieldEditor from '@/components/reusable/SingleFieldEditor.vue';
@@ -20,11 +19,12 @@ import CurrencyTable from '@/components/character-page components/CurrencyTable.
 import EffectsTableEditor from '@/components/admin-page components/EffectsTableEditor.vue';
 import QuestsTableEditor from '@/components/admin-page components/QuestsTableEditor.vue';
 import PerkRowView from '@/components/character-page components/EntityRows/PerkRowView.vue';
+import EntityRowView from '@/components/character-page components/EntityRows/EntityRowView.vue';
 import Header1 from '@/components/reusable/Titles/Header1.vue';
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
-import { checkObjectFieldExisting, filterPerksByRank, groupById, addRow, removeRow, filterPerksByRankWithoutCount } from '/utils/entityHelper';
+import { checkObjectFieldExisting, filterPerksByRank, groupById, addRow, removeRow, filterPerksByRankWithoutCount, sortByMainField } from '/utils/entityHelper';
 import { toCustomFieldObjectField, toNewCharacterObject } from '/utils/objects.dto';
 import { notify } from '/utils/notification';
 import { checkArrayFieldExisting } from '@utils/entityHelper';
@@ -45,8 +45,12 @@ const filteredSessionPerks = ref([])
 const characterPerksSearchQuery = ref('')
 const sessionPerksSearchQuery = ref('')
 
+const inventoryTypes = ref([])
+const activeType = ref('')
+const characterEntitySearchQuery = ref('')
+const sessionEntitySearchQuery = ref('')
+
 const activeTab = ref('base')
-const activeInventory = ref('')
 
 const tabs = [
     { id: 'base', label: 'Базові характеристики' },
@@ -55,14 +59,6 @@ const tabs = [
     { id: 'quests&effects', label: 'Квести та еффекти' },
     { id: 'perks', label: 'Перки' },
     { id: 'inventory', label: 'Інвентар' }
-]
-
-const inventories = [
-    { id: 'weapon', label: 'Зброя', icon: BoltIcon },
-    { id: 'armor', label: 'Броня', icon: ShieldCheckIcon },
-    { id: 'medicine', label: 'Медикаметни', icon: BeakerIcon },
-    { id: 'inventory', label: 'Інвентар', icon: ArchiveBoxIcon },
-    { id: 'perk', label: 'Перки', icon: CheckBadgeIcon }
 ]
 
 onMounted(async () => {
@@ -76,6 +72,18 @@ onMounted(async () => {
 
     state.isLoading = false
     state.session = resSession.data
+
+    inventoryTypes.value = state.session.entityTypes.map(type => {
+        return {
+            name: type.name,
+            id: type.id,
+            hidden: true,
+            icon: type.icon,
+            search: '',
+            modal_hidden: true,
+            searchGlobal: ''
+        }
+    })
 })
 
 filteredCharacterPerks.value.perks = computed(() => {
@@ -270,8 +278,46 @@ function addHealthField(field) {
     markUnsaved();
 }
 
-function updateInventory() {
-    markUnsaved();
+function showEntityType(id) {
+    inventoryTypes.value.forEach(type => {
+        if (type.id === id) {
+            type.hidden = false
+            activeType.value = type
+        }
+        else type.hidden = true
+    });
+
+    characterEntitySearchQuery.value = ''
+    sessionEntitySearchQuery.value = ''
+}
+
+function getFilteredCharacterEntities(type) {
+    sortByMainField(selected_character.value.entities, 'name')
+
+    return selected_character.value.entities
+        .filter(e => e.type === type.name)
+        .filter(e =>
+            e.name.toLowerCase().includes(characterEntitySearchQuery.value.toLowerCase())
+        )
+}
+
+function getFilteredSessionEntities(type) {
+
+    return state.session.entities
+        .filter(e => e.type === type.name)
+        .filter(e =>
+            e.name.toLowerCase().includes(sessionPerksSearchQuery.value.toLowerCase())
+        )
+}
+
+function addEntity(entity) {
+    addRow(state.session.entities, selected_character.value.entities, entity.id)
+    markUnsaved()
+}
+
+function removeEntity(entity) {
+    removeRow(selected_character.value.entities, entity.id)
+    markUnsaved()
 }
 
 function removerPerk(perk) {
@@ -444,6 +490,54 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
         </div>
 
         <div id="inventory" v-if="activeTab === 'inventory'" class="flex flex-col items-center gap-y-4">
+
+            <div class="w-full flex gap-2 justify-center">
+                <GraySelectorButton v-for="type in inventoryTypes" :label="type.name" :id="type.id"
+                    :active="!type.hidden" @click="showEntityType(type.id)" />
+            </div>
+
+            <Header1 class="self-start" label="Інвентар персонажа:" />
+
+            <div class="w-full flex flex-col gap-2">
+
+                <div class="flex gap-2">
+                    
+                    <input v-model="characterEntitySearchQuery" placeholder="Пошук ..."
+                        class="h-12 w-full p-2 col-span-3 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+
+                    <RejectButtonWithText v-if="characterEntitySearchQuery" @click="characterEntitySearchQuery = ''"
+                        text="Очистити" />
+                </div>
+
+                <div class="w-full grid grid-cols-3 gap-2 max-h-[1024px] overflow-y-auto md:no-scrollbar">
+
+                    <EntityRowView v-for="entity in getFilteredCharacterEntities(activeType)" :entity="entity"
+                        :callback_add="addEntity" :callback_remove="removeEntity" />
+
+                </div>
+            </div>
+
+            <Header1 class="self-start" label="Весь інвентар:" />
+
+            <div class="w-full flex flex-col gap-2">
+
+                <div class="flex gap-2">
+
+                    <input v-model="sessionPerksSearchQuery" placeholder="Пошук ..."
+                        class="h-12 w-full p-2 col-span-3 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+
+                    <RejectButtonWithText v-if="sessionPerksSearchQuery" @click="sessionPerksSearchQuery = ''"
+                        text="Очистити" />
+                </div>
+
+
+                <div class="w-full grid grid-cols-3 gap-2 max-h-[512px] overflow-y-auto md:no-scrollbar">
+
+                    <EntityRowView v-for="entity in getFilteredSessionEntities(activeType)" :entity="entity"
+                        :callback_add="addEntity" :callback_remove="removeEntity" />
+
+                </div>
+            </div>
 
         </div>
 

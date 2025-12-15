@@ -83,6 +83,8 @@ export function sortByTwoFields(array, primaryField, secondaryField) {
     const keyB = `${b[primaryField]}-${b[secondaryField]}`
     return keyA.localeCompare(keyB, 'uk')
   })
+}
 
-  return array
+export function sortByMainField(array, primaryField){
+    array.sort((a, b) => a[primaryField].localeCompare(b[primaryField], 'uk'));
 }

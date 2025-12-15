@@ -97,7 +97,7 @@ watch(() => props.value.value, scrollToValue)
 <template>
   <div class="w-full max-w-md mx-auto font-gothic" :id="props.title">
     <!-- Track -->
-    <div ref="scroller" class="relative flex gap-4 overflow-x-auto no-scrollbar px-6 py-3
+    <div ref="scroller" class="relative flex gap-4 overflow-x-auto md:no-scrollbar px-6 py-3
              snap-x snap-mandatory scroll-p-1 select-none">
 
       <div class="shrink-0" :style="{ width: '50%' }"></div>
@@ -134,14 +134,7 @@ watch(() => props.value.value, scrollToValue)
 </template>
 
 <style>
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
 
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
 
 @keyframes gradient-pulse {
   0% {

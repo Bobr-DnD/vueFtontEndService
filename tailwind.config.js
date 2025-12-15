@@ -19,7 +19,8 @@ export default {
           light_gray: '#C7C7C7',
           red: '#8E1616',
           bright: '#D84040',
-          light: '#EEEEEE'
+          light: '#EEEEEE',
+          brown: '#433333'
         },
         orange: {
           gold: '#FABC3F',

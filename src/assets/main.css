@@ -17,7 +17,15 @@ nav {
     margin: 0;
 }
 
-/* Remove arrows for Firefox */
 .no-arrows[type=number] {
     -moz-appearance: textfield;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

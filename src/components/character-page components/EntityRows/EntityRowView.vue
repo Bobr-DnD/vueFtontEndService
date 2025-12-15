@@ -24,7 +24,7 @@ const modal_hidden = ref(true)
 <template>
     <div class="w-full">
         <div @click="modal_hidden = !modal_hidden" class="p-2 w-full bg-darkred-dark text-darkred-light border-2 rounded-2xl
-            grid grid-cols-4 gap-1 justify-items-center items-center font-univers font-medium text-lg md:hover:cursor-pointer">
+            grid grid-cols-4 gap-2 justify-items-center items-center font-univers font-medium text-lg md:hover:cursor-pointer">
 
             <div class="col-span-4 text-xl font-semibold">{{ props.entity.name }}</div>
 
@@ -32,9 +32,9 @@ const modal_hidden = ref(true)
                 }}
             </div>
 
-            <div v-if="props.entity.characteristics" class="w-full col-span-4 flex flex-wrap gap-1">
+            <div v-if="props.entity.characteristics" class="w-full col-span-4 flex flex-wrap gap-1 bg-darkred-brown rounded-lg">
 
-                <div class="basis-full text-center text-xl">Характеристики: </div>
+                <div class="basis-full text-center text-xl p-1">Характеристики: </div>
 
                 <div class="p-1 w-full bg-darkred-light rounded-lg text-darkred-dark flex flex-col gap-1">
                     <div v-for="value, name in props.entity.characteristics" :key="Math.random().toString(24).slice(2)"
@@ -45,9 +45,9 @@ const modal_hidden = ref(true)
 
             </div>
 
-            <div v-if="props.entity.requirement" class="w-full col-span-4 flex flex-wrap gap-1">
+            <div v-if="props.entity.requirement" class="w-full col-span-4 flex flex-wrap gap-1 bg-darkred-brown rounded-lg">
 
-                <div class="basis-full text-center text-xl">Вимоги: </div>
+                <div class="basis-full text-center text-xl p-1">Вимоги: </div>
 
                 <div class="p-1 w-full bg-darkred-light rounded-lg text-darkred-dark flex flex-col gap-1">
                     <div v-for="value, name in props.entity.requirement" :key="Math.random().toString(24).slice(2)"

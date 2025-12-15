@@ -88,7 +88,7 @@ function getFilteredSessionEntities(type) {
         </div>
 
 
-        <div class="w-full max-h-[680px] overflow-y-scroll no-scrollbar flex flex-col gap-1">
+        <div class="w-full max-h-[680px] overflow-y-auto md:no-scrollbar flex flex-col gap-1">
             <EntityRowView v-if="!type.hidden" v-for="entity in getFilteredCharacterEntities(type)" :key="entity.name" :entity="entity"
                 :callback_add="addEntity" :callback_remove="removeEntity" />
         </div>
