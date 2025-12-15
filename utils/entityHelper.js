@@ -38,6 +38,17 @@ export function filterPerksByRank(perks, allPerks) {
     .filter(perk => perk.count < perk.ranks);
 }
 
+export function filterPerksByRankWithoutCount(perks, allPerks) {
+  const grouped = groupById(perks);
+
+  return allPerks.filter(perk => {
+    const found = grouped.find(p => p.id === perk.id);
+    const count = found?.count ?? 0;
+
+    return count < perk.ranks;
+  });
+}
+
 export function removeRow(entityArray, id) {
   const index = entityArray.findIndex(entity => entity.id === id)
   if (index !== -1) entityArray.splice(index, 1)

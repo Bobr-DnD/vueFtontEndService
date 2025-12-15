@@ -94,7 +94,7 @@ function removePerk(perk) {
         </div>
 
         <div v-if="!perksHidden" class="flex flex-col gap-1">
-            <PerkRowView v-for="perk in filteredCharacterArray" :perk="perk" :callback="removePerk" :removable="true" />
+            <PerkRowView v-for="perk in filteredCharacterArray" :perk="perk" :callback_remove="removePerk"/>
 
         </div>
 

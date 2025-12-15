@@ -4,6 +4,7 @@ import { reactive, onMounted, ref, computed, toRaw } from 'vue';
 import { useRoute } from 'vue-router';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
+import { ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
 import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue'
 import SingleFieldEditor from '@/components/reusable/SingleFieldEditor.vue';
@@ -11,7 +12,6 @@ import ImageEditor from '@/components/reusable/ImageEditor.vue';
 import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
 import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
 import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
-import { ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import HealthFieldsEditor from '@/components/admin-page components/HealthFieldsEditor.vue';
@@ -19,15 +19,15 @@ import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
 import CurrencyTable from '@/components/character-page components/CurrencyTable.vue';
 import EffectsTableEditor from '@/components/admin-page components/EffectsTableEditor.vue';
 import QuestsTableEditor from '@/components/admin-page components/QuestsTableEditor.vue';
+import PerkRowView from '@/components/character-page components/EntityRows/PerkRowView.vue';
 import Header1 from '@/components/reusable/Titles/Header1.vue';
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
-import { checkObjectFieldExisting } from '/utils/entityHelper';
+import { checkObjectFieldExisting, filterPerksByRank, groupById, addRow, removeRow, filterPerksByRankWithoutCount } from '/utils/entityHelper';
 import { toCustomFieldObjectField, toNewCharacterObject } from '/utils/objects.dto';
 import { notify } from '/utils/notification';
 import { checkArrayFieldExisting } from '@utils/entityHelper';
-import PerkTable from '@/components/character-page components/PerkTable.vue';
 
 const state = reactive({
     session: {},
@@ -38,6 +38,12 @@ const state = reactive({
 const sessionId = useRoute().params.sessionId
 const selected_character = ref(toNewCharacterObject({}))
 const editingCharacter = ref(selected_character.value.id)
+
+//perks variables
+const filteredCharacterPerks = ref([])
+const filteredSessionPerks = ref([])
+const characterPerksSearchQuery = ref('')
+const sessionPerksSearchQuery = ref('')
 
 const activeTab = ref('base')
 const activeInventory = ref('')
@@ -72,6 +78,26 @@ onMounted(async () => {
     state.session = resSession.data
 })
 
+filteredCharacterPerks.value.perks = computed(() => {
+    const groupedArray = groupById(selected_character.value.perks)
+
+    if (!characterPerksSearchQuery.value.trim()) return groupedArray
+    const query = characterPerksSearchQuery.value.toLowerCase()
+    return groupedArray.filter(el =>
+        el.name.toLowerCase().includes(query)
+    )
+})
+
+filteredSessionPerks.value.perks = computed(() => {
+    const groupedArray = filterPerksByRankWithoutCount(selected_character.value.perks, state.session.perks)
+
+    if (!sessionPerksSearchQuery.value.trim()) return groupedArray
+    const query = sessionPerksSearchQuery.value.toLowerCase()
+    return groupedArray.filter(el =>
+        el.name.toLowerCase().includes(query)
+    )
+})
+
 function selectCharacter(character) {
     if (state.unsavedChanges) {
         const confirmSwitch = confirm('Є незбережені зміни. Вийти без збереження?')
@@ -85,6 +111,9 @@ function selectCharacter(character) {
         selected_character.value = toNewCharacterObject({})
     }
     else selected_character.value = toNewCharacterObject(structuredClone(toRaw(character)))
+
+    characterPerksSearchQuery.value = ''
+    sessionPerksSearchQuery.value = ''
 }
 
 function markUnsaved() {
@@ -245,7 +274,13 @@ function updateInventory() {
     markUnsaved();
 }
 
-function updatePerks() {
+function removerPerk(perk) {
+    removeRow(selected_character.value.perks, perk.id)
+    markUnsaved()
+}
+
+function addPerk(perk) {
+    addRow(state.session.perks, selected_character.value.perks, perk.id)
     markUnsaved()
 }
 
@@ -378,11 +413,34 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
                 :character_quests="selected_character.quests" :callback="updateQuests" />
         </div>
 
-        <div id="perks" v-if="activeTab === 'perks'" class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-3">
+        <div id="perks" v-if="activeTab === 'perks'" class="grid grid-cols-3 auto-rows-min gap-x-4 gap-y-3">
 
-            <!-- <PerkTable :session_perks="state.session.perks" :character_perks="selected_character.perks" :perkPoints="1"
-                :callback="updatePerks" :removable="true" /> -->
-                
+            <Header1 class="col-span-3 justify-self-center" label="Перки персонажа: " />
+
+            <div class="col-span-3 flex gap-2">
+                <input v-model="characterPerksSearchQuery" placeholder="Пошук ..."
+                    class="h-12 w-full p-2 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+
+                <RejectButtonWithText v-if="characterPerksSearchQuery" @click="characterPerksSearchQuery = ''"
+                    text="Очистити" />
+            </div>
+
+            <PerkRowView v-for="perk in filteredCharacterPerks.perks" :perk="perk" :removable="true"
+                :callback_remove="removerPerk" />
+
+            <Header1 class="col-span-3 justify-self-center" label="Усі перки: " />
+
+            <div class="col-span-3 flex gap-2">
+                <input v-model="sessionPerksSearchQuery" placeholder="Пошук ..."
+                    class="h-12 w-full p-2 col-span-3 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+
+                <RejectButtonWithText v-if="sessionPerksSearchQuery" @click="sessionPerksSearchQuery = ''"
+                    text="Очистити" />
+            </div>
+
+            <PerkRowView v-for="perk in filteredSessionPerks.perks" :perk="perk" :addable="true"
+                :callback_add="addPerk" />
+
         </div>
 
         <div id="inventory" v-if="activeTab === 'inventory'" class="flex flex-col items-center gap-y-4">
