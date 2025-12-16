@@ -9,6 +9,7 @@ import CharacterPageView from "@/views/CharacterPageView.vue";
 import CharacterPageEditor from "@/views/CharacterPageEditor.vue";
 import EntitiesPageEditor from "@/views/EntitiesPageEditor.vue";
 import SessionPageEditor from "@/views/SessionPageEditor.vue";
+import EffectsPageEditor from "@/views/EffectsPageEditor.vue";
 
 import AdminPageView from "@/views/AdminPageView.vue";
 
@@ -44,6 +45,11 @@ const router = createRouter({
                     path: 'entities',
                     name: 'entities_editor',
                     component: EntitiesPageEditor
+                },
+                {
+                    path: 'effects',
+                    name: 'effects_editor',
+                    component: EffectsPageEditor
                 }
             ]
         },
