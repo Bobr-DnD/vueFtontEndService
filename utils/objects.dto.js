@@ -5,9 +5,9 @@ export function toEffectObjectField(effect) {
   };
 }
 
-export function toCustomFieldObjectField(customField) {
+export function toObject(objectField) {
   return {
-    [customField.name]: customField.value
+    [objectField.name]: objectField.value
   }
 }
 
@@ -67,5 +67,14 @@ export function toNewSession(session){
     effects :session.effects ?? [],
     fractions: session.fractions ?? [],
     quests: session.quests ?? []
+  }
+}
+
+export function toNewEffect(effect){
+  return {
+    id: effect.id || 'new',
+    name: effect.name ?? '',
+    description: effect.description ?? '',
+    effect: effect.effect ?? {}
   }
 }

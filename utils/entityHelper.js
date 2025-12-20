@@ -70,7 +70,7 @@ export function useItem(entityArray, effectsArray, entityEffects, sessionMove, e
 }
 
 export function checkObjectFieldExisting(field) {
-  return (field !== undefined && field !== null)
+  return (field !== undefined && field !== null && Object.keys(field).length > 0)
 }
 
 export function checkArrayFieldExisting(field) {

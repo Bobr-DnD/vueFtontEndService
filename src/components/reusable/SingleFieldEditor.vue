@@ -30,7 +30,7 @@ const saveField = () => {
     fieldReadonly.value = true
     let inputValue;
     if (props.type === 'text') inputValue = inputEl.value.value
-    else inputValue = parseInt(inputEl.value.value)
+    else inputValue = parseInt(inputEl.value.value) ?? 0
     props.callback(props.fieldName, inputValue)
 
 }

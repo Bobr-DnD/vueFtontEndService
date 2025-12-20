@@ -2,7 +2,7 @@
 import { reactive, onMounted, ref, computed, toRaw } from 'vue';
 import { useRoute } from 'vue-router';
 import { asyncHandler } from '@utils/asyncHandler';
-import { toNewSession, toCustomFieldObjectField } from '@utils/objects.dto';
+import { toNewSession, toObject } from '@utils/objects.dto';
 import { notify } from '@utils/notification';
 import { iconsList } from '@utils/icons'
 import RepositoryFactory from '@http/RepositoryFactory';
@@ -87,7 +87,7 @@ function addImage(image) {
 }
 
 function addCustomField(name, value) {
-    Object.assign(editedSession.value.customFields, toCustomFieldObjectField({ name, value }))
+    Object.assign(editedSession.value.customFields, toObject({ name, value }))
     markUnsaved();
 }
 

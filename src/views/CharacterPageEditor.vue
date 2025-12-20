@@ -25,7 +25,7 @@ import Header1 from '@/components/reusable/Titles/Header1.vue';
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
 import { checkObjectFieldExisting, filterPerksByRank, groupById, addRow, removeRow, filterPerksByRankWithoutCount, sortByMainField } from '/utils/entityHelper';
-import { toCustomFieldObjectField, toNewCharacterObject } from '/utils/objects.dto';
+import { toObject, toNewCharacterObject } from '/utils/objects.dto';
 import { notify } from '/utils/notification';
 import { checkArrayFieldExisting } from '@utils/entityHelper';
 
@@ -137,18 +137,12 @@ async function saveCharacter() {
             const [res, err] = await asyncHandler(
                 RepositoryFactory.create('character', selected_character.value)
             )
-            if (err) {
-                notify({ message: err.message, type: 'error' })
-                return
-            }
+            if (err) return
 
             const [resSession, errSession] = await asyncHandler(
                 RepositoryFactory.getById('session', sessionId)
             )
-            if (errSession) {
-                notify({ message: errSession.message, type: 'error' })
-                return
-            }
+            if (errSession) return
 
             state.session = resSession.data
             state.unsavedChanges = false
@@ -160,18 +154,12 @@ async function saveCharacter() {
             const [res, err] = await asyncHandler(
                 RepositoryFactory.update('character', selected_character.value.id, selected_character.value)
             )
-            if (err) {
-                notify({ message: err.message, type: 'error' })
-                return
-            }
+            if (err) return
 
             const [resSession, errSession] = await asyncHandler(
                 RepositoryFactory.getById('session', sessionId)
             )
-            if (errSession) {
-                notify({ message: errSession.message, type: 'error' })
-                return
-            }
+            if (errSession) return
 
             state.session = resSession.data
             state.unsavedChanges = false
@@ -191,7 +179,6 @@ async function deleteCharacter() {
         RepositoryFactory.delete('character', selected_character.value.id)
     )
     if (err) {
-        notify({ message: err.message, type: 'error' })
         return
     }
 
@@ -199,7 +186,6 @@ async function deleteCharacter() {
         RepositoryFactory.getById('session', sessionId)
     )
     if (errSession) {
-        notify({ message: errSession.message, type: 'error' })
         return
     }
 
@@ -255,7 +241,7 @@ function updateQuests(quests) {
 }
 
 function addCustomField(name, value) {
-    Object.assign(selected_character.value.customFields, toCustomFieldObjectField({ name, value }))
+    Object.assign(selected_character.value.customFields, toObject({ name, value }))
     markUnsaved();
 }
 

@@ -7,7 +7,7 @@ import { ChartBarIcon, SparklesIcon, FlagIcon, BanknotesIcon } from '@heroicons/
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
 import { checkArrayFieldExisting } from '/utils/entityHelper'
-import { toCustomFieldObjectField } from '/utils/objects.dto';
+import { toObject } from '/utils/objects.dto';
 import { toNewCharacterObject } from '/utils/objects.dto';
 import { socket } from '@ws/webSocket';
 import { notify } from '/utils/notification';
@@ -129,7 +129,7 @@ function updateCurrency(fields) {
 }
 
 async function addCustomField(name, value) {
-    Object.assign(state.character.customFields, toCustomFieldObjectField({ name, value }))
+    Object.assign(state.character.customFields, toObject({ name, value }))
     state.character = await updateCharacter()
 }
 

@@ -1,4 +1,5 @@
 <script setup>
+import { checkObjectFieldExisting } from '@utils/entityHelper';
 
 const props = defineProps({
     effect: {
@@ -20,8 +21,9 @@ const props = defineProps({
             Опис: {{ props.effect.description }}
         </div>
 
-        <div v-if="props.effect.effect">
-            Вплив ефекту на поля: {{ Object.entries(props.effect.effect).map(([key, value]) => `${key}: ${value}`).join(', ') }}
+        <div v-if="checkObjectFieldExisting(props.effect.effect)">
+            Вплив ефекту на поля: {{Object.entries(props.effect.effect).map(([key, value]) => `${key}:
+            ${value}`).join(', ') }}
         </div>
     </div>
 
