@@ -358,8 +358,8 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
             <ImageEditor class="w-full col-span-2" :image="selected_character.image" label="Character image"
                 :callback="addImage" />
 
-            <SingleFieldEditor placeholder="Ім'я(обов'язкове поле)" fieldName="name" :value="selected_character.name"
-                :callback="updateCharacterField" class="w-full" />
+            <SingleFieldEditor placeholder="Ім'я" fieldName="name" :value="selected_character.name"
+                :callback="updateCharacterField" :important="true" class="w-full" />
             <SingleFieldEditor placeholder="Стать" fieldName="gender" :value="selected_character.gender"
                 :callback="updateCharacterField" class="w-full" />
             <SingleFieldEditor placeholder="Клас" fieldName="class" :value="selected_character.class"

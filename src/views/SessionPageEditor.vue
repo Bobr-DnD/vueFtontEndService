@@ -128,7 +128,7 @@ function updateStringArray(field, array) {
                     :callback="addImage" />
 
                 <SingleFieldEditor :value="editedSession.name" placeholder="Назва сесії" fieldName="name"
-                    :callback="updateSession" type="text" />
+                    :callback="updateSession" type="text" :important="true" />
 
                 <!-- <SingleFieldEditor :value="editedSession.move" placeholder="Хід" fieldName="move"
                     :callback="updateSession" type="number" /> -->
@@ -158,10 +158,13 @@ function updateStringArray(field, array) {
                     :callback="updateStringArray" :set_icon="true" />
 
                 <ArrayStringForm :array="editedSession.characteristicsList" label="Характеристики"
-                    array_name="characteristicsList" :callback="updateStringArray" :set_icon="false" />
+                    array_name="characteristicsList" :callback="updateStringArray" />
+
+                <ArrayStringForm :array="editedSession.questTypes" label="Статуси квестів"
+                    array_name="questTypes" :callback="updateStringArray" />
 
                 <ArrayStringForm :array="editedSession.enemyTypes" label="Вороги" array_name="enemyTypes"
-                    :callback="updateStringArray" :set_icon="false" />
+                    :callback="updateStringArray" />
 
             </div>
 

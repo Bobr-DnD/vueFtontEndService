@@ -132,6 +132,12 @@ function discardChanges() {
 }
 
 function selectEffect(effect) {
+    if (unsavedChanges.value) {
+        const confirmSwitch = confirm('Є незбережені зміни. Вийти без збереження?')
+        if (!confirmSwitch) return
+    }
+
+    unsavedChanges.value = false
     selectedEffect.value = toNewEffect(structuredClone(toRaw(effect)))
 }
 
@@ -141,8 +147,6 @@ function updateEffectField(fieldName, value) {
 }
 
 function updateEffectCharacteristics() {
-    console.log(newEffect.value);
-
     if (newEffect.value.value)
         Object.assign(selectedEffect.value.effect, toObject(newEffect.value))
     else notify({ message: 'Вкажіть значення', type: 'error' })
@@ -179,7 +183,7 @@ function removeEffectCharacteristic(key) {
             <RejectButtonWithText v-if="searchQuery" @click="searchQuery = ''" text="Очистити" />
         </div>
 
-        <div class="w-full max-h-[512px] overflow-y-scroll no-scrollbar grid grid-cols-4 gap-4">
+        <div class="w-full py-2 max-h-[512px] overflow-y-scroll no-scrollbar grid grid-cols-4 gap-4">
 
             <div @click="selectEffect({})" :class="selectedEffect.id === 'new' && 'bg-darkred-gray text-darkred-light'"
                 class="border-8 border-darkred-dark rounded-2xl flex justify-center items-center hover:cursor-pointer">
@@ -195,7 +199,7 @@ function removeEffectCharacteristic(key) {
 
     </section>
 
-    <section class="m-4 flex gap-2 items-center">
+    <section v-if="!state.isLoading" class="m-4 flex gap-2 items-center">
         <AprroveButtonWithText :class="[!unsavedChanges && 'pointer-events-none opacity-50']" text="Зберегти зміни"
             @click="saveEffect" />
 
@@ -212,9 +216,9 @@ function removeEffectCharacteristic(key) {
         <Header1 class="col-span-2" label="Створити\редагувати ефект" />
 
         <SingleFieldEditor placeholder="Назва" fieldName="name" type="text" :value="selectedEffect.name"
-            :callback="updateEffectField" />
+            :callback="updateEffectField" :important="true" class="p-0"/>
         <SingleFieldEditor placeholder="Опис" fieldName="description" type="text" :value="selectedEffect.description"
-            :callback="updateEffectField" />
+            :callback="updateEffectField" :important="true" class="p-0"/>
 
         <Header2 v-if="selectedEffect.effect" label="Характеристики, на які впливає ефект:" />
 

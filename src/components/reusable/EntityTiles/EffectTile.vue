@@ -13,8 +13,8 @@ const props = defineProps({
 <template>
 
     <div class="p-3 rounded-2xl bg-darkred-dark text-darkred-light flex flex-col gap-2">
-        <div>
-            Назва: {{ props.effect.name }}
+        <div class="text-xl font-medium">
+            {{ props.effect.name }}
         </div>
 
         <div>

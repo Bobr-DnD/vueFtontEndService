@@ -60,6 +60,7 @@ export function toNewSession(session){
     enemyTypes: session.enemyTypes ?? [],
     characteristicsList: session.characteristicsList ?? [],
     currencyTypes: session.currencyTypes ?? [],
+    questTypes: session.questTypes ?? [],
     characters: session.characters ?? [],
     entities: session.entities ?? [],
     enemies: session.enemies ?? [],
@@ -72,9 +73,21 @@ export function toNewSession(session){
 
 export function toNewEffect(effect){
   return {
-    id: effect.id || 'new',
+    id: effect.id || effect._id || 'new',
     name: effect.name ?? '',
     description: effect.description ?? '',
     effect: effect.effect ?? {}
+  }
+}
+
+export function toNewQuest(quest){
+  return {
+    id: quest.id || quest._id || 'new',
+    name: quest.name ?? '',
+    description: quest.description ?? '',
+    status: quest.status ?? '',
+    reward: quest.reward ?? '',
+    steps: quest.steps ?? [],
+    notes: quest.notes ?? ''
   }
 }
