@@ -1,12 +1,11 @@
 <script setup>
 import { ref, toRaw } from 'vue';
 import { iconsList } from '@utils/icons';
-import AprroveButtonWithText from './Buttons/AprroveButtonWithText.vue';
-import RejectButtonWithText from './Buttons/RejectButtonWithText.vue';
-import PlusButton from './Buttons/PlusButton.vue';
-import DeleteButton from './Buttons/DeleteButton.vue';
-import IconsDropdown from './IconsDropdown.vue';
-import Header1 from './Titles/Header1.vue';
+import AprroveButtonWithText from '../Buttons/AprroveButtonWithText.vue';
+import RejectButtonWithText from '../Buttons/RejectButtonWithText.vue';
+import PlusButton from '../Buttons/PlusButton.vue';
+import DeleteButton from '../Buttons/DeleteButton.vue';
+import IconsDropdown from '../IconsDropdown.vue';
 
 const props = defineProps({
     array: {

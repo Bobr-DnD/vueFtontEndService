@@ -18,7 +18,8 @@ import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWith
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
 import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
 import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
-import ArrayStringForm from '@/components/reusable/ArrayStringForm.vue';
+import ArrayStringFormWIcons from '@/components/reusable/Forms/ArrayStringFormWIcons.vue';
+import ArrayStringFromWColorPicker from '@/components/reusable/Forms/ArrayStringFromWColorPicker.vue';
 import Header1 from '@/components/reusable/Titles/Header1.vue';
 
 const state = reactive({
@@ -151,19 +152,22 @@ function updateStringArray(field, array) {
             </div>
 
             <div v-if="activeTab === 'types'" class="grid grid-cols-2 gap-4">
-                <ArrayStringForm :array="editedSession.entityTypes" label="Інвентар" array_name="entityTypes"
+                <ArrayStringFormWIcons :array="editedSession.entityTypes" label="Інвентар" array_name="entityTypes"
                     :callback="updateStringArray" :set_icon="true" />
 
-                <ArrayStringForm :array="editedSession.currencyTypes" label="Валюти" array_name="currencyTypes"
+                <ArrayStringFormWIcons :array="editedSession.currencyTypes" label="Валюти" array_name="currencyTypes"
                     :callback="updateStringArray" :set_icon="true" />
 
-                <ArrayStringForm :array="editedSession.characteristicsList" label="Характеристики"
+                <ArrayStringFormWIcons :array="editedSession.characteristicsList" label="Характеристики"
                     array_name="characteristicsList" :callback="updateStringArray" />
 
-                <ArrayStringForm :array="editedSession.questTypes" label="Статуси квестів"
-                    array_name="questTypes" :callback="updateStringArray" />
+                <ArrayStringFormWIcons :array="editedSession.questTypes" label="Статуси квестів" array_name="questTypes"
+                    :callback="updateStringArray" />
 
-                <ArrayStringForm :array="editedSession.enemyTypes" label="Вороги" array_name="enemyTypes"
+                <ArrayStringFromWColorPicker :array="editedSession.perkTypes" label="Типи перків" array_name="perkTypes"
+                    :callback="updateStringArray" />
+
+                <ArrayStringFormWIcons :array="editedSession.enemyTypes" label="Вороги" array_name="enemyTypes"
                     :callback="updateStringArray" />
 
             </div>
