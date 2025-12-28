@@ -3,6 +3,7 @@ import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import ApproveButton from '@/components/reusable/Buttons/ApproveButton.vue';
+import { checkArrayFieldExisting } from '@utils/entityHelper';
 
 const props = defineProps({
     entity: {
@@ -71,7 +72,7 @@ const props = defineProps({
 
             </div>
 
-            <div v-if="props.entity.effects.length > 0" class="w-full flex flex-wrap gap-1">
+            <div v-if="checkArrayFieldExisting(props.entity.effects)" class="w-full flex flex-wrap gap-1">
 
                 <div class="basis-full text-center text-xl">Ефекти: </div>
 

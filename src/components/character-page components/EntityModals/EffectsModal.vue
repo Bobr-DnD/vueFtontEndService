@@ -1,6 +1,11 @@
 <script setup>
+import { ref, computed, toRaw } from 'vue';
+import { checkObjectFieldExisting } from '@utils/entityHelper';
+
 import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue';
 import ApproveButton from '@/components/reusable/Buttons/ApproveButton.vue';
+import SearchInputBlack from '@/components/reusable/SearchInputs/SearchInputBlack.vue';
+
 
 const props = defineProps({
     effects: {
@@ -17,6 +22,17 @@ const props = defineProps({
     }
 })
 
+const searchQuery = ref('')
+
+const filteredEffects = computed(() => {
+
+    if (!searchQuery.value.trim()) return toRaw(props.effects)
+    const query = searchQuery.value.toLowerCase()
+    return toRaw(props.effects.filter(el =>
+        el.name.toLowerCase().includes(query)
+    ))
+})
+
 </script>
 
 <template>
@@ -28,7 +44,7 @@ const props = defineProps({
             <CloseButtonRedBG @click="props.callback_close" />
             <div class="h-6"></div>
 
-            <div class="p-2 grid grid-cols-[140px_1fr_40px] gap-2">
+            <div class="p-2 grid grid-cols-[140px_1fr_40px] gap-2 bg-darkred-dark rounded-lg">
                 <div>
                     Назва
                 </div>
@@ -37,21 +53,38 @@ const props = defineProps({
                 </div>
             </div>
 
-            <div v-for="effect in props.effects" :key="effect.id"
-                class="p-2 rounded-lg bg-darkred-gray odd:bg-darkred-light_gray text-darkred-dark grid grid-cols-[140px_1fr_40px] gap-2">
-
-                <div>{{ effect.name }}</div>
-
-                <div class="justify-self-center">{{ effect.description }}</div>
-
-                <ApproveButton class="row-span-2 flex justify-center items-center" @click="props.callback(effect.id)"/>
-
-                <div v-if="effect.effect" v-for="value, name in effect.effect"
-                    :key="Math.random().toString(24).slice(2)" class="col-span-3 justify-self-start">
-                    Еффект: {{ name }}: {{ value }}
-                </div>
-
+            <div>
+                <SearchInputBlack v-model:searchQuery="searchQuery" />
             </div>
+
+            <div class="max-h-[800px] overflow-y-scroll no-scrollbar grid grid-cols-1 gap-2">
+                <div v-for="effect in filteredEffects" :key="effect.id"
+                    class="p-2 rounded-lg bg-darkred-gray odd:bg-darkred-light_gray text-darkred-dark grid grid-cols-[140px_1fr_40px] gap-2 items-center">
+
+                    <div>{{ effect.name }}</div>
+
+                    <div class="justify-self-center">{{ effect.description }}</div>
+
+                    <ApproveButton class="row-span-2 flex justify-center items-center"
+                        @click="props.callback(effect.id)" />
+
+                    <div v-if="checkObjectFieldExisting(effect.effect)"
+                        class="col-span-2 justify-self-start flex flex-wrap gap-1 items-center">
+                        <div class="shrink w-full text-xl font-medium">
+                            Еффекти:
+                        </div>
+                        <div v-if="effect.effect" v-for="value, name in effect.effect"
+                            :key="Math.random().toString(24).slice(2)"
+                            class="bg-darkred-dark_gray text-darkred-light p-2 rounded-lg font-normal">
+                            {{ name }}: {{ value }}
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+
+
 
         </div>
     </div>
