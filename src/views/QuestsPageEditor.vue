@@ -7,6 +7,7 @@ import { toNewQuest } from '@utils/objects.dto';
 import { notify } from '@utils/notification';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
+import Loader from 'vue-spinner/src/SyncLoader.vue'
 import SingleFieldEditor from '@/components/reusable/SingleFieldEditor.vue';
 import SearchInputBlack from '@/components/reusable/SearchInputs/SearchInputBlack.vue';
 import Header1 from '@/components/reusable/Titles/Header1.vue';
@@ -109,7 +110,7 @@ async function deleteQuest() {
 async function discardChanges() {
     if (selectedQuest.value.id === 'new') selectedQuest.value = toNewQuest({})
     else {
-        selectedQuest.value = state.session.quests.find(el => el.id === selectedQuest.value.id)
+        selectedQuest.value = toNewQuest(structuredClone(toRaw(state.session.quests.find(el => el.id === selectedQuest.value.id))))
     }
 
     state.unsavedChanges = false
@@ -160,7 +161,8 @@ function getQuestType(id) {
 
         <div class="grid grid-cols-4 gap-4 py-2 max-h-[512px] overflow-y-scroll no-scrollbar">
 
-            <div @click="selectQuest({})" :class="selectedQuest.id === 'new' && 'bg-darkred-gray text-darkred-light'"
+            <div @click="selectQuest({})"
+                :class="selectedQuest.id === 'new' && 'bg-darkred-dark_gray text-darkred-light'"
                 class="border-8 border-darkred-dark rounded-2xl flex justify-center items-center hover:cursor-pointer">
                 <PlusButton class="w-20" />
             </div>
@@ -215,5 +217,9 @@ function getQuestType(id) {
         </div>
 
     </section>
+
+    <div v-if="state.isLoading" class="text-center py-6">
+        <Loader />
+    </div>
 
 </template>

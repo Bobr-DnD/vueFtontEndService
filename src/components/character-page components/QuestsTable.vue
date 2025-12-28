@@ -1,5 +1,6 @@
 <script setup>
 import DeleteButton from '../reusable/Buttons/DeleteButton.vue';
+import { checkArrayFieldExisting } from '@utils/entityHelper';
 
 const props = defineProps({
     quests: {
@@ -36,24 +37,16 @@ const props = defineProps({
                     <div class="w-full text-xl font-normal">
                         Винагорода: {{ quest.reward }}
                     </div>
-                    <div v-if="quest.steps.length !== 0" class="w-full text-xl font-normal">
+                    <div v-if="checkArrayFieldExisting(quest.steps)" class="w-full text-xl font-normal">
                         Кроки:
                     </div>
                 </div>
 
-                <div v-for="step in quest.steps" :key="Math.random().toString(24).slice(2)"
+                <div v-for="step in quest.steps" :key="step.id"
                     class="text-lg font-normal indent-4">
 
-                    <div v-if="step.status === 'fail'">
-                        • <span class="line-through decoration-2 decoration-darkred-red">{{ step.name }}</span>
-                    </div>
-
-                    <div v-if="step.status === 'done'">
-                        • <span class="line-through decoration-2 decoration-darkred-dark">{{ step.name }}</span>
-                    </div>
-
-                    <div v-if="step.status === 'active'" class="">
-                        • {{ step.name }}
+                    <div>
+                        • {{ step.name }} <sup>{{ step.status }}</sup>
                     </div>
 
                 </div>

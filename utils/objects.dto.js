@@ -61,6 +61,7 @@ export function toNewSession(session){
     characteristicsList: session.characteristicsList ?? [],
     currencyTypes: session.currencyTypes ?? [],
     questTypes: session.questTypes ?? [],
+    perkTypes: session.perkTypes ?? [],
     characters: session.characters ?? [],
     entities: session.entities ?? [],
     enemies: session.enemies ?? [],
@@ -89,5 +90,18 @@ export function toNewQuest(quest){
     reward: quest.reward ?? '',
     steps: quest.steps ?? [],
     notes: quest.notes ?? ''
+  }
+}
+
+export function toNewPerk(perk){
+  return {
+    id: perk.id ?? perk._id ?? 'new',
+    name: perk.name ?? '',
+    descriptions: perk.descriptions ?? [],
+    effects: perk.effects ?? [],
+    requirement: perk.requirement ?? {},
+    ranks: perk.ranks ?? 0,
+    type: perk.type ?? {},
+    notes: perk.notes ?? ''
   }
 }

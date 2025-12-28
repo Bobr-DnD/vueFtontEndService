@@ -161,13 +161,13 @@ function updateStringArray(field, array) {
                 <ArrayStringFormWIcons :array="editedSession.characteristicsList" label="Характеристики"
                     array_name="characteristicsList" :callback="updateStringArray" />
 
+                <ArrayStringFormWIcons :array="editedSession.enemyTypes" label="Вороги" array_name="enemyTypes"
+                    :callback="updateStringArray" />
+
                 <ArrayStringFormWIcons :array="editedSession.questTypes" label="Статуси квестів" array_name="questTypes"
                     :callback="updateStringArray" />
 
                 <ArrayStringFromWColorPicker :array="editedSession.perkTypes" label="Типи перків" array_name="perkTypes"
-                    :callback="updateStringArray" />
-
-                <ArrayStringFormWIcons :array="editedSession.enemyTypes" label="Вороги" array_name="enemyTypes"
                     :callback="updateStringArray" />
 
             </div>

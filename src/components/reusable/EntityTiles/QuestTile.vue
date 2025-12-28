@@ -16,11 +16,11 @@ const props = defineProps({
             {{ props.quest.name }}
         </div>
 
-        <div>
+        <div class="p-2 bg-darkred-dark_gray rounded-lg">
             Опис: {{ props.quest.description }}
         </div>
 
-        <div>
+        <div class="p-2 bg-darkred-dark_gray rounded-lg">
             Винагорода: {{ props.quest.reward }}
         </div>
     </div>

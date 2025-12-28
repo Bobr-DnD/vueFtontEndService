@@ -17,11 +17,11 @@ const props = defineProps({
             {{ props.effect.name }}
         </div>
 
-        <div>
+        <div class="p-2 bg-darkred-dark_gray rounded-lg">
             Опис: {{ props.effect.description }}
         </div>
 
-        <div v-if="checkObjectFieldExisting(props.effect.effect)">
+        <div v-if="checkObjectFieldExisting(props.effect.effect)" class="p-2 bg-darkred-dark_gray rounded-lg">
             Вплив ефекту на поля: {{Object.entries(props.effect.effect).map(([key, value]) => `${key}:
             ${value}`).join(', ') }}
         </div>

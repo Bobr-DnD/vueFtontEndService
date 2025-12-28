@@ -124,7 +124,7 @@ function discardChanges() {
 
     if (selectedEffect.value.id === 'new') selectedEffect.value = toNewEffect({})
     else {
-        selectedEffect.value = state.session.effects.find(el => el.id === selectedEffect.value.id)
+        selectedEffect.value = toNewEffect(structuredClone(toRaw(state.session.effects.find(el => el.id === selectedEffect.value.id))))
     }
 
     unsavedChanges.value = false
@@ -138,6 +138,7 @@ function selectEffect(effect) {
     }
 
     unsavedChanges.value = false
+    newEffect.value = {}
     selectedEffect.value = toNewEffect(structuredClone(toRaw(effect)))
 }
 
@@ -185,7 +186,8 @@ function removeEffectCharacteristic(key) {
 
         <div class="w-full py-2 max-h-[512px] overflow-y-scroll no-scrollbar grid grid-cols-4 gap-4">
 
-            <div @click="selectEffect({})" :class="selectedEffect.id === 'new' && 'bg-darkred-gray text-darkred-light'"
+            <div @click="selectEffect({})"
+                :class="selectedEffect.id === 'new' && 'bg-darkred-dark_gray text-darkred-light'"
                 class="border-8 border-darkred-dark rounded-2xl flex justify-center items-center hover:cursor-pointer">
                 <PlusButton class="w-20" />
             </div>
@@ -216,11 +218,11 @@ function removeEffectCharacteristic(key) {
         <Header1 class="col-span-2" label="Створити\редагувати ефект" />
 
         <SingleFieldEditor placeholder="Назва" fieldName="name" type="text" :value="selectedEffect.name"
-            :callback="updateEffectField" :important="true" class="p-0"/>
+            :callback="updateEffectField" :important="true" class="p-0" />
         <SingleFieldEditor placeholder="Опис" fieldName="description" type="text" :value="selectedEffect.description"
-            :callback="updateEffectField" :important="true" class="p-0"/>
+            :callback="updateEffectField" :important="true" class="p-0" />
 
-        <Header2 v-if="selectedEffect.effect" label="Характеристики, на які впливає ефект:" />
+        <Header2 label="Характеристики, на які впливає ефект:" />
 
         <div class="col-span-2 flex flex-wrap gap-4 hover:cursor-pointer">
             <div v-if="checkObjectFieldExisting(selectedEffect.effect)" v-for="value, key in selectedEffect.effect"
