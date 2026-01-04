@@ -63,9 +63,10 @@ const filteredEffects = computed(() => {
 
 async function saveEffect() {
 
+    const effect = toRaw(selectedEffect.value)
+
     if (selectedEffect.value.id === 'new') {
 
-        const effect = selectedEffect.value
         effect.session = sessionId
 
         const [res, err] = await asyncHandler(
@@ -76,7 +77,6 @@ async function saveEffect() {
         selectedEffect.value = toNewEffect({})
     }
     else {
-        const effect = selectedEffect.value
 
         const [res, err] = await asyncHandler(
             RepositoryFactory.update('effect', effect.id, effect)

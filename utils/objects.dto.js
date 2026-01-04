@@ -105,3 +105,21 @@ export function toNewPerk(perk){
     notes: perk.notes ?? ''
   }
 }
+
+export function toNewEntity(entity){
+  return {
+    id: entity.id ?? entity._id ?? 'new',
+    name: entity.name ?? '',
+    type: entity.type ?? '',
+    image: entity.image ?? '',
+    notes: entity.notes ?? '',
+    characteristics: entity.characteristics ?? {},
+    requirement: entity.requirement ?? {},
+    effects: entity.effects ?? [],
+    description: entity.description ?? '',
+    price: entity.price ?? 0,
+    usage: entity.usage ?? 0,
+    rarity: entity.rarity ?? ''
+
+  }
+}

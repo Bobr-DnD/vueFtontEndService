@@ -108,10 +108,10 @@ const props = defineProps({
                     Рідкість: {{ props.entity.rarity }}
                 </div>
 
-                <div v-if="props.entity.usage"
+                <!-- <div v-if="props.entity.usage"
                     class="rounded-lg odd:bg-darkred-light even:bg-darkred-light_gray py-1 px-2">
                     К-сть використань: {{ props.entity.usage }}
-                </div>
+                </div> -->
 
             </div>
 
