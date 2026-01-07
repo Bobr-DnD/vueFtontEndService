@@ -1,9 +1,9 @@
 <script setup>
-import { onMounted, reactive, ref, onBeforeUnmount, computed, watch } from 'vue';
+import { onMounted, reactive, ref, onBeforeUnmount, computed, toRaw } from 'vue';
 import { useRoute } from 'vue-router';
 import { asyncHandler } from '/utils/asyncHandler';
 import { checkObjectFieldExisting, addRow, removeRow, groupById, filterDuplicates } from '/utils/entityHelper'
-import { toNewCharacterObject } from '/utils/objects.dto.js';
+import { socket, connected } from '@ws/webSocket';
 
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import RepositoryFactory from '@http/RepositoryFactory'
@@ -19,6 +19,7 @@ import ApproveButton from '@/components/reusable/Buttons/ApproveButton.vue';
 import PerkTile from '@/components/reusable/EntityTiles/PerkTile.vue';
 import SearchInputBlack from '@/components/reusable/SearchInputs/SearchInputBlack.vue';
 import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue';
+import SideSlider from '@/components/reusable/SideSlider.vue';
 
 const sessionId = useRoute().params.sessionId
 const state = reactive({
@@ -79,31 +80,13 @@ onMounted(async () => {
 })
 
 async function updateSession() {
-  const [res, err] = await asyncHandler(
-    RepositoryFactory.update('session', sessionId, state.session)
-  )
-  if (err) {
-    notify({ message: err.message, type: 'error' })
-    return
-  }
-  return res.data
+  console.log('updates session');
+  socket.emit('session:updatedSession', toRaw(state.session))
 }
 
-async function updateCharacter(character) {
-  const [res, err] = await asyncHandler(
-    RepositoryFactory.update('character', character.id, character)
-  )
-  if (err) {
-    notify({ message: err.message, type: 'error' })
-    return
-  }
-  return toNewCharacterObject(res.data)
-}
-
-
-async function updateCustomFields(fields) {
-  state.session.customFields = fields
-  state.session = await updateCharacter()
+async function updateCharacter() {
+  console.log('updated character');
+  socket.emit('session:updateCharacter', toRaw(state.selectedChatacter))
 }
 
 </script>
@@ -112,10 +95,12 @@ async function updateCustomFields(fields) {
 
   <MasterPageNavigation />
 
+  <SideSlider :status="connected"/>
+
   <div v-if="!state.isLoading" class="w-full gap-4 my-6 flex flex-wrap justify-center items-center">
 
     <GraySelectorButton v-for="character in state.session.characters" :id="character.id" :label="character.name"
-      :active="state.selectedChatacter.id === character.id" @click="state.selectedChatacter = character" />
+      :active="state.selectedChatacter.id === character.id" @click="state.selectedChatacter = toRaw(character)" />
 
   </div>
 
@@ -130,7 +115,7 @@ async function updateCustomFields(fields) {
 
         <EffectTile :effect="effect" />
         <DeleteButton class="w-14 h-14 bg-darkred-red text-darkred-light text-2xl self-center justify-self-end"
-          @click="removeRow(state.selectedChatacter.effects, effect.id)" />
+          @click="removeRow(state.selectedChatacter.effects, effect.id); updateCharacter()" />
 
       </div>
 
@@ -171,11 +156,11 @@ async function updateCustomFields(fields) {
             <div class="flex flex-col justify-end items-center gap-2 h-full">
               <ApproveButton v-if="perk.count < perk.ranks"
                 class="h-10 w-full text-2xl flex items-center justify-center"
-                @click="addRow(state.session.perks, state.selectedChatacter.perks, perk.id)" />
+                @click="addRow(state.session.perks, state.selectedChatacter.perks, perk.id); updateCharacter()" />
 
               <DeleteButton
                 class="h-10 w-full bg-darkred-red text-darkred-light text-2xl flex items-center justify-center"
-                @click="removeRow(state.selectedChatacter.perks, perk.id)" />
+                @click="removeRow(state.selectedChatacter.perks, perk.id); updateCharacter()" />
 
             </div>
 
@@ -208,7 +193,7 @@ async function updateCustomFields(fields) {
 
         <div class="max-h-[650px] w-full grid grid-cols-4 gap-4 overflow-y-scroll no-scrollbar">
           <EffectTile class="border-4 border-darkred-gray rounded-lg md:hover:cursor-pointer" v-for="effect in filteredSessionEffects"
-            :effect=effect @click="addRow(state.session.effects, state.selectedChatacter.effects, effect.id); effectsModalShowed = false"/>
+            :effect=effect @click="addRow(state.session.effects, state.selectedChatacter.effects, effect.id); effectsModalShowed = false; updateCharacter()"/>
         </div>
 
       </div>
@@ -228,7 +213,7 @@ async function updateCustomFields(fields) {
 
         <div class="max-h-[650px] w-full grid grid-cols-4 gap-2 overflow-y-scroll no-scrollbar">
           <PerkTile class="border-4 border-darkred-gray rounded-lg"
-            @click="addRow(state.session.perks, state.selectedChatacter.perks, perk.id); perksModalShowed = false"
+            @click="addRow(state.session.perks, state.selectedChatacter.perks, perk.id); perksModalShowed = false; updateCharacter()"
             v-for="perk in filteredSessionPerks" :perk="perk" />
         </div>
 
