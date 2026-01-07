@@ -49,6 +49,11 @@ export function filterPerksByRankWithoutCount(perks, allPerks) {
   });
 }
 
+export function filterDuplicates(arrayA, arrayB, key = 'id') {
+  const setBValues = new Set(arrayB.map(item => item[key]));
+  return arrayA.filter(item => !setBValues.has(item[key]));
+}
+
 export function removeRow(entityArray, id) {
   const index = entityArray.findIndex(entity => entity.id === id)
   if (index !== -1) entityArray.splice(index, 1)

@@ -35,6 +35,11 @@ const router = createRouter({
             children:[
                 {
                     path: '',
+                    name: 'session_control_panel',
+                    component: AdminPageView
+                },
+                {
+                    path: 'session',
                     name: 'session_editor',
                     component: SessionPageEditor
                 },
