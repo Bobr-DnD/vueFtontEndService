@@ -9,7 +9,7 @@ import { asyncHandler } from '/utils/asyncHandler';
 import { checkArrayFieldExisting } from '/utils/entityHelper'
 import { toObject } from '/utils/objects.dto';
 import { toNewCharacterObject } from '/utils/objects.dto';
-import { socket } from '@ws/webSocket';
+import { socket, connected } from '@ws/webSocket';
 import { notify } from '/utils/notification';
 
 import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaion.vue';
@@ -277,6 +277,11 @@ async function updateCharacterNotes(field, value) {
 
     <div v-if="state.isLoading" class="text-center py-6">
         <Loader />
+    </div>
+
+    <div class="fixed z-50 top-5 right-5">
+        <div :class="connected ? 'bg-greenish-dark' : 'bg-darkred-red'" class="w-10 h-10 border-1 rounded-full">
+        </div>
     </div>
 
 </template>

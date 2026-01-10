@@ -1,10 +1,11 @@
 <script setup>
 import { reactive, onMounted } from 'vue'
+import { asyncHandler } from '/utils/asyncHandler'
+
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import Navigation from '@/components/navigations/Navigation.vue'
 import SessionCard from '@/components/reusable/SessionCard.vue'
 import RepositoryFactory from '@http/RepositoryFactory'
-import { notify } from '/utils/notification'
 
 const state = reactive({
   sessions: [],
@@ -12,21 +13,21 @@ const state = reactive({
 })
 
 onMounted(async () => {
-  try {
-    const res = await RepositoryFactory.get('session')
-    state.sessions = res.data
-  } catch (err) {
-    notify({ message: err.message, type: 'error' })
-  }
-  finally {
-    state.isLoading = false
-  }
+
+  const [res, err] = await asyncHandler(
+    RepositoryFactory.get('session')
+  )
+  if (err) return
+
+  state.sessions = res.data
+  state.isLoading = false
 })
 </script>
 
 <template>
   <Navigation />
-  <SessionCard v-if="!state.isLoading" v-for="session in state.sessions" :key="session.id" :id="session.id" :session="session" />
+  <SessionCard v-if="!state.isLoading" v-for="session in state.sessions" :key="session.id" :id="session.id"
+    :session="session" />
 
   <div v-if="state.isLoading" class="text-center py-6">
     <Loader />

@@ -19,7 +19,7 @@ import ApproveButton from '@/components/reusable/Buttons/ApproveButton.vue';
 import PerkTile from '@/components/reusable/EntityTiles/PerkTile.vue';
 import SearchInputBlack from '@/components/reusable/SearchInputs/SearchInputBlack.vue';
 import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue';
-import SideSlider from '@/components/reusable/SideSlider.vue';
+import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
 
 const sessionId = useRoute().params.sessionId
 const state = reactive({
@@ -81,12 +81,16 @@ onMounted(async () => {
 
 async function updateSession() {
   console.log('updates session');
-  socket.emit('session:updatedSession', toRaw(state.session))
+  socket.emit('session:update', toRaw(state.session))
 }
 
 async function updateCharacter() {
   console.log('updated character');
   socket.emit('session:updateCharacter', toRaw(state.selectedChatacter))
+}
+
+function updateCharacterCharacteristic(fields) {
+  state.selectedChatacter.characteristics = fields
 }
 
 </script>
@@ -95,14 +99,21 @@ async function updateCharacter() {
 
   <MasterPageNavigation />
 
-  <SideSlider :status="connected"/>
-
   <div v-if="!state.isLoading" class="w-full gap-4 my-6 flex flex-wrap justify-center items-center">
 
     <GraySelectorButton v-for="character in state.session.characters" :id="character.id" :label="character.name"
       :active="state.selectedChatacter.id === character.id" @click="state.selectedChatacter = toRaw(character)" />
 
   </div>
+
+  <section class="m-4 p-2 flex flex-col gap-4">
+    <Header1 label="Характеристики:" />
+
+    <div class="flex flex-wrap gap-4">
+      <ObjectFieldsTable v-if="checkObjectFieldExisting(state.selectedChatacter.characteristics)"
+        :fields="state.selectedChatacter.characteristics" :callback="updateCharacterCharacteristic" />
+    </div>
+  </section>
 
   <section v-if="!state.isLoading" class="m-4 p-2 flex flex-col gap-4 justify-center items-center">
 
@@ -120,8 +131,11 @@ async function updateCharacter() {
       </div>
 
       <Header2 v-else class="col-span-full" label="Пусто" />
-      <PlusButton class="col-span-full justify-self-center w-24 border-8 border-darkred-dark rounded-lg"
-        @click="effectsModalShowed = !effectsModalShowed" />
+
+      <div @click="effectsModalShowed = !effectsModalShowed"
+        class="w-64 col-span-full justify-self-center border-8 border-darkred-dark rounded-lg bg-darkred-dark_gray text-darkred-light flex justify-center items-center hover:cursor-pointer">
+        <PlusButton class="w-20" />
+      </div>
 
     </div>
 
@@ -171,8 +185,11 @@ async function updateCharacter() {
       </div>
 
       <Header2 v-else class="col-span-full" label="Пусто" />
-      <PlusButton class="col-span-full justify-self-center w-24 border-8 border-darkred-dark rounded-lg"
-        @click="perksModalShowed = !perksModalShowed" />
+
+      <div @click="perksModalShowed = !perksModalShowed"
+        class="w-64 col-span-full justify-self-center border-8 border-darkred-dark rounded-lg bg-darkred-dark_gray text-darkred-light flex justify-center items-center hover:cursor-pointer">
+        <PlusButton class="w-20" />
+      </div>
 
     </div>
 
@@ -192,8 +209,11 @@ async function updateCharacter() {
         </div>
 
         <div class="max-h-[650px] w-full grid grid-cols-4 gap-4 overflow-y-scroll no-scrollbar">
-          <EffectTile class="border-4 border-darkred-gray rounded-lg md:hover:cursor-pointer" v-for="effect in filteredSessionEffects"
-            :effect=effect @click="addRow(state.session.effects, state.selectedChatacter.effects, effect.id); effectsModalShowed = false; updateCharacter()"/>
+
+          <EffectTile class="border-4 border-darkred-gray rounded-lg md:hover:cursor-pointer"
+            v-for="effect in filteredSessionEffects" :effect=effect
+            @click="addRow(state.session.effects, state.selectedChatacter.effects, effect.id); effectsModalShowed = false; updateCharacter()" />
+
         </div>
 
       </div>

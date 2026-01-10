@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import CloseButtonRedBG from './Buttons/CloseButtonRedBG.vue';
 import { ArrowRightIcon, ArrowLeftIcon } from '@heroicons/vue/24/solid';
 import Header2 from './Titles/Header2.vue';
@@ -7,7 +7,7 @@ import Header2 from './Titles/Header2.vue';
 const props = defineProps({
     side: {
         type: String,
-        default: 'right', // 'left' or 'right'
+        default: 'right',
         validator: (value) => ['left', 'right'].includes(value)
     },
     width: {
@@ -17,18 +17,37 @@ const props = defineProps({
     status: {
         type: Boolean,
         default: false
+    },
+    charactersIds: {
+        type: Array,
+        required: true
+    },
+    charactersOnlineIds: {
+        type: Array,
+        default: []
     }
 })
 
 const isOpen = ref(false)
+const characters = ref([])
+
+watch(() => props.charactersOnlineIds, () => setOnlineCharacters())
+
+function setOnlineCharacters() {
+
+    characters.value = props.charactersIds
+        .filter(el => props.charactersOnlineIds.includes(el.id))
+        .map(el => el.id)
+
+}
 
 </script>
 
 <template>
-    <div class="">
+    <div>
 
         <button @click="isOpen = !isOpen"
-            class="fixed top-32 -translate-y-1/2 z-50 bg-darkred-dark text-darkred-light px-3 py-6 rounded-lg shadow-lg hover:bg-opacity-90 transition-all duration-300"
+            class="pointer-events-auto fixed top-32 -translate-y-1/2 z-50 bg-darkred-dark text-darkred-light px-3 py-6 rounded-lg shadow-lg hover:bg-opacity-90 transition-all duration-300"
             :class="{
                 'left-0 rounded-l-none': side === 'left' && !isOpen,
                 'left-[calc(var(--panel-width))]': side === 'left' && isOpen,
@@ -51,7 +70,7 @@ const isOpen = ref(false)
 
         <Transition name="fade">
             <div v-if="isOpen" @click="isOpen = !isOpen"
-                class="fixed inset-0 bg-darkred-dark bg-opacity-50 z-40 backdrop-blur-sm" aria-hidden="true">
+                class="fixed inset-0 bg-darkred-dark bg-opacity-50 z-40 backdrop-blur-sm pointer-events-auto" aria-hidden="true">
             </div>
         </Transition>
 
@@ -61,13 +80,28 @@ const isOpen = ref(false)
                 'right-0': side === 'right'
             }" :style="{ width: width }">
 
-                <CloseButtonRedBG @click="isOpen = false" />
+                <CloseButtonRedBG @click="isOpen = false" class="pointer-events-auto"/>
 
                 <div class="p-6 ">
 
-                    <Header2 v-if="props.status" label="Онлайн" class="text-greenish-mid"/>
+                    <Header2 v-if="props.status" label="Онлайн" class="text-greenish-mid" />
                     <Header2 v-else label="Офлайн" class="text-darkred-bright" />
 
+                </div>
+
+                <div class="px-6 pb-6 pt-2 text-darkred-light font-gothic text-xl flex flex-col gap-2">
+                    <div v-for="character in props.charactersIds"
+                        class="[&>*]:w-fit [&>*]:p-1 [&>*]:border-b-2 rounded-lg [&>*]:rounded-lg">
+                        
+                        <div v-if="characters.includes(character.id)" class=" border-greenish-dark">
+                            {{ character.name }} онлайн
+                        </div>
+
+                        <div v-else class="border-darkred-red">
+                            {{ character.name }} офлайн
+                        </div>
+
+                    </div>
                 </div>
             </div>
 
