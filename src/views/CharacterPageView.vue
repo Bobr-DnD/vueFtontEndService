@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, onMounted, onBeforeUnmount } from 'vue';
+import { reactive, ref, onMounted, onBeforeUnmount, watch, toRaw } from 'vue';
 import { useRoute } from 'vue-router';
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import { ChartBarIcon, SparklesIcon, FlagIcon, BanknotesIcon } from '@heroicons/vue/24/solid'
@@ -8,9 +8,8 @@ import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
 import { checkArrayFieldExisting } from '/utils/entityHelper'
 import { toObject } from '/utils/objects.dto';
-import { toNewCharacterObject } from '/utils/objects.dto';
+import { toNewCharacterObject, toNewSession } from '/utils/objects.dto';
 import { socket, connected } from '@ws/webSocket';
-import { notify } from '/utils/notification';
 
 import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaion.vue';
 import PerkTable from '@/components/character-page components/PerkTable.vue';
@@ -21,13 +20,12 @@ import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
 import characterCardSmall from '@/components/character-page components/CharacterViewCard.vue';
 import Experience from '@/components/character-page components/Experience.vue';
 import CurrencyTable from '@/components/character-page components/CurrencyTable.vue';
-import ButtonRedHideFunction from '@/components/reusable/Buttons/ButtonRedHideFunction.vue';
 import HideButton from '@/components/reusable/Buttons/HideButton.vue';
 import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue';
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue';
 import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
 import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
-
+import BackendOffline from '@/components/reusable/BackendOffline.vue';
 import HorizontalNumberPicker from '@/components/reusable/HorizontalNumberPicker.vue';
 import ProgressiveBar from '@/components/reusable/ProgressiveBar.vue';
 
@@ -37,20 +35,17 @@ const state = reactive({
     isLoading: true
 })
 
-let effects_hidden = ref(true)
-let quests_hidden = ref(true)
-let currency_hidden = ref(true)
-let custom_hidden = ref(true)
-let custom_modal_hidden = ref(true)
-let perks_hidden = ref(true)
+const effects_hidden = ref(true)
+const quests_hidden = ref(true)
+const currency_hidden = ref(true)
+const custom_hidden = ref(true)
+const custom_modal_hidden = ref(true)
+const isBackendOffline = ref(false)
+const offlineTimeout = ref(null)
+
 
 const characterId = useRoute().params.characterId
 const sessionId = useRoute().params.sessionId
-
-socket.on('session:join', (session) => {
-    if (session?.members?.some(member => member[0] === socket.id)) return
-    socket.emit('session:connectCharacter', sessionId, { characterId })
-})
 
 onMounted(async () => {
     const [resCharacter, errCharacter] = await asyncHandler(
@@ -60,96 +55,101 @@ onMounted(async () => {
         RepositoryFactory.getById('session', sessionId)
     )
 
-    if (errCharacter) {
-        console.warn(errCharacter.message)
-        return
-    }
-    else if (errSession) {
-        console.warn(errSession.message)
-        return
-    }
+    if (errCharacter) return
+    else if (errSession) return
+
     else state.isLoading = false
 
     state.character = toNewCharacterObject(resCharacter.data)
-    state.session = resSession.data
-    socket.emit('session:connectCharacter', sessionId, { characterId })
+    state.session = toNewSession(resSession.data)
+
+    socket.emit('session:connectCharacter', sessionId, characterId)
 })
 
 onBeforeUnmount(() => {
     socket.emit('session:disconnectCharacter', sessionId)
-    socket.off('session:join')
+    ['session:join', 'character:update', 'session:updateSession'].forEach(e => socket.off(e))
 })
 
-state.character.perks !== undefined ? perks_hidden.value = false : perks_hidden.value = true
+socket.on('session:join', (session) => {
+    if (session?.members?.some(member => member[0] === socket.id)) return
+    socket.emit('session:connectCharacter', sessionId, characterId)
+    state.isLoading = false
+})
 
-async function updateCharacter() {
-    const [res, err] = await asyncHandler(
-        RepositoryFactory.update('character', characterId, state.character)
-    )
-    if (err) {
-        notify({ message: err.message, type: 'error' })
-        return
+socket.on('character:update', (character) => {
+    state.character = toNewCharacterObject(character)
+})
+
+socket.on('session:updateSession', (session) => {
+    state.session = toNewSession(session)
+})
+
+watch(connected, (isConnected) => {
+    if (isConnected) {
+        if (offlineTimeout.value) {
+            clearTimeout(offlineTimeout.value)
+            offlineTimeout.value = null
+        }
+        isBackendOffline.value = false
+        state.isLoading = false
     }
-    return toNewCharacterObject(res.data)
+    else {
+        if (!isBackendOffline.value) {
+            offlineTimeout.value = setTimeout(() => {
+
+                isBackendOffline.value = true
+            }, 30 * 1000)
+        }
+        state.isLoading = true
+    }
+})
+
+function updateCharacter() {
+    socket.emit('character:update', (toRaw(state.character)))
 }
 
-async function updateSession() {
-    const [res, err] = await asyncHandler(
-        RepositoryFactory.update('session', sessionId, state.session)
-    )
-    if (err) {
-        notify({ message: err.message, type: 'error' })
-        return
-    }
-
-    return res.data
-}
-
-async function addExperience() {
+function addExperience() {
     state.character.experience++;
     if (state.character.experience >= state.character.experienceToLevelUp) {
         state.character.experience = 0;
         state.character.perkPoints++;
         state.character.level++;
     }
-    state.character = await updateCharacter()
+    updateCharacter()
 }
 
-async function updateHealthFields(value, title) {
+function updateHealthFields(value, title) {
     const item = state.character.health.find(h => h.name === title)
     if (item) {
         item.value += value
     }
-    state.character = await updateCharacter() //TODO refactor update to dto
+    updateCharacter()
 }
 
 function updateCurrency(fields) {
     state.character.currency = fields
-    markUnsaved()
+    updateCharacter()
 }
 
-async function addCustomField(name, value) {
+function addCustomField(name, value) {
     Object.assign(state.character.customFields, toObject({ name, value }))
-    state.character = await updateCharacter()
+    updateCharacter()
 }
 
-async function updateCustomFields(fields) {
+function updateCustomFields(fields) {
     state.character.customFields = fields
-    state.character = await updateCharacter()
+    updateCharacter()
 }
 
-async function updateEntities() {
-    state.character = await updateCharacter()
-}
-
-async function addPerk() {
+function addPerk() {
     state.character.perkPoints--;
-    state.character = await updateCharacter()
+    updateCharacter()
 }
 
-async function updateCharacterNotes(field, value) {
+function updateCharacterNotes(field, value) {
     state.character[field] = value;
-    state.character = await updateCharacter()
+    updateCharacter()
 }
 
 </script>
@@ -231,7 +231,6 @@ async function updateCharacterNotes(field, value) {
 
                 </div>
 
-
             </div>
 
             <div class="flex flex-col gap-2">
@@ -242,21 +241,10 @@ async function updateCharacterNotes(field, value) {
                     :callback="updateCurrency" />
             </div>
 
-
         </section>
     </div>
 
     <section v-if="!state.isLoading" class="grid grid-cols-1 gap-2 justify-items-center mx-auto min-w-80 max-w-96">
-
-        <!-- <section class="w-full">
-            <ButtonRedHideFunction @click="perks_hidden = !perks_hidden" text="Навички" mainIcon="checkBadge"
-                :hidden="perks_hidden" />
-            <div :class="['grid gird-cols-1 w-full', perks_hidden ? 'hidden' : '']">
-                <PerkTable v-if="state.session.perks" :session_perks="state.session.perks"
-                    :character_perks="state.character.perks" :perkPoints="state.character.perkPoints"
-                    :callback="addPerk" :removable="false" />
-            </div>
-        </section> -->
 
         <section class="w-full flex flex-col gap-1">
             <PerkTable :session_perks="state.session.perks" :character_perks="state.character.perks"
@@ -265,7 +253,7 @@ async function updateCharacterNotes(field, value) {
 
         <section class="w-full flex flex-col gap-1">
             <EntityTable :character_entities="state.character.entities" :session_entities="state.session.entities"
-                :types="state.session.entityTypes" :callback="updateEntities" />
+                :types="state.session.entityTypes" :callback="updateCharacter" />
         </section>
 
     </section>
@@ -275,14 +263,15 @@ async function updateCharacterNotes(field, value) {
             :callback="updateCharacterNotes" />
     </section>
 
-    <div v-if="state.isLoading" class="text-center py-6">
+    <div v-if="state.isLoading" class="w-full text-center py-6 flex flex-col gap-10 justify-center items-center">
+        <BackendOffline v-if="isBackendOffline" class="w-[650px]" />
         <Loader />
     </div>
 
-    <div class="fixed z-50 top-5 right-5">
+    <!-- <div class="fixed z-50 top-5 right-5">
         <div :class="connected ? 'bg-greenish-dark' : 'bg-darkred-red'" class="w-10 h-10 border-1 rounded-full">
         </div>
-    </div>
+    </div> -->
 
 </template>
 

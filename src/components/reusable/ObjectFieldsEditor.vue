@@ -42,8 +42,6 @@ function addField() {
     else notify({ message: 'Заповніть усі поля', type: 'error' })
 }
 
-const canSave = computed(() => input_name.value.value !== '')
-
 </script>
 
 <template>

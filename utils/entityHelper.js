@@ -79,6 +79,8 @@ export function checkObjectFieldExisting(field) {
 }
 
 export function checkArrayFieldExisting(field) {
+  console.log(field);
+  
   return field.length
 }
 

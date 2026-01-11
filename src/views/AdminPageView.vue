@@ -1,12 +1,10 @@
 <script setup>
-import { onMounted, reactive, ref, onBeforeUnmount, computed, toRaw } from 'vue';
+import { onMounted, onBeforeUnmount, reactive, ref, computed, toRaw, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { asyncHandler } from '/utils/asyncHandler';
 import { checkObjectFieldExisting, addRow, removeRow, groupById, filterDuplicates } from '/utils/entityHelper'
 import { socket, connected } from '@ws/webSocket';
 
 import Loader from 'vue-spinner/src/SyncLoader.vue'
-import RepositoryFactory from '@http/RepositoryFactory'
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
 import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
@@ -20,22 +18,25 @@ import PerkTile from '@/components/reusable/EntityTiles/PerkTile.vue';
 import SearchInputBlack from '@/components/reusable/SearchInputs/SearchInputBlack.vue';
 import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue';
 import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
+import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
+import BackendOffline from '@/components/reusable/BackendOffline.vue';
 
 const sessionId = useRoute().params.sessionId
 const state = reactive({
   session: {},
-  isLoading: true,
-  selectedChatacter: {}
+  selectedChatacter: {},
+  isLoading: true
 })
 
 const effectsModalShowed = ref(false)
 const perksModalShowed = ref(false)
 const sessionPerksSearchQuery = ref('')
 const sessionEffectsSearchQuery = ref('')
+const isBackendOffline = ref(false)
+const offlineTimeOut = ref(null)
 
 const filteredCharacterPerks = computed(() => {
   const grouped = groupById(state.selectedChatacter.perks)
-
   return grouped
 })
 
@@ -63,34 +64,73 @@ const filteredSessionEffects = computed(() => {
   )
 })
 
-onMounted(async () => {
-
-  const [resSession, errSession] = await asyncHandler(
-    RepositoryFactory.getById('session', sessionId)
-  )
-
-  if (errSession) {
-    console.warn(errSession.message)
-    return
-  }
-  else state.isLoading = false
-
-  state.session = resSession.data
-  state.selectedChatacter = state.session.characters[0]
+onMounted(() => {
+  socket.emit('session:get', sessionId)
 })
 
-async function updateSession() {
-  console.log('updates session');
-  socket.emit('session:update', toRaw(state.session))
+onBeforeUnmount(() => {
+  ['character:update', 'session:updateSession', 'session:get'].forEach(e => socket.off(e))
+})
+
+socket.on('character:update', (character) => {
+  if (character.id === state.selectedChatacter.id) state.selectedChatacter = character
+  else console.warn('hamno: user ne toyi');
+})
+
+socket.on('session:updateSession', (session) => {
+  state.session = session
+})
+
+socket.on('session:get', (session) => {
+  state.session = session
+  state.selectedChatacter = state.session.characters[0]
+  state.isLoading = false
+})
+
+watch(connected, (isConnected) => {
+  if (isConnected) {
+    if (offlineTimeOut.value) {
+
+      clearTimeout(offlineTimeOut.value)
+      offlineTimeOut.value = null
+    }
+
+    socket.on('session:get', (session) => {
+      state.session = session
+      state.selectedChatacter = state.session.characters[0]
+    })
+
+    isBackendOffline.value = false
+    state.isLoading = false
+  }
+  else {
+    state.isLoading = true
+    if (!isBackendOffline.value) {
+      offlineTimeOut.value = setTimeout(() => {
+
+        isBackendOffline.value = true
+      }, 30 * 1000)
+    }
+  }
+
+})
+
+function updateSession() {
+  socket.emit('session:updateSession', toRaw(state.session))
 }
 
-async function updateCharacter() {
-  console.log('updated character');
-  socket.emit('session:updateCharacter', toRaw(state.selectedChatacter))
+function updateCharacter() {
+  socket.emit('character:update', toRaw(state.selectedChatacter))
 }
 
 function updateCharacterCharacteristic(fields) {
   state.selectedChatacter.characteristics = fields
+  updateCharacter()
+}
+
+function updateSessionField(fieldName, field) {
+  state.session[fieldName] = field
+  updateSession()
 }
 
 </script>
@@ -99,6 +139,11 @@ function updateCharacterCharacteristic(fields) {
 
   <MasterPageNavigation />
 
+  <section v-if="!state.isLoading" class="m-4 pr-6 pl-2 py-2">
+    <TextAreaEditor fieldName="notes" name="Записки майстра" :value="state.session.notes"
+      :callback="updateSessionField" />
+  </section>
+
   <div v-if="!state.isLoading" class="w-full gap-4 my-6 flex flex-wrap justify-center items-center">
 
     <GraySelectorButton v-for="character in state.session.characters" :id="character.id" :label="character.name"
@@ -106,7 +151,7 @@ function updateCharacterCharacteristic(fields) {
 
   </div>
 
-  <section class="m-4 p-2 flex flex-col gap-4">
+  <section v-if="!state.isLoading" class="m-4 p-2 flex flex-col gap-4">
     <Header1 label="Характеристики:" />
 
     <div class="flex flex-wrap gap-4">
@@ -244,8 +289,9 @@ function updateCharacterCharacteristic(fields) {
 
   </section>
 
-  <div v-if="state.isLoading" class="text-center py-6">
-    <Loader />
+  <div v-if="state.isLoading" class="w-full text-center py-6 flex flex-col gap-10 justify-center items-center">
+    <BackendOffline v-if="isBackendOffline" class="w-[650px]" />
+    <Loader class="[&>*]:bg-darkred-red" />
   </div>
 
 </template>

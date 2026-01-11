@@ -3,7 +3,7 @@ import DeleteButton from '../reusable/Buttons/DeleteButton.vue';
 
 const props = defineProps({
     effects: {
-        type: Object,
+        type: Array,
         required: true
     },
     removable: {

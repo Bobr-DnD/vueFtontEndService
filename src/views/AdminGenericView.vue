@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onBeforeUnmount, reactive } from 'vue';
+import { onMounted, onBeforeUnmount, reactive, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { socket, connected } from '@ws/webSocket';
 import RepositoryFactory from '@http/RepositoryFactory';
@@ -30,17 +30,24 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
     socket.emit('session:leave', sessionId)
+    ['session:error', 'session:update'].forEach(e => socket.off(e))
 })
 
 socket.on('session:update', async (session) => {
-
-    console.log(session);
-
     state.charactersOnlineIds = []
     if (session.members) {
         state.charactersOnlineIds = session.members.filter(el => el[1].role === 'user' && el[1].userId).map(el => el[1].userId)
-    }   
-    
+    }
+
+})
+
+socket.on('error', async (message) => {
+    console.log(message);
+})
+
+
+watch(connected, (isConnected) => {
+    if (isConnected) socket.emit('session:join', sessionId, { role: 'admin' })
 })
 
 </script>
