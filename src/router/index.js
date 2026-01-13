@@ -8,6 +8,10 @@ import NotFoundView from '@/components/reusable/NotFoundView.vue'
 import CharacterPageView from "@/views/CharacterPageView.vue";
 import CharacterPageEditor from "@/views/CharacterPageEditor.vue";
 import EntitiesPageEditor from "@/views/EntitiesPageEditor.vue";
+import SessionPageEditor from "@/views/SessionPageEditor.vue";
+import EffectsPageEditor from "@/views/EffectsPageEditor.vue";
+import QuestsPageEditor from "@/views/QuestsPageEditor.vue";
+import PerksPageEditor from "@/views/PerksPageEditor.vue";
 
 import AdminPageView from "@/views/AdminPageView.vue";
 
@@ -31,8 +35,13 @@ const router = createRouter({
             children:[
                 {
                     path: '',
-                    name: 'admin_panel',
+                    name: 'session_control_panel',
                     component: AdminPageView
+                },
+                {
+                    path: 'session',
+                    name: 'session_editor',
+                    component: SessionPageEditor
                 },
                 {
                     path: 'characters',
@@ -43,6 +52,21 @@ const router = createRouter({
                     path: 'entities',
                     name: 'entities_editor',
                     component: EntitiesPageEditor
+                },
+                {
+                    path: 'effects',
+                    name: 'effects_editor',
+                    component: EffectsPageEditor
+                },
+                {
+                    path: 'quests',
+                    name: 'quests_editor',
+                    component: QuestsPageEditor
+                },
+                {
+                    path: 'perks',
+                    name: 'perks_editor',
+                    component: PerksPageEditor
                 }
             ]
         },

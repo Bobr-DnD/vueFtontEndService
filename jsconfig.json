@@ -5,6 +5,7 @@
       "@http/*": ["./HTTPServices"],
       "@ws/*": ["./WSServices"],
       "@/*": ["./src/*"],
+      "@utils/*": ["./utils"]
     }
   },
   "exclude": ["node_modules", "dist"]

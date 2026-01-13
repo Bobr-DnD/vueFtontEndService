@@ -34,7 +34,7 @@ watch(() => props.value, async (newValue) => {
 })
 
 const editField = async () => {
-    fieldReadonly.value = !fieldReadonly.value
+    fieldReadonly.value = false
     await nextTick()
     areaEl.value.focus()
 }
@@ -56,9 +56,9 @@ const saveField = () => {
         <form @submit.prevent class="flex flex-col items-start justify-center w-full">
             <label :for="props.fieldName" class="text-lg font-gothic">{{ props.name }}:</label>
             <textarea :ref="'areaEl'" :name="props.fieldName" :id="props.fieldName" :value="editableValue" @input="autoResize"
-                :disabled="fieldReadonly" class="w-full h-fit max-h-[500px] overflow-y-scroll no-scrollbar resize-none
+                :disabled="fieldReadonly" class="w-full h-fit max-h-[500px] overflow-y-auto md:no-scrollbar resize-none
                 p-3 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light
-                font-univers text-base transition-all duration-300 ease-in-out focus:outline-none focus:ring-2
+                font-gothic text-base transition-all duration-300 ease-in-out focus:outline-none focus:ring-2
                 focus:ring-darkred-red focus:border-darkred-red placeholder:text-darkred-light/60
                 md:hover:border-darkred-red/70" placeholder="Введіть текст..."></textarea>
         </form>

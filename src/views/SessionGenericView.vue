@@ -1,7 +1,7 @@
 <script setup>
-import { onMounted, onBeforeUnmount } from 'vue';
+import { onMounted, onBeforeUnmount, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { socket } from '@ws/webSocket';
+import { socket, connected } from '@ws/webSocket';
 
 const sessionId = useRoute().params.sessionId
 
@@ -11,6 +11,10 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
     socket.emit('session:leave', sessionId)
+})
+
+watch(connected, (isConnected) => {
+    if (isConnected) socket.emit('session:join', sessionId, { role: 'user' })
 })
 
 </script>

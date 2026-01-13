@@ -61,12 +61,12 @@ function addHealthField() {
         min: min_parsed,
         max: max_parsed,
         value: value_parsed,
-        healing: parseInt(healing.value.value),
         colors: [color_max.value.value, color_mid.value.value, color_min.value.value],
         id: props.health_field?.id || null
     }
 
     health = toHealthObjectField(health)
+
     if (!field_exists) resetFields()
     props.callback(health)
 }
@@ -95,10 +95,7 @@ function resetFields() {
             </section>
 
             <section>
-                <label :for="`${props.label}_healing`" class="text-lg font-gothic">Значення відновлення:</label>
-                <input :ref="'healing'" :name="`${props.label}_healing`" :id="`${props.label}_healing`" placeholder="0"
-                    :value="field_exists ? props.health_field.healing : null" type="number"
-                    class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full">
+
             </section>
 
             <section>
@@ -147,7 +144,7 @@ function resetFields() {
 
         <section class="flex items-center justify-start mt-2 gap-4">
 
-            <AprroveButtonWithText :text="field_exists ? 'Редагувати' : 'Додати'"
+            <AprroveButtonWithText :text="field_exists ? 'Зберегти' : 'Додати'"
                 class="w-32 h-12 flex justify-center items-center" @click="addHealthField" />
 
             <RejectButtonWithText v-if="!field_exists" text="Очистити"

@@ -31,7 +31,7 @@ watch(() => props.hidden, (newValue) => {
 <template>
     <button
         class="px-4 py-2 rounded-xl font-univers font-semibold text-xl transition-all duration-500 ease-in-out grid grid-cols-[40px_1fr_60px] items-center justify-items-center"
-        :class="props.hidden ? 'bg-darkred-gray text-darkred-dark' : 'bg-darkred-dark text-darkred-light'">
+        :class="props.hidden ? 'bg-darkred-dark text-darkred-light' : 'bg-darkred-gray text-darkred-dark'">
 
         <mainIcon v-if="props.mainIcon" class="w-8 h-8" />
         {{ text }}

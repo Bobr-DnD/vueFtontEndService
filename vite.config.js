@@ -24,6 +24,7 @@ export default defineConfig(({ mode }) => {
         '@http': fileURLToPath(new URL('./HTTPServices', import.meta.url)),
         "@ws": fileURLToPath(new URL('./WSServices', import.meta.url)),
         '@': fileURLToPath(new URL('./src', import.meta.url)),
+        '@utils': fileURLToPath(new URL('./utils', import.meta.url)),
       },
     },
   }

@@ -51,7 +51,7 @@ function saveField(button) {
 
         <div class="w-full text-darkred-dark font-semibold text-xl tracking-wide">Налаштування урону:</div>
 
-        <div v-for="d in props.damage" class="flex flex-col items-start justify-center text-lg text-darkred-dark">
+        <div v-for="d in props.damage" :key="Math.random().toString(24).slice(2)" class="flex flex-col items-start justify-center text-lg text-darkred-dark">
 
             <div>
                 {{ d.damage }}

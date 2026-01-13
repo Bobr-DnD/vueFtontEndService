@@ -23,6 +23,37 @@ export function groupById(items, idKey = 'id') {
   return grouped
 }
 
+export function filterPerksByRank(perks, allPerks) {
+  const grouped = groupById(perks);
+
+  return allPerks
+    .map(perk => {
+      const found = grouped.find(p => p.id === perk.id);
+
+      return {
+        ...perk,
+        count: found?.count ?? 0
+      };
+    })
+    .filter(perk => perk.count < perk.ranks);
+}
+
+export function filterPerksByRankWithoutCount(perks, allPerks) {
+  const grouped = groupById(perks);
+
+  return allPerks.filter(perk => {
+    const found = grouped.find(p => p.id === perk.id);
+    const count = found?.count ?? 0;
+
+    return count < perk.ranks;
+  });
+}
+
+export function filterDuplicates(arrayA, arrayB, key = 'id') {
+  const setBValues = new Set(arrayB.map(item => item[key]));
+  return arrayA.filter(item => !setBValues.has(item[key]));
+}
+
 export function removeRow(entityArray, id) {
   const index = entityArray.findIndex(entity => entity.id === id)
   if (index !== -1) entityArray.splice(index, 1)
@@ -44,19 +75,21 @@ export function useItem(entityArray, effectsArray, entityEffects, sessionMove, e
 }
 
 export function checkObjectFieldExisting(field) {
-    return (field !== undefined && field !== null)
+  return (field !== undefined && field !== null && Object.keys(field).length > 0)
 }
 
 export function checkArrayFieldExisting(field) {
-    return field.length
+  return field.length
 }
 
-export function sortByTwoFields(array, primaryField, secondaryField){
-    array.sort((a, b) => {
-        const keyA = `${a[primaryField]}-${a[secondaryField]}`
-        const keyB = `${b[primaryField]}-${b[secondaryField]}`
-        return keyA.localeCompare(keyB, 'uk')
-    })
+export function sortByTwoFields(array, primaryField, secondaryField) {
+  array.sort((a, b) => {
+    const keyA = `${a[primaryField]}-${a[secondaryField]}`
+    const keyB = `${b[primaryField]}-${b[secondaryField]}`
+    return keyA.localeCompare(keyB, 'uk')
+  })
+}
 
-    return array
+export function sortByMainField(array, primaryField) {
+  array.sort((a, b) => a[primaryField].localeCompare(b[primaryField], 'uk'));
 }

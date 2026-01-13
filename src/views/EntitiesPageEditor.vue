@@ -1,10 +1,13 @@
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed, toRaw } from 'vue';
 import { useRoute } from 'vue-router';
 
 import RepositoryFactory from '@http/RepositoryFactory';
-import { asyncHandler } from '/utils/asyncHandler';
-import { notify } from '/utils/notification';
+import { asyncHandler } from '@utils/asyncHandler';
+import { notify } from '@utils/notification';
+import { toNewEntity, toObject } from '@utils/objects.dto';
+import { checkObjectFieldExisting, addRow, removeRow } from '@utils/entityHelper';
+import { socket } from '@ws/webSocket';
 
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
@@ -12,38 +15,207 @@ import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
-import Weapon from '@/components/reusable/EntityEditor/Weapon.vue';
+import SearchInputBlack from '@/components/reusable/SearchInputs/SearchInputBlack.vue';
+import PlusButton from '@/components/reusable/Buttons/PlusButton.vue';
+import EntityTile from '@/components/reusable/EntityTiles/EntityTile.vue';
+import Header1 from '@/components/reusable/Titles/Header1.vue';
+import SingleFieldEditor from '@/components/reusable/SingleFieldEditor.vue';
+import DropDownChoosen from '@/components/reusable/DropDowns/DropDownChoosen.vue';
+import ImageEditor from '@/components/reusable/ImageEditor.vue';
+import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
+import Header2 from '@/components/reusable/Titles/Header2.vue';
+import DeleteButton from '@/components/reusable/Buttons/DeleteButton.vue';
+import TextDropdown from '@/components/character-page components/TextDropdown.vue';
+import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
+import EffectTile from '@/components/reusable/EntityTiles/EffectTile.vue';
 
 const state = reactive({
-    session: {},
+    session: {
+        effects: [],
+        entities: []
+    },
     isLoading: true,
-    unsavedChanges: false
+    unsavedChanges: false,
+    selectedEntity: toNewEntity({})
 })
 
 const sessionId = useRoute().params.sessionId
 
-const selected_entity = ref({})
-
-const tabs = [
-    { id: 'weapon', label: 'Зброя' },
-    { id: 'armor', label: 'Броня' },
-    { id: 'medicine', label: 'Хілки' },
-    { id: 'inventory', label: 'Інвентар' },
-    { id: 'perk', label: 'Перки' },
-]
+const selectedType = ref('')
+const searchQuery = ref('')
+const searchQueryEffects = ref('')
+const entityNewRequirement = ref({})
 
 onMounted(async () => {
     const [resSession, errSession] = await asyncHandler(
         RepositoryFactory.getById('session', sessionId)
     )
-    if (errSession) {
-        console.warn(notify({ message: errSession.message, type: 'error' }))
-        return
-    }
+    if (errSession) return
 
     state.isLoading = false
     state.session = resSession.data
 })
+
+const filteredEntities = computed(() => {
+
+    let entities = toRaw(state.session.entities)
+
+    if (selectedType.value) {
+        entities = entities.filter(el => el.type === selectedType.value)
+    }
+
+    if (searchQuery.value.trim()) {
+        const query = searchQuery.value.toLowerCase()
+        entities = entities.filter(el =>
+            el.name.toLowerCase().includes(query)
+        )
+    }
+
+    return entities
+})
+
+const filteredEffects = computed(() => {
+    let effects = toRaw(state.session.effects)
+
+    if (searchQueryEffects.value.trim()) {
+        const query = searchQueryEffects.value.toLowerCase()
+
+        effects = effects.filter(el =>
+            el.name.toLowerCase().includes(query)
+        )
+    }
+
+    return effects
+})
+
+async function saveEntity() {
+
+    const entity = toRaw(state.selectedEntity)
+
+    if (state.selectedEntity.id === 'new') {
+        entity.session = sessionId
+
+        const [res, err] = await asyncHandler(
+            RepositoryFactory.create('entity', entity)
+        )
+        if (err) return
+
+        state.selectedEntity = toNewEntity({ type: state.selectedEntity.type })
+    }
+    else {
+        const [res, err] = await asyncHandler(
+            RepositoryFactory.update('entity', entity.id, entity)
+        )
+        if (err) return
+    }
+
+    const [res, err] = await asyncHandler(
+        RepositoryFactory.getById('session', sessionId)
+    )
+    if (err) return
+
+    state.session = res.data
+    state.unsavedChanges = false
+    notify({ message: 'Зміни збережені', type: 'info' })
+    socket.emit('session:updateEverywhere', sessionId)
+}
+
+async function deleteEntity() {
+    const [resEntity, errEntity] = await asyncHandler(
+        RepositoryFactory.delete('entity', state.selectedEntity.id)
+    )
+    if (errEntity) return
+
+    const [res, err] = await asyncHandler(
+        RepositoryFactory.getById('session', sessionId)
+    )
+    if (err) return
+
+    state.session = res.data
+    state.unsavedChanges = false
+    state.selectedEntity = toNewEntity({ type: state.selectedEntity.type })
+
+    notify({ message: 'Елемент видалено', type: 'info' })
+    socket.emit('session:updateEverywhere', sessionId)
+}
+
+function discardChanges() {
+    if (state.selectedEntity.id === 'new') state.selectedEntity = toNewEntity({})
+    else state.selectedEntity = toNewEntity(structuredClone(toRaw(state.session.entities.find(el => el.id === state.selectedEntity.id))))
+
+    state.unsavedChanges = false
+    notify({ message: 'Зміни анульовані', type: 'warning' })
+}
+
+function markUnsaved() {
+    state.unsavedChanges = true
+}
+
+function selectEntity(entity) {
+    if (state.unsavedChanges) {
+        const confirmSwitch = confirm('Є незбережені зміни. Вийти без збереження?')
+        if (!confirmSwitch) return
+    }
+
+    state.unsavedChanges = false
+    state.selectedEntity = toNewEntity(structuredClone(toRaw(entity)))
+    searchQueryEffects.value = ''
+}
+
+function updateEntityFields(field, value) {
+    state.selectedEntity[field] = value
+    markUnsaved()
+}
+
+function updateEntityType(id) {
+    const type = state.session.entityTypes.find(el => el.id === id)
+    state.selectedEntity.type = type.name
+    if (state.selectedEntity.id !== 'new') markUnsaved()
+}
+
+function updateImage(image) {
+    state.selectedEntity.image = image
+    markUnsaved()
+}
+
+function addRequirement() {
+    Object.assign(state.selectedEntity.requirement, toObject({ name: entityNewRequirement.value.type, value: entityNewRequirement.value.value }))
+    markUnsaved()
+}
+
+function removeRequirement(key) {
+    delete state.selectedEntity.requirement[key]
+    markUnsaved()
+}
+
+function getRequirementType(id) {
+    const type = state.session.characteristicsList.find(el => el.id === id)
+    entityNewRequirement.value.type = type.name
+}
+
+function getRequirementValue(field, value) {
+    entityNewRequirement.value.value = value
+}
+
+function addCharacteristic(name, value) {
+    Object.assign(state.selectedEntity.characteristics, toObject({ name, value }))
+    markUnsaved()
+}
+
+function removeCharacteristic(key) {
+    delete state.selectedEntity.characteristics[key]
+    markUnsaved()
+}
+
+function addEffect(id) {
+    addRow(state.session.effects, state.selectedEntity.effects, id)
+    markUnsaved()
+}
+
+function removeEffect(id) {
+    removeRow(state.selectedEntity.effects, id)
+    markUnsaved()
+}
 
 </script>
 
@@ -52,25 +224,159 @@ onMounted(async () => {
 
     <MasterPageNavigation />
 
-    <div class="m-4 grid grid-cols-1 gap-2 items-center justify-start">
+    <section class="m-4 grid grid-cols-1 gap-2 items-center justify-start">
         <div v-if="!state.isLoading" class="w-full flex flex-wrap justify-center items-center gap-2 justify-self-start">
-            <GraySelectorButton class="w-full basis-32" v-for="tab in tabs" @click="selected_entity = tab.id"
-                :id="tab.id" :label="tab.label" :active="selected_entity === tab.id ? true : false" />
 
-            <!-- <AprroveButtonWithText @click="saveCharacter" class="w-full" text="Підтвердити"
-                :class="[!state.unsavedChanges && 'pointer-events-none opacity-50']" />
-            <RejectButtonWithText @click="discardChanges" class="w-full" text="Відминити"
-                :class="[!canSave && 'pointer-events-none opacity-50']" />
-            <UnsavedLabel v-if="state.unsavedChanges" /> -->
+            <GraySelectorButton class="w-full basis-32" @click="selectedType = ''" id="all" label="Всі"
+                :active="selectedType === '' ? true : false" />
+
+            <GraySelectorButton class="w-full basis-32" v-for="type in state.session.entityTypes" :key="type.id"
+                @click="selectedType = type.name" :id="type.id" :label="type.name"
+                :active="selectedType === type.name ? true : false" />
+
         </div>
 
-        <div v-if="selected_entity === 'weapon'" class="">
-            <Weapon />
+        <div>
+            <SearchInputBlack v-model:searchQuery="searchQuery" />
         </div>
 
-    </div>
+        <div class="grid grid-cols-4 gap-4 py-2 max-h-[512px] overflow-y-scroll no-scrollbar">
+            <div @click="selectEntity({})"
+                :class="state.selectedEntity.id === 'new' && 'bg-darkred-dark_gray text-darkred-light'"
+                class="border-8 border-darkred-dark rounded-2xl flex justify-center items-center hover:cursor-pointer">
+                <PlusButton class="w-20" />
+            </div>
+
+            <EntityTile v-for="entity in filteredEntities" @click="selectEntity(entity)"
+                :class="state.selectedEntity.id === entity.id && 'outline outline-4 outline-offset-[-1px] outline-darkred-red'"
+                :entity="entity" />
+
+        </div>
+
+    </section>
+
+    <section v-if="!state.isLoading" class="m-4 flex gap-2 items-center justify-start">
+
+        <AprroveButtonWithText @click="saveEntity" text="Підтвердити"
+            :class="[!state.unsavedChanges && 'pointer-events-none opacity-50']" />
+
+        <RejectButtonWithText v-if="state.selectedEntity.id !== 'new'" @click="deleteEntity" text="Видалити" />
+
+        <RejectButtonWithText @click="discardChanges" text="Відминити"
+            :class="[!state.unsavedChanges && 'pointer-events-none opacity-50']" />
+
+        <UnsavedLabel v-if="state.unsavedChanges" />
+    </section>
+
+    <section v-if="!state.isLoading" class="m-4 grid grid-cols-4 gap-2 items-center justify-start">
+
+        <Header1 class="col-span-full" label="Створити\Редагувати річ:" />
+
+        <ImageEditor class="col-span-full" :image="state.selectedEntity.image" label="Картинка"
+            :callback="updateImage" />
+
+        <SingleFieldEditor class="col-span-3" placeholder="Назва" fieldName="name" :value="state.selectedEntity.name"
+            :callback="updateEntityFields" type="text" :important="true" />
+
+        <DropDownChoosen label="Тип" entity_name="EntityType" :entity_array="state.session.entityTypes"
+            :selected="state.selectedEntity.type" :callback="updateEntityType" />
+
+        <SingleFieldEditor class="col-span-3" placeholder="Опис" fieldName="description" ,
+            :value="state.selectedEntity.description" :callback="updateEntityFields" type="text" :important="true" />
+
+        <SingleFieldEditor placeholder="Ціна" fieldName="price" :value="state.selectedEntity.price"
+            :callback="updateEntityFields" type="number" />
+
+        <TextAreaEditor class="col-span-3" fieldName="notes" name="Записки" :value="state.selectedEntity.notes"
+            :callback="updateEntityFields" />
+
+        <SingleFieldEditor placeholder="Рідкість" fieldName="rarity" :value="state.selectedEntity.rarity"
+            :callback="updateEntityFields" type="text" />
+
+        <div class="col-span-2 self-start flex gap-4 flex-wrap rounded-2xl border-x-4 border-darkred-dark_gray p-4">
+
+            <Header1 class="shrink w-full" label="Харакетристики:" />
+
+            <div v-if="checkObjectFieldExisting(state.selectedEntity.characteristics)"
+                v-for="value, key in state.selectedEntity.characteristics"
+                class="flex gap-3 items-center p-3 w-fit rounded-lg bg-darkred-dark text-darkred-light">
+
+                <div>
+                    {{ key }}: {{ value }}
+                </div>
+
+                <DeleteButton class="bg-darkred-red" @click="removeCharacteristic(key)" />
+            </div>
+
+            <div v-else>
+                Пусто
+            </div>
 
 
+            <ObjectFieldsEditor class="shrink w-full" name="entityCharacteristics"
+                :fields="state.selectedEntity.characteristics" :callback="addCharacteristic" />
+
+        </div>
+
+        <div class="col-span-2 self-start flex gap-4 flex-wrap rounded-2xl border-x-4 border-darkred-dark_gray p-4">
+
+            <Header1 class="shrink w-full" label="Вимоги:" />
+
+            <div v-if="checkObjectFieldExisting(state.selectedEntity.requirement)"
+                v-for="value, key in state.selectedEntity.requirement"
+                class="flex gap-3 items-center p-3 w-fit rounded-lg bg-darkred-dark text-darkred-light">
+
+                <div>
+                    {{ key }}: {{ value }}
+                </div>
+
+                <DeleteButton class="bg-darkred-red" @click="removeRequirement(key)" />
+            </div>
+
+            <div class="shrink w-full mx-auto flex gap-2 items-center">
+                <TextDropdown label="Характеристика" :entity_array="state.session.characteristicsList"
+                    entity_name="entityCharacteristic" :callback="getRequirementType" />
+                <SingleFieldEditor placeholder="Значення" fieldName="value" type="number"
+                    :value="entityNewRequirement.value" :callback="getRequirementValue" />
+                <div class="pb-2 self-end">
+                    <AprroveButtonWithText @click="addRequirement" text="Додати поле" />
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="m-4 grid grid-cols-1 gap-2 items-center justify-start">
+        <Header1 label="Ефекти:" />
+
+        <div v-if="checkObjectFieldExisting(state.selectedEntity.effects)"
+            class="grid grid-cols-3 gap-4 items-center justify-start">
+
+            <div v-for="effect in state.selectedEntity.effects"
+                class="bg-darkred-dark  p-2 rounded-2xl flex gap-4 items-center justify-between">
+
+                <EffectTile :effect="effect" class="w-full" />
+
+                <DeleteButton @click="removeEffect(effect.id)"
+                    class="bg-darkred-red h-16 w-16 text-darkred-light text-2xl" />
+
+            </div>
+
+        </div>
+
+        <div v-else>
+            <Header2 label="Пусто" />
+        </div>
+
+        <SearchInputBlack v-model:searchQuery="searchQueryEffects" />
+
+        <div class="max-h-[512px] overflow-y-scroll no-scrollbar grid grid-cols-4 gap-4 items-center justify-start">
+            <EffectTile v-for="effect in filteredEffects" :effect="effect" @click="addEffect(effect.id)" />
+        </div>
+
+    </section>
 
     <div v-if="state.isLoading" class="text-center py-6">
         <Loader />

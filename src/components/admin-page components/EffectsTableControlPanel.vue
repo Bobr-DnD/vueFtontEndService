@@ -65,7 +65,7 @@ function changeCharacter(event) {
         </div>
 
         <div class="grid grid-cols-4 gap-2 justify-items-center items-center font-medium text-md rounded-lg bg-darkred-dark_gray p-2 mt-2"
-            v-for="effect in character.effects">
+            v-for="effect in character.effects" :key=effect.id>
             <div class="p-2 rounded-md  w-full text-center">{{ effect.effect.description }}</div>
             <div class="p-2 rounded-md w-full text-center">{{ effect.effect.name }}</div>
             <div class="p-2 rounded-md w-full text-center">{{ effect.timeLeft }}</div>

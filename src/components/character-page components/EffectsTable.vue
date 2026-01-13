@@ -1,7 +1,19 @@
 <script setup>
+import DeleteButton from '../reusable/Buttons/DeleteButton.vue';
 
 const props = defineProps({
-    effects: { type: Object, required: true }
+    effects: {
+        type: Array,
+        required: true
+    },
+    removable: {
+        type: Boolean,
+        default: false
+    },
+    callback: {
+        type: Function,
+        default: () => console.log('There is nothing to click')
+    }
 })
 
 </script>
@@ -9,33 +21,30 @@ const props = defineProps({
 <template>
     <div class="space-y-2 font-univers">
 
-        <div class="grid grid-cols-[1fr_1fr_min-content] p-2 gap-2 justify-items-center items-center bg-darkred-dark_gray  
-                border-darkred-gray rounded-xl shadow-sm text-darkred-light">
+        <div class="grid px-4 py-2 gap-2 justify-items-center items-center bg-darkred-dark_gray  
+                border-darkred-gray rounded-xl shadow-sm text-darkred-light"
+            :class="props.removable ? 'grid-cols-[1fr_1fr_40px]' : 'grid-cols-[1fr_1fr]'">
             <div>
                 Назва
             </div>
             <div>
                 Ефект
             </div>
-            <div class="justify-self-end">
-                Тривалість
-            </div>
         </div>
 
-        <div v-for="effect in props.effects" class="grid grid-cols-[1fr_1fr_80px] gap-2 p-3 justify-items-center items-center
-         bg-darkred-dark_gray  border-darkred-gray rounded-xl shadow-sm text-darkred-light">
+        <div v-for="effect in props.effects" :key=effect.id class="grid gap-2 px-4 py-2 justify-items-center items-center
+         bg-darkred-dark_gray  border-darkred-gray rounded-xl shadow-sm text-darkred-light"
+            :class="props.removable ? 'grid-cols-[1fr_1fr_40px]' : 'grid-cols-[1fr_1fr]'">
 
             <div class="text-lg font-semibold">
-                {{ effect.effect.name }}
+                {{ effect.name }}
             </div>
 
             <div class="text-sm">
-                {{ effect.effect.description }}
+                {{ effect.description }}
             </div>
 
-            <div class="text-md font-medium px-2 py-1 rounded-lg bg-darkred-dark">
-                {{ effect.timeLeft }}
-            </div>
+            <DeleteButton @click="props.callback(effect.id)" v-if="props.removable" class="bg-darkred-red" />
         </div>
     </div>
 </template>

@@ -1,62 +1,52 @@
 <script setup>
-import { reactive, ref, onMounted, onBeforeUnmount } from 'vue';
+import { reactive, ref, onMounted, onBeforeUnmount, watch, toRaw } from 'vue';
 import { useRoute } from 'vue-router';
 import Loader from 'vue-spinner/src/SyncLoader.vue'
-import { CheckBadgeIcon, ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, ChartBarIcon, SparklesIcon, FlagIcon, CurrencyDollarIcon } from '@heroicons/vue/24/solid'
+import { ChartBarIcon, SparklesIcon, FlagIcon, BanknotesIcon } from '@heroicons/vue/24/solid'
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
-import { checkArrayFieldExisting, checkObjectFieldExisting } from '/utils/entityHelper'
-import { toCustomFieldObjectField } from '/utils/objects.dto';
-import { toEmptyCharacterObject } from '/utils/objects.dto';
-import { socket } from '@ws/webSocket';
+import { checkArrayFieldExisting } from '/utils/entityHelper'
+import { toObject } from '/utils/objects.dto';
+import { toNewCharacterObject, toNewSession } from '/utils/objects.dto';
+import { socket, connected } from '@ws/webSocket';
+import { notify } from '@utils/notification';
 
 import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaion.vue';
-import WeaponTable from '@/components/character-page components/WeaponTable.vue';
-import ArmorTable from '@/components/character-page components/ArmorTable.vue';
-import MedicineTable from '@/components/character-page components/MedicineTable.vue';
-import InventoryTable from '@/components/character-page components/InventoryTable.vue';
 import PerkTable from '@/components/character-page components/PerkTable.vue';
-
+import EntityTable from '@/components/character-page components/EntityTable.vue';
 import EffectsTable from '@/components/character-page components/EffectsTable.vue';
 import QuestsTable from '@/components/character-page components/QuestsTable.vue';
-import CustomFieldsTable from '@/components/reusable/CustomFieldsTable.vue';
+import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
 import characterCardSmall from '@/components/character-page components/CharacterViewCard.vue';
 import Experience from '@/components/character-page components/Experience.vue';
 import CurrencyTable from '@/components/character-page components/CurrencyTable.vue';
-import ButtonRedHideFunction from '@/components/reusable/Buttons/ButtonRedHideFunction.vue';
 import HideButton from '@/components/reusable/Buttons/HideButton.vue';
+import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue';
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue';
 import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
 import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
-
+import BackendOffline from '@/components/reusable/BackendOffline.vue';
 import HorizontalNumberPicker from '@/components/reusable/HorizontalNumberPicker.vue';
 import ProgressiveBar from '@/components/reusable/ProgressiveBar.vue';
 
 const state = reactive({
     character: {},
     session: {},
-    isLoading: true
+    isLoading: true,
 })
 
-let effects_hidden = ref(true)
-let quests_hidden = ref(true)
-let currency_hidden = ref(true)
-let custom_hidden = ref(true)
-let custom_modal_hidden = ref(true)
-let perks_hidden = ref(Boolean)
-let weapons_hidden = ref(true)
-let armors_hidden = ref(true)
-let meds_hidden = ref(true)
-let inventories_hidden = ref(true)
+const effects_hidden = ref(true)
+const quests_hidden = ref(true)
+const currency_hidden = ref(true)
+const custom_hidden = ref(true)
+const custom_modal_hidden = ref(true)
+const isBackendOffline = ref(false)
+const offlineTimeout = ref(null)
+
 
 const characterId = useRoute().params.characterId
 const sessionId = useRoute().params.sessionId
-
-socket.on('session:join', (session) => {
-    if (session?.members?.some(member => member[0] === socket.id)) return
-    socket.emit('session:connectCharacter', sessionId, { characterId })
-})
 
 onMounted(async () => {
     const [resCharacter, errCharacter] = await asyncHandler(
@@ -66,98 +56,112 @@ onMounted(async () => {
         RepositoryFactory.getById('session', sessionId)
     )
 
-    if (errCharacter) {
-        console.warn(errCharacter.message)
-        return
-    }
-    else if (errSession) {
-        console.warn(errSession.message)
-        return
-    }
-    else state.isLoading = false
+    if (errCharacter) return
+    if (errSession) return
 
-    state.character = toEmptyCharacterObject(resCharacter.data)
-    state.session = resSession.data
-    socket.emit('session:connectCharacter', sessionId, { characterId })
+    state.character = toNewCharacterObject(resCharacter.data)
+    state.session = toNewSession(resSession.data)
+
+    socket.emit('session:connectCharacter', sessionId, characterId)
+    state.isLoading = false
 })
 
 onBeforeUnmount(() => {
     socket.emit('session:disconnectCharacter', sessionId)
-    socket.off('session:join')
+    const events = ['session:join', 'character:update', 'character:updateAdmin','character:get' , 'session:updateEverywhere']
+    events.forEach(e => socket.off(e))
 })
 
-state.character.perks !== undefined ? perks_hidden.value = false : perks_hidden.value = true
+socket.on('session:join', (session) => {
+    if (session?.members?.some(member => member[0] === socket.id)) return
+    socket.emit('session:connectCharacter', sessionId, characterId)
+    state.isLoading = false
+})
 
+socket.on('character:get', (character) => {
+    state.character = toNewCharacterObject(character)
+})
 
+socket.on('character:update', (character) => {
+    state.character = toNewCharacterObject(character)
+})
 
-async function updateCharacter() {
-    const [res, err] = await asyncHandler(
-        RepositoryFactory.update('character', characterId, state.character)
-    )
-    if (err) {
-        notify({ message: err.message, type: 'error' })
-        return
+socket.on('character:updateAdmin', (character) => {
+    state.character = toNewCharacterObject(character)
+    notify({message: 'Майстер оновив персонажа', type: 'warning'})
+})
+
+socket.on('session:updateEverywhere', (session) => {
+    state.session = toNewSession(session)
+    socket.emit('character:get', characterId)
+    notify({ message: 'Майстер оновив сесію', type: 'warning' })
+})
+
+watch(connected, (isConnected) => {
+    if (isConnected) {
+        if (offlineTimeout.value) {
+            clearTimeout(offlineTimeout.value)
+            offlineTimeout.value = null
+        }
+        isBackendOffline.value = false
+        state.isLoading = false
     }
-    return toEmptyCharacterObject(res.data)
+    else {
+        if (!isBackendOffline.value) {
+            offlineTimeout.value = setTimeout(() => {
+
+                isBackendOffline.value = true
+            }, 30 * 1000)
+        }
+        state.isLoading = true
+    }
+})
+
+function updateCharacter() {
+    socket.emit('character:update', (toRaw(state.character)))
 }
 
-async function updateSession() {
-    const [res, err] = await asyncHandler(
-        RepositoryFactory.update('session', sessionId, state.session)
-    )
-    if (err) {
-        notify({ message: err.message, type: 'error' })
-        return
-    }
-
-    return res.data
-}
-
-async function addExperience() {
+function addExperience() {
     state.character.experience++;
     if (state.character.experience >= state.character.experienceToLevelUp) {
         state.character.experience = 0;
         state.character.perkPoints++;
         state.character.level++;
     }
-    state.character = await updateCharacter()
+    updateCharacter()
 }
 
-async function updateHealthFields(value, title) {
+function updateHealthFields(value, title) {
     const item = state.character.health.find(h => h.name === title)
     if (item) {
         item.value += value
     }
-    state.character = await updateCharacter() //TODO refactor update to dto
+    updateCharacter()
 }
 
-async function updateCurrency(currency) {
-    state.session.currency = currency
-    state.session = await updateSession()
+function updateCurrency(fields) {
+    state.character.currency = fields
+    updateCharacter()
 }
 
-async function addCustomField(name, value) {
-    Object.assign(state.character.customFields, toCustomFieldObjectField({ name, value }))
-    state.character = await updateCharacter()
+function addCustomField(name, value) {
+    Object.assign(state.character.customFields, toObject({ name, value }))
+    updateCharacter()
 }
 
-async function updateCustomFields(fields) {
+function updateCustomFields(fields) {
     state.character.customFields = fields
-    state.character = await updateCharacter()
+    updateCharacter()
 }
 
-async function updateInventory() {
-    state.character = await updateCharacter()
-}
-
-async function addPerk() {
+function addPerk() {
     state.character.perkPoints--;
-    state.character = await updateCharacter()
+    updateCharacter()
 }
 
-async function updateCharacterNotes(field, value) {
+function updateCharacterNotes(field, value) {
     state.character[field] = value;
-    state.character = await updateCharacter()
+    updateCharacter()
 }
 
 </script>
@@ -168,7 +172,8 @@ async function updateCharacterNotes(field, value) {
     <div v-if="!state.isLoading" class="w-80 mx-auto my-6 space-y-2 font-univers">
 
         <characterCardSmall :name="state.character.name" :characteristics="state.character.characteristics"
-            :gender="state.character.gender" :class="state.character.class" :race="state.character.race" :image="state.character.image" />
+            :gender="state.character.gender" :class="state.character.class" :race="state.character.race"
+            :image="state.character.image" />
 
         <Experience :exp="state.character.experience" :expMax="state.character.experienceToLevelUp"
             :perkPoints="state.character.perkPoints" :callback="addExperience" />
@@ -177,7 +182,7 @@ async function updateCharacterNotes(field, value) {
 
     <div v-if="!state.isLoading" class="w-96 mx-auto my-4">
 
-        <section class="mb-2" v-for="h in state.character.health">
+        <section class="mb-2" v-for="h in state.character.health" :key="h.id">
 
             <div class="p-1 grow">
                 <ProgressiveBar :value="h.value" :valueMax="h.max" :text="h.name" :colors="h.colors" />
@@ -191,101 +196,77 @@ async function updateCharacterNotes(field, value) {
         <section class="grid grid-cols-1 gap-2 w-full mx-auto my-2">
 
 
-            <div class="">
-                <HideButton v-if="checkArrayFieldExisting(state.character.effects)" class="w-full mb-2"
+            <div class="flex flex-col gap-2">
+                <HideButton v-if="checkArrayFieldExisting(state.character.effects)" class="w-full"
                     textShow="Показати ефекти" textHide="Приховати ефекти" :hidden="effects_hidden"
                     :mainIcon="SparklesIcon" @click="effects_hidden = !effects_hidden" />
                 <EffectsTable v-if="checkArrayFieldExisting(state.character.effects) && !effects_hidden"
                     :effects="state.character.effects" />
             </div>
 
-            <div class="">
-                <HideButton v-if="checkObjectFieldExisting(state.character.quest)" class="w-full"
-                    textShow="Показати особистий квест" textHide="Приховати особистий квест" :hidden="quests_hidden"
-                    :mainIcon="FlagIcon" @click="quests_hidden = !quests_hidden" />
-                <QuestsTable v-if="checkObjectFieldExisting(state.character.quest) && !quests_hidden"
+            <div class="flex flex-col gap-2">
+                <HideButton v-if="checkArrayFieldExisting(state.character.quests)" class="w-full"
+                    textShow="Показати квести" textHide="Приховати квести" :hidden="quests_hidden" :mainIcon="FlagIcon"
+                    @click="quests_hidden = !quests_hidden" />
+                <QuestsTable v-if="checkArrayFieldExisting(state.character.quests) && !quests_hidden"
                     :quests="state.character.quests" />
             </div>
 
 
-            <div class="">
+            <div class="flex flex-col gap-2">
                 <HideButton class="w-full" textShow="Показати додаткові характеристики"
                     textHide="Приховати додаткові характеристики" :hidden="custom_hidden" :mainIcon="ChartBarIcon"
                     @click="custom_hidden = !custom_hidden" />
 
-                <CustomFieldsTable v-if="!custom_hidden" :fields="state.character.customFields"
+                <ObjectFieldsTable v-if="!custom_hidden" :fields="state.character.customFields"
                     :callback="updateCustomFields" :field_removable="false" />
 
-                <PlusButton v-if="!custom_hidden" @click="custom_modal_hidden = !custom_modal_hidden" class="w-16 mt-2 mx-auto text-center border-4 border-darkred-dark rounded-lg 
+                <PlusButton v-if="!custom_hidden" @click="custom_modal_hidden = !custom_modal_hidden" class="w-16 h-14 mt-2 mx-auto text-center border-4 border-darkred-dark rounded-lg 
            transition-all duration-300 ease-out md:hover:cursor-pointer
            bg-gradient-to-br from-darkred-dark to-darkred-light
            md:hover:from-darkred-red md:hover:to-darkred-dark relative overflow-hidden group" />
 
-                <ObjectFieldsEditor v-if="!custom_modal_hidden && !custom_hidden" :name="'CustomFields_'"
-                    :fields="state.character.customFields" :callback="addCustomField" />
+                <div @click="custom_modal_hidden = true" v-if="!custom_modal_hidden && !custom_hidden"
+                    class="fixed inset-0 flex items-center justify-center z-50 bg-darkred-dark/50 md:hover:cursor-pointer">
+
+                    <div @click.stop
+                        class="max-w-[480px] w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl bg-darkred-dark relative">
+                        <div class="">
+                            <CloseButtonRedBG @click="custom_modal_hidden = true" />
+                        </div>
+
+
+                        <ObjectFieldsEditor class="hover:cursor-default" :name="'CustomFields_'"
+                            :fields="state.character.customFields" :callback="addCustomField" />
+
+                    </div>
+
+                </div>
 
             </div>
 
-            <div class="">
-                <HideButton v-if="checkObjectFieldExisting(state.session.currency)" class="w-full"
+            <div class="flex flex-col gap-2">
+                <HideButton v-if="checkArrayFieldExisting(state.character.currency)" class="w-full"
                     textShow="Показати баланс" textHide="Приховати баланс" :hidden="currency_hidden"
-                    :mainIcon="CurrencyDollarIcon" @click="currency_hidden = !currency_hidden" />
-                <CurrencyTable v-if="checkObjectFieldExisting(state.session.currency) && !currency_hidden"
-                    :currency="state.session.currency" :callback="updateCurrency" />
+                    :mainIcon="BanknotesIcon" @click="currency_hidden = !currency_hidden" />
+                <CurrencyTable v-if="!currency_hidden" :currency_array="state.character.currency"
+                    :callback="updateCurrency" />
             </div>
-
 
         </section>
     </div>
 
-    <section v-if="!state.isLoading" class="grid grid-cols-1 justify-items-center mx-auto min-w-80 max-w-96">
+    <section v-if="!state.isLoading" class="grid grid-cols-1 gap-2 justify-items-center mx-auto min-w-80 max-w-96">
 
-        <section class="w-full">
-            <ButtonRedHideFunction @click="perks_hidden = !perks_hidden" text="Навички" :mainIcon="CheckBadgeIcon"
-                :hidden="perks_hidden" />
-            <div :class="['grid grid-cols-1 w-full', perks_hidden ? 'hidden' : '']">
-                <PerkTable v-if="state.session.perks" :perks_all="state.session.perks" :perks="state.character.perks"
-                    :perkPoints="state.character.perkPoints" :callback="addPerk" :removable="false" />
-            </div>
+        <section class="w-full flex flex-col gap-1">
+            <PerkTable :session_perks="state.session.perks" :character_perks="state.character.perks"
+                :perkPoints="state.character.perkPoints" :callback="addPerk" />
         </section>
 
-        <section class="w-full">
-            <ButtonRedHideFunction @click="weapons_hidden = !weapons_hidden" text="Зброя" :mainIcon="BoltIcon"
-                :hidden="weapons_hidden" />
-            <div :class="['grid grid-cols-1 w-full', weapons_hidden ? 'hidden' : '']">
-                <WeaponTable :weapons_all="state.session.weapons" :weapons="state.character.weapons"
-                    :callback="updateInventory" />
-            </div>
+        <section class="w-full flex flex-col gap-1">
+            <EntityTable :character_entities="state.character.entities" :session_entities="state.session.entities"
+                :types="state.session.entityTypes" :callback="updateCharacter" />
         </section>
-
-        <section class="w-full">
-            <ButtonRedHideFunction @click="armors_hidden = !armors_hidden" text="Броня" :mainIcon="ShieldCheckIcon"
-                :hidden="armors_hidden" />
-            <div :class="['grid grid-cols-1 w-full', armors_hidden ? 'hidden' : '']">
-                <ArmorTable :armors_all="state.session.armors" :armors="state.character.armor"
-                    :callback="updateInventory" />
-            </div>
-        </section>
-
-        <section class="w-full">
-            <ButtonRedHideFunction @click="meds_hidden = !meds_hidden" text="Медикаменти" :mainIcon="BeakerIcon"
-                :hidden="meds_hidden" />
-            <div :class="['grid grid-cols-1 w-full', meds_hidden ? 'hidden' : '']">
-                <MedicineTable :medicines_all="state.session.medicines" :medicines="state.character.medicines"
-                    :effects_all="state.session.effects" :effects="state.character.effects" :move="state.session.move"
-                    :callback="updateInventory" />
-            </div>
-        </section>
-
-        <section class="w-full">
-            <ButtonRedHideFunction @click="inventories_hidden = !inventories_hidden" text="Інвентар"
-                :mainIcon="ArchiveBoxIcon" v-model:hidden="inventories_hidden" />
-            <div :class="['grid grid-cols-1 w-full', inventories_hidden ? 'hidden' : '']">
-                <InventoryTable :inventory_all="state.session.inventories" :inventory="state.character.inventory"
-                    :callback="updateInventory" />
-            </div>
-        </section>
-
 
     </section>
 
@@ -294,9 +275,15 @@ async function updateCharacterNotes(field, value) {
             :callback="updateCharacterNotes" />
     </section>
 
-    <div v-if="state.isLoading" class="text-center py-6">
+    <div v-if="state.isLoading" class="w-full text-center py-6 flex flex-col gap-10 justify-center items-center">
+        <BackendOffline v-if="isBackendOffline" class="w-[650px]" />
         <Loader />
     </div>
+
+    <!-- <div class="fixed z-50 top-5 right-5">
+        <div :class="connected ? 'bg-greenish-dark' : 'bg-darkred-red'" class="w-10 h-10 border-1 rounded-full">
+        </div>
+    </div> -->
 
 </template>
 

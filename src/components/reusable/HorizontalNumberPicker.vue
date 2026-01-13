@@ -134,14 +134,7 @@ watch(() => props.value.value, scrollToValue)
 </template>
 
 <style>
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
 
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
 
 @keyframes gradient-pulse {
   0% {

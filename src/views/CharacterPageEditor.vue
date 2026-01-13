@@ -1,7 +1,8 @@
 <script setup>
 import Loader from 'vue-spinner/src/SyncLoader.vue'
-import { reactive, onMounted, ref, computed, toRaw } from 'vue';
+import { reactive, onMounted, ref, computed, toRaw, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router';
+import { socket } from '@ws/webSocket';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
 import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
@@ -9,24 +10,25 @@ import PlusButton from '@/components/reusable/Buttons/PlusButton.vue'
 import SingleFieldEditor from '@/components/reusable/SingleFieldEditor.vue';
 import ImageEditor from '@/components/reusable/ImageEditor.vue';
 import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
-import CustomFieldsTable from '@/components/reusable/CustomFieldsTable.vue';
+import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
 import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
-import { ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, CheckBadgeIcon } from '@heroicons/vue/24/solid'
-import WeaponTable from '@/components/character-page components/WeaponTable.vue';
-import ArmorTable from '@/components/character-page components/ArmorTable.vue';
-import MedicineTable from '@/components/character-page components/MedicineTable.vue';
-import InventoryTable from '@/components/character-page components/InventoryTable.vue';
-import PerkTable from '@/components/character-page components/PerkTable.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import HealthFieldsEditor from '@/components/admin-page components/HealthFieldsEditor.vue';
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
+import CurrencyTable from '@/components/character-page components/CurrencyTable.vue';
+import EffectsTableEditor from '@/components/admin-page components/EffectsTableEditor.vue';
+import QuestsTableEditor from '@/components/admin-page components/QuestsTableEditor.vue';
+import PerkRowView from '@/components/character-page components/EntityRows/PerkRowView.vue';
+import EntityRowView from '@/components/character-page components/EntityRows/EntityRowView.vue';
+import Header1 from '@/components/reusable/Titles/Header1.vue';
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
-import { checkObjectFieldExisting } from '/utils/entityHelper';
-import { toCustomFieldObjectField, toEmptyCharacterObject } from '/utils/objects.dto';
+import { checkObjectFieldExisting, filterPerksByRank, groupById, addRow, removeRow, filterPerksByRankWithoutCount, sortByMainField } from '/utils/entityHelper';
+import { toObject, toNewCharacterObject } from '/utils/objects.dto';
 import { notify } from '/utils/notification';
+import { checkArrayFieldExisting } from '@utils/entityHelper';
 
 const state = reactive({
     session: {},
@@ -35,25 +37,29 @@ const state = reactive({
 })
 
 const sessionId = useRoute().params.sessionId
-const selected_character = ref(toEmptyCharacterObject({}))
+const selected_character = ref(toNewCharacterObject({}))
 const editingCharacter = ref(selected_character.value.id)
 
+//perks variables
+const filteredCharacterPerks = ref([])
+const filteredSessionPerks = ref([])
+const characterPerksSearchQuery = ref('')
+const sessionPerksSearchQuery = ref('')
+
+const inventoryTypes = ref([])
+const activeType = ref('')
+const characterEntitySearchQuery = ref('')
+const sessionEntitySearchQuery = ref('')
+
 const activeTab = ref('base')
-const activeInventory = ref('')
 
 const tabs = [
     { id: 'base', label: 'Базові характеристики' },
-    { id: 'main', label: 'Головні характеристики' },
+    { id: 'custom', label: 'Кастомні поля' },
     { id: 'health', label: "Здоров'я" },
+    { id: 'quests&effects', label: 'Квести та еффекти' },
+    { id: 'perks', label: 'Перки' },
     { id: 'inventory', label: 'Інвентар' }
-]
-
-const inventories = [
-    { id: 'weapon', label: 'Зброя', icon: BoltIcon },
-    { id: 'armor', label: 'Броня', icon: ShieldCheckIcon },
-    { id: 'medicine', label: 'Медикаметни', icon: BeakerIcon },
-    { id: 'inventory', label: 'Інвентар', icon: ArchiveBoxIcon },
-    { id: 'perk', label: 'Перки', icon: CheckBadgeIcon }
 ]
 
 onMounted(async () => {
@@ -67,6 +73,63 @@ onMounted(async () => {
 
     state.isLoading = false
     state.session = resSession.data
+
+    inventoryTypes.value = state.session.entityTypes.map(type => {
+        return {
+            name: type.name,
+            id: type.id,
+            hidden: true,
+            icon: type.icon,
+            search: '',
+            modal_hidden: true,
+            searchGlobal: ''
+        }
+    })
+})
+
+onBeforeUnmount(() => {
+    const events = ['character:update', 'character:get', 'session:updateEverywhere', 'character:updateAdmin', 'session:updateAdmin']
+    events.forEach(e => socket.off(e))
+})
+
+socket.on('character:update', (character) => {
+    if (character.id === selected_character.value.id) selected_character.value = toNewCharacterObject(character)
+    else {
+        state.session.characters = state.session.characters.map(ch =>
+            ch.id === character.id ? toNewCharacterObject(character) : ch
+        )
+    }
+    notify({ message: `Персонажа ${character.name} було оновлено`, type: 'warning' })
+})
+
+socket.on('character:get', (character) => {
+    selected_character.value = toNewCharacterObject(character)
+})
+
+socket.on('session:updateEverywhere', (session) => {
+    state.session = session
+    socket.emit('character:get', selected_character.value.id)
+    notify({ message: `Сесію було оновлено глобально`, type: 'warning' })
+})
+
+filteredCharacterPerks.value.perks = computed(() => {
+    const groupedArray = groupById(selected_character.value.perks)
+
+    if (!characterPerksSearchQuery.value.trim()) return groupedArray
+    const query = characterPerksSearchQuery.value.toLowerCase()
+    return groupedArray.filter(el =>
+        el.name.toLowerCase().includes(query)
+    )
+})
+
+filteredSessionPerks.value.perks = computed(() => {
+    const groupedArray = filterPerksByRankWithoutCount(selected_character.value.perks, state.session.perks)
+
+    if (!sessionPerksSearchQuery.value.trim()) return groupedArray
+    const query = sessionPerksSearchQuery.value.toLowerCase()
+    return groupedArray.filter(el =>
+        el.name.toLowerCase().includes(query)
+    )
 })
 
 function selectCharacter(character) {
@@ -79,9 +142,12 @@ function selectCharacter(character) {
     state.unsavedChanges = false;
 
     if (character.id === 'empty') {
-        selected_character.value = toEmptyCharacterObject({})
+        selected_character.value = toNewCharacterObject({})
     }
-    else selected_character.value = toEmptyCharacterObject(structuredClone(toRaw(character)))
+    else selected_character.value = toNewCharacterObject(structuredClone(toRaw(character)))
+
+    characterPerksSearchQuery.value = ''
+    sessionPerksSearchQuery.value = ''
 }
 
 function markUnsaved() {
@@ -95,49 +161,39 @@ async function saveCharacter() {
 
         if (selected_character.value.id === 'empty') {
             const [res, err] = await asyncHandler(
-                RepositoryFactory.create('character', selected_character.value)
+                RepositoryFactory.create('character', toRaw(selected_character.value))
             )
-            if (err) {
-                notify({ message: err.message, type: 'error' })
-                return
-            }
+            if (err) return
 
             const [resSession, errSession] = await asyncHandler(
                 RepositoryFactory.getById('session', sessionId)
             )
-            if (errSession) {
-                notify({ message: errSession.message, type: 'error' })
-                return
-            }
+            if (errSession) return
 
             state.session = resSession.data
             state.unsavedChanges = false
 
             notify({ message: 'Персонаж збережений', type: 'success' })
-            selectCharacter(toEmptyCharacterObject(res.data))
+            socket.emit('session:updateAdmin', sessionId);
+            selectCharacter(toNewCharacterObject(res.data))
 
         } else {
             const [res, err] = await asyncHandler(
-                RepositoryFactory.update('character', selected_character.value.id, selected_character.value)
+                RepositoryFactory.update('character', selected_character.value.id, toRaw(selected_character.value))
             )
-            if (err) {
-                notify({ message: err.message, type: 'error' })
-                return
-            }
+            if (err) return
 
             const [resSession, errSession] = await asyncHandler(
                 RepositoryFactory.getById('session', sessionId)
             )
-            if (errSession) {
-                notify({ message: errSession.message, type: 'error' })
-                return
-            }
+            if (errSession) return
 
             state.session = resSession.data
             state.unsavedChanges = false
 
             notify({ message: 'Персонаж оновлений', type: 'success' })
-            //selectCharacter(toEmptyCharacterObject(res.data))
+            socket.emit('character:updateAdmin', res.data)
+            //selectCharacter(toNewCharacterObject(res.data))
         }
     }
     else {
@@ -151,7 +207,6 @@ async function deleteCharacter() {
         RepositoryFactory.delete('character', selected_character.value.id)
     )
     if (err) {
-        notify({ message: err.message, type: 'error' })
         return
     }
 
@@ -159,15 +214,15 @@ async function deleteCharacter() {
         RepositoryFactory.getById('session', sessionId)
     )
     if (errSession) {
-        notify({ message: errSession.message, type: 'error' })
         return
     }
 
     state.session = resSession.data
     state.unsavedChanges = false
 
-    selectCharacter(toEmptyCharacterObject({}))
+    selectCharacter(toNewCharacterObject({}))
     notify({ message: 'Персонаж видалений', type: 'success' })
+    socket.emit('session:updateAdmin', sessionId);
 }
 
 function discardChanges() {
@@ -176,7 +231,7 @@ function discardChanges() {
 
     if (editingCharacter.value !== 'empty')
         current = state.session.characters.find(c => c.id === editingCharacter.value);
-    else current = toEmptyCharacterObject({});
+    else current = toNewCharacterObject({});
 
     if (current) selected_character.value = structuredClone(toRaw(current))
     state.unsavedChanges = false
@@ -184,28 +239,38 @@ function discardChanges() {
     notify({ message: 'Зміни анульовані', type: 'warning' })
 }
 
-function updateCharacter(field, value) {
+function updateCharacterField(field, value) {
     selected_character.value[field] = value
     markUnsaved();
 }
 
 function updateCharacterCharacteristic(fields) {
-    selected_character.characteristics = fields
+    selected_character.value.characteristics = fields
     markUnsaved();
 }
 
-function addCharacterCharacteristic(name, value) {
-    Object.assign(selected_character.value.characteristics, toCustomFieldObjectField({ name, value }))
-    markUnsaved();
+function updateCurrency(fields) {
+    selected_character.value.currency = fields
+    markUnsaved()
 }
 
 function updateCustomFields(fields) {
-    selected_character.customFields = fields
+    selected_character.value.customFields = fields
     markUnsaved();
 }
 
+function updateEffects(effects) {
+    selected_character.value.effects = effects
+    markUnsaved()
+}
+
+function updateQuests(quests) {
+    selected_character.value.quests = quests
+    markUnsaved()
+}
+
 function addCustomField(name, value) {
-    Object.assign(selected_character.value.customFields, toCustomFieldObjectField({ name, value }))
+    Object.assign(selected_character.value.customFields, toObject({ name, value }))
     markUnsaved();
 }
 
@@ -228,12 +293,60 @@ function addHealthField(field) {
     markUnsaved();
 }
 
-function updateInventory() {
-    markUnsaved();
+function showEntityType(id) {
+    inventoryTypes.value.forEach(type => {
+        if (type.id === id) {
+            type.hidden = false
+            activeType.value = type
+        }
+        else type.hidden = true
+    });
+
+    characterEntitySearchQuery.value = ''
+    sessionEntitySearchQuery.value = ''
 }
 
-function addImage(image){
-    selected_character.value.image = image,
+function getFilteredCharacterEntities(type) {
+    sortByMainField(selected_character.value.entities, 'name')
+
+    return selected_character.value.entities
+        .filter(e => e.type === type.name)
+        .filter(e =>
+            e.name.toLowerCase().includes(characterEntitySearchQuery.value.toLowerCase())
+        )
+}
+
+function getFilteredSessionEntities(type) {
+
+    return state.session.entities
+        .filter(e => e.type === type.name)
+        .filter(e =>
+            e.name.toLowerCase().includes(sessionPerksSearchQuery.value.toLowerCase())
+        )
+}
+
+function addEntity(entity) {
+    addRow(state.session.entities, selected_character.value.entities, entity.id)
+    markUnsaved()
+}
+
+function removeEntity(entity) {
+    removeRow(selected_character.value.entities, entity.id)
+    markUnsaved()
+}
+
+function removerPerk(perk) {
+    removeRow(selected_character.value.perks, perk.id)
+    markUnsaved()
+}
+
+function addPerk(perk) {
+    addRow(state.session.perks, selected_character.value.perks, perk.id)
+    markUnsaved()
+}
+
+function addImage(image) {
+    selected_character.value.image = image
     markUnsaved()
 }
 
@@ -247,19 +360,19 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
     <MasterPageNavigation />
 
     <div v-if="!state.isLoading" class="flex items-center justify-center space-x-4 m-2">
-        <GraySelectorButton v-for="character in state.session.characters" @click="selectCharacter(character)"
-            :id="character.id" :label="character.name"
+        <GraySelectorButton v-for="character in state.session.characters" :key="character.id"
+            @click="selectCharacter(character)" :id="character.id" :label="character.name"
             :active="selected_character.id === character.id ? true : false" />
-        <PlusButton @click="selectCharacter({ id: 'empty' })" class="w-16 mx-auto text-center border-4 border-darkred-dark rounded-lg md:hover:cursor-pointer
-           md:hover:bg-darkred-gray relative overflow-hidden group"
+        <PlusButton @click="selectCharacter({ id: 'empty' })" class="w-16 h-14 border-4 border-darkred-dark rounded-lg
+           md:hover:bg-darkred-gray group"
             :class="selected_character.id === 'empty' ? 'bg-darkred-gray text-darkred-light' : 'bg-darkred-light'" />
     </div>
 
     <section v-if="!state.isLoading" class="m-4 mr-8 grid grid-cols-[25%_75%] gap-2">
 
         <div class="p-4 w-full flex flex-col justify-start gap-2 font-gothic">
-            <GraySelectorButton v-for="tab in tabs" @click="activeTab = tab.id" :id="tab.id" :label="tab.label"
-                :active="activeTab === tab.id ? true : false" />
+            <GraySelectorButton v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id" :id="tab.id"
+                :label="tab.label" :active="activeTab === tab.id ? true : false" />
             <RejectButtonWithText @click="deleteCharacter" class="w-full" text="Видалити персонажа"
                 v-if="selected_character.id !== 'empty'" />
             <AprroveButtonWithText @click="saveCharacter" class="w-full" text="Підтвердити"
@@ -269,117 +382,177 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
             <UnsavedLabel v-if="state.unsavedChanges" />
         </div>
 
-        <div id="base" v-if="activeTab === 'base'" class="grid grid-cols-2 auto-rows-min gap-x-4">
+        <div id="base" v-if="activeTab === 'base'" class="grid grid-cols-2 auto-rows-min gap-4">
 
-            <ImageEditor class="w-full col-span-2" :image="selected_character.image" label="Character image" :callback="addImage" />
-       
-                <SingleFieldEditor placeholder="Ім'я(обов'язкове поле)" fieldName="name"
-                    :value="selected_character.name" :callback="updateCharacter" class="w-full" />
-                <SingleFieldEditor placeholder="Стать" fieldName="gender" :value="selected_character.gender"
-                    :callback="updateCharacter" class="w-full" />
-                <SingleFieldEditor placeholder="Клас" fieldName="class" :value="selected_character.class"
-                    :callback="updateCharacter" class="w-full" />
-                <SingleFieldEditor placeholder="Раса" fieldName="race" :value="selected_character.race"
-                    :callback="updateCharacter" class="w-full" />
+            <ImageEditor class="w-full col-span-2" :image="selected_character.image" label="Character image"
+                :callback="addImage" />
+
+            <SingleFieldEditor placeholder="Ім'я" fieldName="name" :value="selected_character.name"
+                :callback="updateCharacterField" :important="true" class="w-full" />
+            <SingleFieldEditor placeholder="Стать" fieldName="gender" :value="selected_character.gender"
+                :callback="updateCharacterField" class="w-full" />
+            <SingleFieldEditor placeholder="Клас" fieldName="class" :value="selected_character.class"
+                :callback="updateCharacterField" class="w-full" />
+            <SingleFieldEditor placeholder="Раса" fieldName="race" :value="selected_character.race"
+                :callback="updateCharacterField" class="w-full" />
 
             <SingleFieldEditor placeholder="Рівень" fieldName="level" :value="selected_character.level"
-                :callback="updateCharacter" type="number" class="w-full" />
+                :callback="updateCharacterField" type="number" class="w-full" />
             <SingleFieldEditor placeholder="Очки перків" fieldName="perkPoints" :value="selected_character.perkPoints"
-                :callback="updateCharacter" type="number" class="w-full" />
+                :callback="updateCharacterField" type="number" class="w-full" />
             <SingleFieldEditor placeholder="Досвід" fieldName="experience" :value="selected_character.experience"
-                :callback="updateCharacter" type="number" class="w-full" />
+                :callback="updateCharacterField" type="number" class="w-full" />
             <SingleFieldEditor placeholder="К-сть досвіду для рівня" fieldName="experienceToLevelUp"
-                :value="selected_character.experienceToLevelUp" :callback="updateCharacter" type="number"
+                :value="selected_character.experienceToLevelUp" :callback="updateCharacterField" type="number"
                 class="w-full" />
 
             <TextAreaEditor fieldName="playerNotes" name="Записки гравця" :value="selected_character.playerNotes"
-                :callback="updateCharacter" />
+                :callback="updateCharacterField" />
             <TextAreaEditor fieldName="adminNotes" name="Записки майстра" :value="selected_character.adminNotes"
-                :callback="updateCharacter" />
+                :callback="updateCharacterField" />
+
+            <Header1 class="col-span-2 justify-self-center" label="Список основних характеистик:" />
+
+            <Header1 v-if="!checkArrayFieldExisting(selected_character.characteristics)" class="col-span-2"
+                label="Пусто" />
+
+            <ObjectFieldsTable v-if="checkObjectFieldExisting(selected_character.characteristics)"
+                :fields="selected_character.characteristics" :callback="updateCharacterCharacteristic" />
+
+            <Header1 class="col-span-2 justify-self-center" label="Список фінансів:" />
+
+            <Header1 v-if="!checkArrayFieldExisting(selected_character.currency)" class="col-span-2" label="Пусто" />
+
+            <CurrencyTable :currency_array="selected_character.currency" :callback="updateCurrency" />
 
         </div>
 
-        <div id="main" v-if="activeTab === 'main'" class="grid grid-cols-2 auto-rows-min gap-x-4">
+        <div id="custom" v-if="activeTab === 'custom'" class="grid grid-cols-2 auto-rows-min gap-4">
 
-            <div class="mt-6 h-min p-2 border-2 rounded-md">
-                <h1 class="font-gothic font-medium text-2xl">Список кастомних полей:</h1>
-                <CustomFieldsTable v-if="checkObjectFieldExisting(selected_character.customFields)"
-                    :fields="selected_character.customFields" :callback="updateCustomFields" :field_removable="true" />
-                <h1 class="font-gothic font-medium text-2xl">Додати нове поле:</h1>
-                <ObjectFieldsEditor name="CustomFields_" :fields="selected_character.customFields"
-                    :callback="addCustomField" />
-            </div>
+            <Header1 class="col-span-2 font-medium" label="Список кастомних полей:" />
 
-            <div class="mt-6 h-min p-2 border-2 rounded-md">
-                <h1 class="font-gothic font-medium text-2xl">Список Характеристик:</h1>
-                <CustomFieldsTable v-if="checkObjectFieldExisting(selected_character.characteristics)"
-                    :fields="selected_character.characteristics" :callback="updateCharacterCharacteristic"
-                    :field_removable="true" />
-                <h1 class="font-gothic font-medium text-2xl">Додати нову харакетристику:</h1>
-                <ObjectFieldsEditor name="Characteristics_" :fields="selected_character.characteristics"
-                    :callback="addCharacterCharacteristic" />
-            </div>
+            <Header1 v-if="!checkArrayFieldExisting(selected_character.customFields)" class="col-span-2"
+                label="Пусто" />
+
+            <ObjectFieldsTable v-if="checkObjectFieldExisting(selected_character.customFields)"
+                :fields="selected_character.customFields" :callback="updateCustomFields" :field_removable="true" />
+
+            <Header1 class="col-span-w font-medium" label="Додати нове поле:" />
+
+            <ObjectFieldsEditor class="col-span-2" name="CustomFields_" :fields="selected_character.customFields"
+                :callback="addCustomField" />
 
         </div>
 
         <div id="health" v-if="activeTab === 'health'" class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-3">
 
-            <h1 class="text-2xl font-gothic col-span-2 justify-self-center">Редагування існуючи полей:</h1>
 
-            <HealthFieldsEditor v-for="field in selected_character.health" :label="field.name" :health_field="field"
-                class="col-span-2" :callback="updateHealthFields" :callback_remove="deleteHealthField" />
+            <Header1 class="col-span-2 justify-self-center font-medium" label="Редагування існуючи полей:" />
 
+            <Header1 v-if="!checkArrayFieldExisting(selected_character.health)" class="col-span-2" label="Пусто" />
 
-            <h1 class="text-2xl font-gothic col-span-2 justify-self-center">Створити нове поле:</h1>
+            <HealthFieldsEditor v-for="field in selected_character.health" :key="field.id" :label="field.name"
+                :health_field="field" class="col-span-2" :callback="updateHealthFields"
+                :callback_remove="deleteHealthField" />
+
+            <Header1 class="col-span-2 justify-self-center font-medium" label="Створити нове поле::" />
 
             <HealthFieldsEditor label="Health" class="col-span-2" :callback="addHealthField" />
 
         </div>
 
+        <div id="quests&effects" v-if="activeTab === 'quests&effects'"
+            class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-3">
+
+            <Header1 class="justify-self-center" label="Еффекти:" />
+            <Header1 class="justify-self-center" label="Квести:" />
+
+            <EffectsTableEditor :sessionEffects="state.session.effects" :character_effects="selected_character.effects"
+                :callback="updateEffects" />
+
+            <QuestsTableEditor class="flex flex-col gap-2" :session_quests="state.session.quests"
+                :character_quests="selected_character.quests" :callback="updateQuests" />
+        </div>
+
+        <div id="perks" v-if="activeTab === 'perks'" class="grid grid-cols-3 auto-rows-min gap-x-4 gap-y-3">
+
+            <Header1 class="col-span-3 justify-self-center" label="Перки персонажа: " />
+
+            <div class="col-span-3 flex gap-2">
+                <input v-model="characterPerksSearchQuery" placeholder="Пошук ..."
+                    class="h-12 w-full p-2 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+
+                <RejectButtonWithText v-if="characterPerksSearchQuery" @click="characterPerksSearchQuery = ''"
+                    text="Очистити" />
+            </div>
+
+            <PerkRowView v-for="perk in filteredCharacterPerks.perks" :perk="perk" :removable="true"
+                :callback_remove="removerPerk" />
+
+            <Header1 class="col-span-3 justify-self-center" label="Усі перки: " />
+
+            <div class="col-span-3 flex gap-2">
+                <input v-model="sessionPerksSearchQuery" placeholder="Пошук ..."
+                    class="h-12 w-full p-2 col-span-3 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+
+                <RejectButtonWithText v-if="sessionPerksSearchQuery" @click="sessionPerksSearchQuery = ''"
+                    text="Очистити" />
+            </div>
+
+            <PerkRowView v-for="perk in filteredSessionPerks.perks" :perk="perk" :addable="true"
+                :callback_add="addPerk" />
+
+        </div>
+
         <div id="inventory" v-if="activeTab === 'inventory'" class="flex flex-col items-center gap-y-4">
 
-            <section class="flex gap-2 self-start">
-                <GraySelectorButton v-for="inv in inventories" @click="activeInventory = inv.id" :id="inv.id"
-                    :label="inv.label" :active="activeInventory === inv.id ? true : false" />
-            </section>
+            <div class="w-full flex gap-2 justify-center">
+                <GraySelectorButton v-for="type in inventoryTypes" :label="type.name" :id="type.id"
+                    :active="!type.hidden" @click="showEntityType(type.id)" />
+            </div>
 
-            <section id="weapon" v-if="activeInventory === 'weapon'" class="border rounded-lg p-2 w-[600px]">
-                <div class="grid grid-cols-1 w-full">
-                    <WeaponTable :weapons_all="state.session.weapons" :weapons="selected_character.weapons"
-                        :callback="updateInventory" />
+            <Header1 class="self-start" label="Інвентар персонажа:" />
+
+            <div class="w-full flex flex-col gap-2">
+
+                <div class="flex gap-2">
+
+                    <input v-model="characterEntitySearchQuery" placeholder="Пошук ..."
+                        class="h-12 w-full p-2 col-span-3 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+
+                    <RejectButtonWithText v-if="characterEntitySearchQuery" @click="characterEntitySearchQuery = ''"
+                        text="Очистити" />
                 </div>
-            </section>
 
-            <section id="armor" v-if="activeInventory === 'armor'" class="border rounded-lg p-2 w-[600px]">
-                <div class="grid grid-cols-1 w-full">
-                    <ArmorTable :armors_all="state.session.armors" :armors="selected_character.armor"
-                        :callback="updateInventory" />
+                <div class="w-full grid grid-cols-3 gap-2 max-h-[1024px] overflow-y-auto md:no-scrollbar">
+
+                    <EntityRowView v-for="entity in getFilteredCharacterEntities(activeType)" :entity="entity"
+                        :callback_add="addEntity" :callback_remove="removeEntity" />
+
                 </div>
-            </section>
+            </div>
 
-            <section id="medicine" v-if="activeInventory === 'medicine'" class="border rounded-lg p-2 w-[600px]">
+            <Header1 class="self-start" label="Весь інвентар:" />
 
-                <div class="grid grid-cols-1 w-full">
-                    <MedicineTable :medicines_all="state.session.medicines" :medicines="selected_character.medicines"
-                        :effects_all="state.session.effects" :effects="selected_character.effects"
-                        :move="state.session.move" :callback="updateInventory" />
+            <div class="w-full flex flex-col gap-2">
+
+                <div class="flex gap-2">
+
+                    <input v-model="sessionPerksSearchQuery" placeholder="Пошук ..."
+                        class="h-12 w-full p-2 col-span-3 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+
+                    <RejectButtonWithText v-if="sessionPerksSearchQuery" @click="sessionPerksSearchQuery = ''"
+                        text="Очистити" />
                 </div>
-            </section>
 
-            <section id="inventory" v-if="activeInventory === 'inventory'" class="border rounded-lg p-2 w-[600px]">
-                <div class="grid grid-cols-1 w-ful">
-                    <InventoryTable :inventory_all="state.session.inventories" :inventory="selected_character.inventory"
-                        :callback="updateInventory" />
-                </div>
-            </section>
 
-            <section id="perk" v-if="activeInventory === 'perk'" class="border rounded-lg p-2 w-[600px]">
-                <div class="grid grid-cols-1 w-full">
-                    <PerkTable v-if="state.session.perks" :perks_all="state.session.perks"
-                        :perks="selected_character.perks" :perkPoints="1" :callback="updateInventory"
-                        :removable="true" />
+                <div class="w-full grid grid-cols-3 gap-2 max-h-[512px] overflow-y-auto md:no-scrollbar">
+
+                    <EntityRowView v-for="entity in getFilteredSessionEntities(activeType)" :entity="entity"
+                        :callback_add="addEntity" :callback_remove="removeEntity" />
+
                 </div>
-            </section>
+            </div>
 
         </div>
 

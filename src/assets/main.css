@@ -3,21 +3,47 @@
 @tailwind utilities;
 
 nav {
-    background-image: radial-gradient(rgba(255, 0, 0, 0.05) 1px, transparent 1px);
-    background-size: 4px 4px;
+  background-image: radial-gradient(rgba(255, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 4px 4px;
 }
 
 .hidden {
-    display: none;
+  display: none;
 }
 
 .no-arrows::-webkit-outer-spin-button,
 .no-arrows::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+  -webkit-appearance: none;
+  margin: 0;
 }
 
-/* Remove arrows for Firefox */
 .no-arrows[type=number] {
-    -moz-appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  z-index: 50;
+  background-color: rgba(29, 22, 22, 0.5);
+
+  cursor: default;
+}
+
+@media (min-width: 768px) {
+  .modal-overlay:hover {
+    cursor: pointer;
+  }
 }

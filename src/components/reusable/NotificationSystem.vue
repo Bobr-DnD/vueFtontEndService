@@ -19,21 +19,25 @@ const typeMessage = {
 </script>
 
 <template>
-    <div class="fixed top-4 right-4 flex flex-col gap-2 z-50 max-w-sm w-full pointer-events-none select-none">
-        <transition-group name="fade" tag="div" class="space-y-1">
+    <div
+        class="fixed top-3 right-3 left-3 z-50 flex flex-col gap-2 pointer-events-none select-none sm:left-auto sm:w-80">
+
+        <transition-group name="fade" tag="div" class="space-y-2">
+
             <div v-for="n in notifications" :key="n.id" :class="[
-                'rounded-lg p-4 shadow-lg border-2 font-univers text-base pointer-events-auto',
-                'bg-darkred-dark text-darkred-light text-lg font-gothic border-4 rounded-lg',
-                'transition-all duration-300 backdrop-blur-md',
-                'grid grid-cols-[1fr_40px]',
+                'pointer-events-auto rounded-xl p-4 shadow-xl border-2',
+                'bg-darkred-dark text-darkred-light font-gothic text-base',
+                'backdrop-blur-md transition-all duration-300',
+                'grid grid-cols-[1fr_36px] gap-3 items-center',
                 typeStyles[n.type] || typeStyles.info
             ]">
 
-                <div class="flex flex-col gap-2 w-full">
-                    <div>
+                <div class="flex flex-col gap-1 w-full">
+                    <div class="text-lg font-semibold">
                         {{ typeMessage[n.type] || typeMessage.info }}
                     </div>
-                    <div>
+
+                    <div class="text-base leading-snug break-words">
                         {{ n.message }}
                     </div>
                 </div>
@@ -44,6 +48,7 @@ const typeMessage = {
 
         </transition-group>
     </div>
+
 </template>
 
 <style scoped>
