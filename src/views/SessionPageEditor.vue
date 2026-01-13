@@ -1,11 +1,11 @@
 <script setup>
-import { reactive, onMounted, ref, computed, toRaw } from 'vue';
+import { reactive, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { asyncHandler } from '@utils/asyncHandler';
 import { toNewSession, toObject } from '@utils/objects.dto';
 import { notify } from '@utils/notification';
-import { iconsList } from '@utils/icons'
 import RepositoryFactory from '@http/RepositoryFactory';
+import { socket } from '@ws/webSocket';
 
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
@@ -65,6 +65,7 @@ async function saveSession() {
     state.unsavedChanges = false
 
     notify({ message: 'Сесія оновлена', type: 'success' })
+    socket.emit('session:updateEverywhere', res.data.id)
 }
 
 function markUnsaved() {
@@ -134,8 +135,8 @@ function updateStringArray(field, array) {
                 <!-- <SingleFieldEditor :value="editedSession.move" placeholder="Хід" fieldName="move"
                     :callback="updateSession" type="number" /> -->
 
-                <TextAreaEditor class="col-span-2" fieldName="adminNotes" name="Записки майстра"
-                    :value="editedSession.adminNotes" :callback="updateSession" />
+                <TextAreaEditor class="col-span-2" fieldName="notes" name="Записки майстра" :value="editedSession.notes"
+                    :callback="updateSession" />
 
                 <Header1 class="col-span-2 font-medium" label="Список кастомних полей" />
 

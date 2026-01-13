@@ -55,7 +55,7 @@ export function toNewSession(session){
     image: session.image ?? null,
     move: session.move ?? 0,
     customFields: session.customFields ?? {},
-    adminNotes: session.adminNotes ?? null,
+    notes: session.notes ?? null,
     entityTypes: session.entityTypes ?? [],
     enemyTypes: session.enemyTypes ?? [],
     characteristicsList: session.characteristicsList ?? [],

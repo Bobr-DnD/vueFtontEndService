@@ -6,6 +6,7 @@ import { asyncHandler } from '@utils/asyncHandler';
 import { notify } from '@utils/notification';
 import { toNewPerk, toObject } from '@utils/objects.dto';
 import { checkObjectFieldExisting } from '@utils/entityHelper';
+import { socket } from '@ws/webSocket';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
 import Loader from 'vue-spinner/src/SyncLoader.vue'
@@ -76,9 +77,10 @@ async function savePerk() {
     }
     else {
         const perk = toRaw(selectedPerk.value)
-
+        console.log(perk);
+        
         const [res, err] = await asyncHandler(
-            RepositoryFactory.update('perk', perk, perk.id)
+            RepositoryFactory.update('perk', perk.id, perk)
         )
         if (err) return
     }
@@ -91,12 +93,14 @@ async function savePerk() {
     state.session = res.data
     state.unsavedChanges = false
     selectedPerk.value = toNewPerk({})
+
     notify({ message: 'Зміни збережені', type: 'info' })
+    socket.emit('session:updateEverywhere', sessionId)
 }
 
 async function deletePerk() {
     const [resPerk, errPerk] = await asyncHandler(
-        RepositoryFactory.delete('perk', selectedPerk.value.id)
+        RepositoryFactory.delete('perk', toRaw(selectedPerk.value.id))
     )
     if (errPerk) return
 
@@ -107,9 +111,10 @@ async function deletePerk() {
 
     state.session = resSession.data
     state.unsavedChanges = false
-    selectedPerk = toNewPerk({})
+    selectedPerk.value = toNewPerk({})
 
     notify({ message: 'Ефект видалено', type: 'info' })
+    socket.emit('session:updateEverywhere', sessionId)
 }
 
 function discardChanges() {

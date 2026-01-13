@@ -5,6 +5,7 @@ import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '@utils/asyncHandler';
 import { toNewQuest } from '@utils/objects.dto';
 import { notify } from '@utils/notification';
+import { socket } from '@ws/webSocket';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
 import Loader from 'vue-spinner/src/SyncLoader.vue'
@@ -87,6 +88,7 @@ async function saveQuest() {
     state.unsavedChanges = false
 
     notify({ message: 'Зміни збережені', type: 'info' })
+    socket.emit('session:updateEverywhere', sessionId)
 }
 
 async function deleteQuest() {
@@ -105,6 +107,7 @@ async function deleteQuest() {
     selectedQuest.value = toNewQuest({})
 
     notify({ message: 'Квест видалено', type: 'info' })
+    socket.emit('session:updateEverywhere', sessionId)
 }
 
 async function discardChanges() {

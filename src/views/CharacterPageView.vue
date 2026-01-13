@@ -10,6 +10,7 @@ import { checkArrayFieldExisting } from '/utils/entityHelper'
 import { toObject } from '/utils/objects.dto';
 import { toNewCharacterObject, toNewSession } from '/utils/objects.dto';
 import { socket, connected } from '@ws/webSocket';
+import { notify } from '@utils/notification';
 
 import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaion.vue';
 import PerkTable from '@/components/character-page components/PerkTable.vue';
@@ -32,7 +33,7 @@ import ProgressiveBar from '@/components/reusable/ProgressiveBar.vue';
 const state = reactive({
     character: {},
     session: {},
-    isLoading: true
+    isLoading: true,
 })
 
 const effects_hidden = ref(true)
@@ -56,19 +57,19 @@ onMounted(async () => {
     )
 
     if (errCharacter) return
-    else if (errSession) return
-
-    else state.isLoading = false
+    if (errSession) return
 
     state.character = toNewCharacterObject(resCharacter.data)
     state.session = toNewSession(resSession.data)
 
     socket.emit('session:connectCharacter', sessionId, characterId)
+    state.isLoading = false
 })
 
 onBeforeUnmount(() => {
     socket.emit('session:disconnectCharacter', sessionId)
-    ['session:join', 'character:update', 'session:updateSession'].forEach(e => socket.off(e))
+    const events = ['session:join', 'character:update', 'character:updateAdmin','character:get' , 'session:updateEverywhere']
+    events.forEach(e => socket.off(e))
 })
 
 socket.on('session:join', (session) => {
@@ -77,12 +78,23 @@ socket.on('session:join', (session) => {
     state.isLoading = false
 })
 
+socket.on('character:get', (character) => {
+    state.character = toNewCharacterObject(character)
+})
+
 socket.on('character:update', (character) => {
     state.character = toNewCharacterObject(character)
 })
 
-socket.on('session:updateSession', (session) => {
+socket.on('character:updateAdmin', (character) => {
+    state.character = toNewCharacterObject(character)
+    notify({message: 'Майстер оновив персонажа', type: 'warning'})
+})
+
+socket.on('session:updateEverywhere', (session) => {
     state.session = toNewSession(session)
+    socket.emit('character:get', characterId)
+    notify({ message: 'Майстер оновив сесію', type: 'warning' })
 })
 
 watch(connected, (isConnected) => {

@@ -7,6 +7,7 @@ import { asyncHandler } from '@utils/asyncHandler';
 import { notify } from '@utils/notification';
 import { toNewEntity, toObject } from '@utils/objects.dto';
 import { checkObjectFieldExisting, addRow, removeRow } from '@utils/entityHelper';
+import { socket } from '@ws/webSocket';
 
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
@@ -116,6 +117,7 @@ async function saveEntity() {
     state.session = res.data
     state.unsavedChanges = false
     notify({ message: 'Зміни збережені', type: 'info' })
+    socket.emit('session:updateEverywhere', sessionId)
 }
 
 async function deleteEntity() {
@@ -134,6 +136,7 @@ async function deleteEntity() {
     state.selectedEntity = toNewEntity({ type: state.selectedEntity.type })
 
     notify({ message: 'Елемент видалено', type: 'info' })
+    socket.emit('session:updateEverywhere', sessionId)
 }
 
 function discardChanges() {

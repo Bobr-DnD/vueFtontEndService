@@ -3,6 +3,7 @@ import { onMounted, onBeforeUnmount, reactive, ref, computed, toRaw, watch } fro
 import { useRoute } from 'vue-router';
 import { checkObjectFieldExisting, addRow, removeRow, groupById, filterDuplicates } from '/utils/entityHelper'
 import { socket, connected } from '@ws/webSocket';
+import { notify } from '@utils/notification';
 
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 
@@ -20,6 +21,7 @@ import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue
 import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
 import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
 import BackendOffline from '@/components/reusable/BackendOffline.vue';
+import { toNewSession } from '/utils/objects.dto';
 
 const sessionId = useRoute().params.sessionId
 const state = reactive({
@@ -69,22 +71,51 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  ['character:update', 'session:updateSession', 'session:get'].forEach(e => socket.off(e))
+  const events = ['character:update', 'session:updateSession', 'session:get', 'session:updateEverywhere', 'session:updateAdmin', 'character:get']
+  events.forEach(e => socket.off(e))
 })
 
 socket.on('character:update', (character) => {
   if (character.id === state.selectedChatacter.id) state.selectedChatacter = character
-  else console.warn('hamno: user ne toyi');
+  else {
+    state.session.characters = state.session.characters.map(ch =>
+      ch.id === character.id ? character : ch
+    )
+  }
+
+  notify({ message: `Персонаж ${character.name} був оновлений`, type: 'warning' })
+
 })
 
 socket.on('session:updateSession', (session) => {
-  state.session = session
+  state.session = toNewSession(session)
+})
+
+socket.on('session:updateEverywhere', (session) => {
+  state.session = toNewSession(session)
+  socket.emit('character:get', state.selectedChatacter.id)
+  notify({ message: `Сесія була оновлена глобально`, type: 'warning' })
+})
+
+socket.on('session:updateAdmin', (session) => {
+  state.session = toNewSession(session)
+  socket.emit('character:get', state.selectedChatacter.id)
+  notify({ message: `Сесія була оновлена лише для майстра`, type: 'warning' })
 })
 
 socket.on('session:get', (session) => {
-  state.session = session
+  state.session = toNewSession(session)
   state.selectedChatacter = state.session.characters[0]
   state.isLoading = false
+})
+
+socket.on('character:get', (character) => {
+  if (character.id === state.selectedChatacter.id) state.selectedChatacter = character
+  else {
+    state.session.characters = state.session.characters.map(ch =>
+      ch.id === character.id ? character : ch
+    )
+  }
 })
 
 watch(connected, (isConnected) => {
@@ -95,10 +126,7 @@ watch(connected, (isConnected) => {
       offlineTimeOut.value = null
     }
 
-    socket.on('session:get', (session) => {
-      state.session = session
-      state.selectedChatacter = state.session.characters[0]
-    })
+    socket.emit('session:get', sessionId)
 
     isBackendOffline.value = false
     state.isLoading = false

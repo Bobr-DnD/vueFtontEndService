@@ -7,6 +7,7 @@ import { asyncHandler } from '@utils/asyncHandler'
 import { notify } from '@utils/notification'
 import { toNewEffect, toObject } from '@utils/objects.dto'
 import { checkObjectFieldExisting } from '@utils/entityHelper'
+import { socket } from '@ws/webSocket'
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue'
 import EffectTile from '@/components/reusable/EntityTiles/EffectTile.vue'
@@ -94,7 +95,7 @@ async function saveEffect() {
 
     unsavedChanges.value = false
     notify({ message: 'Зміни збережені', type: 'info' })
-
+    socket.emit('session:updateEverywhere', sessionId)
 }
 
 async function removeEffect() {
@@ -114,6 +115,7 @@ async function removeEffect() {
     selectedEffect.value = toNewEffect({})
 
     notify({ message: 'Ефект видалено', type: 'info' })
+    socket.emit('session:updateEverywhere', sessionId)
 }
 
 function markUnsaved() {

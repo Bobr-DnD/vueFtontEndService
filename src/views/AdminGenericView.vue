@@ -34,11 +34,13 @@ onBeforeUnmount(() => {
 })
 
 socket.on('session:update', async (session) => {
+    
+    const room = session.room
     state.charactersOnlineIds = []
-    if (session.members) {
-        state.charactersOnlineIds = session.members.filter(el => el[1].role === 'user' && el[1].userId).map(el => el[1].userId)
-    }
 
+    if (room) {
+        state.charactersOnlineIds = room.members.filter(el => el[1].role === 'user' && el[1].userId).map(el => el[1].userId)
+    }
 })
 
 socket.on('error', async (message) => {

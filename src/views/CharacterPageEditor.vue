@@ -1,7 +1,8 @@
 <script setup>
 import Loader from 'vue-spinner/src/SyncLoader.vue'
-import { reactive, onMounted, ref, computed, toRaw } from 'vue';
+import { reactive, onMounted, ref, computed, toRaw, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router';
+import { socket } from '@ws/webSocket';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
 import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
@@ -86,6 +87,31 @@ onMounted(async () => {
     })
 })
 
+onBeforeUnmount(() => {
+    const events = ['character:update', 'character:get', 'session:updateEverywhere', 'character:updateAdmin', 'session:updateAdmin']
+    events.forEach(e => socket.off(e))
+})
+
+socket.on('character:update', (character) => {
+    if (character.id === selected_character.value.id) selected_character.value = toNewCharacterObject(character)
+    else {
+        state.session.characters = state.session.characters.map(ch =>
+            ch.id === character.id ? toNewCharacterObject(character) : ch
+        )
+    }
+    notify({ message: `Персонажа ${character.name} було оновлено`, type: 'warning' })
+})
+
+socket.on('character:get', (character) => {
+    selected_character.value = toNewCharacterObject(character)
+})
+
+socket.on('session:updateEverywhere', (session) => {
+    state.session = session
+    socket.emit('character:get', selected_character.value.id)
+    notify({ message: `Сесію було оновлено глобально`, type: 'warning' })
+})
+
 filteredCharacterPerks.value.perks = computed(() => {
     const groupedArray = groupById(selected_character.value.perks)
 
@@ -135,7 +161,7 @@ async function saveCharacter() {
 
         if (selected_character.value.id === 'empty') {
             const [res, err] = await asyncHandler(
-                RepositoryFactory.create('character', selected_character.value)
+                RepositoryFactory.create('character', toRaw(selected_character.value))
             )
             if (err) return
 
@@ -148,11 +174,12 @@ async function saveCharacter() {
             state.unsavedChanges = false
 
             notify({ message: 'Персонаж збережений', type: 'success' })
+            socket.emit('session:updateAdmin', sessionId);
             selectCharacter(toNewCharacterObject(res.data))
 
         } else {
             const [res, err] = await asyncHandler(
-                RepositoryFactory.update('character', selected_character.value.id, selected_character.value)
+                RepositoryFactory.update('character', selected_character.value.id, toRaw(selected_character.value))
             )
             if (err) return
 
@@ -165,6 +192,7 @@ async function saveCharacter() {
             state.unsavedChanges = false
 
             notify({ message: 'Персонаж оновлений', type: 'success' })
+            socket.emit('character:updateAdmin', res.data)
             //selectCharacter(toNewCharacterObject(res.data))
         }
     }
@@ -194,6 +222,7 @@ async function deleteCharacter() {
 
     selectCharacter(toNewCharacterObject({}))
     notify({ message: 'Персонаж видалений', type: 'success' })
+    socket.emit('session:updateAdmin', sessionId);
 }
 
 function discardChanges() {
@@ -487,7 +516,7 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
             <div class="w-full flex flex-col gap-2">
 
                 <div class="flex gap-2">
-                    
+
                     <input v-model="characterEntitySearchQuery" placeholder="Пошук ..."
                         class="h-12 w-full p-2 col-span-3 rounded-lg bg-darkred-dark_gray text-darkred-light" />
 
