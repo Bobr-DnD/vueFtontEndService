@@ -24,7 +24,6 @@ const props = defineProps({
 const fileInput = ref(null)
 
 async function loadImage() {
-    console.log(fileInput.value.files[0]);
     
     const formData = new FormData();
     formData.append('file', fileInput.value.files[0])

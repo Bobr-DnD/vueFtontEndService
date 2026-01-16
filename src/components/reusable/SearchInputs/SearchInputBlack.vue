@@ -1,7 +1,7 @@
 <script setup>
 import RejectButtonWithText from '../Buttons/RejectButtonWithText.vue';
 
-const searchQuery = defineModel('searchQuery', {required: true, default: ''})
+const searchQuery = defineModel('searchQuery', { type: String, required: true, default: '' })
 
 </script>
 

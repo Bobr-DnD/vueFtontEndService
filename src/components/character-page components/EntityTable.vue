@@ -1,14 +1,16 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
+import { addRow, removeRow } from '/utils/entityHelper';
+import { notify } from '/utils/notification';
+
 import ButtonRedHideFunction from '../reusable/Buttons/ButtonRedHideFunction.vue';
 import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue';
 import ApproveButton from '../reusable/Buttons/ApproveButton.vue';
 import RejectButtonWithText from '../reusable/Buttons/RejectButtonWithText.vue';
 import EntityRowView from './EntityRows/EntityRowView.vue';
 import ModalOpenButton from '../reusable/Buttons/ModalOpenButton.vue';
-import { addRow, removeRow } from '/utils/entityHelper';
-import { returnIcon } from '@utils/icons';
-import { notify } from '/utils/notification';
+import SearchInputBlack from '../reusable/SearchInputs/SearchInputBlack.vue';
+
 
 const props = defineProps({
     character_entities: {
@@ -31,8 +33,8 @@ const props = defineProps({
 
 const types = ref([])
 
-types.value = props.types.map(type => {
-    return {
+watch(() => props.types, (newTypes) => {
+    types.value = newTypes.map(type => ({
         name: type.name,
         id: type.id,
         hidden: true,
@@ -40,9 +42,8 @@ types.value = props.types.map(type => {
         search: '',
         modal_hidden: true,
         searchGlobal: ''
-    }
-})
-
+    }))
+}, { immediate: true })
 
 function addEntity(entity) {
     addRow(props.session_entities, props.character_entities, entity.id)
@@ -76,21 +77,18 @@ function getFilteredSessionEntities(type) {
 
 <template>
 
-    <section v-for="type in types" :key="Math.random().toString(24).slice(2)" class="w-full flex flex-col gap-1 items-center justify-center">
+    <section v-for="type in types" :key="type.id" class="w-full flex flex-col gap-1 items-center justify-center">
         <ButtonRedHideFunction class="w-full" @click="type.hidden = !type.hidden" :text="type.name"
             :mainIcon="type.icon" :hidden="type.hidden" />
 
         <div v-if="!type.hidden" class="w-full flex gap-2 font-gothic">
-            <input v-model="type.search" placeholder="Пошук ..."
-                class="h-12 w-full p-2 rounded-lg bg-darkred-dark_gray text-darkred-light" />
-
-            <RejectButtonWithText v-if="type.search" @click="type.search=''" text="Очистити" />
+            <SearchInputBlack class="w-full" v-model:searchQuery="type.search" />
         </div>
 
 
-        <div class="w-full max-h-[680px] overflow-y-auto md:no-scrollbar flex flex-col gap-1">
-            <EntityRowView v-if="!type.hidden" v-for="entity in getFilteredCharacterEntities(type)" :key="entity.name" :entity="entity"
-                :callback_add="addEntity" :callback_remove="removeEntity" />
+        <div class="w-full max-h-[680px] overflow-y-auto no-scrollbar flex flex-col gap-1">
+            <EntityRowView v-if="!type.hidden" v-for="entity in getFilteredCharacterEntities(type)" :key="entity.name"
+                :entity="entity" :callback_add="addEntity" :callback_remove="removeEntity" />
         </div>
 
         <div v-if="!type.hidden" class="w-full flex justify-center items-center">
@@ -107,10 +105,7 @@ function getFilteredSessionEntities(type) {
                 <CloseButtonRedBG @click="type.modal_hidden = true" />
 
                 <div v-if="!type.hidden" class="w-[85%] flex gap-2">
-                    <input v-model="type.searchGlobal" placeholder="Пошук ..."
-                        class="h-12 w-full p-2 rounded-lg bg-darkred-light text-darkred-dark placeholder:text-darkred-dark_gray font-gothic" />
-
-                    <RejectButtonWithText v-if="type.searchGlobal" @click="type.searchGlobal=''" text="Очистити" />
+                    <SearchInputBlack class="w-full" v-model:searchQuery="type.searchGlobal" />
 
                 </div>
 
@@ -123,14 +118,17 @@ function getFilteredSessionEntities(type) {
                     </div>
                 </div>
 
-                <div v-for="entity in getFilteredSessionEntities(type)" :key="entity.name"
-                    class="grid grid-cols-[1fr_100px_64px] items-center px-2 py-1 rounded-lg font-univers text-lg odd:bg-darkred-gray">
-                    <div>
-                        {{ entity.name }}
+                <div class="max-h-[680px] overflow-y-auto no-scrollbar">
+                    <div v-for="entity in getFilteredSessionEntities(type)" :key="entity.name"
+                        class="grid grid-cols-[1fr_100px_64px] items-center px-2 py-1 rounded-lg font-univers text-lg odd:bg-darkred-gray">
+                        <div>
+                            {{ entity.name }}
+                        </div>
+                        <div>{{ entity.price }}</div>
+                        <ApproveButton @click="addEntity(entity)" class="w-16" />
                     </div>
-                    <div>{{ entity.price }}</div>
-                    <ApproveButton @click="addEntity(entity)" class="w-16" />
                 </div>
+
             </div>
 
         </div>

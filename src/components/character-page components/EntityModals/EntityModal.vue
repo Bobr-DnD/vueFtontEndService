@@ -3,7 +3,7 @@ import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import ApproveButton from '@/components/reusable/Buttons/ApproveButton.vue';
-import { checkArrayFieldExisting } from '@utils/entityHelper';
+import { checkArrayFieldExisting, checkObjectFieldExisting } from '@utils/entityHelper';
 
 const props = defineProps({
     entity: {
@@ -34,7 +34,10 @@ const props = defineProps({
             <CloseButtonRedBG @click="callback_close" />
 
             <div class="font-bold text-2xl text-center border-b border-darkred-red pb-2">
-                {{ entity.name }}
+                <div class="w-[90%]">
+                    {{ entity.name }}
+                </div>
+
             </div>
 
             <div v-if="props.entity.image">
@@ -42,11 +45,11 @@ const props = defineProps({
                     :src="props.entity.image" alt="Entity image" />
             </div>
 
-            <div v-if="props.entity.description" class="justify-self-start">
+            <div v-if="props.entity.description" class="px-2 justify-self-start">
                 Опис: {{ props.entity.description }}
             </div>
 
-            <div v-if="props.entity.characteristics" class="w-full flex flex-wrap gap-1">
+            <div v-if="checkObjectFieldExisting(props.entity.characteristics)" class="w-full flex flex-wrap gap-1">
 
                 <div class="basis-full text-center text-xl">Характеристики: </div>
 
@@ -96,7 +99,7 @@ const props = defineProps({
 
             </div>
 
-            <div class="p-1 w-full rounded-lg bg-darkred-light text-darkred-dark flex-col flex-wrap gap-1">
+            <div v-if="props.entity.price || props.entity.rarity" class="p-1 w-full rounded-lg bg-darkred-light text-darkred-dark flex-col flex-wrap gap-1">
 
                 <div v-if="props.entity.price"
                     class="rounded-lg odd:bg-darkred-light even:bg-darkred-light_gray py-1 px-2">
@@ -107,11 +110,6 @@ const props = defineProps({
                     class="rounded-lg odd:bg-darkred-light even:bg-darkred-light_gray py-1 px-2">
                     Рідкість: {{ props.entity.rarity }}
                 </div>
-
-                <!-- <div v-if="props.entity.usage"
-                    class="rounded-lg odd:bg-darkred-light even:bg-darkred-light_gray py-1 px-2">
-                    К-сть використань: {{ props.entity.usage }}
-                </div> -->
 
             </div>
 

@@ -37,9 +37,9 @@ const filteredEffects = computed(() => {
 
 <template>
     <div @click="props.callback_close"
-        class="fixed inset-0 flex items-center justify-center z-50 bg-darkred-dark/50 md:hover:cursor-pointer">
+        class="modal-overlay flex items-center justify-center md:hover:cursor-pointer">
         <div @click.stop
-            class="w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-gothic text-lg md:hover:cursor-default">
+            class="max-w-[680px] w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-gothic text-lg md:hover:cursor-default">
 
             <CloseButtonRedBG @click="props.callback_close" />
             <div class="h-6"></div>
@@ -57,7 +57,7 @@ const filteredEffects = computed(() => {
                 <SearchInputBlack v-model:searchQuery="searchQuery" />
             </div>
 
-            <div class="max-h-[650px] overflow-y-scroll grid grid-cols-1 gap-2">
+            <div class="max-h-[680px] overflow-y-auto no-scrollbar grid grid-cols-1 gap-2">
                 <div v-for="effect in filteredEffects" :key="effect.id"
                     class="p-2 rounded-lg bg-darkred-gray odd:bg-darkred-light_gray text-darkred-dark grid grid-cols-[140px_1fr_40px] gap-2 items-center">
 
@@ -80,11 +80,8 @@ const filteredEffects = computed(() => {
                         </div>
                     </div>
 
-
                 </div>
             </div>
-
-
 
         </div>
     </div>

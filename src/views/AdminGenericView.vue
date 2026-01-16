@@ -30,11 +30,12 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
     socket.emit('session:leave', sessionId)
-    ['session:error', 'session:update'].forEach(e => socket.off(e))
+    const events = ['session:error', 'session:update']
+    events.forEach(e => socket.off(e))
 })
 
 socket.on('session:update', async (session) => {
-    
+
     const room = session.room
     state.charactersOnlineIds = []
 

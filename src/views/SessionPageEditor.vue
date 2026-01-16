@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, onMounted, ref } from 'vue';
+import { reactive, onMounted, ref, toRaw } from 'vue';
 import { useRoute } from 'vue-router';
 import { asyncHandler } from '@utils/asyncHandler';
 import { toNewSession, toObject } from '@utils/objects.dto';
@@ -53,7 +53,7 @@ onMounted(async () => {
 
 async function saveSession() {
     const [res, err] = await asyncHandler(
-        RepositoryFactory.update('session', editedSession.value.id, editedSession.value)
+        RepositoryFactory.update('session', editedSession.value.id, toRaw(editedSession.value))
     )
     if (err) {
         notify({ message: err.message, type: 'error' })
@@ -84,7 +84,7 @@ function updateSession(field, value) {
 }
 
 function addImage(image) {
-    state.session.value.image = image
+    editedSession.value.image = image
     markUnsaved()
 }
 
@@ -100,10 +100,7 @@ function updateCustomFields(fields) {
 
 function updateStringArray(field, array) {
     editedSession.value[field] = array
-    console.log(editedSession.value[field]);
-
     markUnsaved()
-    console.log(editedSession.value[field]);
 }
 
 

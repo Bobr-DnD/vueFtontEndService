@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 
 const selectValue = ref(null)
 
@@ -26,11 +26,6 @@ const props = defineProps({
     }
 })
 
-onMounted(() => {
-    if (!props.selected) props.callback(selectValue.value.value)
-})
-
-
 </script>
 
 <template>
@@ -40,9 +35,13 @@ onMounted(() => {
             {{ props.label }}:
         </div>
 
-        <select :ref="'selectValue'" @change="props.callback(selectValue.value)" :name="props.entity_name"
+        <select :ref="'selectValue'" @change="selectValue.value !== 'none' ? props.callback(selectValue.value) : console.log('xuita')" :name="props.entity_name"
             :id="props.entity_name"
             class="w-full appearance-none p-1 pl-2 bg-darkred-light border-4 border-darkred-dark rounded-lg text-darkred-dark font-gothic focus:outline-none focus:ring-2 focus:ring-darkred-dark transition cursor-pointer">
+            
+            <option value="none">
+                Не вибарно
+            </option>
             
             <option v-for="entity in props.entity_array" :value="entity.id" :selected="entity.name === props.selected">
                 {{ entity.name }}

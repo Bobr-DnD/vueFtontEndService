@@ -29,7 +29,6 @@ const name = ref(0)
 const min = ref(0)
 const max = ref(0)
 const value = ref(0)
-const healing = ref(0)
 const color_min = ref('#8e1616')
 const color_max = ref('#3e5f44')
 const color_mid = ref('#fabc3f')
@@ -69,13 +68,14 @@ function addHealthField() {
 
     if (!field_exists) resetFields()
     props.callback(health)
+    resetFields()
 }
 
 function resetFields() {
-    name.value.value = ''
-    min.value.value = 0
-    max.value.value = 0
-    value.value.value = 0
+    name.value.value = null
+    min.value.value = null
+    max.value.value = null
+    value.value.value = null
     color_min.value.value = '#8e1616'
     color_max.value.value = '#3e5f44'
     color_mid.value.value = '#fabc3f'

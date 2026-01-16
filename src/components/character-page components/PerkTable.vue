@@ -93,8 +93,8 @@ function removePerk(perk) {
                 text="Очистити" />
         </div>
 
-        <div v-if="!perksHidden" class="flex flex-col gap-1">
-            <PerkRowView v-for="perk in filteredCharacterArray" :perk="perk" :callback_remove="removePerk"/>
+        <div v-if="!perksHidden" class="w-full max-h-[680px] overflow-y-auto no-scrollbar flex flex-col gap-1">
+            <PerkRowView v-for="perk in filteredCharacterArray" :perk="perk" :callback_remove="removePerk" />
 
         </div>
 
@@ -104,7 +104,7 @@ function removePerk(perk) {
 
 
         <div v-if="!modalHidden" @click="modalHidden = true"
-            class="w-full p-2 fixed inset-0 flex flex-col gap-1 items-center justify-center z-50 bg-darkred-dark/50 md:hover:cursor-pointer text-darkred-light">
+            class="w-full p-2 modal-overlay flex flex-col gap-1 items-center justify-center md:hover:cursor-pointer text-darkred-light">
 
             <div @click.stop
                 class="max-w-[480px] w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-gothic md:hover:cursor-default">
@@ -119,16 +119,18 @@ function removePerk(perk) {
                         text="Очистити" />
                 </div>
 
+                <div class="max-h-[680px] overflow-y-auto no-scrollbar">
+                    <div v-for="perk in filteredSessionArray"
+                        class="grid grid-cols-[1fr_40px] gap-2 odd:bg-darkred-gray p-2 rounded-lg">
+                        <div>Назва: {{ perk.name }}</div>
 
-                <div v-for="perk in filteredSessionArray"
-                    class="grid grid-cols-[1fr_40px] gap-2 odd:bg-darkred-gray p-2 rounded-lg">
-                    <div>Назва: {{ perk.name }}</div>
+                        <ApproveButton @click="addPerk(perk)" class="row-span-2 flex justify-center items-center" />
 
-                    <ApproveButton @click="addPerk(perk)" class="row-span-2 flex justify-center items-center" />
+                        <div>Опис: {{ perk.descriptions[perk.count] }}</div>
 
-                    <div>Опис: {{ perk.descriptions[perk.count] }}</div>
-
+                    </div>
                 </div>
+
 
             </div>
 

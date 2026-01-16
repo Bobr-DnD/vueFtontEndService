@@ -70,7 +70,7 @@ async function saveQuest() {
             RepositoryFactory.create('quest', quest)
         )
         if (err) return
-        selectedQuest.value = toNewQuest({})
+        selectedQuest.value = toNewQuest({status: quest.status})
     }
     else {
         const [res, err] = await asyncHandler(

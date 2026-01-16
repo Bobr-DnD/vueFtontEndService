@@ -241,7 +241,8 @@ function removeEffectCharacteristic(key) {
 
         </div>
 
-        <div class="col-span-2 justify-self-center flex gap-2 items-center">
+        <div v-if="checkObjectFieldExisting(state.session.characteristicsList)"
+            class="col-span-2 justify-self-center flex gap-2 items-center">
             <TextDropdown label="Характеристика" :entity_array="state.session.characteristicsList"
                 entity_name="effectCharacteristic" :callback="getCharacteristicType" />
             <SingleFieldEditor placeholder="Значення" fieldName="value" type="number" :value="newEffect.value"
@@ -250,6 +251,10 @@ function removeEffectCharacteristic(key) {
                 <AprroveButtonWithText @click="updateEffectCharacteristics" text="Додати поле" />
             </div>
 
+        </div>
+
+        <div v-else>
+            <Header2 label="В сесії відсутні характеристики" />
         </div>
 
     </section>

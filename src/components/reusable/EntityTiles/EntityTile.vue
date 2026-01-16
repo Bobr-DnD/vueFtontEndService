@@ -16,9 +16,11 @@ const props = defineProps({
             {{ props.entity.name }}
         </div>
 
-        <div class="p-2 bg-darkred-dark_gray rounded-lg">
+        <div v-if="props.entity.description" class="p-2 bg-darkred-dark_gray rounded-lg">
             Опис: {{ props.entity.description }}
         </div>
+
+        <div v-else class="p-2 bg-darkred-dark_gray rounded-lg">Опис відсутній</div>
 
     </div>
 </template>
