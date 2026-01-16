@@ -24,10 +24,12 @@ import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWi
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
 import DeleteButton from '@/components/reusable/Buttons/DeleteButton.vue';
+import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
 
 const sessionId = useRoute().params.sessionId
 const searchQuery = ref('')
 const selectedPerk = ref(toNewPerk({}))
+const selectedType = ref('')
 const perkNewRequirement = ref({})
 
 const state = reactive({
@@ -49,36 +51,37 @@ onMounted(async () => {
 })
 
 const filteredPerks = computed(() => {
-    const perks = state.session.perks;
+    let perks = toRaw(state.session.perks);
 
-    if (!searchQuery.value.trim()) {
-        return [...perks];
+    if (selectedType.value) perks = perks.filter(el => el.type.name === selectedType.value)
+
+    if (searchQuery.value.trim()) {
+        const query = searchQuery.value.toLowerCase();
+        perks = perks.filter(el =>
+            el.name.toLowerCase().includes(query)
+        );
     }
 
-    const query = searchQuery.value.toLowerCase();
-
-    return perks.filter(el =>
-        el.name.toLowerCase().includes(query)
-    );
+    return perks
 });
 
 async function savePerk() {
+    const perk = toRaw(selectedPerk.value)
+
+    if (!checkObjectFieldExisting(perk.type)) {
+        notify({ message: 'перк повинен мати тип' })
+        return
+    }
+
     if (selectedPerk.value.id === 'new') {
 
-        const perk = toRaw(selectedPerk.value)
         perk.session = sessionId
-
         const [res, err] = await asyncHandler(
             RepositoryFactory.create('perk', perk)
         )
         if (err) return
-
-        selectedPerk.value = toNewPerk({})
     }
     else {
-        const perk = toRaw(selectedPerk.value)
-        console.log(perk);
-        
         const [res, err] = await asyncHandler(
             RepositoryFactory.update('perk', perk.id, perk)
         )
@@ -92,7 +95,7 @@ async function savePerk() {
 
     state.session = res.data
     state.unsavedChanges = false
-    selectedPerk.value = toNewPerk({})
+    selectedPerk.value = toNewPerk({ type: perk.type })
 
     notify({ message: 'Зміни збережені', type: 'info' })
     socket.emit('session:updateEverywhere', sessionId)
@@ -185,6 +188,19 @@ function removePerkSingleRequirement(key) {
 
     <MasterPageNavigation />
 
+
+    <section v-if="!state.isLoading"
+        class="w-full m-4 flex flex-wrap justify-center items-center gap-2 justify-self-start">
+
+        <GraySelectorButton class="w-full basis-32" @click="selectedType = ''" id="all" label="Всі"
+            :active="selectedType === '' ? true : false" />
+
+        <GraySelectorButton class="w-full basis-32" v-for="type in state.session.perkTypes" :key="type.id"
+            @click="selectedType = type.name" :id="type.id" :label="type.name"
+            :active="selectedType === type.name ? true : false" />
+
+    </section>
+
     <section v-if="!state.isLoading" class="m-4 grid grid-cols-1 gap-4">
         <Header1 label="Усі перки:" />
 
@@ -209,7 +225,7 @@ function removePerkSingleRequirement(key) {
         <RejectButtonWithText :class="[!state.unsavedChanges && 'pointer-events-none opacity-50']" text="Відмінити"
             @click="discardChanges" />
 
-        <RejectButtonWithText v-if="selectedPerk.id !== 'new'" text="Видалити ефект" @click="deletePerk" />
+        <RejectButtonWithText v-if="selectedPerk.id !== 'new'" text="Видалити перк" @click="deletePerk" />
 
         <UnsavedLabel v-if="state.unsavedChanges" />
     </section>
@@ -243,12 +259,13 @@ function removePerkSingleRequirement(key) {
 
             </div>
             <div v-else class="">
-                Пусто
+                <Header2 label="Пусто" />
             </div>
 
         </div>
 
-        <div class="col-span-2 justify-self-center flex gap-2 items-center">
+        <div v-if="checkObjectFieldExisting(state.session.characteristicsList)"
+            class="col-span-2 justify-self-center flex gap-2 items-center">
             <TextDropdown label="Характеристика" :entity_array="state.session.characteristicsList"
                 entity_name="perkRequirement" :callback="getCharacteristicType" />
             <SingleFieldEditor placeholder="Значення" fieldName="value" type="number" :value="perkNewRequirement.value"
@@ -257,6 +274,10 @@ function removePerkSingleRequirement(key) {
                 <AprroveButtonWithText @click="updateEffectCharacteristics" text="Додати поле" />
             </div>
 
+        </div>
+
+        <div v-else>
+            <Header2 label="В сесії відсутні характеристики" />
         </div>
 
     </section>

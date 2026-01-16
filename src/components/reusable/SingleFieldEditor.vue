@@ -53,7 +53,7 @@ const saveField = () => {
             <input :ref="'inputEl'" :id="props.fieldName" :type="props.type" :value="editableValue"
                 :disabled="fieldReadonly" :name="props.fieldName" :placeholder="props.placeholder"
                 class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full
-               disabled:bg-darkred-dark_gray disabled:text-darkred-light placeholder-darkred-light/60 transition-all duration-200" />
+               disabled:bg-darkred-dark_gray disabled:text-darkred-light placeholder-darkred-dark_gray/60 disabled:placeholder-darkred-light/60 transition-all duration-200" />
         </form>
 
         <div @click="editField"

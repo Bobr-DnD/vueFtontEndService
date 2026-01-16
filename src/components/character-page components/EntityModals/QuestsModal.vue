@@ -34,9 +34,9 @@ const filteredQuests = computed(() => {
 
 <template>
     <div @click="props.callback_close"
-        class="fixed inset-0 flex items-center justify-center z-50 bg-darkred-dark/50 md:hover:cursor-pointer">
+        class="modal-overlay flex items-center justify-center md:hover:cursor-pointer">
         <div @click.stop
-            class="max-w-[480px] w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-gothic text-lg md:hover:cursor-default">
+            class="max-w-[680px] w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-gothic text-lg md:hover:cursor-default">
 
             <CloseButtonRedBG @click="props.callback_close" />
 

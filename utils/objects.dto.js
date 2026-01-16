@@ -52,10 +52,10 @@ export function toNewSession(session){
   return {
     id: session.id ?? 'new',
     name: session.name ?? '',
-    image: session.image ?? null,
+    image: session.image ?? '',
     move: session.move ?? 0,
     customFields: session.customFields ?? {},
-    notes: session.notes ?? null,
+    notes: session.notes ?? '',
     entityTypes: session.entityTypes ?? [],
     enemyTypes: session.enemyTypes ?? [],
     characteristicsList: session.characteristicsList ?? [],

@@ -282,7 +282,7 @@ function removeEffect(id) {
             :selected="state.selectedEntity.type" :callback="updateEntityType" />
 
         <SingleFieldEditor class="col-span-3" placeholder="Опис" fieldName="description" ,
-            :value="state.selectedEntity.description" :callback="updateEntityFields" type="text" :important="true" />
+            :value="state.selectedEntity.description" :callback="updateEntityFields" type="text" />
 
         <SingleFieldEditor placeholder="Ціна" fieldName="price" :value="state.selectedEntity.price"
             :callback="updateEntityFields" type="number" />
@@ -333,7 +333,7 @@ function removeEffect(id) {
                 <DeleteButton class="bg-darkred-red" @click="removeRequirement(key)" />
             </div>
 
-            <div class="shrink w-full mx-auto flex gap-2 items-center">
+            <div v-if="checkObjectFieldExisting(state.session.characteristicsList)" class="shrink w-full mx-auto flex gap-2 items-center">
                 <TextDropdown label="Характеристика" :entity_array="state.session.characteristicsList"
                     entity_name="entityCharacteristic" :callback="getRequirementType" />
                 <SingleFieldEditor placeholder="Значення" fieldName="value" type="number"
@@ -343,6 +343,8 @@ function removeEffect(id) {
                 </div>
 
             </div>
+
+            <div v-else> <Header2 label="В сесії відсутні характеристики"/></div>
 
         </div>
 

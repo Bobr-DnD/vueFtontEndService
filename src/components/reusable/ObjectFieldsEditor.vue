@@ -33,7 +33,9 @@ function addField() {
     let value
     if (value_field_string.value.value !== '' && input_name.value.value != '') {
         if (value_field_string.value) value = input_value.value.value
-        else if (!value_field_string.value) value = parseInt(input_value.value.value) || 1
+        else if (!value_field_string.value) value = parseInt(input_value.value.value) ?? 1
+
+        if (Number.isNaN(value)) value = 0
 
         props.callback(input_name.value.value, value)
         input_name.value.value = ''
@@ -70,7 +72,7 @@ function addField() {
                     placeholder="Значення" class="w-full font-gothic text-lg text-darkred-dark text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
            focus:outline-none focus:ring-2 focus:ring-darkred-light_gray transition" />
 
-                <input :ref="'input_value'" v-if="!value_field_string" :id="props.name + 'Value'" type="number"
+                <input @submit.prevent :ref="'input_value'" v-if="!value_field_string" :id="props.name + 'Value'" type="number"
                     :placeholder="0" class="w-full font-gothic text-lg text-darkred-dark text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
            focus:outline-none focus:ring-2 focus:ring-darkred-light_gray transition" />
 
