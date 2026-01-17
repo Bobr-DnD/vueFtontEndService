@@ -54,7 +54,7 @@ function addField() {
                 Назва поля:
             </label>
 
-            <input :ref="'input_name'" :id="props.name + 'Name'" type="text" placeholder="Назва поля" class="w-full font-gothic text-lg text-darkred-dark text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
+            <input ref="input_name" :id="props.name + 'Name'" type="text" placeholder="Назва поля" class="w-full font-gothic text-lg text-darkred-dark text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
            focus:outline-none focus:ring-2 focus:ring-darkred-light_gray transition" />
 
         </form>
@@ -68,11 +68,11 @@ function addField() {
 
             <div class="w-full grid grid-cols-[1fr_90px] gap-2">
 
-                <input :ref="'input_value'" v-if="value_field_string" :id="props.name + 'Value'" type="text"
+                <input ref="input_value" v-if="value_field_string" :id="props.name + 'Value'" type="text"
                     placeholder="Значення" class="w-full font-gothic text-lg text-darkred-dark text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
            focus:outline-none focus:ring-2 focus:ring-darkred-light_gray transition" />
 
-                <input @submit.prevent :ref="'input_value'" v-if="!value_field_string" :id="props.name + 'Value'" type="number"
+                <input @submit.prevent ref="input_value" v-if="!value_field_string" :id="props.name + 'Value'" type="number"
                     :placeholder="0" class="w-full font-gothic text-lg text-darkred-dark text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
            focus:outline-none focus:ring-2 focus:ring-darkred-light_gray transition" />
 

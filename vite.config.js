@@ -13,8 +13,11 @@ export default defineConfig(({ mode }) => {
     ],
     server: {
       port: env.VITE_PORT,
-      host: '0.0.0.0',
-      allowedHosts: ['fallout-dnd.tplinkdns.com']
+      host: '0.0.0.0'
+    },
+    preview: {
+      port: env.VITE_PORT,
+      host: '0.0.0.0'
     },
     resolve: {
       alias: {

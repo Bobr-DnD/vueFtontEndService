@@ -60,7 +60,7 @@ function changeValue(operation) {
         <section class="">
 
             <form @submit.prevent class="flex flex-col items-start justify-center w-full font-gothic rounded-lg">
-                <input :ref="'input'" :id="entity_name" type="number" :value="default_number" class="no-arrows h-11 bg-darkred-dark_gray w-full text-darkred-light text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
+                <input ref="input" :id="entity_name" type="number" :value="default_number" class="no-arrows h-11 bg-darkred-dark_gray w-full text-darkred-light text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
            focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
             </form>
 

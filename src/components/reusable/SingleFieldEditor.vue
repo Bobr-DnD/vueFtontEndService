@@ -25,14 +25,14 @@ watch(() => props.value, (newValue) => {
 const editField = async () => {
     fieldReadonly.value = false
     await nextTick()
-    inputEl.value.focus()
+    inputEl.value?.focus()
 }
 
 const saveField = () => {
     fieldReadonly.value = true
     let inputValue;
     if (props.type === 'text') inputValue = inputEl.value.value
-    else inputValue = parseInt(inputEl.value.value) ?? 0
+    else inputValue = parseInt(inputEl.value.value) || 0
     props.callback(props.fieldName, inputValue)
 
 }
@@ -50,7 +50,7 @@ const saveField = () => {
                 :
             </label>
 
-            <input :ref="'inputEl'" :id="props.fieldName" :type="props.type" :value="editableValue"
+            <input ref="inputEl" :id="props.fieldName" :type="props.type" :value="editableValue"
                 :disabled="fieldReadonly" :name="props.fieldName" :placeholder="props.placeholder"
                 class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full
                disabled:bg-darkred-dark_gray disabled:text-darkred-light placeholder-darkred-dark_gray/60 disabled:placeholder-darkred-light/60 transition-all duration-200" />

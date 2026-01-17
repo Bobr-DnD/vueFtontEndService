@@ -103,7 +103,6 @@ function updateStringArray(field, array) {
     markUnsaved()
 }
 
-
 </script>
 
 <template>
@@ -128,9 +127,6 @@ function updateStringArray(field, array) {
 
                 <SingleFieldEditor :value="editedSession.name" placeholder="Назва сесії" fieldName="name"
                     :callback="updateSession" type="text" :important="true" />
-
-                <!-- <SingleFieldEditor :value="editedSession.move" placeholder="Хід" fieldName="move"
-                    :callback="updateSession" type="number" /> -->
 
                 <TextAreaEditor class="col-span-2" fieldName="notes" name="Записки майстра" :value="editedSession.notes"
                     :callback="updateSession" />

@@ -87,7 +87,7 @@ function updateColor(id, color) {
                     placeholder="Назва" @input="updateItem(item.id)"
                     class="p-1 border-4 text-lg border-darkred-dark rounded-lg text-darkred-dark w-full focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
 
-                <input type="color" :value="item.color ?? '#3BFF00'" @change="updateColor(item.id, $event.target.value)"
+                <input type="color" :value="item.color || '#3BFF00'" @change="updateColor(item.id, $event.target.value)"
                     class="w-full h-full p-0">
 
                 <DeleteButton class="bg-darkred-red text-darkred-light" @click="removeItem(item.id)" />
