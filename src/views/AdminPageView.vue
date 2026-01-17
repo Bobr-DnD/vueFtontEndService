@@ -183,7 +183,7 @@ function updateSessionField(fieldName, field) {
     <Header1 label="Характеристики:" />
 
     <div class="flex flex-wrap gap-4">
-      <ObjectFieldsTable v-if="checkObjectFieldExisting(state.selectedChatacter.characteristics)"
+      <ObjectFieldsTable v-if="checkObjectFieldExisting(state.selectedChatacter?.characteristics)"
         :fields="state.selectedChatacter.characteristics" :callback="updateCharacterCharacteristic" />
     </div>
   </section>
@@ -193,7 +193,7 @@ function updateSessionField(fieldName, field) {
     <div class="w-full grid grid-cols-4 gap-4">
       <Header1 class="col-span-full" label="Ефекти:" />
 
-      <div v-if="checkObjectFieldExisting(state.selectedChatacter.effects)"
+      <div v-if="checkObjectFieldExisting(state.selectedChatacter?.effects)"
         v-for="effect in state.selectedChatacter.effects"
         class="grid grid-cols-[1fr_56px] px-2 gap-4 bg-darkred-dark rounded-2xl">
 
@@ -215,7 +215,7 @@ function updateSessionField(fieldName, field) {
     <div class="w-full grid grid-cols-1 gap-4">
       <Header1 class="col-span-full" label="Перки:" />
 
-      <div v-if="checkObjectFieldExisting(state.selectedChatacter.perks)" class="grid grid-cols-4 gap-4">
+      <div v-if="checkObjectFieldExisting(state.selectedChatacter?.perks)" class="grid grid-cols-4 gap-4">
 
         <div v-for="perk in filteredCharacterPerks"
           class="px-4 py-3 text-lg bg-darkred-dark rounded-2xl text-darkred-light">

@@ -89,7 +89,7 @@ function resetFields() {
 
             <section>
                 <label :for="props.label" class="text-lg font-gothic">Назва поля:</label>
-                <input :ref="'name'" :name="props.label" :id="props.label" placeholder="Назва"
+                <input ref="name" :name="props.label" :id="props.label" placeholder="Назва"
                     :value="field_exists ? props.health_field.name : ''" type="text"
                     class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full">
             </section>
@@ -100,42 +100,42 @@ function resetFields() {
 
             <section>
                 <label :for="`${props.label}_min`" class="text-lg font-gothic">Мінімальне значення:</label>
-                <input :ref="'min'" :name="`${props.label}_min`" :id="`${props.label}_min`" placeholder="0"
+                <input ref="min" :name="`${props.label}_min`" :id="`${props.label}_min`" placeholder="0"
                     :value="field_exists ? props.health_field.min : null" type="number"
                     class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full">
             </section>
 
             <section>
                 <label for="color_min" class="text-lg font-gothic">Колір мінімального значення:</label>
-                <input :ref="'color_min'" name="color_min" id="color_min" type="color"
+                <input ref="color_min" name="color_min" id="color_min" type="color"
                     :value="field_exists ? props.health_field.colors[2] : '#8e1616'"
                     class="w-full h-8 cursor-pointer appearance-none overflow-hidden shadow-inner shadow-darkred-black">
             </section>
 
             <section>
                 <label :for="`${props.label}_max`" class="text-lg font-gothic">Максимальне значення:</label>
-                <input :ref="'max'" :name="`${props.label}_max`" :id="`${props.label}_max`" placeholder="25"
+                <input ref="max" :name="`${props.label}_max`" :id="`${props.label}_max`" placeholder="25"
                     :value="field_exists ? props.health_field.max : null" type="number"
                     class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full">
             </section>
 
             <section>
                 <label for="color_max" class="text-lg font-gothic">Колір максимального значення:</label>
-                <input :ref="'color_max'" name="color_max" id="color_max" type="color"
+                <input ref="color_max" name="color_max" id="color_max" type="color"
                     :value="field_exists ? props.health_field.colors[0] : '#3e5f44'"
                     class="w-full h-8 cursor-pointer appearance-none overflow-hidden shadow-inner shadow-darkred-black">
             </section>
 
             <section>
                 <label :for="`${props.label}_value`" class="text-lg font-gothic">Нинішнє значення:</label>
-                <input :ref="'value'" :name="`${props.label}_value`" :id="`${props.label}_value`" placeholder="0"
+                <input ref="value" :name="`${props.label}_value`" :id="`${props.label}_value`" placeholder="0"
                     :value="field_exists ? props.health_field.value : null" type="number"
                     class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full">
             </section>
 
             <section>
                 <label for="color_mid" class="text-lg font-gothic">Колір значення посередині:</label>
-                <input :ref="'color_mid'" name="color_mid" id="color_mid" type="color"
+                <input ref="color_mid" name="color_mid" id="color_mid" type="color"
                     :value="field_exists ? props.health_field.colors[1] : '#fabc3f'"
                     class="w-full h-8 cursor-pointer appearance-none overflow-hidden shadow-inner shadow-darkred-black">
             </section>

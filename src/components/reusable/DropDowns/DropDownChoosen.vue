@@ -35,7 +35,7 @@ const props = defineProps({
             {{ props.label }}:
         </div>
 
-        <select :ref="'selectValue'" @change="selectValue.value !== 'none' ? props.callback(selectValue.value) : console.log('xuita')" :name="props.entity_name"
+        <select ref="selectValue" @change="selectValue.value !== 'none' ? props.callback(selectValue.value) : console.log('xuita')" :name="props.entity_name"
             :id="props.entity_name"
             class="w-full appearance-none p-1 pl-2 bg-darkred-light border-4 border-darkred-dark rounded-lg text-darkred-dark font-gothic focus:outline-none focus:ring-2 focus:ring-darkred-dark transition cursor-pointer">
             

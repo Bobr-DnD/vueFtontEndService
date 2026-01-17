@@ -68,7 +68,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
     socket.emit('session:disconnectCharacter', sessionId)
-    const events = ['session:join', 'character:update', 'character:updateAdmin','character:get' , 'session:updateEverywhere']
+    const events = ['session:join', 'character:update', 'character:updateAdmin', 'character:get', 'session:updateEverywhere']
     events.forEach(e => socket.off(e))
 })
 
@@ -88,7 +88,7 @@ socket.on('character:update', (character) => {
 
 socket.on('character:updateAdmin', (character) => {
     state.character = toNewCharacterObject(character)
-    notify({message: 'Майстер оновив персонажа', type: 'warning'})
+    notify({ message: 'Майстер оновив персонажа', type: 'warning' })
 })
 
 socket.on('session:updateEverywhere', (session) => {
@@ -147,6 +147,7 @@ function updateCurrency(fields) {
 function addCustomField(name, value) {
     Object.assign(state.character.customFields, toObject({ name, value }))
     updateCharacter()
+    custom_modal_hidden.value = true
 }
 
 function updateCustomFields(fields) {

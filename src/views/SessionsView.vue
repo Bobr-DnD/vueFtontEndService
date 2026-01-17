@@ -72,6 +72,7 @@ async function createSession() {
   if(err) return
 
   state.sessions.push(res.data)
+  modalShow.value = false
   
 }
 

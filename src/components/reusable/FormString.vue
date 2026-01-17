@@ -31,7 +31,7 @@ function changeValue() {
             {{ entity_name.toUpperCase() }}:
         </label>
         <section class="flex flex-col items-start justify-center w-full">
-            <input :ref="'textEl'" :id="entity_name" type="text" :value="value"
+            <input ref="textEl" :id="entity_name" type="text" :value="value"
                 class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
         </section>
 
