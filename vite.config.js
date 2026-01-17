@@ -11,9 +11,6 @@ export default defineConfig(({ mode }) => {
       vue(),
       //vueDevTools(),
     ],
-    preview: {
-      port: env.VITE_PORT
-    },
     server: {
       port: env.VITE_PORT,
       host: '0.0.0.0'
