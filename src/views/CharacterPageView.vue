@@ -1,7 +1,6 @@
 <script setup>
 import { reactive, ref, onMounted, onBeforeUnmount, watch, toRaw } from 'vue';
 import { useRoute } from 'vue-router';
-import Loader from 'vue-spinner/src/SyncLoader.vue'
 import { ChartBarIcon, SparklesIcon, FlagIcon, BanknotesIcon } from '@heroicons/vue/24/solid'
 
 import RepositoryFactory from '@http/RepositoryFactory';
@@ -29,6 +28,7 @@ import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
 import BackendOffline from '@/components/reusable/BackendOffline.vue';
 import HorizontalNumberPicker from '@/components/reusable/HorizontalNumberPicker.vue';
 import ProgressiveBar from '@/components/reusable/ProgressiveBar.vue';
+import DiceLoader from '@/components/reusable/Loaders/DiceLoader.vue';
 
 const state = reactive({
     character: {},
@@ -278,7 +278,8 @@ function updateCharacterNotes(field, value) {
 
     <div v-if="state.isLoading" class="w-full text-center py-6 flex flex-col gap-10 justify-center items-center">
         <BackendOffline v-if="isBackendOffline" class="w-[650px]" />
-        <Loader />
+
+        <DiceLoader />
     </div>
 
     <!-- <div class="fixed z-50 top-5 right-5">

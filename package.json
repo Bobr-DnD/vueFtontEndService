@@ -8,9 +8,10 @@
   },
   "scripts": {
     "dev": "vite",
-    "play": "vite build --mode production",
+    "play": "vite build --mode production && vite preview",
     "build": "vite build --mode production",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "vite build --mode production && firebase deploy"
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.23",

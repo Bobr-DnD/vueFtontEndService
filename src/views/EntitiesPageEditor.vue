@@ -224,8 +224,8 @@ function removeEffect(id) {
 
     <MasterPageNavigation />
 
-    <section class="m-4 grid grid-cols-1 gap-2 items-center justify-start">
-        <div v-if="!state.isLoading" class="w-full flex flex-wrap justify-center items-center gap-2 justify-self-start">
+    <section v-if="!state.isLoading" class="m-4 grid grid-cols-1 gap-2 items-center justify-start">
+        <div class="w-full flex flex-wrap justify-center items-center gap-2 justify-self-start">
 
             <GraySelectorButton class="w-full basis-32" @click="selectedType = ''" id="all" label="Всі"
                 :active="selectedType === '' ? true : false" />
@@ -350,7 +350,7 @@ function removeEffect(id) {
 
     </section>
 
-    <section class="m-4 grid grid-cols-1 gap-2 items-center justify-start">
+    <section v-if="!state.isLoading" class="m-4 grid grid-cols-1 gap-2 items-center justify-start">
         <Header1 label="Ефекти:" />
 
         <div v-if="checkObjectFieldExisting(state.selectedEntity.effects)"

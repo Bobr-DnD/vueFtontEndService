@@ -3,8 +3,7 @@ import { reactive, onMounted, computed, ref, toRaw } from 'vue'
 import { asyncHandler } from '@utils/asyncHandler'
 import RepositoryFactory from '@http/RepositoryFactory'
 import { notify } from '@utils/notification'
-
-import Loader from 'vue-spinner/src/SyncLoader.vue'
+import CardsLoader from '@/components/reusable/Loaders/CardsLoader.vue'
 import Navigation from '@/components/navigations/Navigation.vue'
 import SessionCard from '@/components/reusable/SessionCard.vue'
 import SearchInputBlack from '@/components/reusable/SearchInputs/SearchInputBlack.vue'
@@ -65,15 +64,15 @@ async function createSession() {
     notify({ message: 'Введіть назву сесії', type: 'error' })
     return
   }
-  
+
   const [res, err] = await asyncHandler(
     RepositoryFactory.create('session', { password: toRaw(newPass.value.trim()), name: toRaw(sessionName.value.trim()) })
   )
-  if(err) return
+  if (err) return
 
   state.sessions.push(res.data)
   modalShow.value = false
-  
+
 }
 
 </script>
@@ -96,7 +95,10 @@ async function createSession() {
     :name="session.name" :image="session.image" />
 
   <div v-if="state.isLoading" class="text-center py-6">
-    <Loader />
+    <div class="flex justify-center items-center">
+      <CardsLoader />
+    </div>
+
   </div>
 
   <div v-if="modalShow" @click="modalShow = false" class="modal-overlay flex justify-center items-center">

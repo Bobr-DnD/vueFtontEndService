@@ -109,7 +109,7 @@ function updateStringArray(field, array) {
 
     <MasterPageNavigation />
 
-    <div class="grid grid-cols-[25%_1fr]">
+    <div v-if="!state.isLoading" class="grid grid-cols-[25%_1fr]">
         <section class="p-4 w-full flex flex-col justify-start gap-2 font-gothic">
             <GraySelectorButton v-for="tab in tabs" @click="activeTab = tab.id" :key="tab.id" :id="tab.id"
                 :label="tab.label" :active="activeTab === tab.id ? true : false" />
@@ -120,7 +120,7 @@ function updateStringArray(field, array) {
             <UnsavedLabel v-if="state.unsavedChanges" />
         </section>
 
-        <section v-if="!state.isLoading" class="m-4 p-2">
+        <section class="m-4 p-2">
             <div v-if="activeTab === 'base'" class="grid grid-cols-2 gap-2">
                 <ImageEditor class="w-full col-span-2" :image="editedSession.image" label="Session image"
                     :callback="addImage" />
@@ -168,9 +168,6 @@ function updateStringArray(field, array) {
 
         </section>
     </div>
-
-
-
 
     <div v-if="state.isLoading" class="text-center py-6">
         <Loader />

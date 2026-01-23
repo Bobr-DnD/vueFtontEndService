@@ -1,11 +1,11 @@
 <script setup>
 import { onMounted, onBeforeUnmount, reactive, ref, computed, toRaw, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { checkObjectFieldExisting, addRow, removeRow, groupById, filterDuplicates } from '/utils/entityHelper'
+import { checkObjectFieldExisting, checkArrayFieldExisting, addRow, removeRow, groupById, filterDuplicates } from '/utils/entityHelper'
 import { socket, connected } from '@ws/webSocket';
 import { notify } from '@utils/notification';
 
-import Loader from 'vue-spinner/src/SyncLoader.vue'
+import DiceLoader from '@/components/reusable/Loaders/DiceLoader.vue';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
 import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
@@ -105,7 +105,7 @@ socket.on('session:updateAdmin', (session) => {
 
 socket.on('session:get', (session) => {
   state.session = toNewSession(session)
-  state.selectedChatacter = state.session.characters[0]
+  state.selectedChatacter = state.session.characters[0] || null
   state.isLoading = false
 })
 
@@ -179,7 +179,11 @@ function updateSessionField(fieldName, field) {
 
   </div>
 
-  <section v-if="!state.isLoading" class="m-4 p-2 flex flex-col gap-4">
+  <section v-if="!state.selectedChatacter" class="m-4 p-2 text-center">
+    <Header1 label="Гравці відсутні - створіть їх для початку" />
+  </section>
+
+  <section v-if="!state.isLoading && state.selectedChatacter" class="m-4 p-2 flex flex-col gap-4">
     <Header1 label="Характеристики:" />
 
     <div class="flex flex-wrap gap-4">
@@ -188,10 +192,11 @@ function updateSessionField(fieldName, field) {
     </div>
   </section>
 
-  <section v-if="!state.isLoading" class="m-4 p-2 flex flex-col gap-4 justify-center items-center">
+  <section v-if="!state.isLoading && state.selectedChatacter"
+    class="m-4 p-2 flex flex-col gap-4 justify-center items-center">
 
     <div class="w-full grid grid-cols-4 gap-4">
-      <Header1 class="col-span-full" label="Ефекти:" />
+      <Header1 class="col-span-full" label="Ефекти гравця:" />
 
       <div v-if="checkObjectFieldExisting(state.selectedChatacter?.effects)"
         v-for="effect in state.selectedChatacter.effects"
@@ -213,7 +218,7 @@ function updateSessionField(fieldName, field) {
     </div>
 
     <div class="w-full grid grid-cols-1 gap-4">
-      <Header1 class="col-span-full" label="Перки:" />
+      <Header1 class="col-span-full" label="Перки гравця:" />
 
       <div v-if="checkObjectFieldExisting(state.selectedChatacter?.perks)" class="grid grid-cols-4 gap-4">
 
@@ -281,12 +286,17 @@ function updateSessionField(fieldName, field) {
           <CloseButtonRedBG @click="effectsModalShowed = false" />
         </div>
 
-        <div class="max-h-[650px] w-full grid grid-cols-4 gap-4 overflow-y-scroll no-scrollbar">
+        <div v-if="checkArrayFieldExisting(filteredSessionEffects)"
+          class="max-h-[650px] w-full grid grid-cols-4 gap-4 overflow-y-scroll no-scrollbar">
 
           <EffectTile class="border-4 border-darkred-gray rounded-lg md:hover:cursor-pointer"
             v-for="effect in filteredSessionEffects" :effect=effect
             @click="addRow(state.session.effects, state.selectedChatacter.effects, effect.id); effectsModalShowed = false; updateCharacter()" />
 
+        </div>
+
+        <div v-else class="text-center">
+          <Header2 label="Сесія не має ефектів - створіть їх" />
         </div>
 
       </div>
@@ -304,12 +314,15 @@ function updateSessionField(fieldName, field) {
           <CloseButtonRedBG @click="perksModalShowed = false" />
         </div>
 
-        <div class="max-h-[650px] w-full grid grid-cols-4 gap-2 overflow-y-scroll no-scrollbar">
+        <div v-if="checkArrayFieldExisting(filteredCharacterPerks)" class="max-h-[650px] w-full grid grid-cols-4 gap-2 overflow-y-scroll no-scrollbar">
           <PerkTile class="border-4 border-darkred-gray rounded-lg"
             @click="addRow(state.session.perks, state.selectedChatacter.perks, perk.id); perksModalShowed = false; updateCharacter()"
             v-for="perk in filteredSessionPerks" :perk="perk" />
         </div>
 
+        <div v-else class="text-center">
+          <Header2 label="Сесія не має перків - створіть їх" />
+        </div>
 
       </div>
 
@@ -319,7 +332,7 @@ function updateSessionField(fieldName, field) {
 
   <div v-if="state.isLoading" class="w-full text-center py-6 flex flex-col gap-10 justify-center items-center">
     <BackendOffline v-if="isBackendOffline" class="w-[650px]" />
-    <Loader class="[&>*]:bg-darkred-red" />
+    <DiceLoader />
   </div>
 
 </template>

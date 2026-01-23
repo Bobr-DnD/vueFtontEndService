@@ -5,7 +5,7 @@ import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
 import { socket } from '@ws/webSocket';
 
-import Loader from 'vue-spinner/src/SyncLoader.vue'
+import CardsLoader from '@/components/reusable/Loaders/CardsLoader.vue';
 import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaion.vue';
 import characterCard from '@/components/reusable/CharacterCard.vue';
 
@@ -47,7 +47,11 @@ socket.on('session:update', (session) => {
   </div>
 
   <div v-if="state.isLoading" class="text-center py-6">
-    <Loader />
+    
+    <div class="flex justify-center items-center">
+      <CardsLoader />
+    </div>
+    
   </div>
 </template>
 
