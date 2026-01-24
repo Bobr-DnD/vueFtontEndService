@@ -240,7 +240,7 @@ function removeEffect(id) {
             <SearchInputBlack v-model:searchQuery="searchQuery" />
         </div>
 
-        <div class="grid grid-cols-4 gap-4 py-2 max-h-[512px] overflow-y-scroll no-scrollbar">
+        <div class="grid grid-cols-4 gap-4 py-2 max-h-[512px] overflow-y-scroll auto-hide-scroll">
             <div @click="selectEntity({})"
                 :class="state.selectedEntity.id === 'new' && 'bg-darkred-dark_gray text-darkred-light'"
                 class="border-8 border-darkred-dark rounded-2xl flex justify-center items-center hover:cursor-pointer">
@@ -374,7 +374,7 @@ function removeEffect(id) {
 
         <SearchInputBlack v-model:searchQuery="searchQueryEffects" />
 
-        <div class="max-h-[512px] overflow-y-scroll no-scrollbar grid grid-cols-4 gap-4 items-center justify-start">
+        <div class="max-h-[512px] overflow-y-scroll auto-hide-scroll grid grid-cols-4 gap-4 items-center justify-start">
             <EffectTile v-for="effect in filteredEffects" :effect="effect" @click="addEffect(effect.id)" />
         </div>
 

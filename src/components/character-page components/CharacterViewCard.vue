@@ -14,7 +14,7 @@ const character_fields = computed(() => props.gender || props.class ||props.race
 </script>
 
 <template>
-    <img class="w-full h-96 object-cover object-top rounded-xl border-4 border-darkred-red shadow-md"
+    <img class="w-full h-[512px] top-0 object-cover object-top rounded-xl border-4 border-darkred-red shadow-md"
         :src="props.image ? props.image : 'https://placehold.co/400x400?text=Character'"
         alt="Character image" />
 

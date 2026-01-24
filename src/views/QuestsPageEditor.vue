@@ -162,7 +162,7 @@ function getQuestType(id) {
 
         <SearchInputBlack v-model:searchQuery="searchQuery" />
 
-        <div class="grid grid-cols-4 gap-4 py-2 max-h-[512px] overflow-y-scroll no-scrollbar">
+        <div class="grid grid-cols-4 gap-4 py-2 max-h-[512px] overflow-y-scroll auto-hide-scroll">
 
             <div @click="selectQuest({})"
                 :class="selectedQuest.id === 'new' && 'bg-darkred-dark_gray text-darkred-light'"

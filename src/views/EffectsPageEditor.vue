@@ -186,7 +186,7 @@ function removeEffectCharacteristic(key) {
             <RejectButtonWithText v-if="searchQuery" @click="searchQuery = ''" text="Очистити" />
         </div>
 
-        <div class="w-full py-2 max-h-[512px] overflow-y-scroll no-scrollbar grid grid-cols-4 gap-4">
+        <div class="w-full py-2 max-h-[512px] overflow-y-scroll auto-hide-scroll grid grid-cols-4 gap-4">
 
             <div @click="selectEffect({})"
                 :class="selectedEffect.id === 'new' && 'bg-darkred-dark_gray text-darkred-light'"

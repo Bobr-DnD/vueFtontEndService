@@ -206,7 +206,7 @@ function removePerkSingleRequirement(key) {
 
         <SearchInputBlack v-model:searchQuery="searchQuery" />
 
-        <div class="grid grid-cols-4 gap-4 py-2 max-h-[512px] overflow-y-scroll no-scrollbar">
+        <div class="grid grid-cols-4 gap-4 py-2 max-h-[512px] overflow-y-scroll auto-hide-scroll">
             <div @click="selectPerk({})" :class="selectedPerk.id === 'new' && 'bg-darkred-dark_gray text-darkred-light'"
                 class="border-8 border-darkred-dark rounded-2xl flex justify-center items-center hover:cursor-pointer">
                 <PlusButton class="w-20" />

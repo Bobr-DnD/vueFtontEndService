@@ -524,7 +524,7 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
                         text="Очистити" />
                 </div>
 
-                <div class="w-full grid grid-cols-3 gap-2 max-h-[1024px] overflow-y-auto md:no-scrollbar">
+                <div class="w-full grid grid-cols-3 gap-2 max-h-[1024px] overflow-y-auto md:auto-hide-scroll">
 
                     <EntityRowView v-for="entity in getFilteredCharacterEntities(activeType)" :entity="entity"
                         :callback_add="addEntity" :callback_remove="removeEntity" />
@@ -546,7 +546,7 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
                 </div>
 
 
-                <div class="w-full grid grid-cols-3 gap-2 max-h-[512px] overflow-y-auto md:no-scrollbar">
+                <div class="w-full grid grid-cols-3 gap-2 max-h-[512px] overflow-y-auto md:auto-hide-scroll">
 
                     <EntityRowView v-for="entity in getFilteredSessionEntities(activeType)" :entity="entity"
                         :callback_add="addEntity" :callback_remove="removeEntity" />

@@ -57,7 +57,7 @@ const filteredEffects = computed(() => {
                 <SearchInputBlack v-model:searchQuery="searchQuery" />
             </div>
 
-            <div class="max-h-[680px] overflow-y-auto no-scrollbar grid grid-cols-1 gap-2">
+            <div class="max-h-[680px] overflow-y-auto auto-hide-scroll grid grid-cols-1 gap-2">
                 <div v-for="effect in filteredEffects" :key="effect.id"
                     class="p-2 rounded-lg bg-darkred-gray odd:bg-darkred-light_gray text-darkred-dark grid grid-cols-[140px_1fr_40px] gap-2 items-center">
 

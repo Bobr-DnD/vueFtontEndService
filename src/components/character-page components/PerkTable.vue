@@ -93,7 +93,7 @@ function removePerk(perk) {
                 text="Очистити" />
         </div>
 
-        <div v-if="!perksHidden" class="w-full max-h-[680px] overflow-y-auto no-scrollbar flex flex-col gap-1">
+        <div v-if="!perksHidden" class="w-full max-h-[680px] overflow-y-auto auto-hide-scroll flex flex-col gap-1">
             <PerkRowView v-for="perk in filteredCharacterArray" :perk="perk" :callback_remove="removePerk" />
 
         </div>
@@ -119,7 +119,7 @@ function removePerk(perk) {
                         text="Очистити" />
                 </div>
 
-                <div class="max-h-[680px] overflow-y-auto no-scrollbar">
+                <div class="max-h-[680px] overflow-y-auto auto-hide-scroll">
                     <div v-for="perk in filteredSessionArray"
                         class="grid grid-cols-[1fr_40px] gap-2 odd:bg-darkred-gray p-2 rounded-lg">
                         <div>Назва: {{ perk.name }}</div>

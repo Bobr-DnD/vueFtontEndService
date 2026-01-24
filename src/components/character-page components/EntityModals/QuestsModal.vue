@@ -55,7 +55,7 @@ const filteredQuests = computed(() => {
                 <SearchInputBlack v-model:searchQuery="searchQuery" />
             </div>
 
-            <div class="flex flex-col gap-2 max-h-[650px] overflow-y-scroll no-scrollbar">
+            <div class="flex flex-col gap-2 max-h-[650px] overflow-y-scroll auto-hide-scroll">
                 <div v-for="quest in filteredQuests"
                     class="p-2 rounded-lg bg-darkred-gray odd:bg-darkred-light_gray text-darkred-dark grid grid-cols-[1fr_1fr_40px] gap-2">
                     <div>

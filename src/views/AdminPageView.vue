@@ -287,7 +287,7 @@ function updateSessionField(fieldName, field) {
         </div>
 
         <div v-if="checkArrayFieldExisting(filteredSessionEffects)"
-          class="max-h-[650px] w-full grid grid-cols-4 gap-4 overflow-y-scroll no-scrollbar">
+          class="max-h-[650px] w-full grid grid-cols-4 gap-4 overflow-y-scroll auto-hide-scroll">
 
           <EffectTile class="border-4 border-darkred-gray rounded-lg md:hover:cursor-pointer"
             v-for="effect in filteredSessionEffects" :effect=effect
@@ -314,7 +314,7 @@ function updateSessionField(fieldName, field) {
           <CloseButtonRedBG @click="perksModalShowed = false" />
         </div>
 
-        <div v-if="checkArrayFieldExisting(filteredCharacterPerks)" class="max-h-[650px] w-full grid grid-cols-4 gap-2 overflow-y-scroll no-scrollbar">
+        <div v-if="checkArrayFieldExisting(filteredCharacterPerks)" class="max-h-[650px] w-full grid grid-cols-4 gap-2 overflow-y-scroll auto-hide-scroll">
           <PerkTile class="border-4 border-darkred-gray rounded-lg"
             @click="addRow(state.session.perks, state.selectedChatacter.perks, perk.id); perksModalShowed = false; updateCharacter()"
             v-for="perk in filteredSessionPerks" :perk="perk" />
@@ -330,7 +330,7 @@ function updateSessionField(fieldName, field) {
 
   </section>
 
-  <div v-if="state.isLoading" class="w-full text-center py-6 flex flex-col gap-10 justify-center items-center">
+  <div v-if="state.isLoading" class="w-full h-full text-center py-6 flex flex-col gap-10 justify-center items-center">
     <BackendOffline v-if="isBackendOffline" class="w-[650px]" />
     <DiceLoader />
   </div>

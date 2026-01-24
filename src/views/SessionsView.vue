@@ -94,11 +94,8 @@ async function createSession() {
   <SessionCard v-if="!state.isLoading" v-for="session in filteredSessions" :key="session.id" :id="session.id"
     :name="session.name" :image="session.image" />
 
-  <div v-if="state.isLoading" class="text-center py-6">
-    <div class="flex justify-center items-center">
-      <CardsLoader />
-    </div>
-
+  <div v-if="state.isLoading" class="h-full flex justify-center items-center">
+    <CardsLoader />
   </div>
 
   <div v-if="modalShow" @click="modalShow = false" class="modal-overlay flex justify-center items-center">

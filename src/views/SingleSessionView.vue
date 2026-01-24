@@ -46,13 +46,10 @@ socket.on('session:update', (session) => {
       :routing="true" :online="state.charactersOnlineIds.includes(character.id)" />
   </div>
 
-  <div v-if="state.isLoading" class="text-center py-6">
-    
-    <div class="flex justify-center items-center">
-      <CardsLoader />
-    </div>
-    
+  <div v-if="state.isLoading" class="h-full flex justify-center items-center">
+    <CardsLoader />
   </div>
+
 </template>
 
 <style scoped></style>
