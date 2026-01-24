@@ -21,29 +21,33 @@ const sessionId = useRoute().params.sessionId
 </script>
 
 <template>
-    <div class="m-4 p-2 rounded-xl border-4 border-darkred-dark font-gothic text-lg h-full w-80 flex flex-col gap-3">
+    <div
+        class="m-4 p-2 rounded-xl border-4 border-darkred-dark font-gothic text-lg h-fit min-h-96 w-80 flex flex-col gap-3">
         <div class="w-full flex flex-col items-center gap-3">
 
             <RouterLink v-if="props.routing" :to="'/session/' + sessionId + '/character/' + props.character.id"
-                class="w-full">
+                class="w-full relative inline-block">
                 <img class="w-full h-96 object-cover object-top rounded-xl border-darkred-red border-4"
                     :src="character.image ? character.image : 'https://placehold.co/400x400?text=Character'"
                     alt="Character image" />
+
+                <span class="absolute top-2 right-2">
+                    <div :class="props.online ? 'bg-greenish-dark' : 'bg-darkred-red'"
+                        class="w-7 h-7 border-1 rounded-full">
+                    </div>
+                </span>
             </RouterLink>
 
-            <img v-else class="w-full h-96 object-cover object-top rounded-xl border-darkred-red border-4"
-                :src="character.image ? character.image : 'https://placehold.co/400x400?text=Character'"
-                alt="Character image" />
+            <div v-else class="w-full relative inline-block">
+                <img class="w-full h-96 object-cover object-top rounded-xl border-darkred-red border-4"
+                    :src="character.image ? character.image : 'https://placehold.co/400x400?text=Character'"
+                    alt="Character image" />
 
-            <div class="[&>*]:px-1 [&>*]:border-y-4 [&>*]:rounded-lg text-xl">
-                
-                <div v-if="props.online" class="border-greenish-dark">
-                    Онлайн
-                </div>
-
-                <div v-else class="border-darkred-red">
-                    Офлайн
-                </div>
+                <span class="absolute top-2 right-2">
+                    <div :class="props.online ? 'bg-greenish-dark' : 'bg-darkred-red'"
+                        class="w-7 h-7 border-1 rounded-full">
+                    </div>
+                </span>
             </div>
 
             <RouterLink v-if="props.routing" :to="'/session/' + sessionId + '/character/' + props.character.id"
@@ -53,12 +57,6 @@ const sessionId = useRoute().params.sessionId
             <div v-else class="font-semibold text-2xl">{{ props.character.name }}</div>
 
         </div>
-
-        <!-- <div
-            class="flex flex-wrap justify-around items-center mb-2 space-y-1 text-lg border-b-2 border-darkred-gray rounded-lg">
-            <div class="">Стать: {{ props.character.gender }}</div>
-            <div class="">Клас: {{ props.character.class }}</div>
-        </div> -->
 
         <div
             class="grid auto-rows-max grid-cols-2 items-center justify-items-center mb-3 border-y-2 border-darkred-red rounded-md">

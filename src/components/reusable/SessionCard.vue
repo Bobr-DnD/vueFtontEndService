@@ -78,7 +78,9 @@ async function sessionLogin() {
                     {{ props.name }}
                 </h2>
 
-                <InputPassword v-model:passString="pass" />
+                <form @submit.prevent="sessionLogin">
+                    <InputPassword v-model:passString="pass" />
+                </form>
 
                 <button @click="toggleMode"
                     class="w-full text-md font-medium font-gothic py-2 px-3 rounded-lg bg-darkred-red md:hover:bg-darkred-bright transition-colors  tracking-wide shadow-md">

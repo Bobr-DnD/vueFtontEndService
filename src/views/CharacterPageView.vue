@@ -282,11 +282,6 @@ function updateCharacterNotes(field, value) {
         <DiceLoader />
     </div>
 
-    <!-- <div class="fixed z-50 top-5 right-5">
-        <div :class="connected ? 'bg-greenish-dark' : 'bg-darkred-red'" class="w-10 h-10 border-1 rounded-full">
-        </div>
-    </div> -->
-
 </template>
 
 <style scoped>

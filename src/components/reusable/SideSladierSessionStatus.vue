@@ -70,7 +70,8 @@ function setOnlineCharacters() {
 
         <Transition name="fade">
             <div v-if="isOpen" @click="isOpen = !isOpen"
-                class="fixed inset-0 bg-darkred-dark bg-opacity-50 z-40 backdrop-blur-sm pointer-events-auto" aria-hidden="true">
+                class="fixed inset-0 bg-darkred-dark bg-opacity-50 z-40 backdrop-blur-sm pointer-events-auto"
+                aria-hidden="true">
             </div>
         </Transition>
 
@@ -80,7 +81,7 @@ function setOnlineCharacters() {
                 'right-0': side === 'right'
             }" :style="{ width: width }">
 
-                <CloseButtonRedBG @click="isOpen = false" class="pointer-events-auto"/>
+                <CloseButtonRedBG @click="isOpen = false" class="pointer-events-auto" />
 
                 <div class="p-6 ">
 
@@ -91,14 +92,17 @@ function setOnlineCharacters() {
 
                 <div class="px-6 pb-6 pt-2 text-darkred-light font-gothic text-xl flex flex-col gap-2">
                     <div v-for="character in props.charactersIds"
-                        class="[&>*]:w-fit [&>*]:p-1 [&>*]:border-b-2 rounded-lg [&>*]:rounded-lg">
-                        
-                        <div v-if="characters.includes(character.id)" class=" border-greenish-dark">
-                            {{ character.name }} онлайн
+                        class="[&>*]:w-fit [&>*]:p-1 [&>*]:border-b-2 [&>*]:relative [&>*]:inline-block rounded-lg [&>*]:rounded-lg">
+
+                        <div v-if="characters.includes(character.id)"
+                            class="border-greenish-dark">
+                            {{ character.name }}
+                            <div class="w-4 h-4 border-1 rounded-full bg-greenish-dark absolute -top-2 -right-3"></div>
                         </div>
 
                         <div v-else class="border-darkred-red">
-                            {{ character.name }} офлайн
+                            {{ character.name }}
+                            <div class="w-4 h-4 border-1 rounded-full bg-darkred-red absolute -top-1 -right-3"></div>
                         </div>
 
                     </div>

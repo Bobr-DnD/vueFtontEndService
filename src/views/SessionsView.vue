@@ -106,9 +106,11 @@ async function createSession() {
       <CloseButtonRedBG @click="modalShow = false" />
       <Header1 label="Свторити сесію:" class="px-1" />
 
-      <InputName v-model:nameString="sessionName" />
-      <InputPassword :new="true" v-model:passString="newPass" />
-      <InputPassword :confirm="true" v-model:passString="confirmPass" />
+      <form @submit.prevent="createSession">
+        <InputName v-model:nameString="sessionName" />
+        <InputPassword :new="true" v-model:passString="newPass" />
+        <InputPassword :confirm="true" v-model:passString="confirmPass" />
+      </form>
 
       <AprroveButtonWithText @click="createSession" text="Створити сесію" />
     </div>
