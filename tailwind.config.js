@@ -9,7 +9,7 @@ export default {
         greenish: {
           dark: '#3E5F44',
           mid: '#5E936C',
-          light: '#93DA97',
+          light: '#00B305',
           pale: '#E8FFD7'
         },
         darkred: {

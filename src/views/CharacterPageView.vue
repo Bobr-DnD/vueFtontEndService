@@ -5,7 +5,7 @@ import { ChartBarIcon, SparklesIcon, FlagIcon, BanknotesIcon } from '@heroicons/
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
-import { checkArrayFieldExisting } from '/utils/entityHelper'
+import { checkObjectFieldExisting } from '/utils/entityHelper'
 import { toObject } from '/utils/objects.dto';
 import { toNewCharacterObject, toNewSession } from '/utils/objects.dto';
 import { socket, connected } from '@ws/webSocket';
@@ -175,6 +175,7 @@ function updateCharacterNotes(field, value) {
         <section class="p-2 lg:p-4 space-y-2">
 
             <characterCardSmall :name="state.character.name" :characteristics="state.character.characteristics"
+                :effects="state.character.effects" :characteristicsComputed="state.character.characteristicsComputed"
                 :gender="state.character.gender" :class="state.character.class" :race="state.character.race"
                 :image="state.character.image" />
 
@@ -234,28 +235,24 @@ function updateCharacterNotes(field, value) {
 
                 </div>
 
-                <div class="flex flex-col gap-2">
-                    <HideButton v-if="checkArrayFieldExisting(state.character.currency)" class="w-full"
-                        textShow="Показати баланс" textHide="Приховати баланс" :hidden="currency_hidden"
-                        :mainIcon="BanknotesIcon" @click="currency_hidden = !currency_hidden" />
+                <div v-if="checkObjectFieldExisting(state.character?.currency)" class="flex flex-col gap-2">
+                    <HideButton class="w-full" textShow="Показати баланс" textHide="Приховати баланс"
+                        :hidden="currency_hidden" :mainIcon="BanknotesIcon"
+                        @click="currency_hidden = !currency_hidden" />
                     <CurrencyTable v-if="!currency_hidden" :currency_array="state.character.currency"
                         :callback="updateCurrency" />
                 </div>
 
-                <div class="flex flex-col gap-2">
-                    <HideButton v-if="checkArrayFieldExisting(state.character.effects)" class="w-full"
-                        textShow="Показати ефекти" textHide="Приховати ефекти" :hidden="effects_hidden"
-                        :mainIcon="SparklesIcon" @click="effects_hidden = !effects_hidden" />
-                    <EffectsTable v-if="checkArrayFieldExisting(state.character.effects) && !effects_hidden"
-                        :effects="state.character.effects" />
+                <div v-if="checkObjectFieldExisting(state.character?.effects)" class="flex flex-col gap-2">
+                    <HideButton class="w-full" textShow="Показати ефекти" textHide="Приховати ефекти"
+                        :hidden="effects_hidden" :mainIcon="SparklesIcon" @click="effects_hidden = !effects_hidden" />
+                    <EffectsTable v-if="!effects_hidden" :effects="state.character.effects" />
                 </div>
 
-                <div class="flex flex-col gap-2">
-                    <HideButton v-if="checkArrayFieldExisting(state.character.quests)" class="w-full"
-                        textShow="Показати квести" textHide="Приховати квести" :hidden="quests_hidden"
-                        :mainIcon="FlagIcon" @click="quests_hidden = !quests_hidden" />
-                    <QuestsTable v-if="checkArrayFieldExisting(state.character.quests) && !quests_hidden"
-                        :quests="state.character.quests" />
+                <div v-if="checkObjectFieldExisting(state.character?.quests)" class="flex flex-col gap-2">
+                    <HideButton class="w-full" textShow="Показати квести" textHide="Приховати квести"
+                        :hidden="quests_hidden" :mainIcon="FlagIcon" @click="quests_hidden = !quests_hidden" />
+                    <QuestsTable v-if="!quests_hidden" :quests="state.character.quests" />
                 </div>
 
             </section>
