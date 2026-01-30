@@ -1,11 +1,11 @@
 <script setup>
-import { ref, reactive, onMounted, computed, toRaw } from 'vue';
+import { ref, reactive, onMounted, onBeforeUnmount, computed, toRaw } from 'vue';
 import { useRoute } from 'vue-router';
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '@utils/asyncHandler';
 import { notify } from '@utils/notification';
-import { toNewEntity, toObject } from '@utils/objects.dto';
+import { toNewEntity, toObject, toNewSession } from '@utils/objects.dto';
 import { checkObjectFieldExisting, addRow, removeRow } from '@utils/entityHelper';
 import { socket } from '@ws/webSocket';
 
@@ -53,7 +53,17 @@ onMounted(async () => {
     if (errSession) return
 
     state.isLoading = false
-    state.session = resSession.data
+    state.session = toNewSession(resSession.data)
+})
+
+onBeforeUnmount(() => {
+    const events = ['session:updateNotify']
+    events.forEach(e => socket.off(e))
+})
+
+socket.on('session:updateNotify', (session) => {
+    state.session = toNewSession(session)
+    notify({ message: `Сесію було оновлено майстром`, type: 'warning' })
 })
 
 const filteredEntities = computed(() => {
@@ -116,8 +126,9 @@ async function saveEntity() {
 
     state.session = res.data
     state.unsavedChanges = false
+    
     notify({ message: 'Зміни збережені', type: 'info' })
-    socket.emit('session:updateEverywhere', sessionId)
+    socket.emit('session:updateNotify', sessionId)
 }
 
 async function deleteEntity() {
@@ -136,7 +147,7 @@ async function deleteEntity() {
     state.selectedEntity = toNewEntity({ type: state.selectedEntity.type })
 
     notify({ message: 'Елемент видалено', type: 'info' })
-    socket.emit('session:updateEverywhere', sessionId)
+    socket.emit('session:updateNotify', sessionId)
 }
 
 function discardChanges() {

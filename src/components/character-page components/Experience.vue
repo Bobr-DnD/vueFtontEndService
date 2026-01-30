@@ -23,8 +23,8 @@ const props = defineProps({
             <ProgressiveBar :value="props.exp" :valueMax="props.expMax" text="Досвід" />
         </div>
 
-        <div class="p-1 grow"> <button @click="callback()" class="w-full h-full p-2 rounded-lg border-2 border-darkred-red bg-darkred-dark_gray 
-                text-darkred-light font-semibold tracking-wide md:hover:bg-darkred-red md:hover:text-darkred-light active:bg-darkred-bright active:scale-95 
+        <div class="p-1 grow"> <button @click="callback()" class="w-full h-full p-2 rounded-lg border-2 border-darkred-dark bg-darkred-light 
+                text-darkred-dark text-xl font-semibold tracking-wide md:hover:bg-darkred-red md:hover:text-darkred-light active:bg-darkred-bright active:scale-95 
                 transition-all duration-200 ease-in-out shadow-md md:hover:shadow-lg">
                 +1 досвід </button> </div>
     </div>

@@ -50,7 +50,7 @@ const saveField = () => {
 
 
 <template>
-    <div class="grid auto-rows-min gap-2 content-start justify-items-start justify-start p-2" :class="!fieldReadonly ? 'grid-cols-[1fr_44px_44px]' : 'grid-cols-[1fr_44px]'">
+    <div class="grid grid-cols-[1fr_44px] auto-rows-min gap-2 content-start justify-items-start justify-start p-2">
 
         <form @submit.prevent class="flex flex-col items-start justify-center w-full">
             <label :for="props.fieldName" class="text-lg font-gothic">{{ props.name }}:</label>
@@ -62,7 +62,7 @@ const saveField = () => {
                 md:hover:border-darkred-red/70" placeholder="Введіть текст..."></textarea>
         </form>
 
-        <div class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl md:hover:cursor-pointer"
+        <div v-if="fieldReadonly" class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl md:hover:cursor-pointer"
             @click="editField">
             <PencilIcon class="w-4 h-4 text-darkred-light" />
         </div>

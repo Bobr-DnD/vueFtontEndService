@@ -98,7 +98,7 @@ function removePerk(perk) {
 
         </div>
 
-        <div v-if="!perksHidden" class="w-full flex justify-center">
+        <div v-if="!perksHidden && props.perkPoints > 0" class="w-full flex justify-center">
             <ModalOpenButton @click="modalHidden = false" class="mx-auto" text="Додати перк" />
         </div>
 

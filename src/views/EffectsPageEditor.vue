@@ -1,11 +1,11 @@
 <script setup>
-import { reactive, ref, onMounted, computed, toRaw, watch } from 'vue'
+import { reactive, ref, onMounted, onBeforeUnmount, computed, toRaw, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import RepositoryFactory from '@http/RepositoryFactory'
 import { asyncHandler } from '@utils/asyncHandler'
 import { notify } from '@utils/notification'
-import { toNewEffect, toObject } from '@utils/objects.dto'
+import { toNewEffect, toObject,toNewSession } from '@utils/objects.dto'
 import { checkObjectFieldExisting } from '@utils/entityHelper'
 import { socket } from '@ws/webSocket'
 
@@ -46,6 +46,16 @@ onMounted(async () => {
 
     state.isLoading = false
     state.session = res.data
+})
+
+onBeforeUnmount(() => {
+    const events = ['session:updateNotify']
+    events.forEach(e => socket.off(e))
+})
+
+socket.on('session:updateNotify', (session) => {
+    state.session = toNewSession(session)
+    notify({ message: `Сесію було оновлено майстром`, type: 'warning' })
 })
 
 const filteredEffects = computed(() => {
@@ -92,10 +102,10 @@ async function saveEffect() {
     if (err) return
 
     state.session = res.data
-
     unsavedChanges.value = false
+    
     notify({ message: 'Зміни збережені', type: 'info' })
-    socket.emit('session:updateEverywhere', sessionId)
+    socket.emit('session:updateNotify', sessionId)
 }
 
 async function removeEffect() {
@@ -115,7 +125,7 @@ async function removeEffect() {
     selectedEffect.value = toNewEffect({})
 
     notify({ message: 'Ефект видалено', type: 'info' })
-    socket.emit('session:updateEverywhere', sessionId)
+    socket.emit('session:updateNotify', sessionId)
 }
 
 function markUnsaved() {

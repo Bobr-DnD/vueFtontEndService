@@ -68,7 +68,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
     socket.emit('session:disconnectCharacter', sessionId)
-    const events = ['session:join', 'character:update', 'character:updateAdmin', 'character:get', 'session:updateEverywhere']
+    const events = ['session:join', 'character:get', 'character:updateNotify', 'session:updateNotify']
     events.forEach(e => socket.off(e))
 })
 
@@ -78,23 +78,17 @@ socket.on('session:join', (session) => {
     state.isLoading = false
 })
 
-socket.on('character:get', (character) => {
+socket.on('character:updateNotify', (character) => {
+    console.log(character.name);
+    
     state.character = toNewCharacterObject(character)
 })
 
-socket.on('character:update', (character) => {
-    state.character = toNewCharacterObject(character)
-})
-
-socket.on('character:updateAdmin', (character) => {
-    state.character = toNewCharacterObject(character)
-    notify({ message: 'Майстер оновив персонажа', type: 'warning' })
-})
-
-socket.on('session:updateEverywhere', (session) => {
+socket.on('session:updateNotify', (session) => {
     state.session = toNewSession(session)
-    socket.emit('character:get', characterId)
-    notify({ message: 'Майстер оновив сесію', type: 'warning' })
+    state.character = toNewCharacterObject(state.session.characters.find(character => character.id === characterId))
+    
+    notify({ message: 'Сесія та персонаж оновлено майстром', type: 'warning' })
 })
 
 watch(connected, (isConnected) => {
@@ -118,7 +112,7 @@ watch(connected, (isConnected) => {
 })
 
 function updateCharacter() {
-    socket.emit('character:update', (toRaw(state.character)))
+    socket.emit('character:updateData', (toRaw(state.character)))
 }
 
 function addExperience() {

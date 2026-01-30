@@ -65,7 +65,7 @@ async function saveSession() {
     state.unsavedChanges = false
 
     notify({ message: 'Сесія оновлена', type: 'success' })
-    socket.emit('session:updateEverywhere', res.data.id)
+    socket.emit('session:updateNotify', res.data.id)
 }
 
 function markUnsaved() {

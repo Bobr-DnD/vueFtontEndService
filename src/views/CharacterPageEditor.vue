@@ -26,7 +26,7 @@ import Header1 from '@/components/reusable/Titles/Header1.vue';
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
 import { checkObjectFieldExisting, filterPerksByRank, groupById, addRow, removeRow, filterPerksByRankWithoutCount, sortByMainField } from '/utils/entityHelper';
-import { toObject, toNewCharacterObject } from '/utils/objects.dto';
+import { toObject, toNewCharacterObject, toNewSession } from '/utils/objects.dto';
 import { notify } from '/utils/notification';
 import { checkArrayFieldExisting } from '@utils/entityHelper';
 
@@ -72,7 +72,7 @@ onMounted(async () => {
     }
 
     state.isLoading = false
-    state.session = resSession.data
+    state.session = toNewSession(resSession.data)
 
     inventoryTypes.value = state.session.entityTypes.map(type => {
         return {
@@ -88,11 +88,11 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-    const events = ['character:update', 'character:get', 'session:updateEverywhere', 'character:updateAdmin', 'session:updateAdmin']
+    const events = ['character:updateNotify', 'session:updateNotify']
     events.forEach(e => socket.off(e))
 })
 
-socket.on('character:update', (character) => {
+socket.on('character:updateNotify', (character) => {
     if (character.id === selected_character.value.id) selected_character.value = toNewCharacterObject(character)
     else {
         state.session.characters = state.session.characters.map(ch =>
@@ -102,14 +102,10 @@ socket.on('character:update', (character) => {
     notify({ message: `Персонажа ${character.name} було оновлено`, type: 'warning' })
 })
 
-socket.on('character:get', (character) => {
-    selected_character.value = toNewCharacterObject(character)
-})
-
-socket.on('session:updateEverywhere', (session) => {
-    state.session = session
-    socket.emit('character:get', selected_character.value.id)
-    notify({ message: `Сесію було оновлено глобально`, type: 'warning' })
+socket.on('session:updateNotify', (session) => {
+    state.session = toNewSession(session)
+    selected_character.value = state.session.characters.find(character => character.id === selected_character.value.id)
+    notify({ message: `Сесію було оновлено майстром`, type: 'warning' })
 })
 
 filteredCharacterPerks.value.perks = computed(() => {
@@ -170,11 +166,11 @@ async function saveCharacter() {
             )
             if (errSession) return
 
-            state.session = resSession.data
+            state.session = toNewSession(resSession.data)
             state.unsavedChanges = false
 
             notify({ message: 'Персонаж збережений', type: 'success' })
-            socket.emit('session:updateAdmin', sessionId);
+            socket.emit('session:updateNotify', resSession.data);
             selectCharacter(toNewCharacterObject(res.data))
 
         } else {
@@ -192,7 +188,7 @@ async function saveCharacter() {
             state.unsavedChanges = false
 
             notify({ message: 'Персонаж оновлений', type: 'success' })
-            socket.emit('character:updateAdmin', res.data)
+            socket.emit('character:updateNotify', res.data)
             //selectCharacter(toNewCharacterObject(res.data))
         }
     }
@@ -217,12 +213,12 @@ async function deleteCharacter() {
         return
     }
 
-    state.session = resSession.data
+    state.session = toNewSession(resSession.data)
     state.unsavedChanges = false
 
     selectCharacter(toNewCharacterObject({}))
     notify({ message: 'Персонаж видалений', type: 'success' })
-    socket.emit('session:updateAdmin', sessionId);
+    socket.emit('session:updateNotify', resSession.data);
 }
 
 function discardChanges() {

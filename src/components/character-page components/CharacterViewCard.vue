@@ -1,9 +1,8 @@
 <script setup>
-import { computed, effect, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { ArrowDownIcon } from '@heroicons/vue/24/solid';
 import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue';
 import Header1 from '../reusable/Titles/Header1.vue';
-import Header2 from '../reusable/Titles/Header2.vue';
 
 const props = defineProps({
     name: { type: String, required: true },
@@ -17,13 +16,12 @@ const props = defineProps({
 })
 
 const character_fields = computed(() => props.gender || props.class || props.race)
-const modalHidden = ref(true)
-const appliedEffects = ref([])
-const selectedCharacteristic = ref('')
+const appliedEffects = computed(() => {
+    return props.effects.filter(effect => effect.effect[selectedCharacteristic.value])
+})
 
-function showAppliedEffects(characteristic) {
-    appliedEffects.value = props.effects.filter(effect => effect.effect[characteristic])
-}
+const modalHidden = ref(true)
+const selectedCharacteristic = ref('')
 
 </script>
 
@@ -85,7 +83,7 @@ function showAppliedEffects(characteristic) {
 
                 <div class="flex flex-wrap items-center justify-center gap-2">
                     <div v-for="value, key in props.characteristics" :key="Math.random().toString(24).slice(2)"
-                        @click="showAppliedEffects(key); selectedCharacteristic = key"
+                        @click="selectedCharacteristic = key"
                         class="grow p-2 text-center rounded-lg border-2 border-darkred-red bg-darkred-dark_gray text-darkred-light font-semibold hover:cursor-pointer">
                         <div>
                             {{ key }} — {{ value }}

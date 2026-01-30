@@ -1,10 +1,10 @@
 <script setup>
-import { reactive, ref, onMounted, toRaw, computed } from 'vue';
+import { reactive, ref, onMounted,onBeforeUnmount, toRaw, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '@utils/asyncHandler';
 import { notify } from '@utils/notification';
-import { toNewPerk, toObject } from '@utils/objects.dto';
+import { toNewPerk, toObject, toNewSession } from '@utils/objects.dto';
 import { checkObjectFieldExisting } from '@utils/entityHelper';
 import { socket } from '@ws/webSocket';
 
@@ -48,6 +48,16 @@ onMounted(async () => {
 
     state.isLoading = false
     state.session = res.data
+})
+
+onBeforeUnmount(() => {
+    const events = ['session:updateNotify']
+    events.forEach(e => socket.off(e))
+})
+
+socket.on('session:updateNotify', (session) => {
+    state.session = toNewSession(session)
+    notify({ message: `Сесію було оновлено майстром`, type: 'warning' })
 })
 
 const filteredPerks = computed(() => {
@@ -98,7 +108,7 @@ async function savePerk() {
     selectedPerk.value = toNewPerk({ type: perk.type })
 
     notify({ message: 'Зміни збережені', type: 'info' })
-    socket.emit('session:updateEverywhere', sessionId)
+    socket.emit('session:updateNotify', sessionId)
 }
 
 async function deletePerk() {
@@ -117,7 +127,7 @@ async function deletePerk() {
     selectedPerk.value = toNewPerk({})
 
     notify({ message: 'Ефект видалено', type: 'info' })
-    socket.emit('session:updateEverywhere', sessionId)
+    socket.emit('session:updateNotify', sessionId)
 }
 
 function discardChanges() {
