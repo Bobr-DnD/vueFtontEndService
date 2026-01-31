@@ -25,10 +25,9 @@ import Header1 from '@/components/reusable/Titles/Header1.vue';
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
-import { checkObjectFieldExisting, filterPerksByRank, groupById, addRow, removeRow, filterPerksByRankWithoutCount, sortByMainField } from '/utils/entityHelper';
+import { checkObjectFieldExisting, filterPerksByRank, groupById, addRow, removeRow, filterPerksByRankWithoutCount } from '/utils/entityHelper';
 import { toObject, toNewCharacterObject, toNewSession } from '/utils/objects.dto';
 import { notify } from '/utils/notification';
-import { checkArrayFieldExisting } from '@utils/entityHelper';
 
 const state = reactive({
     session: {},
@@ -43,13 +42,17 @@ const editingCharacter = ref(selected_character.value.id)
 //perks variables
 const filteredCharacterPerks = ref([])
 const filteredSessionPerks = ref([])
-const characterPerksSearchQuery = ref('')
-const sessionPerksSearchQuery = ref('')
+const filteredCharacterEntities = ref([])
 
 const inventoryTypes = ref([])
+const perkTypes = ref([])
+const activePerkType = ref('')
 const activeType = ref('')
+
 const characterEntitySearchQuery = ref('')
 const sessionEntitySearchQuery = ref('')
+const characterPerksSearchQuery = ref('')
+const sessionPerksSearchQuery = ref('')
 
 const activeTab = ref('base')
 
@@ -73,19 +76,41 @@ onMounted(async () => {
 
     state.isLoading = false
     state.session = toNewSession(resSession.data)
+    checkTypes()
+})
 
+function checkTypes() {
     inventoryTypes.value = state.session.entityTypes.map(type => {
         return {
             name: type.name,
             id: type.id,
-            hidden: true,
-            icon: type.icon,
-            search: '',
-            modal_hidden: true,
-            searchGlobal: ''
+            hidden: true
         }
     })
-})
+
+    perkTypes.value = state.session.perkTypes.map(type => {
+        return {
+            name: type.name,
+            id: type.id,
+            hidden: true,
+        }
+    })
+
+    perkTypes.value.push({
+        name: 'Усі',
+        id: 'all',
+        hidden: false
+    })
+
+    inventoryTypes.value.push({
+        name: 'Усі',
+        id: 'all',
+        hidden: false
+    })
+
+    activePerkType.value = 'all'
+    activeType.value = inventoryTypes.value[inventoryTypes.value.length - 1]
+}
 
 onBeforeUnmount(() => {
     const events = ['character:updateNotify', 'session:updateNotify']
@@ -108,6 +133,16 @@ socket.on('session:updateNotify', (session) => {
     notify({ message: `Сесію було оновлено майстром`, type: 'warning' })
 })
 
+filteredCharacterEntities.value.entities = computed(() => {
+    const groupedArray = groupById(selected_character.value.entities)
+
+    if (!characterEntitySearchQuery.value.trim()) return groupedArray
+    const query = characterEntitySearchQuery.value.toLowerCase()
+    return groupedArray.filter(el =>
+        el.name.toLowerCase().includes(query)
+    )
+})
+
 filteredCharacterPerks.value.perks = computed(() => {
     const groupedArray = groupById(selected_character.value.perks)
 
@@ -119,7 +154,8 @@ filteredCharacterPerks.value.perks = computed(() => {
 })
 
 filteredSessionPerks.value.perks = computed(() => {
-    const groupedArray = filterPerksByRankWithoutCount(selected_character.value.perks, state.session.perks)
+    const groupedArray = filterPerksByRank(selected_character.value.perks, state.session.perks)
+    groupedArray.forEach(el => el.count++)  //CHECK may broke some descriptions
 
     if (!sessionPerksSearchQuery.value.trim()) return groupedArray
     const query = sessionPerksSearchQuery.value.toLowerCase()
@@ -127,6 +163,90 @@ filteredSessionPerks.value.perks = computed(() => {
         el.name.toLowerCase().includes(query)
     )
 })
+
+//entities
+function showEntityType(id) {
+    inventoryTypes.value.forEach(type => {
+        if (type.id === id) {
+            type.hidden = false
+            activeType.value = type
+        }
+        else type.hidden = true
+    });
+
+    characterEntitySearchQuery.value = ''
+    sessionEntitySearchQuery.value = ''
+}
+
+function getFilteredCharacterEntities(type) {
+    if (type.id === 'all')
+        return filteredCharacterEntities.value.entities
+            .filter(e =>
+                e.name.toLowerCase().includes(characterEntitySearchQuery.value.toLowerCase())
+            )
+
+    return filteredCharacterEntities.value.entities
+        .filter(e => e.type === type.name)
+        .filter(e =>
+            e.name.toLowerCase().includes(characterEntitySearchQuery.value.toLowerCase())
+        )
+}
+
+function getFilteredSessionEntities(type) {
+    if (type.id === 'all')
+        return state.session.entities
+            .filter(e =>
+                e.name.toLowerCase().includes(sessionEntitySearchQuery.value.toLowerCase())
+            )
+
+    return state.session.entities
+        .filter(e => e.type === type.name)
+        .filter(e =>
+            e.name.toLowerCase().includes(sessionEntitySearchQuery.value.toLowerCase())
+        )
+}
+//perks
+function showPerkType(id) {
+
+    perkTypes.value.forEach(type => {
+        if (type.id === id) {
+            type.hidden = false
+            activePerkType.value = id === 'all' ? type.id : type.name
+        }
+        else type.hidden = true
+    });
+
+    characterPerksSearchQuery.value = ''
+    sessionPerksSearchQuery.value = ''
+}
+
+function getFilteredSessionPerks(type) {
+
+    if (type === 'all')
+        return filteredSessionPerks.value.perks.filter(e =>
+            e.name.toLowerCase().includes(sessionPerksSearchQuery.value.toLowerCase())
+        )
+
+    return filteredSessionPerks.value.perks
+        .filter(e => e.type.name === type)
+        .filter(e =>
+            e.name.toLowerCase().includes(sessionPerksSearchQuery.value.toLowerCase())
+        )
+}
+
+function getFilteredCharacterPerks(type) {
+
+    if (type === 'all')
+        return filteredCharacterPerks.value.perks.filter(e =>
+            e.name.toLowerCase().includes(characterPerksSearchQuery.value.toLowerCase())
+        )
+
+    return filteredCharacterPerks.value.perks
+        .filter(e => e.type.name === type)
+        .filter(e =>
+            e.name.toLowerCase().includes(characterPerksSearchQuery.value.toLowerCase())
+        )
+}
 
 function selectCharacter(character) {
     if (state.unsavedChanges) {
@@ -289,38 +409,6 @@ function addHealthField(field) {
     markUnsaved();
 }
 
-function showEntityType(id) {
-    inventoryTypes.value.forEach(type => {
-        if (type.id === id) {
-            type.hidden = false
-            activeType.value = type
-        }
-        else type.hidden = true
-    });
-
-    characterEntitySearchQuery.value = ''
-    sessionEntitySearchQuery.value = ''
-}
-
-function getFilteredCharacterEntities(type) {
-    sortByMainField(selected_character.value.entities, 'name')
-
-    return selected_character.value.entities
-        .filter(e => e.type === type.name)
-        .filter(e =>
-            e.name.toLowerCase().includes(characterEntitySearchQuery.value.toLowerCase())
-        )
-}
-
-function getFilteredSessionEntities(type) {
-
-    return state.session.entities
-        .filter(e => e.type === type.name)
-        .filter(e =>
-            e.name.toLowerCase().includes(sessionPerksSearchQuery.value.toLowerCase())
-        )
-}
-
 function addEntity(entity) {
     addRow(state.session.entities, selected_character.value.entities, entity.id)
     markUnsaved()
@@ -409,7 +497,7 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
 
             <Header1 class="col-span-2 justify-self-center" label="Список основних характеистик:" />
 
-            <Header1 v-if="!checkArrayFieldExisting(selected_character.characteristics)" class="col-span-2"
+            <Header1 v-if="!checkObjectFieldExisting(selected_character.characteristics)" class="col-span-2"
                 label="Пусто" />
 
             <ObjectFieldsTable v-if="checkObjectFieldExisting(selected_character.characteristics)"
@@ -417,7 +505,7 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
 
             <Header1 class="col-span-2 justify-self-center" label="Список фінансів:" />
 
-            <Header1 v-if="!checkArrayFieldExisting(selected_character.currency)" class="col-span-2" label="Пусто" />
+            <Header1 v-if="!checkObjectFieldExisting(selected_character.currency)" class="col-span-2" label="Пусто" />
 
             <CurrencyTable :currency_array="selected_character.currency" :callback="updateCurrency" />
 
@@ -427,7 +515,7 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
 
             <Header1 class="col-span-2 font-medium" label="Список кастомних полей:" />
 
-            <Header1 v-if="!checkArrayFieldExisting(selected_character.customFields)" class="col-span-2"
+            <Header1 v-if="!checkObjectFieldExisting(selected_character.customFields)" class="col-span-2"
                 label="Пусто" />
 
             <ObjectFieldsTable v-if="checkObjectFieldExisting(selected_character.customFields)"
@@ -472,7 +560,13 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
 
         <div id="perks" v-if="activeTab === 'perks'" class="grid grid-cols-3 auto-rows-min gap-x-4 gap-y-3">
 
-            <Header1 class="col-span-3 justify-self-center" label="Перки персонажа: " />
+            <div class="w-full col-span-full flex gap-2 justify-center">
+
+                <GraySelectorButton v-for="type in perkTypes" :label="type.name" :id="type.id" :active="!type.hidden"
+                    @click="showPerkType(type.id)" />
+            </div>
+
+            <Header1 class="col-span-full justify-self-center" label="Перки персонажа: " />
 
             <div class="col-span-3 flex gap-2">
                 <input v-model="characterPerksSearchQuery" placeholder="Пошук ..."
@@ -482,10 +576,10 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
                     text="Очистити" />
             </div>
 
-            <PerkRowView v-for="perk in filteredCharacterPerks.perks" :perk="perk" :removable="true"
+            <PerkRowView v-for="perk in getFilteredCharacterPerks(activePerkType)" :perk="perk" :removable="true"
                 :callback_remove="removerPerk" />
 
-            <Header1 class="col-span-3 justify-self-center" label="Усі перки: " />
+            <Header1 class="col-span-full justify-self-center" label="Усі перки: " />
 
             <div class="col-span-3 flex gap-2">
                 <input v-model="sessionPerksSearchQuery" placeholder="Пошук ..."
@@ -495,7 +589,7 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
                     text="Очистити" />
             </div>
 
-            <PerkRowView v-for="perk in filteredSessionPerks.perks" :perk="perk" :addable="true"
+            <PerkRowView v-for="perk in getFilteredSessionPerks(activePerkType)" :perk="perk" :addable="true"
                 :callback_add="addPerk" />
 
         </div>
@@ -534,13 +628,12 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
 
                 <div class="flex gap-2">
 
-                    <input v-model="sessionPerksSearchQuery" placeholder="Пошук ..."
+                    <input v-model="sessionEntitySearchQuery" placeholder="Пошук ..."
                         class="h-12 w-full p-2 col-span-3 rounded-lg bg-darkred-dark_gray text-darkred-light" />
 
-                    <RejectButtonWithText v-if="sessionPerksSearchQuery" @click="sessionPerksSearchQuery = ''"
+                    <RejectButtonWithText v-if="sessionEntitySearchQuery" @click="sessionEntitySearchQuery = ''"
                         text="Очистити" />
                 </div>
-
 
                 <div class="w-full grid grid-cols-3 gap-2 max-h-[512px] overflow-y-auto md:auto-hide-scroll">
 

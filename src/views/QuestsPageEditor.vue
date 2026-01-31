@@ -52,8 +52,6 @@ onBeforeUnmount(() => {
 
 socket.on('session:updateNotify', (session) => {
     state.session = toNewSession(session)
-    console.log(state.session.questTypes);
-    
     notify({ message: `Сесію було оновлено майстром`, type: 'warning' })
 })
 

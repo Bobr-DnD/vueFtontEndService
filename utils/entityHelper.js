@@ -12,14 +12,6 @@ export function groupById(items, idKey = 'id') {
 
   let grouped = Array.from(map.values())
 
-  grouped.sort((a, b) => {
-    const nameA = (a.name || '').toString().toLowerCase()
-    const nameB = (b.name || '').toString().toLowerCase()
-    if (nameA < nameB) return -1
-    if (nameA > nameB) return 1
-    else return 0
-  })
-
   return grouped
 }
 

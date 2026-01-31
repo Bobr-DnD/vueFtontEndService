@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import DeleteButton from '@/components/reusable/Buttons/DeleteButton.vue';
 import ApproveButton from '@/components/reusable/Buttons/ApproveButton.vue';
 import PerkModal from '../EntityModals/PerkModal.vue';
+import { CursorArrowRippleIcon } from '@heroicons/vue/24/solid';
 
 const props = defineProps({
     perk: {
@@ -34,7 +35,9 @@ const modalHidden = ref(true)
 </script>
 
 <template>
-    <div>
+    <div class="relative">
+
+        <CursorArrowRippleIcon class="w-5 h-5 absolute top-2 right-1 text-darkred-light"/>
 
         <div @click="modalHidden = !modalHidden"
             :class="props.removable || props.addable ? 'grid-cols-[1fr_50px]' : 'grid-cols-1'"

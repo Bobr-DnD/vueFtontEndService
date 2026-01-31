@@ -79,8 +79,6 @@ socket.on('session:join', (session) => {
 })
 
 socket.on('character:updateNotify', (character) => {
-    console.log(character.name);
-    
     state.character = toNewCharacterObject(character)
 })
 
@@ -204,7 +202,7 @@ function updateCharacterNotes(field, value) {
                         @click="custom_hidden = !custom_hidden" />
 
                     <ObjectFieldsTable v-if="!custom_hidden" :fields="state.character.customFields"
-                        :callback="updateCustomFields" :field_removable="false" />
+                        :callback="updateCustomFields" :field_removable="true" />
 
                     <PlusButton v-if="!custom_hidden" @click="custom_modal_hidden = !custom_modal_hidden" class="w-16 h-14 mt-2 mx-auto text-center border-4 border-darkred-dark rounded-lg 
            transition-all duration-300 ease-out md:hover:cursor-pointer

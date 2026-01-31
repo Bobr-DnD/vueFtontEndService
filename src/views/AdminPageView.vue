@@ -18,7 +18,7 @@ import ApproveButton from '@/components/reusable/Buttons/ApproveButton.vue';
 import PerkTile from '@/components/reusable/EntityTiles/PerkTile.vue';
 import SearchInputBlack from '@/components/reusable/SearchInputs/SearchInputBlack.vue';
 import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue';
-import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
+import CharacteristicFields from '@/components/admin-page components/CharacteristicFields.vue';
 import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
 import BackendOffline from '@/components/reusable/BackendOffline.vue';
 import { toNewSession, toNewCharacterObject } from '/utils/objects.dto';
@@ -163,11 +163,11 @@ function updateSessionField(fieldName, field) {
   </section>
 
   <section v-if="!state.isLoading && state.selectedChatacter" class="m-4 p-2 flex flex-col gap-4">
-    <Header1 label="Характеристики:" />
+    <Header1 label="Базові характеристики(з бонусами):" />
 
     <div class="flex flex-wrap gap-4">
-      <ObjectFieldsTable v-if="checkObjectFieldExisting(state.selectedChatacter?.characteristics)"
-        :fields="state.selectedChatacter.characteristics" :callback="updateCharacterCharacteristic" />
+      <CharacteristicFields v-if="checkObjectFieldExisting(state.selectedChatacter?.characteristics)"
+        :baseCharacteristics="state.selectedChatacter.characteristics" :computedCharacteristics="state.selectedChatacter.characteristicsComputed" :callback="updateCharacterCharacteristic" />
     </div>
   </section>
 

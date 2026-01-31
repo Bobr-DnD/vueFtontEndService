@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import { ArrowDownIcon } from '@heroicons/vue/24/solid';
 import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue';
 import Header1 from '../reusable/Titles/Header1.vue';
+import { CursorArrowRippleIcon } from '@heroicons/vue/24/solid';
 
 const props = defineProps({
     name: { type: String, required: true },
@@ -46,9 +47,15 @@ const selectedCharacteristic = ref('')
         </div>
     </div>
 
-    <section>
-        <Header1 label="Характеристики" class="text-center font-bold text-darkred-red mb-1 cursor-pointer"
-            @click="modalHidden = !modalHidden" />
+    <section class="border-2 border-darkred-dark p-2 rounded-lg relative">
+
+        <CursorArrowRippleIcon class="w-5 h-5 absolute top-2 right-1"/>
+
+        <div class="relative">
+            <Header1 label="Характеристики" class="text-center font-bold text-darkred-red mb-1 cursor-pointer"
+                @click="modalHidden = !modalHidden" />
+        </div>
+
         <div class="flex flex-wrap items-center justify-center gap-2">
             <div v-for="value, key in props.characteristicsComputed" :key="Math.random().toString(24).slice(2)"
                 @click="modalHidden = !modalHidden"
