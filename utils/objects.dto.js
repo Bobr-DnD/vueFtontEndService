@@ -25,6 +25,7 @@ export function toNewCharacterObject(character) {
     perkPoints: character.perkPoints ?? 0,
     health: character.health ?? [],
     characteristics: character.characteristics ?? {},
+    characteristicsComputed: character.characteristicsComputed ?? {},
     currency: character.currency ?? [],
     customFields: character.customFields ?? {},
     effects: character.effects ?? [],

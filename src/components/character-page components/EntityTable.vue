@@ -1,7 +1,8 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { addRow, removeRow } from '/utils/entityHelper';
 import { notify } from '/utils/notification';
+import { groupById } from '/utils/entityHelper';
 
 import ButtonRedHideFunction from '../reusable/Buttons/ButtonRedHideFunction.vue';
 import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue';
@@ -45,6 +46,10 @@ watch(() => props.types, (newTypes) => {
     }))
 }, { immediate: true })
 
+const groupedCharacterEntities = computed(() => {
+    return groupById(props.character_entities)
+})
+
 function addEntity(entity) {
     addRow(props.session_entities, props.character_entities, entity.id)
     notify({ message: `Додано ${entity.name}`, type: 'success' })
@@ -58,7 +63,7 @@ function removeEntity(entity) {
 }
 
 function getFilteredCharacterEntities(type) {
-    return props.character_entities
+    return groupedCharacterEntities.value
         .filter(e => e.type === type.name)
         .filter(e =>
             e.name.toLowerCase().includes(type.search.toLowerCase())
@@ -109,22 +114,22 @@ function getFilteredSessionEntities(type) {
 
                 </div>
 
-                <div class="grid grid-cols-[1fr_100px_64px] px-2 text-xl font-univers">
+                <div class="w-[450px] grid grid-cols-[1fr_100px_64px] px-2 text-xl font-univers">
                     <div>
                         Назва
                     </div>
-                    <div>
+                    <div class="justify-self-center">
                         Ціна
                     </div>
                 </div>
 
-                <div class="max-h-[680px] overflow-y-auto auto-hide-scroll">
+                <div class="max-h-[680px] overflow-y-auto auto-hide-scroll flex flex-col gap-2">
                     <div v-for="entity in getFilteredSessionEntities(type)" :key="entity.name"
                         class="grid grid-cols-[1fr_100px_64px] items-center px-2 py-1 rounded-lg font-univers text-lg odd:bg-darkred-gray">
                         <div>
                             {{ entity.name }}
                         </div>
-                        <div>{{ entity.price }}</div>
+                        <div class="justify-self-center">{{ entity.price }}</div>
                         <ApproveButton @click="addEntity(entity)" class="w-16" />
                     </div>
                 </div>

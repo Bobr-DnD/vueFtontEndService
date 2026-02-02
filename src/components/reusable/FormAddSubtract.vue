@@ -33,7 +33,7 @@ const input = ref(null)
 function changeValue(operation) {
 
     const value = parseInt(input.value.value) || 1
-    
+
     switch (operation) {
         case 'plus':
             props.callback(props.entity_name, value)
@@ -57,9 +57,10 @@ function changeValue(operation) {
 
             {{ entity_name.toUpperCase() }}: {{ value }}</label>
 
-        <section class="">
+        <div class=" col-span-full text-darkred-dark font-medium text-md">Додати\Відняти від значення:</div>
+        <section>
 
-            <form @submit.prevent class="flex flex-col items-start justify-center w-full font-gothic rounded-lg">
+            <form @submit.prevent class="flex gap-2 flex-col items-start justify-center w-full font-gothic rounded-lg">
                 <input ref="input" :id="entity_name" type="number" :value="default_number" class="no-arrows h-11 bg-darkred-dark_gray w-full text-darkred-light text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
            focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
             </form>

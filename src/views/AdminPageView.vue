@@ -18,10 +18,10 @@ import ApproveButton from '@/components/reusable/Buttons/ApproveButton.vue';
 import PerkTile from '@/components/reusable/EntityTiles/PerkTile.vue';
 import SearchInputBlack from '@/components/reusable/SearchInputs/SearchInputBlack.vue';
 import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue';
-import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
+import CharacteristicFields from '@/components/admin-page components/CharacteristicFields.vue';
 import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
 import BackendOffline from '@/components/reusable/BackendOffline.vue';
-import { toNewSession } from '/utils/objects.dto';
+import { toNewSession, toNewCharacterObject } from '/utils/objects.dto';
 
 const sessionId = useRoute().params.sessionId
 const state = reactive({
@@ -71,51 +71,30 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  const events = ['character:update', 'session:updateSession', 'session:get', 'session:updateEverywhere', 'session:updateAdmin', 'character:get']
+  const events = ['character:updateNotify', 'session:get', 'session:updateNotify']
   events.forEach(e => socket.off(e))
 })
 
-socket.on('character:update', (character) => {
-  if (character.id === state.selectedChatacter.id) state.selectedChatacter = character
+socket.on('session:updateNotify', (session) => {
+  state.session = toNewSession(session)
+  state.selectedChatacter = state.session.characters.find(character => character.id === state.selectedChatacter.id)
+})
+
+socket.on('character:updateNotify', (character) => {
+  if (character.id === state.selectedChatacter.id) state.selectedChatacter = toNewCharacterObject(character)
   else {
     state.session.characters = state.session.characters.map(ch =>
-      ch.id === character.id ? character : ch
+      ch.id === character.id ? toNewCharacterObject(character) : ch
     )
   }
 
   notify({ message: `Персонаж ${character.name} був оновлений`, type: 'warning' })
-
-})
-
-socket.on('session:updateSession', (session) => {
-  state.session = toNewSession(session)
-})
-
-socket.on('session:updateEverywhere', (session) => {
-  state.session = toNewSession(session)
-  socket.emit('character:get', state.selectedChatacter.id)
-  notify({ message: `Сесія була оновлена глобально`, type: 'warning' })
-})
-
-socket.on('session:updateAdmin', (session) => {
-  state.session = toNewSession(session)
-  socket.emit('character:get', state.selectedChatacter.id)
-  notify({ message: `Сесія була оновлена лише для майстра`, type: 'warning' })
 })
 
 socket.on('session:get', (session) => {
   state.session = toNewSession(session)
   state.selectedChatacter = state.session.characters[0] || null
   state.isLoading = false
-})
-
-socket.on('character:get', (character) => {
-  if (character.id === state.selectedChatacter.id) state.selectedChatacter = character
-  else {
-    state.session.characters = state.session.characters.map(ch =>
-      ch.id === character.id ? character : ch
-    )
-  }
 })
 
 watch(connected, (isConnected) => {
@@ -144,11 +123,11 @@ watch(connected, (isConnected) => {
 })
 
 function updateSession() {
-  socket.emit('session:updateSession', toRaw(state.session))
+  socket.emit('session:updateData', toRaw(state.session))
 }
 
 function updateCharacter() {
-  socket.emit('character:update', toRaw(state.selectedChatacter))
+  socket.emit('character:updateData', toRaw(state.selectedChatacter))
 }
 
 function updateCharacterCharacteristic(fields) {
@@ -184,11 +163,11 @@ function updateSessionField(fieldName, field) {
   </section>
 
   <section v-if="!state.isLoading && state.selectedChatacter" class="m-4 p-2 flex flex-col gap-4">
-    <Header1 label="Характеристики:" />
+    <Header1 label="Базові характеристики(з бонусами):" />
 
     <div class="flex flex-wrap gap-4">
-      <ObjectFieldsTable v-if="checkObjectFieldExisting(state.selectedChatacter?.characteristics)"
-        :fields="state.selectedChatacter.characteristics" :callback="updateCharacterCharacteristic" />
+      <CharacteristicFields v-if="checkObjectFieldExisting(state.selectedChatacter?.characteristics)"
+        :baseCharacteristics="state.selectedChatacter.characteristics" :computedCharacteristics="state.selectedChatacter.characteristicsComputed" :callback="updateCharacterCharacteristic" />
     </div>
   </section>
 
@@ -314,7 +293,8 @@ function updateSessionField(fieldName, field) {
           <CloseButtonRedBG @click="perksModalShowed = false" />
         </div>
 
-        <div v-if="checkArrayFieldExisting(filteredCharacterPerks)" class="max-h-[650px] w-full grid grid-cols-4 gap-2 overflow-y-scroll auto-hide-scroll">
+        <div v-if="checkArrayFieldExisting(filteredCharacterPerks)"
+          class="max-h-[650px] w-full grid grid-cols-4 gap-2 overflow-y-scroll auto-hide-scroll">
           <PerkTile class="border-4 border-darkred-gray rounded-lg"
             @click="addRow(state.session.perks, state.selectedChatacter.perks, perk.id); perksModalShowed = false; updateCharacter()"
             v-for="perk in filteredSessionPerks" :perk="perk" />

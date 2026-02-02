@@ -5,7 +5,7 @@ import { ChartBarIcon, SparklesIcon, FlagIcon, BanknotesIcon } from '@heroicons/
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
-import { checkArrayFieldExisting } from '/utils/entityHelper'
+import { checkObjectFieldExisting } from '/utils/entityHelper'
 import { toObject } from '/utils/objects.dto';
 import { toNewCharacterObject, toNewSession } from '/utils/objects.dto';
 import { socket, connected } from '@ws/webSocket';
@@ -68,7 +68,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
     socket.emit('session:disconnectCharacter', sessionId)
-    const events = ['session:join', 'character:update', 'character:updateAdmin', 'character:get', 'session:updateEverywhere']
+    const events = ['session:join', 'character:get', 'character:updateNotify', 'session:updateNotify']
     events.forEach(e => socket.off(e))
 })
 
@@ -78,23 +78,15 @@ socket.on('session:join', (session) => {
     state.isLoading = false
 })
 
-socket.on('character:get', (character) => {
+socket.on('character:updateNotify', (character) => {
     state.character = toNewCharacterObject(character)
 })
 
-socket.on('character:update', (character) => {
-    state.character = toNewCharacterObject(character)
-})
-
-socket.on('character:updateAdmin', (character) => {
-    state.character = toNewCharacterObject(character)
-    notify({ message: 'Майстер оновив персонажа', type: 'warning' })
-})
-
-socket.on('session:updateEverywhere', (session) => {
+socket.on('session:updateNotify', (session) => {
     state.session = toNewSession(session)
-    socket.emit('character:get', characterId)
-    notify({ message: 'Майстер оновив сесію', type: 'warning' })
+    state.character = toNewCharacterObject(state.session.characters.find(character => character.id === characterId))
+    
+    notify({ message: 'Сесія та персонаж оновлено майстром', type: 'warning' })
 })
 
 watch(connected, (isConnected) => {
@@ -118,7 +110,7 @@ watch(connected, (isConnected) => {
 })
 
 function updateCharacter() {
-    socket.emit('character:update', (toRaw(state.character)))
+    socket.emit('character:updateData', (toRaw(state.character)))
 }
 
 function addExperience() {
@@ -175,6 +167,7 @@ function updateCharacterNotes(field, value) {
         <section class="p-2 lg:p-4 space-y-2">
 
             <characterCardSmall :name="state.character.name" :characteristics="state.character.characteristics"
+                :effects="state.character.effects" :characteristicsComputed="state.character.characteristicsComputed"
                 :gender="state.character.gender" :class="state.character.class" :race="state.character.race"
                 :image="state.character.image" />
 
@@ -209,7 +202,7 @@ function updateCharacterNotes(field, value) {
                         @click="custom_hidden = !custom_hidden" />
 
                     <ObjectFieldsTable v-if="!custom_hidden" :fields="state.character.customFields"
-                        :callback="updateCustomFields" :field_removable="false" />
+                        :callback="updateCustomFields" :field_removable="true" />
 
                     <PlusButton v-if="!custom_hidden" @click="custom_modal_hidden = !custom_modal_hidden" class="w-16 h-14 mt-2 mx-auto text-center border-4 border-darkred-dark rounded-lg 
            transition-all duration-300 ease-out md:hover:cursor-pointer
@@ -234,28 +227,24 @@ function updateCharacterNotes(field, value) {
 
                 </div>
 
-                <div class="flex flex-col gap-2">
-                    <HideButton v-if="checkArrayFieldExisting(state.character.currency)" class="w-full"
-                        textShow="Показати баланс" textHide="Приховати баланс" :hidden="currency_hidden"
-                        :mainIcon="BanknotesIcon" @click="currency_hidden = !currency_hidden" />
+                <div v-if="checkObjectFieldExisting(state.character?.currency)" class="flex flex-col gap-2">
+                    <HideButton class="w-full" textShow="Показати баланс" textHide="Приховати баланс"
+                        :hidden="currency_hidden" :mainIcon="BanknotesIcon"
+                        @click="currency_hidden = !currency_hidden" />
                     <CurrencyTable v-if="!currency_hidden" :currency_array="state.character.currency"
                         :callback="updateCurrency" />
                 </div>
 
-                <div class="flex flex-col gap-2">
-                    <HideButton v-if="checkArrayFieldExisting(state.character.effects)" class="w-full"
-                        textShow="Показати ефекти" textHide="Приховати ефекти" :hidden="effects_hidden"
-                        :mainIcon="SparklesIcon" @click="effects_hidden = !effects_hidden" />
-                    <EffectsTable v-if="checkArrayFieldExisting(state.character.effects) && !effects_hidden"
-                        :effects="state.character.effects" />
+                <div v-if="checkObjectFieldExisting(state.character?.effects)" class="flex flex-col gap-2">
+                    <HideButton class="w-full" textShow="Показати ефекти" textHide="Приховати ефекти"
+                        :hidden="effects_hidden" :mainIcon="SparklesIcon" @click="effects_hidden = !effects_hidden" />
+                    <EffectsTable v-if="!effects_hidden" :effects="state.character.effects" />
                 </div>
 
-                <div class="flex flex-col gap-2">
-                    <HideButton v-if="checkArrayFieldExisting(state.character.quests)" class="w-full"
-                        textShow="Показати квести" textHide="Приховати квести" :hidden="quests_hidden"
-                        :mainIcon="FlagIcon" @click="quests_hidden = !quests_hidden" />
-                    <QuestsTable v-if="checkArrayFieldExisting(state.character.quests) && !quests_hidden"
-                        :quests="state.character.quests" />
+                <div v-if="checkObjectFieldExisting(state.character?.quests)" class="flex flex-col gap-2">
+                    <HideButton class="w-full" textShow="Показати квести" textHide="Приховати квести"
+                        :hidden="quests_hidden" :mainIcon="FlagIcon" @click="quests_hidden = !quests_hidden" />
+                    <QuestsTable v-if="!quests_hidden" :quests="state.character.quests" />
                 </div>
 
             </section>

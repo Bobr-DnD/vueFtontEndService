@@ -1,9 +1,9 @@
 <script setup>
-import { ref, onMounted, reactive, computed, toRaw } from 'vue';
+import { ref, onMounted, onBeforeUnmount, reactive, computed, toRaw } from 'vue';
 import { useRoute } from 'vue-router';
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '@utils/asyncHandler';
-import { toNewQuest } from '@utils/objects.dto';
+import { toNewQuest, toNewSession } from '@utils/objects.dto';
 import { notify } from '@utils/notification';
 import { socket } from '@ws/webSocket';
 
@@ -42,7 +42,17 @@ onMounted(async () => {
     }
 
     state.isLoading = false
-    state.session = res.data
+    state.session = toNewSession(res.data)
+})
+
+onBeforeUnmount(() => {
+    const events = ['session:updateNotify']
+    events.forEach(e => socket.off(e))
+})
+
+socket.on('session:updateNotify', (session) => {
+    state.session = toNewSession(session)
+    notify({ message: `Сесію було оновлено майстром`, type: 'warning' })
 })
 
 const filteredQuests = computed(() => {
@@ -88,7 +98,7 @@ async function saveQuest() {
     state.unsavedChanges = false
 
     notify({ message: 'Зміни збережені', type: 'info' })
-    socket.emit('session:updateEverywhere', sessionId)
+    socket.emit('session:updateNotify', sessionId)
 }
 
 async function deleteQuest() {
@@ -107,7 +117,7 @@ async function deleteQuest() {
     selectedQuest.value = toNewQuest({})
 
     notify({ message: 'Квест видалено', type: 'info' })
-    socket.emit('session:updateEverywhere', sessionId)
+    socket.emit('session:updateNotify', sessionId)
 }
 
 async function discardChanges() {

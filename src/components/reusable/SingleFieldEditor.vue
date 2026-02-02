@@ -39,8 +39,7 @@ const saveField = () => {
 </script>
 
 <template>
-    <div class="grid gap-2 items-center justify-items-start justify-start p-2"
-        :class="!fieldReadonly ? 'grid-cols-[1fr_44px_44px]' : 'grid-cols-[1fr_44px]'">
+    <div class="grid grid-cols-[1fr_44px] gap-2 items-center justify-items-start justify-start p-2">
 
         <form @submit.prevent class="flex flex-col items-start justify-center w-full">
             
@@ -56,7 +55,7 @@ const saveField = () => {
                disabled:bg-darkred-dark_gray disabled:text-darkred-light placeholder-darkred-dark_gray/60 disabled:placeholder-darkred-light/60 transition-all duration-200" />
         </form>
 
-        <div @click="editField"
+        <div v-if="fieldReadonly" @click="editField"
             class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl md:hover:cursor-pointer">
             <PencilIcon class="w-4 h-4 text-darkred-light md:hover:cursor-pointer" />
         </div>
