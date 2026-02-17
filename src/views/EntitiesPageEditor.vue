@@ -298,7 +298,7 @@ function removeEffect(id) {
         <SingleFieldEditor placeholder="Ціна" fieldName="price" :value="state.selectedEntity.price"
             :callback="updateEntityFields" type="number" />
 
-        <TextAreaEditor class="col-span-3" fieldName="notes" name="Записки" :value="state.selectedEntity.notes"
+        <TextAreaEditor class="col-span-3" fieldName="notes" name="Записки Майстра" :value="state.selectedEntity.notes"
             :callback="updateEntityFields" />
 
         <SingleFieldEditor placeholder="Рідкість" fieldName="rarity" :value="state.selectedEntity.rarity"

@@ -217,7 +217,7 @@ function showPerkType(id) {
     });
 
     characterPerksSearchQuery.value = ''
-    sessionPerksSearchQuery.value = ''
+    sessionPerksSearchQuery.value = ''    
 }
 
 function getFilteredSessionPerks(type) {
@@ -533,7 +533,7 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
 
             <Header1 class="col-span-2 justify-self-center font-medium" label="Редагування існуючи полей:" />
 
-            <Header1 v-if="!checkArrayFieldExisting(selected_character.health)" class="col-span-2" label="Пусто" />
+            <Header1 v-if="!checkObjectFieldExisting(selected_character.health)" class="col-span-2" label="Пусто" />
 
             <HealthFieldsEditor v-for="field in selected_character.health" :key="field.id" :label="field.name"
                 :health_field="field" class="col-span-2" :callback="updateHealthFields"
