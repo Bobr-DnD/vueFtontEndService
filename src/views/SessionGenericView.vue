@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, onBeforeUnmount, watch } from 'vue';
+import RepositoryFactory from '@http/RepositoryFactory';
 import { useRoute } from 'vue-router';
 import { socket, connected } from '@ws/webSocket';
 

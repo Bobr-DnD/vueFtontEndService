@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, onMounted, computed, ref, toRaw } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { asyncHandler } from '@utils/asyncHandler'
 import RepositoryFactory from '@http/RepositoryFactory'
 import { notify } from '@utils/notification'
@@ -14,11 +14,8 @@ import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue'
 import Header1 from '@/components/reusable/Titles/Header1.vue'
 
-const state = reactive({
-  sessions: [],
-  isLoading: true
-})
-
+const sessions = ref([])
+const isLoading = ref(true)
 const searchQuery = ref('')
 const modalShow = ref(false)
 const newPass = ref('')
@@ -26,87 +23,119 @@ const confirmPass = ref('')
 const sessionName = ref('')
 
 onMounted(async () => {
-
   const [res, err] = await asyncHandler(
-    RepositoryFactory.get('session')
+    RepositoryFactory.get('session/details')
   )
   if (err) return
 
-  state.sessions = res.data
-  state.isLoading = false
+  sessions.value = res.data
+  isLoading.value = false
 })
 
 const filteredSessions = computed(() => {
-
-  let sessions = toRaw(state.sessions)
-  if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase()
-    sessions = sessions.filter(el =>
-      el.name.toLowerCase().includes(query)
-    )
+  if (!searchQuery.value.trim()) {
+    return sessions.value
   }
 
-  return sessions
+  const query = searchQuery.value.toLowerCase()
+  return sessions.value.filter(el =>
+    el.name.toLowerCase().includes(query)
+  )
 })
 
 async function createSession() {
-  if (newPass.value.trim().length < 8) {
-    notify({ message: 'Мінімальна довжина пароля - 8 символів', type: 'error' })
+  const validationErrors = validateForm()
+
+  if (validationErrors.length > 0) {
+    validationErrors.forEach(error => notify({ message: error, type: 'error' }))
     return
   }
 
-  if (newPass.value !== confirmPass.value) {
-    notify({ message: 'Паролі не співпадають', type: 'error' })
-    return
-  }
+  isLoading.value = true
+  modalShow.value = false
 
-  if (!sessionName.value.trim()) {
-    notify({ message: 'Введіть назву сесії', type: 'error' })
+  const [newSessionRes, newSessionErr] = await asyncHandler(
+    RepositoryFactory.create('session', {
+      password: newPass.value.trim(),
+      name: sessionName.value.trim()
+    })
+  )
+  if (newSessionErr) {
+    isLoading.value = false
     return
   }
 
   const [res, err] = await asyncHandler(
-    RepositoryFactory.create('session', { password: toRaw(newPass.value.trim()), name: toRaw(sessionName.value.trim()) })
+    RepositoryFactory.get('session/details')
   )
-  if (err) return
 
-  state.sessions.push(res.data)
-  modalShow.value = false
+  if (err) {
+    isLoading.value = false
+    return
+  }
 
+  sessions.value = res.data
+  isLoading.value = false
+
+  clearModalValues()
 }
 
+function validateForm() {
+  const errors = []
+
+  if (newPass.value.trim().length < 8) {
+    errors.push('Мінімальна довжина пароля - 8 символів')
+  }
+
+  if (newPass.value !== confirmPass.value) {
+    errors.push('Паролі не співпадають')
+  }
+
+  if (!sessionName.value.trim()) {
+    errors.push('Введіть назву сесії')
+  }
+
+  return errors
+}
+
+function clearModalValues() {
+  newPass.value = ''
+  confirmPass.value = ''
+  sessionName.value = ''
+}
+
+watch(modalShow, () => clearModalValues())
 </script>
 
 <template>
   <Navigation />
 
-  <div v-if="!state.isLoading" class="mx-auto my-4 w-96 flex flex-col gap-2">
+  <div v-if="!isLoading" class="mx-auto my-4 w-96 flex flex-col gap-2">
     <SearchInputBlack v-model:searchQuery="searchQuery" />
 
     <div @click="modalShow = !modalShow"
       class="border-8 border-darkred-dark rounded-2xl flex justify-center items-center hover:cursor-pointer hover:bg-darkred-dark_gray hover:text-darkred-light">
-
       <PlusButton class="w-20" />
     </div>
-
   </div>
 
-  <SessionCard v-if="!state.isLoading" v-for="session in filteredSessions" :key="session.id" :id="session.id"
-    :name="session.name" :image="session.image" />
+  <div class="lg:w-full flex lg:flex-row flex-col gap-8 justify-center">
+    <SessionCard v-if="!isLoading" v-for="session in filteredSessions" :key="session.id" :id="session.id"
+      :name="session.name" :image="session.image" />
+  </div>
 
-  <div v-if="state.isLoading" class="h-full flex justify-center items-center">
+  <div v-if="isLoading" class="h-full flex justify-center items-center">
     <CardsLoader />
   </div>
 
   <div v-if="modalShow" @click="modalShow = false" class="modal-overlay flex justify-center items-center">
-
     <div @click.stop
       class="max-w-[480px] w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-gothic md:hover:cursor-default">
 
       <CloseButtonRedBG @click="modalShow = false" />
-      <Header1 label="Свторити сесію:" class="px-1" />
+      <Header1 label="Створити сесію:" class="px-1" />
 
-      <form @submit.prevent="createSession">
+      <form @submit.prevent="createSession" class="flex flex-col gap-2">
         <InputName v-model:nameString="sessionName" />
         <InputPassword :new="true" v-model:passString="newPass" />
         <InputPassword :confirm="true" v-model:passString="confirmPass" />
@@ -114,7 +143,6 @@ async function createSession() {
 
       <AprroveButtonWithText @click="createSession" text="Створити сесію" />
     </div>
-
   </div>
 </template>
 

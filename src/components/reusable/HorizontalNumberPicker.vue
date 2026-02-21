@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch, nextTick } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch, nextTick } from 'vue'
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -17,6 +17,14 @@ const props = defineProps({
   pad: { type: Number, default: 2 }, // e.g. 2 -> "07"
   callback: { type: Function, required: true }
 })
+
+function handleWheel(e) {
+  e.preventDefault()
+
+  scroller.value.scrollLeft += e.deltaY
+}
+
+
 
 const items = computed(() => {
   const out = []
@@ -90,19 +98,31 @@ async function scrollToValue() {
   wrap.scrollTo({ left: offset, behavior: 'smooth' })
 }
 
-onMounted(() => nextTick(scrollToValue))
+onMounted(() => {
+  if (scroller.value) {
+    scroller.value.addEventListener('wheel', handleWheel, { passive: false })
+  }
+  nextTick(scrollToValue)
+})
+
+onUnmounted(() => {
+  if (scroller.value) {
+    scroller.value.removeEventListener('wheel', handleWheel)
+  }
+})
+
 watch(() => props.value.value, scrollToValue)
 </script>
 
 <template>
+
   <div class="w-full max-w-md mx-auto font-gothic" :id="props.title">
-    <!-- Track -->
-    <div ref="scroller" class="relative flex gap-4 overflow-x-auto no-scrollbar px-6 py-3
+
+    <div ref="scroller" class="relative flex gap-4 overflow-x-auto auto-hide-scroll px-6 py-3
              snap-x snap-mandatory scroll-p-1 select-none">
 
       <div class="shrink-0" :style="{ width: '50%' }"></div>
 
-      <!-- numbers -->
       <div v-for="(v, i) in items" :key="v" :ref="el => itemRefs[i] = el" class="snap-center shrink-0 w-14 h-14 grid place-items-center rounded-xl border transition-all duration-200 cursor-pointer bg-white text-gray-800 
         border-gray-300 dark:bg-zinc-900 dark:text-zinc-100 dark:border-zinc-700 dark:md:hover:border-zinc-500">
 
@@ -114,9 +134,8 @@ watch(() => props.value.value, scrollToValue)
 
     </div>
 
-    <!-- center indicator line -->
     <div class="relative h-0">
-      <div class="absolute left-1/2 -translate-x-1/2 -top-8 h-8 w-0.5 bg-darkred-bright/70 rounded"></div>
+      <div class="absolute left-1/2 -translate-x-1/2 -top-8 h-8 w-0.5 bg-darkred-bright/90 rounded"></div>
     </div>
   </div>
 
@@ -131,11 +150,10 @@ watch(() => props.value.value, scrollToValue)
       OK
     </button>
   </div>
+
 </template>
 
 <style>
-
-
 @keyframes gradient-pulse {
   0% {
     background-position: 0% 50%;

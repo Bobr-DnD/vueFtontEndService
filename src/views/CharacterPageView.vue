@@ -34,6 +34,7 @@ const state = reactive({
     character: {},
     session: {},
     isLoading: true,
+    characterIsUpdating: false,
 })
 
 const effects_hidden = ref(true)
@@ -41,9 +42,9 @@ const quests_hidden = ref(true)
 const currency_hidden = ref(true)
 const custom_hidden = ref(true)
 const custom_modal_hidden = ref(true)
+
 const isBackendOffline = ref(false)
 const offlineTimeout = ref(null)
-
 
 const characterId = useRoute().params.characterId
 const sessionId = useRoute().params.sessionId
@@ -53,11 +54,13 @@ onMounted(async () => {
         RepositoryFactory.getById('character', characterId)
     )
     const [resSession, errSession] = await asyncHandler(
-        RepositoryFactory.getById('session', sessionId)
+        RepositoryFactory.getById('session/plainWithEntitiesAndEffects', sessionId)
     )
 
-    if (errCharacter) return
-    if (errSession) return
+    if (errCharacter || errSession) {
+        state.isLoading = false
+        return
+    }
 
     state.character = toNewCharacterObject(resCharacter.data)
     state.session = toNewSession(resSession.data)
@@ -79,6 +82,7 @@ socket.on('session:join', (session) => {
 })
 
 socket.on('character:updateNotify', (character) => {
+    state.characterIsUpdating = false
     state.character = toNewCharacterObject(character)
 })
 
@@ -86,7 +90,7 @@ socket.on('session:updateNotify', (session) => {
     state.session = toNewSession(session)
     state.character = toNewCharacterObject(state.session.characters.find(character => character.id === characterId))
     
-    notify({ message: 'Сесія та персонаж оновлено майстром', type: 'warning' })
+    notify({ message: 'Майстер щось оновив', type: 'warning' })
 })
 
 watch(connected, (isConnected) => {
@@ -111,6 +115,7 @@ watch(connected, (isConnected) => {
 
 function updateCharacter() {
     socket.emit('character:updateData', (toRaw(state.character)))
+    state.characterIsUpdating = true
 }
 
 function addExperience() {
@@ -172,7 +177,8 @@ function updateCharacterNotes(field, value) {
                 :image="state.character.image" />
 
             <Experience :exp="state.character.experience" :expMax="state.character.experienceToLevelUp"
-                :perkPoints="state.character.perkPoints" :callback="addExperience" />
+                :perkPoints="state.character.perkPoints" :callback="addExperience"
+                :class="state.characterIsUpdating && 'pointer-events-none'" />
 
             <TextAreaEditor class="lg:grid hidden" fieldName="playerNotes" name="Записки гравця"
                 :value="state.character.playerNotes" :callback="updateCharacterNotes" />
@@ -189,7 +195,7 @@ function updateCharacterNotes(field, value) {
                     </div>
 
                     <HorizontalNumberPicker :value="h.value" :min="-h.value" :max="h.max - h.value" :colors="h.colors"
-                        :callback="updateHealthFields" :title="h.name" />
+                        :callback="updateHealthFields" :title="h.name"/>
                 </div>
 
             </section>
