@@ -22,12 +22,12 @@ const sessionId = useRoute().params.sessionId
 
 <template>
     <div
-        class="m-4 p-2 rounded-xl border-4 border-darkred-dark font-gothic text-lg h-fit min-h-96 w-80 flex flex-col gap-3">
+        class="rounded-xl border-4 border-darkred-dark font-gothic text-lg h-fit min-h-96 w-full max-w-sm flex flex-col gap-3">
         <div class="w-full flex flex-col items-center gap-3">
 
             <RouterLink v-if="props.routing" :to="'/session/' + sessionId + '/character/' + props.character.id"
                 class="w-full relative inline-block">
-                <img class="w-full h-96 object-cover object-top rounded-xl border-darkred-red border-4"
+                <img class="w-full h-96 object-cover object-top rounded-t-lg"
                     :src="character.image ? character.image : 'https://placehold.co/400x400?text=Character'"
                     alt="Character image" />
 
@@ -39,7 +39,7 @@ const sessionId = useRoute().params.sessionId
             </RouterLink>
 
             <div v-else class="w-full relative inline-block">
-                <img class="w-full h-96 object-cover object-top rounded-xl border-darkred-red border-4"
+                <img class="w-full h-96 object-cover object-top rounded-t-lg"
                     :src="character.image ? character.image : 'https://placehold.co/400x400?text=Character'"
                     alt="Character image" />
 
@@ -58,13 +58,17 @@ const sessionId = useRoute().params.sessionId
 
         </div>
 
-        <div
-            class="grid auto-rows-max grid-cols-2 items-center justify-items-center mb-3 border-y-2 border-darkred-red rounded-md">
-            <div>Рівень: {{ props.character.level }}</div>
-            <div>Досвід: {{ props.character.experience }}/{{ props.character.experienceToLevelUp }}</div>
-            <div class="col-span-2" v-for="h in props.character.health" :key="h.id">{{ h.name }}: {{ h.value }}/{{ h.max
-            }}</div>
+        <div class="w-full flex justify-center">
+            <div
+                class="grid auto-rows-max w-full max-w-xs grid-cols-2 items-center justify-items-center mb-3 border-y-2 border-darkred-red rounded-md">
+                <div>Рівень: {{ props.character.level }}</div>
+                <div>Досвід: {{ props.character.experience }}/{{ props.character.experienceToLevelUp }}</div>
+                <div class="col-span-2" v-for="h in props.character.health" :key="h.id">{{ h.name }}: {{ h.value
+                    }}/{{ h.max }}
+                </div>
+            </div>
         </div>
+
 
         <div v-if="!props.routing" class="border-b-2 border-darkred-bright rounded-lg mb-4">
             <div class="text-center border-t-2 border-darkred-bright rounded-lg">Характеристики:</div>

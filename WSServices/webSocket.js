@@ -8,8 +8,8 @@ const socket = io(import.meta.env.VITE_WS, {
   reconnection: true,
   reconnectionAttempts: Infinity,
   reconnectionDelay: 1000,
-  reconnectionDelayMax: 5000,
-  randomizationFactor: 0.5 
+  reconnectionDelayMax: 2000,
+  randomizationFactor: 1 
 });
 
 socket.on("connect", () => {

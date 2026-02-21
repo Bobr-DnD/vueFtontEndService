@@ -249,7 +249,7 @@ function removePerkSingleRequirement(key) {
         <DropDownChoosen label="Тип перку" entity_name="perkType" :selected="selectedPerk.type.name"
             :entity_array="state.session.perkTypes" :callback="getPerkType" />
 
-        <TextAreaEditor class="col-span-full" fieldName="notes" name="Записки" :value="selectedPerk.notes"
+        <TextAreaEditor class="col-span-full" fieldName="notes" name="Записки Майстра" :value="selectedPerk.notes"
             :callback="updatePerkField" />
 
     </section>

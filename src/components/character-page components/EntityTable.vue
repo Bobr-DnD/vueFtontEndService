@@ -105,7 +105,7 @@ function getFilteredSessionEntities(type) {
             class="w-full p-2 fixed inset-0 flex flex-col gap-1 items-center justify-center z-50 bg-darkred-dark/50 md:hover:cursor-pointer text-darkred-light">
 
             <div @click.stop
-                class="max-w-[480px] w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-gothic md:hover:cursor-default">
+                class="max-w-[480px] max-h-[680px] h-90% w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-gothic md:hover:cursor-default">
 
                 <CloseButtonRedBG @click="type.modal_hidden = true" />
 

@@ -1,5 +1,7 @@
 <script setup>
 import { ref } from 'vue';
+import { checkObjectFieldExisting } from '/utils/entityHelper';
+
 import DeleteButton from '@/components/reusable/Buttons/DeleteButton.vue';
 import ApproveButton from '@/components/reusable/Buttons/ApproveButton.vue';
 import PerkModal from '../EntityModals/PerkModal.vue';
@@ -54,10 +56,10 @@ const modalHidden = ref(true)
             <ApproveButton v-if="props.addable" @click.stop @click="props.callback_add(props.perk)"
                 class="row-span-2 w-11 justify-self-center" />
 
-            <div v-if="props.perk.count" class="p2 text-clip">Опис: {{ props.perk.descriptions[props.perk.count - 1] }}
+            <div v-if="props.perk.count " class="p2 text-clip">Опис: {{ props.perk.descriptions[props.perk.count - 1] }}
             </div>
 
-            <div v-else class="p2 text-clip">Опис: {{ props.perk.descriptions[0] }}</div>
+            <div v-else-if="checkObjectFieldExisting(props.perk.descriptions)" class="p2 text-clip">Опис: {{ props.perk.descriptions[0] }}</div>
 
         </div>
 

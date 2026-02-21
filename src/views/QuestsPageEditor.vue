@@ -216,7 +216,7 @@ function getQuestType(id) {
         <SingleFieldEditor placeholder="Винагорода" fieldName="reward" type="text" :value="selectedQuest.reward"
             :callback="updateQuestFields" class="col-span-full" />
 
-        <TextAreaEditor fieldName="notes" name="Записки" :value="selectedQuest.notes" :callback="updateQuestFields"
+        <TextAreaEditor fieldName="notes" name="Записки Майстра" :value="selectedQuest.notes" :callback="updateQuestFields"
             class="col-span-full" />
 
     </section>

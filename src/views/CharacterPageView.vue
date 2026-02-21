@@ -29,11 +29,13 @@ import BackendOffline from '@/components/reusable/BackendOffline.vue';
 import HorizontalNumberPicker from '@/components/reusable/HorizontalNumberPicker.vue';
 import ProgressiveBar from '@/components/reusable/ProgressiveBar.vue';
 import DiceLoader from '@/components/reusable/Loaders/DiceLoader.vue';
+import { CursorArrowRippleIcon } from '@heroicons/vue/24/outline';
 
 const state = reactive({
     character: {},
     session: {},
     isLoading: true,
+    characterIsUpdating: false,
 })
 
 const effects_hidden = ref(true)
@@ -41,9 +43,11 @@ const quests_hidden = ref(true)
 const currency_hidden = ref(true)
 const custom_hidden = ref(true)
 const custom_modal_hidden = ref(true)
+
 const isBackendOffline = ref(false)
 const offlineTimeout = ref(null)
 
+const openHealthIds = ref(new Set())
 
 const characterId = useRoute().params.characterId
 const sessionId = useRoute().params.sessionId
@@ -53,11 +57,13 @@ onMounted(async () => {
         RepositoryFactory.getById('character', characterId)
     )
     const [resSession, errSession] = await asyncHandler(
-        RepositoryFactory.getById('session', sessionId)
+        RepositoryFactory.getById('session/plainWithEntitiesAndEffects', sessionId)
     )
 
-    if (errCharacter) return
-    if (errSession) return
+    if (errCharacter || errSession) {
+        state.isLoading = false
+        return
+    }
 
     state.character = toNewCharacterObject(resCharacter.data)
     state.session = toNewSession(resSession.data)
@@ -79,14 +85,14 @@ socket.on('session:join', (session) => {
 })
 
 socket.on('character:updateNotify', (character) => {
+    state.characterIsUpdating = false
     state.character = toNewCharacterObject(character)
 })
 
 socket.on('session:updateNotify', (session) => {
     state.session = toNewSession(session)
     state.character = toNewCharacterObject(state.session.characters.find(character => character.id === characterId))
-    
-    notify({ message: 'Сесія та персонаж оновлено майстром', type: 'warning' })
+    notify({ message: 'Майстер щось оновив', type: 'warning' })
 })
 
 watch(connected, (isConnected) => {
@@ -111,6 +117,7 @@ watch(connected, (isConnected) => {
 
 function updateCharacter() {
     socket.emit('character:updateData', (toRaw(state.character)))
+    state.characterIsUpdating = true
 }
 
 function addExperience() {
@@ -128,6 +135,7 @@ function updateHealthFields(value, title) {
     if (item) {
         item.value += value
     }
+    openHealthIds.value.delete(item.id)
     updateCharacter()
 }
 
@@ -157,6 +165,14 @@ function updateCharacterNotes(field, value) {
     updateCharacter()
 }
 
+function togglePicker(healthId) {
+    if (openHealthIds.value.has(healthId)) {
+        openHealthIds.value.delete(healthId)
+    } else {
+        openHealthIds.value.add(healthId)
+    }
+}
+
 </script>
 
 <template>
@@ -172,7 +188,8 @@ function updateCharacterNotes(field, value) {
                 :image="state.character.image" />
 
             <Experience :exp="state.character.experience" :expMax="state.character.experienceToLevelUp"
-                :perkPoints="state.character.perkPoints" :callback="addExperience" />
+                :perkPoints="state.character.perkPoints" :callback="addExperience"
+                :class="state.characterIsUpdating && 'pointer-events-none'" />
 
             <TextAreaEditor class="lg:grid hidden" fieldName="playerNotes" name="Записки гравця"
                 :value="state.character.playerNotes" :callback="updateCharacterNotes" />
@@ -184,12 +201,19 @@ function updateCharacterNotes(field, value) {
 
                 <div v-for="h in state.character.health" :key="h.id">
 
-                    <div class=" p-1 grow">
-                        <ProgressiveBar :value="h.value" :valueMax="h.max" :text="h.name" :colors="h.colors" />
+                    <div class=" p-1 grow cursor-pointer relative">
+                        <CursorArrowRippleIcon class="w-5 h-5 absolute top-2 right-2 text-darkred-dark" />
+                        <ProgressiveBar @click="togglePicker(h.id)" :value="h.value" :valueMax="h.max" :text="h.name"
+                            :colors="h.colors" />
                     </div>
 
-                    <HorizontalNumberPicker :value="h.value" :min="-h.value" :max="h.max - h.value" :colors="h.colors"
-                        :callback="updateHealthFields" :title="h.name" />
+                    <Transition name="slide">
+                        <div v-if="openHealthIds.has(h.id)">
+                            <HorizontalNumberPicker :value="h.value" :min="-h.value" :max="h.max - h.value"
+                                :colors="h.colors" :callback="updateHealthFields" :title="h.name" />
+                        </div>
+                    </Transition>
+
                 </div>
 
             </section>
@@ -201,50 +225,72 @@ function updateCharacterNotes(field, value) {
                         textHide="Приховати додаткові характеристики" :hidden="custom_hidden" :mainIcon="ChartBarIcon"
                         @click="custom_hidden = !custom_hidden" />
 
-                    <ObjectFieldsTable v-if="!custom_hidden" :fields="state.character.customFields"
-                        :callback="updateCustomFields" :field_removable="true" />
+                    <div class="grid transition-all duration-300 ease-in-out"
+                        :style="{ gridTemplateRows: custom_hidden ? '0fr' : '1fr' }">
+                        <div class="overflow-hidden">
+                            <ObjectFieldsTable :fields="state.character.customFields" :callback="updateCustomFields"
+                                :field_removable="true" />
 
-                    <PlusButton v-if="!custom_hidden" @click="custom_modal_hidden = !custom_modal_hidden" class="w-16 h-14 mt-2 mx-auto text-center border-4 border-darkred-dark rounded-lg 
+                            <PlusButton @click="custom_modal_hidden = !custom_modal_hidden" class="w-16 h-14 mt-2 mx-auto text-center border-4 border-darkred-dark rounded-lg 
            transition-all duration-300 ease-out md:hover:cursor-pointer
            bg-gradient-to-br from-darkred-dark to-darkred-light
            md:hover:from-darkred-red md:hover:to-darkred-dark relative overflow-hidden group" />
+                        </div>
+                    </div>
 
                     <div @click="custom_modal_hidden = true" v-if="!custom_modal_hidden && !custom_hidden"
                         class="fixed inset-0 flex items-center justify-center z-50 bg-darkred-dark/50 md:hover:cursor-pointer">
 
                         <div @click.stop
                             class="max-w-[480px] w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl bg-darkred-dark relative">
-                            <div class="">
+                            <div>
                                 <CloseButtonRedBG @click="custom_modal_hidden = true" />
                             </div>
 
                             <ObjectFieldsEditor class="hover:cursor-default" :name="'CustomFields_'"
                                 :fields="state.character.customFields" :callback="addCustomField" />
-
                         </div>
-
                     </div>
-
                 </div>
 
                 <div v-if="checkObjectFieldExisting(state.character?.currency)" class="flex flex-col gap-2">
                     <HideButton class="w-full" textShow="Показати баланс" textHide="Приховати баланс"
                         :hidden="currency_hidden" :mainIcon="BanknotesIcon"
                         @click="currency_hidden = !currency_hidden" />
-                    <CurrencyTable v-if="!currency_hidden" :currency_array="state.character.currency"
-                        :callback="updateCurrency" />
+
+                    <div class="grid transition-all duration-300 ease-in-out"
+                        :style="{ gridTemplateRows: currency_hidden ? '0fr' : '1fr' }">
+                        <div class="overflow-hidden">
+                            <CurrencyTable :currency_array="state.character.currency" :callback="updateCurrency" />
+                        </div>
+                    </div>
+
                 </div>
 
                 <div v-if="checkObjectFieldExisting(state.character?.effects)" class="flex flex-col gap-2">
                     <HideButton class="w-full" textShow="Показати ефекти" textHide="Приховати ефекти"
                         :hidden="effects_hidden" :mainIcon="SparklesIcon" @click="effects_hidden = !effects_hidden" />
-                    <EffectsTable v-if="!effects_hidden" :effects="state.character.effects" />
+
+                    <div class="grid transition-all duration-300 ease-in-out"
+                        :style="{ gridTemplateRows: effects_hidden ? '0fr' : '1fr' }">
+                        <div class="overflow-hidden">
+                            <EffectsTable :effects="state.character.effects" />
+                        </div>
+                    </div>
+
                 </div>
 
                 <div v-if="checkObjectFieldExisting(state.character?.quests)" class="flex flex-col gap-2">
                     <HideButton class="w-full" textShow="Показати квести" textHide="Приховати квести"
                         :hidden="quests_hidden" :mainIcon="FlagIcon" @click="quests_hidden = !quests_hidden" />
-                    <QuestsTable v-if="!quests_hidden" :quests="state.character.quests" />
+
+                    <div class="grid transition-all duration-300 ease-in-out"
+                        :style="{ gridTemplateRows: quests_hidden ? '0fr' : '1fr' }">
+                        <div class="overflow-hidden">
+                            <QuestsTable :quests="state.character.quests" />
+                        </div>
+                    </div>
+
                 </div>
 
             </section>
@@ -274,14 +320,34 @@ function updateCharacterNotes(field, value) {
 </template>
 
 <style scoped>
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-    transition: all 0.3s ease;
+.slide-enter-active {
+    transition: all 0.3s ease-out;
 }
 
-.fade-slide-enter-from,
-.fade-slide-leave-to {
+.slide-leave-active {
+    transition: all 0.2s ease-in;
+}
+
+.slide-enter-from {
     opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+}
+
+.slide-enter-to {
+    opacity: 1;
+    max-height: 500px;
+    transform: translateY(0);
+}
+
+.slide-leave-from {
+    opacity: 1;
+    max-height: 500px;
+}
+
+.slide-leave-to {
+    opacity: 0;
+    max-height: 0;
     transform: translateY(-10px);
 }
 </style>

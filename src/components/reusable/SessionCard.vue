@@ -61,7 +61,7 @@ async function sessionLogin() {
 <template>
     <div class="flex flex-col items-center justify-center min-h-lg">
         <div
-            class="max-w-sm w-full m-6 rounded-xl shadow-lg overflow-hidden border-4 border-darkred-red bg-darkred-dark">
+            class="max-w-sm w-full rounded-xl shadow-lg overflow-hidden border-4 border-darkred-red bg-darkred-dark">
             <div class="relative">
 
                 <img class="w-full h-96 object-cover object-top border-darkred-light"

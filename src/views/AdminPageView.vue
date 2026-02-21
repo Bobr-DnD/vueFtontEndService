@@ -162,14 +162,14 @@ function updateSessionField(fieldName, field) {
     <Header1 label="Гравці відсутні - створіть їх для початку" />
   </section>
 
-  <section v-if="!state.isLoading && state.selectedChatacter" class="m-4 p-2 flex flex-col gap-4">
+  <!-- <section v-if="!state.isLoading && state.selectedChatacter" class="m-4 p-2 flex flex-col gap-4">
     <Header1 label="Базові характеристики(з бонусами):" />
 
     <div class="flex flex-wrap gap-4">
       <CharacteristicFields v-if="checkObjectFieldExisting(state.selectedChatacter?.characteristics)"
         :baseCharacteristics="state.selectedChatacter.characteristics" :computedCharacteristics="state.selectedChatacter.characteristicsComputed" :callback="updateCharacterCharacteristic" />
     </div>
-  </section>
+  </section> -->
 
   <section v-if="!state.isLoading && state.selectedChatacter"
     class="m-4 p-2 flex flex-col gap-4 justify-center items-center">
