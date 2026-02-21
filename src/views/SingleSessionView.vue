@@ -40,7 +40,7 @@ socket.on('session:update', (session) => {
 
 <template>
   <SessionViewNavigtaion />
-  <div v-if="!isLoading" class="flex items-start justify-center flex-wrap mt-5">
+  <div v-if="!isLoading" class="flex gap-8 items-start justify-center flex-wrap mt-5">
     <characterCard v-for="character in session.characters" :key="character.id" :character="character"
       :routing="true" :online="charactersOnlineIds.includes(character.id)" />
   </div>
