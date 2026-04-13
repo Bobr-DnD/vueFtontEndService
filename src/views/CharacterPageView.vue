@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, onMounted, onBeforeUnmount, watch, toRaw } from 'vue';
+import { reactive, ref, onMounted, onBeforeUnmount, watch, toRaw, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { ChartBarIcon, SparklesIcon, FlagIcon, BanknotesIcon } from '@heroicons/vue/24/solid'
 
@@ -51,6 +51,10 @@ const openHealthIds = ref(new Set())
 
 const characterId = useRoute().params.characterId
 const sessionId = useRoute().params.sessionId
+
+const inventories = computed(() => {
+
+})
 
 onMounted(async () => {
     const [resCharacter, errCharacter] = await asyncHandler(
@@ -188,7 +192,7 @@ function togglePicker(healthId) {
                 :image="state.character.image" />
 
             <Experience :exp="state.character.experience" :expMax="state.character.experienceToLevelUp"
-                :perkPoints="state.character.perkPoints" :callback="addExperience"
+                :perkPoints="state.character.perkPoints" :level="state.character.level" :callback="addExperience"
                 :class="state.characterIsUpdating && 'pointer-events-none'" />
 
             <TextAreaEditor class="lg:grid hidden" fieldName="playerNotes" name="Записки гравця"

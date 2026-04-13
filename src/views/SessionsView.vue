@@ -119,7 +119,7 @@ watch(modalShow, () => clearModalValues())
     </div>
   </div>
 
-  <div class="lg:w-full flex lg:flex-row flex-col gap-8 justify-center">
+  <div class="lg:w-full flex lg:flex-row flex-col gap-8 justify-center pb-4">
     <SessionCard v-if="!isLoading" v-for="session in filteredSessions" :key="session.id" :id="session.id"
       :name="session.name" :image="session.image" />
   </div>
