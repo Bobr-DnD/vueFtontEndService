@@ -15,7 +15,7 @@ import Header1 from '@/components/reusable/Titles/Header1.vue';
 import Header2 from '@/components/reusable/Titles/Header2.vue';
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue';
 import PerkTile from '@/components/reusable/EntityTiles/PerkTile.vue';
-import SingleFieldEditor from '@/components/reusable/SingleFieldEditor.vue';
+import InputTextReactive from '@/components/reusable/Inputs/InputTextReactive.vue';
 import DropDownChoosen from '@/components/reusable/DropDowns/DropDownChoosen.vue';
 import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
 import ArraySingleStringForm from '@/components/reusable/Forms/ArraySingleStringForm.vue';
@@ -243,7 +243,7 @@ function removePerkSingleRequirement(key) {
     <section v-if="!state.isLoading" class="m-4 grid grid-cols-3 gap-4">
         <Header1 class="col-span-full" label="Створити\Редагувати перк:" />
 
-        <SingleFieldEditor class="col-span-2" placeholder="Назва" fieldName="name" :value="selectedPerk.name"
+        <InputTextReactive class="col-span-2" placeholder="Назва" fieldName="name" :value="selectedPerk.name"
             :callback="updatePerkField" type="text" :important="true" />
 
         <DropDownChoosen label="Тип перку" entity_name="perkType" :selected="selectedPerk.type.name"
@@ -278,7 +278,7 @@ function removePerkSingleRequirement(key) {
             class="col-span-2 justify-self-center flex gap-2 items-center">
             <TextDropdown label="Характеристика" :entity_array="state.session.characteristicsList"
                 entity_name="perkRequirement" :callback="getCharacteristicType" />
-            <SingleFieldEditor placeholder="Значення" fieldName="value" type="number" :value="perkNewRequirement.value"
+            <InputTextReactive placeholder="Значення" fieldName="value" type="number" :value="perkNewRequirement.value"
                 :callback="getCharacteristicValue" />
             <div class="pb-2 self-end">
                 <AprroveButtonWithText @click="updateEffectCharacteristics" text="Додати поле" />

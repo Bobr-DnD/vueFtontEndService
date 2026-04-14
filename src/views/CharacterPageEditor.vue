@@ -7,11 +7,11 @@ import { socket } from '@ws/webSocket';
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
 import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue'
-import SingleFieldEditor from '@/components/reusable/SingleFieldEditor.vue';
+import InputTextReactive from '@/components/reusable/Inputs/InputTextReactive.vue';
 import ImageEditor from '@/components/reusable/ImageEditor.vue';
 import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
-import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
-import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
+import CustomFieldTile from '@/components/reusable/EntityTiles/CustomFieldTile.vue';
+import CustomFieldsEditor from '@/components/reusable/CustomFieldsEditor.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import HealthFieldsEditor from '@/components/admin-page components/HealthFieldsEditor.vue';
@@ -471,22 +471,22 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
             <ImageEditor class="w-full col-span-2" :image="selected_character.image" label="Character image"
                 :callback="addImage" />
 
-            <SingleFieldEditor placeholder="Ім'я" fieldName="name" :value="selected_character.name"
+            <InputTextReactive placeholder="Ім'я" fieldName="name" :value="selected_character.name"
                 :callback="updateCharacterField" :important="true" class="w-full" />
-            <SingleFieldEditor placeholder="Стать" fieldName="gender" :value="selected_character.gender"
+            <InputTextReactive placeholder="Стать" fieldName="gender" :value="selected_character.gender"
                 :callback="updateCharacterField" class="w-full" />
-            <SingleFieldEditor placeholder="Клас" fieldName="class" :value="selected_character.class"
+            <InputTextReactive placeholder="Клас" fieldName="class" :value="selected_character.class"
                 :callback="updateCharacterField" class="w-full" />
-            <SingleFieldEditor placeholder="Раса" fieldName="race" :value="selected_character.race"
+            <InputTextReactive placeholder="Раса" fieldName="race" :value="selected_character.race"
                 :callback="updateCharacterField" class="w-full" />
 
-            <SingleFieldEditor placeholder="Рівень" fieldName="level" :value="selected_character.level"
+            <InputTextReactive placeholder="Рівень" fieldName="level" :value="selected_character.level"
                 :callback="updateCharacterField" type="number" class="w-full" />
-            <SingleFieldEditor placeholder="Очки перків" fieldName="perkPoints" :value="selected_character.perkPoints"
+            <InputTextReactive placeholder="Очки перків" fieldName="perkPoints" :value="selected_character.perkPoints"
                 :callback="updateCharacterField" type="number" class="w-full" />
-            <SingleFieldEditor placeholder="Досвід" fieldName="experience" :value="selected_character.experience"
+            <InputTextReactive placeholder="Досвід" fieldName="experience" :value="selected_character.experience"
                 :callback="updateCharacterField" type="number" class="w-full" />
-            <SingleFieldEditor placeholder="К-сть досвіду для рівня" fieldName="experienceToLevelUp"
+            <InputTextReactive placeholder="К-сть досвіду для рівня" fieldName="experienceToLevelUp"
                 :value="selected_character.experienceToLevelUp" :callback="updateCharacterField" type="number"
                 class="w-full" />
 
@@ -500,7 +500,7 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
             <Header1 v-if="!checkObjectFieldExisting(selected_character.characteristics)" class="col-span-2"
                 label="Пусто" />
 
-            <ObjectFieldsTable v-if="checkObjectFieldExisting(selected_character.characteristics)"
+            <CustomFieldTile v-if="checkObjectFieldExisting(selected_character.characteristics)"
                 :fields="selected_character.characteristics" :callback="updateCharacterCharacteristic" />
 
             <Header1 class="col-span-2 justify-self-center" label="Список фінансів:" />
@@ -518,12 +518,12 @@ const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
             <Header1 v-if="!checkObjectFieldExisting(selected_character.customFields)" class="col-span-2"
                 label="Пусто" />
 
-            <ObjectFieldsTable v-if="checkObjectFieldExisting(selected_character.customFields)"
+            <CustomFieldTile v-if="checkObjectFieldExisting(selected_character.customFields)"
                 :fields="selected_character.customFields" :callback="updateCustomFields" :field_removable="true" />
 
             <Header1 class="col-span-w font-medium" label="Додати нове поле:" />
 
-            <ObjectFieldsEditor class="col-span-2" name="CustomFields_" :fields="selected_character.customFields"
+            <CustomFieldsEditor class="col-span-2" name="CustomFields_" :fields="selected_character.customFields"
                 :callback="addCustomField" />
 
         </div>

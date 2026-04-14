@@ -9,7 +9,7 @@ import { socket } from '@ws/webSocket';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
 import Loader from 'vue-spinner/src/SyncLoader.vue'
-import SingleFieldEditor from '@/components/reusable/SingleFieldEditor.vue';
+import InputTextReactive from '@/components/reusable/Inputs/InputTextReactive.vue';
 import SearchInputBlack from '@/components/reusable/SearchInputs/SearchInputBlack.vue';
 import Header1 from '@/components/reusable/Titles/Header1.vue';
 import Header2 from '@/components/reusable/Titles/Header2.vue';
@@ -204,16 +204,16 @@ function getQuestType(id) {
 
         <Header1 class="col-span-full" label="Створити\Редагувати квест:" />
 
-        <SingleFieldEditor placeholder="Назва" fieldName="name" type="text" :important="true"
+        <InputTextReactive placeholder="Назва" fieldName="name" type="text" :important="true"
             :value="selectedQuest.name" :callback="updateQuestFields" class="col-span-2" />
 
         <DropDownChoosen label="Статус квесту" entity_name="questStatus" :entity_array="state.session.questTypes"
             :callback="getQuestType" :selected="selectedQuest.status" />
 
-        <SingleFieldEditor placeholder="Опис" fieldName="description" type="text" :important="true"
+        <InputTextReactive placeholder="Опис" fieldName="description" type="text" :important="true"
             :value="selectedQuest.description" :callback="updateQuestFields" class="col-span-full" />
 
-        <SingleFieldEditor placeholder="Винагорода" fieldName="reward" type="text" :value="selectedQuest.reward"
+        <InputTextReactive placeholder="Винагорода" fieldName="reward" type="text" :value="selectedQuest.reward"
             :callback="updateQuestFields" class="col-span-full" />
 
         <TextAreaEditor fieldName="notes" name="Записки Майстра" :value="selectedQuest.notes" :callback="updateQuestFields"

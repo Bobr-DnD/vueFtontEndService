@@ -15,7 +15,7 @@ import Loader from 'vue-spinner/src/SyncLoader.vue'
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue'
 import Header1 from '@/components/reusable/Titles/Header1.vue'
 import Header2 from '@/components/reusable/Titles/Header2.vue'
-import SingleFieldEditor from '@/components/reusable/SingleFieldEditor.vue'
+import InputTextReactive from '@/components/reusable/Inputs/InputTextReactive.vue'
 import TextDropdown from '@/components/character-page components/TextDropdown.vue'
 import DeleteButton from '@/components/reusable/Buttons/DeleteButton.vue'
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue'
@@ -229,9 +229,9 @@ function removeEffectCharacteristic(key) {
     <section v-if="!state.isLoading" class="m-4 grid grid-cols-2 gap-4">
         <Header1 class="col-span-2" label="Створити\редагувати ефект" />
 
-        <SingleFieldEditor placeholder="Назва" fieldName="name" type="text" :value="selectedEffect.name"
+        <InputTextReactive placeholder="Назва" fieldName="name" type="text" :value="selectedEffect.name"
             :callback="updateEffectField" :important="true" class="p-0" />
-        <SingleFieldEditor placeholder="Опис" fieldName="description" type="text" :value="selectedEffect.description"
+        <InputTextReactive placeholder="Опис" fieldName="description" type="text" :value="selectedEffect.description"
             :callback="updateEffectField" :important="true" class="p-0" />
 
         <Header2 label="Характеристики, на які впливає ефект:" />
@@ -255,7 +255,7 @@ function removeEffectCharacteristic(key) {
             class="col-span-2 justify-self-center flex gap-2 items-center">
             <TextDropdown label="Характеристика" :entity_array="state.session.characteristicsList"
                 entity_name="effectCharacteristic" :callback="getCharacteristicType" />
-            <SingleFieldEditor placeholder="Значення" fieldName="value" type="number" :value="newEffect.value"
+            <InputTextReactive placeholder="Значення" fieldName="value" type="number" :value="newEffect.value"
                 :callback="getCharacteristicValue" />
             <div class="pb-2 self-end">
                 <AprroveButtonWithText @click="updateEffectCharacteristics" text="Додати поле" />

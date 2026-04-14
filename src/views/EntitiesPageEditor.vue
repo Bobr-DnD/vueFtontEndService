@@ -19,14 +19,14 @@ import SearchInputBlack from '@/components/reusable/SearchInputs/SearchInputBlac
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue';
 import EntityTile from '@/components/reusable/EntityTiles/EntityTile.vue';
 import Header1 from '@/components/reusable/Titles/Header1.vue';
-import SingleFieldEditor from '@/components/reusable/SingleFieldEditor.vue';
+import InputTextReactive from '@/components/reusable/Inputs/InputTextReactive.vue';
 import DropDownChoosen from '@/components/reusable/DropDowns/DropDownChoosen.vue';
 import ImageEditor from '@/components/reusable/ImageEditor.vue';
 import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
 import Header2 from '@/components/reusable/Titles/Header2.vue';
 import DeleteButton from '@/components/reusable/Buttons/DeleteButton.vue';
 import TextDropdown from '@/components/character-page components/TextDropdown.vue';
-import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
+import CustomFieldsEditor from '@/components/reusable/CustomFieldsEditor.vue';
 import EffectTile from '@/components/reusable/EntityTiles/EffectTile.vue';
 
 const state = reactive({
@@ -286,22 +286,22 @@ function removeEffect(id) {
         <ImageEditor class="col-span-full" :image="state.selectedEntity.image" label="Картинка"
             :callback="updateImage" />
 
-        <SingleFieldEditor class="col-span-3" placeholder="Назва" fieldName="name" :value="state.selectedEntity.name"
+        <InputTextReactive class="col-span-3" placeholder="Назва" fieldName="name" :value="state.selectedEntity.name"
             :callback="updateEntityFields" type="text" :important="true" />
 
         <DropDownChoosen label="Тип" entity_name="EntityType" :entity_array="state.session.entityTypes"
             :selected="state.selectedEntity.type" :callback="updateEntityType" />
 
-        <SingleFieldEditor class="col-span-3" placeholder="Опис" fieldName="description" ,
+        <InputTextReactive class="col-span-3" placeholder="Опис" fieldName="description" ,
             :value="state.selectedEntity.description" :callback="updateEntityFields" type="text" />
 
-        <SingleFieldEditor placeholder="Ціна" fieldName="price" :value="state.selectedEntity.price"
+        <InputTextReactive placeholder="Ціна" fieldName="price" :value="state.selectedEntity.price"
             :callback="updateEntityFields" type="number" />
 
         <TextAreaEditor class="col-span-3" fieldName="notes" name="Записки Майстра" :value="state.selectedEntity.notes"
             :callback="updateEntityFields" />
 
-        <SingleFieldEditor placeholder="Рідкість" fieldName="rarity" :value="state.selectedEntity.rarity"
+        <InputTextReactive placeholder="Рідкість" fieldName="rarity" :value="state.selectedEntity.rarity"
             :callback="updateEntityFields" type="text" />
 
         <div class="col-span-2 self-start flex gap-4 flex-wrap rounded-2xl border-x-4 border-darkred-dark_gray p-4">
@@ -324,7 +324,7 @@ function removeEffect(id) {
             </div>
 
 
-            <ObjectFieldsEditor class="shrink w-full" name="entityCharacteristics"
+            <CustomFieldsEditor class="shrink w-full" name="entityCharacteristics"
                 :fields="state.selectedEntity.characteristics" :callback="addCharacteristic" />
 
         </div>
@@ -347,7 +347,7 @@ function removeEffect(id) {
             <div v-if="checkObjectFieldExisting(state.session.characteristicsList)" class="shrink w-full mx-auto flex gap-2 items-center">
                 <TextDropdown label="Характеристика" :entity_array="state.session.characteristicsList"
                     entity_name="entityCharacteristic" :callback="getRequirementType" />
-                <SingleFieldEditor placeholder="Значення" fieldName="value" type="number"
+                <InputTextReactive placeholder="Значення" fieldName="value" type="number"
                     :value="entityNewRequirement.value" :callback="getRequirementValue" />
                 <div class="pb-2 self-end">
                     <AprroveButtonWithText @click="addRequirement" text="Додати поле" />

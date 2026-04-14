@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, onMounted, ref, toRaw } from 'vue';
+import { reactive, onMounted, ref, toRaw, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { asyncHandler } from '@utils/asyncHandler';
 import { toNewSession, toObject } from '@utils/objects.dto';
@@ -10,14 +10,14 @@ import { socket } from '@ws/webSocket';
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
 import ImageEditor from '@/components/reusable/ImageEditor.vue';
-import SingleFieldEditor from '@/components/reusable/SingleFieldEditor.vue';
+import InputTextReactive from '@/components/reusable/Inputs/InputTextReactive.vue';
 import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
 import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
-import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
-import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
+import CustomFieldsEditor from '@/components/reusable/CustomFieldsEditor.vue';
+import CustomFieldTile from '@/components/reusable/EntityTiles/CustomFieldTile.vue';
 import ArrayStringFormWIcons from '@/components/reusable/Forms/ArrayStringFormWIcons.vue';
 import ArrayStringFromWColorPicker from '@/components/reusable/Forms/ArrayStringFromWColorPicker.vue';
 import Header1 from '@/components/reusable/Titles/Header1.vue';
@@ -48,7 +48,7 @@ onMounted(async () => {
 
     state.isLoading = false
     state.session = res.data
-    editedSession.value = toNewSession(state.session)
+    copySession()
 })
 
 async function saveSession() {
@@ -61,7 +61,7 @@ async function saveSession() {
     }
 
     state.session = res.data
-    editedSession.value = toNewSession(state.session)
+    copySession()
     state.unsavedChanges = false
 
     notify({ message: 'Сесія оновлена', type: 'success' })
@@ -72,8 +72,12 @@ function markUnsaved() {
     state.unsavedChanges = true
 }
 
+function copySession(){
+    editedSession.value = toNewSession(structuredClone(toRaw(state.session)))
+}
+
 function discardChanges() {
-    editedSession.value = toNewSession(state.session)
+    copySession()
     state.unsavedChanges = false
     notify({ message: 'Зміни анульовані', type: 'warning' })
 }
@@ -88,13 +92,16 @@ function addImage(image) {
     markUnsaved()
 }
 
-function addCustomField(name, value) {
-    Object.assign(editedSession.value.customFields, toObject({ name, value }))
+function addCustomField(object) {
+    editedSession.value.customFields.push(object)
     markUnsaved();
 }
 
-function updateCustomFields(fields) {
-    editedSession.value.customFields = fields
+function removeCustomField(id) {
+    const index = editedSession.value.customFields.findIndex(f => f.id === id)
+    if (index !== -1) editedSession.value.customFields.splice(index, 1)
+    else notify({ message: 'Не знайдено поле для видалення', type: 'error' })
+
     markUnsaved();
 }
 
@@ -102,6 +109,18 @@ function updateStringArray(field, array) {
     editedSession.value[field] = array
     markUnsaved()
 }
+
+watch(() => editedSession.value, (newValue) => {
+
+    //fix it later to smth better
+    if (JSON.stringify(toRaw(state.session.name)) !== JSON.stringify(toRaw(editedSession.value.name))) {
+        markUnsaved()
+    }
+
+    if (JSON.stringify(toRaw(state.session.customFields)) !== JSON.stringify(toRaw(editedSession.value.customFields))) {
+        markUnsaved()
+    }
+}, { deep: true })
 
 </script>
 
@@ -125,22 +144,21 @@ function updateStringArray(field, array) {
                 <ImageEditor class="w-full col-span-2" :image="editedSession.image" label="Session image"
                     :callback="addImage" />
 
-                <SingleFieldEditor :value="editedSession.name" placeholder="Назва сесії" fieldName="name"
-                    :callback="updateSession" type="text" :important="true" />
+                <InputTextReactive placeholder="Назва сесії" fieldName="Sessionname" type="text" :important="true"
+                    v-model:inputValue="editedSession.name" />
 
                 <TextAreaEditor class="col-span-2" fieldName="notes" name="Записки майстра" :value="editedSession.notes"
                     :callback="updateSession" />
 
                 <Header1 class="col-span-2 font-medium" label="Список кастомних полей" />
 
-                <ObjectFieldsTable :field_removable="true" :fields="editedSession.customFields"
-                    :callback="updateCustomFields" />
-
+                <div v-for="(field, index) in editedSession.customFields" :key="field.id">
+                    <CustomFieldTile v-model:customField="editedSession.customFields[index]" :field_removable="true"
+                        :callback_remove="removeCustomField" :callback_save="markUnsaved" />
+                </div>
 
                 <div class="col-span-2">
-
-                    <ObjectFieldsEditor name="customFields" :fields="editedSession.customFields"
-                        :callback="addCustomField" />
+                    <CustomFieldsEditor name="customFields" :callback="addCustomField" />
                 </div>
 
             </div>

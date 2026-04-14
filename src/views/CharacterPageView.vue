@@ -16,14 +16,14 @@ import PerkTable from '@/components/character-page components/PerkTable.vue';
 import EntityTable from '@/components/character-page components/EntityTable.vue';
 import EffectsTable from '@/components/character-page components/EffectsTable.vue';
 import QuestsTable from '@/components/character-page components/QuestsTable.vue';
-import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
+import CustomFieldTile from '@/components/reusable/EntityTiles/CustomFieldTile.vue';
 import characterCardSmall from '@/components/character-page components/CharacterViewCard.vue';
 import Experience from '@/components/character-page components/Experience.vue';
 import CurrencyTable from '@/components/character-page components/CurrencyTable.vue';
 import HideButton from '@/components/reusable/Buttons/HideButton.vue';
 import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue';
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue';
-import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
+import CustomFieldsEditor from '@/components/reusable/CustomFieldsEditor.vue';
 import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
 import BackendOffline from '@/components/reusable/BackendOffline.vue';
 import HorizontalNumberPicker from '@/components/reusable/HorizontalNumberPicker.vue';
@@ -232,7 +232,7 @@ function togglePicker(healthId) {
                     <div class="grid transition-all duration-300 ease-in-out"
                         :style="{ gridTemplateRows: custom_hidden ? '0fr' : '1fr' }">
                         <div class="overflow-hidden">
-                            <ObjectFieldsTable :fields="state.character.customFields" :callback="updateCustomFields"
+                            <CustomFieldTile :fields="state.character.customFields" :callback="updateCustomFields"
                                 :field_removable="true" />
 
                             <PlusButton @click="custom_modal_hidden = !custom_modal_hidden" class="w-16 h-14 mt-2 mx-auto text-center border-4 border-darkred-dark rounded-lg 
@@ -251,7 +251,7 @@ function togglePicker(healthId) {
                                 <CloseButtonRedBG @click="custom_modal_hidden = true" />
                             </div>
 
-                            <ObjectFieldsEditor class="hover:cursor-default" :name="'CustomFields_'"
+                            <CustomFieldsEditor class="hover:cursor-default" :name="'CustomFields_'"
                                 :fields="state.character.customFields" :callback="addCustomField" />
                         </div>
                     </div>
