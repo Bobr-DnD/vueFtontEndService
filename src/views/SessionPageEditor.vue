@@ -6,6 +6,7 @@ import { toNewSession, toObject } from '@utils/objects.dto';
 import { notify } from '@utils/notification';
 import RepositoryFactory from '@http/RepositoryFactory';
 import { socket } from '@ws/webSocket';
+import { isEqual } from 'lodash';
 
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
@@ -72,7 +73,7 @@ function markUnsaved() {
     state.unsavedChanges = true
 }
 
-function copySession(){
+function copySession() {
     editedSession.value = toNewSession(structuredClone(toRaw(state.session)))
 }
 
@@ -110,16 +111,24 @@ function updateStringArray(field, array) {
     markUnsaved()
 }
 
-watch(() => editedSession.value, (newValue) => {
+const keysToWatch = [
+    'name',
+    'customFields',
+    'entityTypes',
+    'currencyTypes',
+    'characteristicsList',
+    'enemyTypes',
+    'questTypes',
+    'perkTypes',
+]
 
-    //fix it later to smth better
-    if (JSON.stringify(toRaw(state.session.name)) !== JSON.stringify(toRaw(editedSession.value.name))) {
-        markUnsaved()
-    }
+watch(() => editedSession.value, () => {
+    const isChanged = keysToWatch.some(key =>
+        !isEqual(state.session[key], editedSession.value[key])
+    )
 
-    if (JSON.stringify(toRaw(state.session.customFields)) !== JSON.stringify(toRaw(editedSession.value.customFields))) {
-        markUnsaved()
-    }
+    if (isChanged) markUnsaved()
+
 }, { deep: true })
 
 </script>
@@ -164,23 +173,18 @@ watch(() => editedSession.value, (newValue) => {
             </div>
 
             <div v-if="activeTab === 'types'" class="grid grid-cols-2 gap-4">
-                <ArrayStringFormWIcons :array="editedSession.entityTypes" label="Інвентар" array_name="entityTypes"
-                    :callback="updateStringArray" :set_icon="true" />
 
-                <ArrayStringFormWIcons :array="editedSession.currencyTypes" label="Валюти" array_name="currencyTypes"
-                    :callback="updateStringArray" :set_icon="true" />
+                <ArrayStringFormWIcons v-model:array="editedSession.entityTypes" label="Інвентар" :setIcon="true" />
 
-                <ArrayStringFormWIcons :array="editedSession.characteristicsList" label="Характеристики"
-                    array_name="characteristicsList" :callback="updateStringArray" />
+                <ArrayStringFormWIcons v-model:array="editedSession.currencyTypes" label="Валюти" :setIcon="true" />
 
-                <ArrayStringFormWIcons :array="editedSession.enemyTypes" label="Вороги" array_name="enemyTypes"
-                    :callback="updateStringArray" />
+                <ArrayStringFormWIcons v-model:array="editedSession.characteristicsList" label="Характеристики" />
 
-                <ArrayStringFormWIcons :array="editedSession.questTypes" label="Статуси квестів" array_name="questTypes"
-                    :callback="updateStringArray" />
+                <ArrayStringFormWIcons v-model:array="editedSession.enemyTypes" label="Вороги" />
 
-                <ArrayStringFromWColorPicker :array="editedSession.perkTypes" label="Типи перків" array_name="perkTypes"
-                    :callback="updateStringArray" />
+                <ArrayStringFormWIcons v-model:array="editedSession.questTypes" label="Статуси квестів" />
+
+                <ArrayStringFromWColorPicker v-model:array="editedSession.perkTypes" label="Типи перків" />
 
             </div>
 

@@ -6,7 +6,7 @@ import CloseButtonRedBG from './Buttons/CloseButtonRedBG.vue'
 const props = defineProps({
     icon: {
         type: String,
-        required: true
+        default: 'checkBadge'
     },
     field_id: {
         type: String,

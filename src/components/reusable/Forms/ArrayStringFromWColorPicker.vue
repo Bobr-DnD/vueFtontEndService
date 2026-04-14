@@ -1,7 +1,5 @@
 <script setup>
-import { ref, toRaw } from 'vue';
-import AprroveButtonWithText from '../Buttons/AprroveButtonWithText.vue';
-import RejectButtonWithText from '../Buttons/RejectButtonWithText.vue';
+import { ref, watch } from 'vue';
 import PlusButton from '../Buttons/PlusButton.vue';
 import DeleteButton from '../Buttons/DeleteButton.vue';
 
@@ -10,104 +8,70 @@ const props = defineProps({
         type: Array,
         required: true
     },
-    array_name: {
-        type: String,
-        required: true
-    },
     label: {
         type: String,
         required: true
-    },
-    callback: {
-        type: Function,
-        required: true
     }
 })
+
+const emit = defineEmits(['update:array'])
 
 const arrayLocal = ref()
-const inputRefs = ref({})
 
-const originalArray = structuredClone(toRaw(props.array))
-
-arrayLocal.value = props.array.map(el => {
-    return {
-        id: el.id,
-        name: el.name,
-        color: el.color
-    }
-})
+watch(
+    () => props.array,
+    (val) => {
+        arrayLocal.value = val.map(el => ({ ...el }))
+    },
+    { immediate: true, deep: true }
+)
 
 function addItem() {
     arrayLocal.value.push({
-        id: Math.random().toString(24).slice(2),
+        id: crypto.randomUUID(),
         name: '',
         color: ''
     })
+    update()
 }
 
 function removeItem(id) {
-    const index = arrayLocal.value.findIndex(el => el.id === id)
-    if (index !== -1) arrayLocal.value.splice(index, 1)
+    arrayLocal.value = arrayLocal.value.filter(el => el.id !== id)
+    update()
 }
 
-function updateItem(id) {
-    arrayLocal.value.forEach(el => {
-        if (el.id === id) el.name = inputRefs.value[id].value
-    })
-}
-
-function updateArray() {
-    props.callback(props.array_name, arrayLocal.value)
-}
-
-function discardChanges() {
-    arrayLocal.value = structuredClone(originalArray)
+function update() {
+    emit('update:array', arrayLocal.value)
 }
 
 function updateColor(id, color) {
     arrayLocal.value.forEach(el => {
         if (el.id === id) el.color = color
     })
-
+    update()
 }
 
 </script>
 
 <template>
-    <div>
+    <div class="grid grid-cols-1 gap-2 font-gothic content-start">
 
-        <section class="grid grid-cols-1 gap-2 font-gothic">
+        <h1 class="text-2xl ">{{ props.label }}:</h1>
+        <h1 v-if="arrayLocal.length === 0" class="text-xl ">Пусто</h1>
 
-            <h1 class="text-2xl ">{{ props.label }}:</h1>
-            <h1 v-if="arrayLocal.length === 0" class="text-xl ">Пусто</h1>
+        <div v-for="item in arrayLocal" :key="item.id" class="grid gap-4 grid-cols-[1fr_40px_40px]">
 
-            <div v-for="item in arrayLocal" :key="item.id" class="grid gap-4 grid-cols-[1fr_40px_40px]">
+            <input v-model.lazy="item.name" type="text" placeholder="Назва" @change="update" :id="item.id"
+                class="p-1 border-4 text-lg border-darkred-dark rounded-lg text-darkred-dark w-full focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
 
-                <input :ref="el => inputRefs[item.id] = el" :id="item.id" type="text" :value="item.name"
-                    placeholder="Назва" @input="updateItem(item.id)"
-                    class="p-1 border-4 text-lg border-darkred-dark rounded-lg text-darkred-dark w-full focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
+            <input type="color" :value="item.color || '#3BFF00'" @change="updateColor(item.id, $event.target.value)" :id="`${item.id}-color`"
+                class="w-full h-full p-0">
 
-                <input type="color" :value="item.color || '#3BFF00'" @change="updateColor(item.id, $event.target.value)"
-                    class="w-full h-full p-0">
+            <DeleteButton class="bg-darkred-red text-darkred-light" @click="removeItem(item.id)" />
 
-                <DeleteButton class="bg-darkred-red text-darkred-light" @click="removeItem(item.id)" />
+        </div>
 
-            </div>
-
-            <div class="flex gap-2">
-
-                <PlusButton class="w-11 h-full text-center border-4 border-darkred-dark rounded-lg md:hover:cursor-pointer
+        <PlusButton class="w-11 h-11 text-center border-4 border-darkred-dark rounded-lg md:hover:cursor-pointer
            md:hover:bg-darkred-gray relative overflow-hidden group" @click="addItem" />
-
-                <AprroveButtonWithText text="Зберегти" @click="updateArray"
-                    class="p-2 flex justify-center text-lg items-center self-end" />
-
-                <RejectButtonWithText text="Відхилити" @click="discardChanges"
-                    class="p-2 flex justify-center text-lg items-center self-end" />
-            </div>
-
-
-        </section>
-
     </div>
 </template>
