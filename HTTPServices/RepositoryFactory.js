@@ -20,6 +20,9 @@ export default {
     login(resource, id, data) {
         return Repository.post(`/${resource}/login/${id}`, data)
     },
+    changepass(resource, id, data){
+        return Repository.post(`/${resource}/changepass/${id}`, data)
+    },
     createFile(resource, file) {
         return Repository.post(`/${resource}`, file, {
             headers: {

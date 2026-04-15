@@ -2,11 +2,12 @@
 import { reactive, onMounted, ref, toRaw, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { asyncHandler } from '@utils/asyncHandler';
-import { toNewSession, toObject } from '@utils/objects.dto';
+import { toNewSession } from '@utils/objects.dto';
 import { notify } from '@utils/notification';
 import RepositoryFactory from '@http/RepositoryFactory';
 import { socket } from '@ws/webSocket';
 import { isEqual } from 'lodash';
+import { useRouter } from 'vue-router'
 
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
@@ -22,6 +23,7 @@ import CustomFieldTile from '@/components/reusable/EntityTiles/CustomFieldTile.v
 import ArrayStringFormWIcons from '@/components/reusable/Forms/ArrayStringFormWIcons.vue';
 import ArrayStringFromWColorPicker from '@/components/reusable/Forms/ArrayStringFromWColorPicker.vue';
 import Header1 from '@/components/reusable/Titles/Header1.vue';
+import InputPassword from '@/components/reusable/Inputs/InputPassword.vue';
 
 const state = reactive({
     session: {},
@@ -29,13 +31,21 @@ const state = reactive({
     unsavedChanges: false
 })
 
+const router = useRouter()
+
+const oldPass = ref('')
+const newPass = ref('')
+const confirmPass = ref('')
+const canChange = ref(false)
+
 const sessionId = useRoute().params.sessionId
 const editedSession = ref()
 const activeTab = ref('base')
 
 const tabs = [
     { id: 'base', label: 'Характеристики' },
-    { id: 'types', label: "Типи об'єктів" }
+    { id: 'types', label: "Типи об'єктів" },
+    { id: 'security', label: 'Зміна пароля' }
 ]
 
 onMounted(async () => {
@@ -67,6 +77,59 @@ async function saveSession() {
 
     notify({ message: 'Сесія оновлена', type: 'success' })
     socket.emit('session:updateNotify', res.data.id)
+}
+
+async function changePassword() {
+    const validationErrors = validatePasses()
+
+    if (validationErrors.length > 0) {
+        validationErrors.forEach(error => notify({ message: error, type: 'error' }))
+        return
+    }
+
+    const [res, err] = await asyncHandler(
+        RepositoryFactory.changepass('session', sessionId, { password: toRaw(oldPass.value), passwordNew: toRaw(newPass.value) })
+    )
+    console.log(res);
+
+    if (err) return
+    else if (res.data.success) notify({ message: res.data.message, type: 'success' })
+
+    clearPasses()
+    return
+}
+
+async function deleteSession() {
+
+    const confirmSwitch = confirm('Видалити сесію?')
+    if (!confirmSwitch) return
+
+    const [res, err] = await asyncHandler(
+        RepositoryFactory.delete('session', sessionId)
+    )
+    if (err) return
+    else if (res.data.status) notify({ message: 'Сесію видалено', type: 'success' })
+    router.push('/')
+}
+
+function validatePasses() {
+    const errors = []
+
+    if (newPass.value.trim().length < 8) {
+        errors.push('Мінімальна довжина пароля - 8 символів')
+    }
+
+    if (newPass.value !== confirmPass.value) {
+        errors.push('Паролі не співпадають')
+    }
+
+    return errors
+}
+
+function clearPasses() {
+    oldPass.value = ''
+    newPass.value = ''
+    confirmPass.value = ''
 }
 
 function markUnsaved() {
@@ -106,11 +169,6 @@ function removeCustomField(id) {
     markUnsaved();
 }
 
-function updateStringArray(field, array) {
-    editedSession.value[field] = array
-    markUnsaved()
-}
-
 const keysToWatch = [
     'name',
     'customFields',
@@ -130,6 +188,11 @@ watch(() => editedSession.value, () => {
     if (isChanged) markUnsaved()
 
 }, { deep: true })
+
+watch([oldPass, newPass, confirmPass], () => {
+    if (oldPass.value.length !== 0 && newPass.value.length !== 0 && confirmPass.value.length !== 0)
+        canChange.value = true
+})
 
 </script>
 
@@ -185,6 +248,26 @@ watch(() => editedSession.value, () => {
                 <ArrayStringFormWIcons v-model:array="editedSession.questTypes" label="Статуси квестів" />
 
                 <ArrayStringFromWColorPicker v-model:array="editedSession.perkTypes" label="Типи перків" />
+
+            </div>
+
+            <div v-if="activeTab === 'security'" class="grid grid-cols-2 gap-4">
+
+                <div class="grid grid-cols-1 gap-4 w-[512px]">
+
+                    <Header1 label="Змінити пароль:" />
+
+                    <form @submit.prevent @keyup.enter="changePassword" class="flex flex-col gap-2">
+                        <InputPassword v-model:passString="oldPass" />
+                        <InputPassword :new="true" v-model:passString="newPass" />
+                        <InputPassword :confirm="true" v-model:passString="confirmPass" />
+                    </form>
+
+                    <AprroveButtonWithText text="Змінити пароль" @click="changePassword"
+                        :class="[!canChange && 'pointer-events-none opacity-50']" />
+
+                    <RejectButtonWithText text="Видалити сесію" @click="deleteSession" />
+                </div>
 
             </div>
 
