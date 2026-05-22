@@ -1,7 +1,7 @@
 <script setup>
 import ImportantField from '../ImportantField.vue';
 
-const value = defineModel('inputValue', { type: String, required: true, default: null })
+const value = defineModel('inputValue', { type: [String, Number], required: true, default: null })
 
 const props = defineProps({
     placeholder: { type: String, required: true },

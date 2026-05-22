@@ -9,7 +9,6 @@ const field = defineModel('customField', { type: Object, required: true })
 
 const props = defineProps({
     callback_remove: { type: Function, required: true },
-    callback_save: { type: Function, required: true },
     field_removable: { type: Boolean, required: false, default: false }
 })
 
@@ -47,10 +46,10 @@ function validate() {
     return validated
 }
 
-function updateField() {
+async function updateField() {
     if (!validate()) return
     readonly.value = true
-    nextTick()
+    await nextTick()
     autoResize()
 }
 
@@ -98,8 +97,6 @@ function updateField() {
                 @click="props.callback_remove(field.id)" />
         </div>
     </div>
-
-
 
 </template>
 

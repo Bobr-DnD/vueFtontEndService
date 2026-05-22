@@ -39,7 +39,7 @@ const modalHidden = ref(true)
 <template>
     <div class="relative">
 
-        <CursorArrowRippleIcon class="w-5 h-5 absolute top-2 right-1 text-darkred-light"/>
+        <CursorArrowRippleIcon class="w-5 h-5 absolute top-2 right-1 text-darkred-light" />
 
         <div @click="modalHidden = !modalHidden"
             :class="props.removable || props.addable ? 'grid-cols-[1fr_50px]' : 'grid-cols-1'"
@@ -56,10 +56,12 @@ const modalHidden = ref(true)
             <ApproveButton v-if="props.addable" @click.stop @click="props.callback_add(props.perk)"
                 class="row-span-2 w-11 justify-self-center" />
 
-            <div v-if="props.perk.count " class="p2 text-clip">Опис: {{ props.perk.descriptions[props.perk.count - 1] }}
+            <div class="p2 text-clip">Опис: {{ props.perk.description }}</div>
+            
+            <div v-if="props.perk.count" class="p2 text-clip">{{ props.perk.levels[props.perk.count - 1] }}
             </div>
 
-            <div v-else-if="checkObjectFieldExisting(props.perk.descriptions)" class="p2 text-clip">Опис: {{ props.perk.descriptions[0] }}</div>
+
 
         </div>
 

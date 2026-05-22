@@ -30,7 +30,7 @@ function addItem() {
     arrayLocal.value.push({
         id: crypto.randomUUID(),
         name: '',
-        color: ''
+        color: '#3bff00'
     })
     update()
 }

@@ -13,7 +13,7 @@ export function toObject(objectField) {
 
 export function toNewCharacterObject(character) {
   return {
-    id: character.id ?? 'empty',
+    id: character.id ?? 'new',
     name: character.name ?? '',
     image: character.image ?? '',
     gender: character.gender ?? '',
@@ -24,10 +24,10 @@ export function toNewCharacterObject(character) {
     experienceToLevelUp: character.experienceToLevelUp ?? 10,
     perkPoints: character.perkPoints ?? 0,
     health: character.health ?? [],
-    characteristics: character.characteristics ?? {},
+    characteristics: character.characteristics ?? [],
     characteristicsComputed: character.characteristicsComputed ?? {},
     currency: character.currency ?? [],
-    customFields: character.customFields ?? {},
+    customFields: character.customFields ?? [],
     effects: character.effects ?? [],
     adminNotes: character.adminNotes ?? '',
     playerNotes: character.playerNotes ?? '',
@@ -54,8 +54,7 @@ export function toNewSession(session){
     id: session.id ?? 'new',
     name: session.name ?? '',
     image: session.image ?? '',
-    move: session.move ?? 0,
-    customFields: session.customFields ?? {},
+    customFields: session.customFields ?? [],
     notes: session.notes ?? '',
     entityTypes: session.entityTypes ?? [],
     enemyTypes: session.enemyTypes ?? [],

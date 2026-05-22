@@ -17,9 +17,9 @@ const props = defineProps({
 
     <div @click="props.callback_close"
         class="fixed inset-0 flex items-center justify-center z-50 bg-darkred-dark/50 md:hover:cursor-pointer">
-        
+
         <div @click.stop
-            class="max-w-[480px] w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-gothic md:hover:cursor-default">
+            class="max-w-[480px] w-full mx-2 p-2 grid grid-cols-1 gap-1 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-gothic md:hover:cursor-default">
 
             <CloseButtonRedBG @click="props.callback_close" />
 
@@ -28,13 +28,15 @@ const props = defineProps({
 
             <div v-else class="p2 text-clip w-[90%]">Назва: {{ props.perk.name }}</div>
 
+            <div class="p2 text-clip">Опис: {{ props.perk.description }}</div>
+
             <div class="flex flex-col gap-1">
                 <div class="font-normal">
                     Рівні перку:
                 </div>
-                <div class="font-normal" v-for="description, index in props.perk.descriptions"
+                <div class="font-normal" v-for="level, index in props.perk.levels"
                     :key="Math.random().toString(24).slice(2)">
-                    {{ index + 1 }} -> {{ description }}
+                    {{ index + 1 }} -> {{ level }}
                 </div>
             </div>
 

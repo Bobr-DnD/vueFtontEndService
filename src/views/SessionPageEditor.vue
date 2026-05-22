@@ -13,7 +13,7 @@ import Loader from 'vue-spinner/src/SyncLoader.vue'
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
 import ImageEditor from '@/components/reusable/ImageEditor.vue';
 import InputTextReactive from '@/components/reusable/Inputs/InputTextReactive.vue';
-import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
+import TextAreaReactive from '@/components/reusable/Inputs/TextAreaReactive.vue';
 import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
@@ -90,9 +90,11 @@ async function changePassword() {
     const [res, err] = await asyncHandler(
         RepositoryFactory.changepass('session', sessionId, { password: toRaw(oldPass.value), passwordNew: toRaw(newPass.value) })
     )
-    console.log(res);
 
-    if (err) return
+    if (err) {
+        notify({ message: err.message, type: 'error' })
+        return
+    }
     else if (res.data.success) notify({ message: res.data.message, type: 'success' })
 
     clearPasses()
@@ -146,31 +148,20 @@ function discardChanges() {
     notify({ message: 'Зміни анульовані', type: 'warning' })
 }
 
-function updateSession(field, value) {
-    editedSession.value[field] = value
-    markUnsaved()
-}
-
-function addImage(image) {
-    editedSession.value.image = image
-    markUnsaved()
-}
-
 function addCustomField(object) {
     editedSession.value.customFields.push(object)
     markUnsaved();
 }
 
 function removeCustomField(id) {
-    const index = editedSession.value.customFields.findIndex(f => f.id === id)
-    if (index !== -1) editedSession.value.customFields.splice(index, 1)
-    else notify({ message: 'Не знайдено поле для видалення', type: 'error' })
-
+    editedSession.value.customFields = editedSession.value.customFields.filter(el => el.id !== id)
     markUnsaved();
 }
 
 const keysToWatch = [
     'name',
+    'image',
+    'notes',
     'customFields',
     'entityTypes',
     'currencyTypes',
@@ -213,20 +204,18 @@ watch([oldPass, newPass, confirmPass], () => {
 
         <section class="m-4 p-2">
             <div v-if="activeTab === 'base'" class="grid grid-cols-2 gap-2">
-                <ImageEditor class="w-full col-span-2" :image="editedSession.image" label="Session image"
-                    :callback="addImage" />
+                <ImageEditor class="w-full col-span-2" v-model:image="editedSession.image" label="Session image" />
 
                 <InputTextReactive placeholder="Назва сесії" fieldName="Sessionname" type="text" :important="true"
                     v-model:inputValue="editedSession.name" />
 
-                <TextAreaEditor class="col-span-2" fieldName="notes" name="Записки майстра" :value="editedSession.notes"
-                    :callback="updateSession" />
+                <TextAreaReactive class="col-span-2" label="Записки майстра" v-model:value="editedSession.notes" />
 
                 <Header1 class="col-span-2 font-medium" label="Список кастомних полей" />
 
                 <div v-for="(field, index) in editedSession.customFields" :key="field.id">
                     <CustomFieldTile v-model:customField="editedSession.customFields[index]" :field_removable="true"
-                        :callback_remove="removeCustomField" :callback_save="markUnsaved" />
+                        :callback_remove="removeCustomField" />
                 </div>
 
                 <div class="col-span-2">
