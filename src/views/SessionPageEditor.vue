@@ -42,6 +42,8 @@ const sessionId = useRoute().params.sessionId
 const editedSession = ref()
 const activeTab = ref('base')
 
+const copied = ref(false)
+
 const tabs = [
     { id: 'base', label: 'Характеристики' },
     { id: 'types', label: "Типи об'єктів" },
@@ -140,6 +142,7 @@ function markUnsaved() {
 
 function copySession() {
     editedSession.value = toNewSession(structuredClone(toRaw(state.session)))
+    copied.value = true
 }
 
 function discardChanges() {
@@ -172,13 +175,19 @@ const keysToWatch = [
 ]
 
 watch(() => editedSession.value, () => {
+
+    if(copied.value){
+        copied.value = false
+        return
+    }
+
     const isChanged = keysToWatch.some(key =>
         !isEqual(state.session[key], editedSession.value[key])
     )
 
     if (isChanged) markUnsaved()
 
-}, { deep: true })
+}, { deep: true, immediate: false })
 
 watch([oldPass, newPass, confirmPass], () => {
     if (oldPass.value.length !== 0 && newPass.value.length !== 0 && confirmPass.value.length !== 0)

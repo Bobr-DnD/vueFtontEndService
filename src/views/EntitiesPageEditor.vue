@@ -286,22 +286,22 @@ function removeEffect(id) {
         <ImageEditor class="col-span-full" :image="state.selectedEntity.image" label="Картинка"
             :callback="updateImage" />
 
-        <InputTextReactive class="col-span-3" placeholder="Назва" fieldName="name" :value="state.selectedEntity.name"
+        <InputTextReactive class="col-span-3" placeholder="Назва" fieldName="name" :inputValue="state.selectedEntity.name"
             :callback="updateEntityFields" type="text" :important="true" />
 
         <DropDownChoosen label="Тип" entity_name="EntityType" :entity_array="state.session.entityTypes"
             :selected="state.selectedEntity.type" :callback="updateEntityType" />
 
         <InputTextReactive class="col-span-3" placeholder="Опис" fieldName="description" ,
-            :value="state.selectedEntity.description" :callback="updateEntityFields" type="text" />
+            :inputValue="state.selectedEntity.description" :callback="updateEntityFields" type="text" />
 
-        <InputTextReactive placeholder="Ціна" fieldName="price" :value="state.selectedEntity.price"
+        <InputTextReactive placeholder="Ціна" fieldName="price" :inputValue="state.selectedEntity.price"
             :callback="updateEntityFields" type="number" />
 
-        <TextAreaEditor class="col-span-3" fieldName="notes" name="Записки Майстра" :value="state.selectedEntity.notes"
+        <TextAreaEditor class="col-span-3" fieldName="notes" name="Записки Майстра" :inputValue="state.selectedEntity.notes"
             :callback="updateEntityFields" />
 
-        <InputTextReactive placeholder="Рідкість" fieldName="rarity" :value="state.selectedEntity.rarity"
+        <InputTextReactive placeholder="Рідкість" fieldName="rarity" :inputValue="state.selectedEntity.rarity"
             :callback="updateEntityFields" type="text" />
 
         <div class="col-span-2 self-start flex gap-4 flex-wrap rounded-2xl border-x-4 border-darkred-dark_gray p-4">
@@ -348,7 +348,7 @@ function removeEffect(id) {
                 <TextDropdown label="Характеристика" :entity_array="state.session.characteristicsList"
                     entity_name="entityCharacteristic" :callback="getRequirementType" />
                 <InputTextReactive placeholder="Значення" fieldName="value" type="number"
-                    :value="entityNewRequirement.value" :callback="getRequirementValue" />
+                    :inputValue="entityNewRequirement.value" :callback="getRequirementValue" />
                 <div class="pb-2 self-end">
                     <AprroveButtonWithText @click="addRequirement" text="Додати поле" />
                 </div>
