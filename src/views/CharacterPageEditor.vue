@@ -61,7 +61,8 @@ const tabs = [
     { id: 'base', label: 'Базові характеристики' },
     { id: 'custom', label: 'Кастомні поля' },
     { id: 'health', label: "Здоров'я" },
-    { id: 'quests&effects', label: 'Квести та еффекти' },
+    { id: 'quests', label: 'Квести' },
+    { id: 'effects', label: 'Еффекти' },
     { id: 'perks', label: 'Перки' },
     { id: 'inventory', label: 'Інвентар' }
 ]
@@ -85,33 +86,6 @@ onMounted(async () => {
     editingCharacter.value = selected_character.value.id
 })
 
-function buildTypes(list) {
-    return [
-        ...list.map(type => ({
-            name: type.name,
-            id: type.id,
-            hidden: true
-        })),
-        {
-            name: 'Всі',
-            id: 'all',
-            hidden: false
-        }
-    ]
-}
-
-function resetSearchQuery() {
-    Object.entries(searchQuery.value).forEach(([key, val]) => {
-        searchQuery.value[key] = ''
-    })
-}
-
-function newCharacter() {
-    const characteristics = state.session.characteristicsList.map(ch => ({ 'name': ch.name, 'value': 0, id: crypto.randomUUID() }))
-    const currency = state.session.currencyTypes.map(c => ({ 'name': c.name, 'value': 0, 'icon': c.icon, id: crypto.randomUUID() }))
-    return toNewCharacterObject({ characteristics, currency, session: sessionId })
-}
-
 onBeforeUnmount(() => {
     const events = ['character:updateNotify', 'session:updateNotify']
     events.forEach(e => socket.off(e))
@@ -132,23 +106,6 @@ socket.on('session:updateNotify', (session) => {
     selected_character.value = state.session.characters.find(character => character.id === selected_character.value.id)
     notify({ message: `Сесію було оновлено майстром`, type: 'warning' })
 })
-
-function selectCharacter(character) {
-    if (state.unsavedChanges) {
-        const confirmSwitch = confirm('Є незбережені зміни. Вийти без збереження?')
-        if (!confirmSwitch) return
-    }
-
-    editingCharacter.value = character.id;
-    state.unsavedChanges = false;
-
-    if (character.id === 'new') {
-        selected_character.value = newCharacter()
-    }
-    else selected_character.value = toNewCharacterObject(structuredClone(toRaw(character)))
-
-    resetSearchQuery()
-}
 
 async function saveCharacter() {
 
@@ -183,7 +140,7 @@ async function saveCharacter() {
             )
             if (errSession) return
 
-            state.session = resSession.data
+            state.session = toNewSession(resSession.data)
             state.unsavedChanges = false
 
             notify({ message: 'Персонаж оновлений', type: 'success' })
@@ -198,6 +155,10 @@ async function saveCharacter() {
 }
 
 async function deleteCharacter() {
+
+    const confirmSwitch = confirm('Видалити персонажа?')
+        if (!confirmSwitch) return
+
     const [res, err] = await asyncHandler(
         RepositoryFactory.delete('character', selected_character.value.id)
     )
@@ -218,6 +179,50 @@ async function deleteCharacter() {
     selectCharacter(newCharacter())
     notify({ message: 'Персонаж видалений', type: 'success' })
     socket.emit('session:updateNotify', resSession.data);
+}
+
+function buildTypes(list) {
+    return [
+        ...list.map(type => ({
+            name: type.name,
+            id: type.id,
+            hidden: true
+        })),
+        {
+            name: 'Всі',
+            id: 'all',
+            hidden: false
+        }
+    ]
+}
+
+function resetSearchQuery() {
+    Object.entries(searchQuery.value).forEach(([key, val]) => {
+        searchQuery.value[key] = ''
+    })
+}
+
+function newCharacter() {
+    const characteristics = state.session.characteristicsList.map(ch => ({ 'name': ch.name, 'value': 0, id: crypto.randomUUID() }))
+    const currency = state.session.currencyTypes.map(c => ({ 'name': c.name, 'value': 0, 'icon': c.icon, id: crypto.randomUUID() }))
+    return toNewCharacterObject({ characteristics, currency, session: sessionId })
+}
+
+function selectCharacter(character) {
+    if (state.unsavedChanges) {
+        const confirmSwitch = confirm('Є незбережені зміни. Вийти без збереження?')
+        if (!confirmSwitch) return
+    }
+
+    editingCharacter.value = character.id;
+    state.unsavedChanges = false;
+
+    if (character.id === 'new') {
+        selected_character.value = newCharacter()
+    }
+    else selected_character.value = toNewCharacterObject(structuredClone(toRaw(character)))
+
+    resetSearchQuery()
 }
 
 function discardChanges() {
@@ -452,17 +457,21 @@ watch([selected_character, editingCharacter], ([newVal1, newVal2], [oldVal1, old
 
         </div>
 
-        <div id="quests&effects" v-if="activeTab === 'quests&effects'"
-            class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-3">
+        <div id="quests" v-if="activeTab === 'quests'" class="grid gap-x-4 gap-y-3">
+
+            <Header1 class="justify-self-center" label="Квести:" />
+
+            <QuestsTableEditor class="flex flex-col gap-2" :session_quests="state.session.quests"
+                :character_quests="selected_character.quests" :callback="updateQuests" />
+        </div>
+
+        <div id="effects" v-if="activeTab === 'effects'" class="grid gap-x-4 gap-y-3">
 
             <Header1 class="justify-self-center" label="Еффекти:" />
-            <Header1 class="justify-self-center" label="Квести:" />
 
             <EffectsTableEditor :sessionEffects="state.session.effects" :character_effects="selected_character.effects"
                 :callback="updateEffects" />
 
-            <QuestsTableEditor class="flex flex-col gap-2" :session_quests="state.session.quests"
-                :character_quests="selected_character.quests" :callback="updateQuests" />
         </div>
 
         <div id="perks" v-if="activeTab === 'perks'" class="grid grid-cols-3 auto-rows-min gap-x-4 gap-y-3">

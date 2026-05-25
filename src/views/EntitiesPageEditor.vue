@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted, onBeforeUnmount, computed, toRaw } from 'vue';
+import { ref, reactive, onMounted, onBeforeUnmount, computed, toRaw, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import RepositoryFactory from '@http/RepositoryFactory';
@@ -22,10 +22,9 @@ import Header1 from '@/components/reusable/Titles/Header1.vue';
 import InputTextReactive from '@/components/reusable/Inputs/InputTextReactive.vue';
 import DropDownChoosen from '@/components/reusable/DropDowns/DropDownChoosen.vue';
 import ImageEditor from '@/components/reusable/ImageEditor.vue';
-import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
+import TextAreaReactive from '@/components/reusable/Inputs/TextAreaReactive.vue';
 import Header2 from '@/components/reusable/Titles/Header2.vue';
 import DeleteButton from '@/components/reusable/Buttons/DeleteButton.vue';
-import TextDropdown from '@/components/character-page components/TextDropdown.vue';
 import CustomFieldsEditor from '@/components/reusable/CustomFieldsEditor.vue';
 import EffectTile from '@/components/reusable/EntityTiles/EffectTile.vue';
 
@@ -132,6 +131,10 @@ async function saveEntity() {
 }
 
 async function deleteEntity() {
+
+    const confirmSwitch = confirm('Видалити?')
+        if (!confirmSwitch) return
+
     const [resEntity, errEntity] = await asyncHandler(
         RepositoryFactory.delete('entity', state.selectedEntity.id)
     )
@@ -281,27 +284,26 @@ function removeEffect(id) {
 
     <section v-if="!state.isLoading" class="m-4 grid grid-cols-4 gap-2 items-center justify-start">
 
-        <Header1 class="col-span-full" label="Створити\Редагувати річ:" />
+        <Header1 class="col-span-full" label="Створити\Редагувати:" />
 
         <ImageEditor class="col-span-full" :image="state.selectedEntity.image" label="Картинка"
             :callback="updateImage" />
 
-        <InputTextReactive class="col-span-3" placeholder="Назва" fieldName="name" :inputValue="state.selectedEntity.name"
+        <InputTextReactive class="col-span-3" placeholder="Назва" fieldName="name" v-model:inputValue="state.selectedEntity.name"
             :callback="updateEntityFields" type="text" :important="true" />
 
         <DropDownChoosen label="Тип" entity_name="EntityType" :entity_array="state.session.entityTypes"
-            :selected="state.selectedEntity.type" :callback="updateEntityType" />
+            v-model:selected="state.selectedEntity.type" :callback="updateEntityType" />
 
         <InputTextReactive class="col-span-3" placeholder="Опис" fieldName="description" ,
-            :inputValue="state.selectedEntity.description" :callback="updateEntityFields" type="text" />
+            v-model:inputValue="state.selectedEntity.description" :callback="updateEntityFields" type="text" />
 
-        <InputTextReactive placeholder="Ціна" fieldName="price" :inputValue="state.selectedEntity.price"
+        <InputTextReactive placeholder="Ціна" fieldName="price" v-model:inputValue="state.selectedEntity.price"
             :callback="updateEntityFields" type="number" />
 
-        <TextAreaEditor class="col-span-3" fieldName="notes" name="Записки Майстра" :inputValue="state.selectedEntity.notes"
-            :callback="updateEntityFields" />
+        <TextAreaReactive class="col-span-3" label="Записки Майстра" v-model:value="state.selectedEntity.notes" />
 
-        <InputTextReactive placeholder="Рідкість" fieldName="rarity" :inputValue="state.selectedEntity.rarity"
+        <InputTextReactive placeholder="Рідкість" fieldName="rarity" v-model:inputValue="state.selectedEntity.rarity"
             :callback="updateEntityFields" type="text" />
 
         <div class="col-span-2 self-start flex gap-4 flex-wrap rounded-2xl border-x-4 border-darkred-dark_gray p-4">
@@ -344,7 +346,7 @@ function removeEffect(id) {
                 <DeleteButton class="bg-darkred-red" @click="removeRequirement(key)" />
             </div>
 
-            <div v-if="checkObjectFieldExisting(state.session.characteristicsList)" class="shrink w-full mx-auto flex gap-2 items-center">
+            <!-- <div v-if="checkObjectFieldExisting(state.session.characteristicsList)" class="shrink w-full mx-auto flex gap-2 items-center">
                 <TextDropdown label="Характеристика" :entity_array="state.session.characteristicsList"
                     entity_name="entityCharacteristic" :callback="getRequirementType" />
                 <InputTextReactive placeholder="Значення" fieldName="value" type="number"
@@ -355,7 +357,7 @@ function removeEffect(id) {
 
             </div>
 
-            <div v-else> <Header2 label="В сесії відсутні характеристики"/></div>
+            <div v-else> <Header2 label="В сесії відсутні характеристики"/></div> -->
 
         </div>
 

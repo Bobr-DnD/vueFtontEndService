@@ -5,7 +5,7 @@ import { useRoute } from 'vue-router'
 import RepositoryFactory from '@http/RepositoryFactory'
 import { asyncHandler } from '@utils/asyncHandler'
 import { notify } from '@utils/notification'
-import { toNewEffect, toObject,toNewSession } from '@utils/objects.dto'
+import { toNewEffect, toObject, toNewSession } from '@utils/objects.dto'
 import { checkObjectFieldExisting } from '@utils/entityHelper'
 import { socket } from '@ws/webSocket'
 
@@ -16,11 +16,11 @@ import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWith
 import Header1 from '@/components/reusable/Titles/Header1.vue'
 import Header2 from '@/components/reusable/Titles/Header2.vue'
 import InputTextReactive from '@/components/reusable/Inputs/InputTextReactive.vue'
-import TextDropdown from '@/components/character-page components/TextDropdown.vue'
 import DeleteButton from '@/components/reusable/Buttons/DeleteButton.vue'
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue'
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue'
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue'
+import DropdownWithValueField from '@/components/admin-page components/DropdownWithValueField.vue'
 
 
 const state = reactive({
@@ -103,7 +103,7 @@ async function saveEffect() {
 
     state.session = res.data
     unsavedChanges.value = false
-    
+
     notify({ message: 'Зміни збережені', type: 'info' })
     socket.emit('session:updateNotify', sessionId)
 }
@@ -159,20 +159,9 @@ function updateEffectField(fieldName, value) {
     markUnsaved()
 }
 
-function updateEffectCharacteristics() {
-    if (newEffect.value.value)
-        Object.assign(selectedEffect.value.effect, toObject(newEffect.value))
-    else notify({ message: 'Вкажіть значення', type: 'error' })
-    markUnsaved()
-}
+function addCharacteristic(characteristic) {
+    console.log(characteristic);
 
-function getCharacteristicType(id) {
-    const type = state.session.characteristicsList.find(el => el.id === id)
-    newEffect.value.name = type.name
-
-}
-function getCharacteristicValue(fieldName, value) {
-    newEffect.value[fieldName] = value
 }
 
 function removeEffectCharacteristic(key) {
@@ -229,10 +218,10 @@ function removeEffectCharacteristic(key) {
     <section v-if="!state.isLoading" class="m-4 grid grid-cols-2 gap-4">
         <Header1 class="col-span-2" label="Створити\редагувати ефект" />
 
-        <InputTextReactive placeholder="Назва" fieldName="name" type="text" :value="selectedEffect.name"
-            :callback="updateEffectField" :important="true" class="p-0" />
-        <InputTextReactive placeholder="Опис" fieldName="description" type="text" :value="selectedEffect.description"
-            :callback="updateEffectField" :important="true" class="p-0" />
+        <InputTextReactive placeholder="Назва" fieldName="name" type="text" v-model:inputValue="selectedEffect.name"
+            :important="true" class="p-0" />
+        <InputTextReactive placeholder="Опис" fieldName="description" type="text"
+            v-model:inputValue="selectedEffect.description" :important="true" class="p-0" />
 
         <Header2 label="Характеристики, на які впливає ефект:" />
 
@@ -251,20 +240,9 @@ function removeEffectCharacteristic(key) {
 
         </div>
 
-        <div v-if="checkObjectFieldExisting(state.session.characteristicsList)"
-            class="col-span-2 justify-self-center flex gap-2 items-center">
-            <TextDropdown label="Характеристика" :entity_array="state.session.characteristicsList"
-                entity_name="effectCharacteristic" :callback="getCharacteristicType" />
-            <InputTextReactive placeholder="Значення" fieldName="value" type="number" :value="newEffect.value"
-                :callback="getCharacteristicValue" />
-            <div class="pb-2 self-end">
-                <AprroveButtonWithText @click="updateEffectCharacteristics" text="Додати поле" />
-            </div>
-
-        </div>
-
-        <div v-else>
-            <Header2 label="В сесії відсутні характеристики" />
+        <div class="col-span-2 justify-self-center text-xl flex gap-4 items-end">
+            <DropdownWithValueField :list="state.session.characteristicsList" :callback="addCharacteristic"
+                name="EffectsCharacteristics" />
         </div>
 
     </section>

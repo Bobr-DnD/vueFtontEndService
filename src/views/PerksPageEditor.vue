@@ -19,7 +19,6 @@ import InputTextReactive from '@/components/reusable/Inputs/InputTextReactive.vu
 import DropDownChoosen from '@/components/reusable/DropDowns/DropDownChoosen.vue';
 import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
 import ArraySingleStringForm from '@/components/reusable/Forms/ArraySingleStringForm.vue';
-import TextDropdown from '@/components/character-page components/TextDropdown.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
@@ -274,7 +273,7 @@ function removePerkSingleRequirement(key) {
 
         </div>
 
-        <div v-if="checkObjectFieldExisting(state.session.characteristicsList)"
+        <!-- <div v-if="checkObjectFieldExisting(state.session.characteristicsList)"
             class="col-span-2 justify-self-center flex gap-2 items-center">
             <TextDropdown label="Характеристика" :entity_array="state.session.characteristicsList"
                 entity_name="perkRequirement" :callback="getCharacteristicType" />
@@ -288,7 +287,7 @@ function removePerkSingleRequirement(key) {
 
         <div v-else>
             <Header2 label="В сесії відсутні характеристики" />
-        </div>
+        </div> -->
 
     </section>
 
