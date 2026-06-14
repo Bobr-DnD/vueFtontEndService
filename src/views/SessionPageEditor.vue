@@ -6,8 +6,8 @@ import { toNewSession } from '@utils/objects.dto';
 import { notify } from '@utils/notification';
 import RepositoryFactory from '@http/RepositoryFactory';
 import { socket } from '@ws/webSocket';
-import { isEqual } from 'lodash';
 import { useRouter } from 'vue-router'
+import { checkEqualByKeys } from '@utils/entityHelper';
 
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
@@ -176,16 +176,12 @@ const keysToWatch = [
 
 watch(() => editedSession.value, () => {
 
-    if(copied.value){
+    if (copied.value) {
         copied.value = false
         return
     }
 
-    const isChanged = keysToWatch.some(key =>
-        !isEqual(state.session[key], editedSession.value[key])
-    )
-
-    if (isChanged) markUnsaved()
+    if (checkEqualByKeys(state.session, editedSession.value, keysToWatch)) markUnsaved()
 
 }, { deep: true, immediate: false })
 

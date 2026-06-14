@@ -1,3 +1,5 @@
+import { isEqual } from "lodash"
+
 export function groupById(items, idKey = 'id') {
   const map = new Map()
 
@@ -84,4 +86,12 @@ export function sortByTwoFields(array, primaryField, secondaryField) {
 
 export function sortByMainField(array, primaryField) {
   array.sort((a, b) => a[primaryField].localeCompare(b[primaryField], 'uk'));
+}
+
+export function checkEqualByKeys(originalArray, copyArray, keys) {
+  const isChanged = keys.some(key =>
+    !isEqual(originalArray[key], copyArray[key])
+  )
+
+  return isChanged
 }
