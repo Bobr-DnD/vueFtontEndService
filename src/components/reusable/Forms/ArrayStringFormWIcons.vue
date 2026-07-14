@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, nextTick } from 'vue';
 import PlusButton from '../Buttons/PlusButton.vue';
 import DeleteButton from '../Buttons/DeleteButton.vue';
 import IconsDropdown from '../IconsDropdown.vue';
@@ -54,7 +54,8 @@ function updateIcon(id, iconName) {
     
 }
 
-function update(){
+async function update(){
+    await nextTick()
     emit('update:array', arrayLocal.value)
 }
 
@@ -71,7 +72,7 @@ function update(){
 
 
             <input v-model.lazy="item.name" type="text" placeholder="Назва" @change="update" :id="item.id"
-                class="p-1 border-4 text-lg border-darkred-dark rounded-lg text-darkred-dark w-full focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
+                class="p-2 border-2 text-md border-darkred-dark rounded-lg text-darkred-dark w-full focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
 
             <IconsDropdown v-if="props.setIcon" :icon="item.icon" :field_id="item.id" :callback="updateIcon" />
 

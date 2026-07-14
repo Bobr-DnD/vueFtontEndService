@@ -1,65 +1,49 @@
 <script setup>
-import { reactive, ref, onMounted, onBeforeUnmount, computed, toRaw, watch } from 'vue'
+import { ref, computed, toRaw, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import RepositoryFactory from '@http/RepositoryFactory'
 import { asyncHandler } from '@utils/asyncHandler'
-import { notify } from '@utils/notification'
-import { toNewEffect, toObject, toNewSession } from '@utils/objects.dto'
-import { checkObjectFieldExisting } from '@utils/entityHelper'
 import { socket } from '@ws/webSocket'
+import { notify } from '@utils/notification'
+import { toNewEffect, toObject } from '@utils/objects.dto'
+import { checkObjectFieldExisting } from '@utils/entityHelper'
+import { useSessionStore } from '@/stores/sessionStore'
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue'
 import EffectTile from '@/components/reusable/EntityTiles/EffectTile.vue'
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue'
-import Header1 from '@/components/reusable/Titles/Header1.vue'
 import Header2 from '@/components/reusable/Titles/Header2.vue'
 import InputTextReactive from '@/components/reusable/Inputs/InputTextReactive.vue'
 import DeleteButton from '@/components/reusable/Buttons/DeleteButton.vue'
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue'
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue'
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue'
-import DropdownWithValueField from '@/components/admin-page components/DropdownWithValueField.vue'
-
-
-const state = reactive({
-    session: {},
-    isLoading: true,
-    unsavedChanges: false
-})
+import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue'
+import SearchInputBlack from '@/components/reusable/SearchInputs/SearchInputBlack.vue'
+import DropDownList from '@/components/reusable/DropDowns/DropDownList.vue'
 
 const sessionId = useRoute().params.sessionId
+const store = useSessionStore()
+const activeTab = ref('base')
+
+const tabs = [
+    { id: 'base', label: 'Список речей' },
+    { id: 'edit', label: "Створити/Редагувати річ" }
+]
+
+const newEffect = ref({
+    name: '',
+    value: ''
+})
 const searchQuery = ref('')
 const selectedEffect = ref(toNewEffect({}))
 const unsavedChanges = ref(false)
-
-const newEffect = ref({})
-
-onMounted(async () => {
-    const [res, err] = await asyncHandler(
-        RepositoryFactory.getById('session', sessionId)
-    )
-    if (err) {
-        return
-    }
-
-    state.isLoading = false
-    state.session = res.data
-})
-
-onBeforeUnmount(() => {
-    const events = ['session:updateNotify']
-    events.forEach(e => socket.off(e))
-})
-
-socket.on('session:updateNotify', (session) => {
-    state.session = toNewSession(session)
-    notify({ message: `Сесію було оновлено майстром`, type: 'warning' })
-})
+const copied = ref(false)
 
 const filteredEffects = computed(() => {
-    const effects = state.session.effects;
+    const effects = toRaw(store.session.effects);
 
     if (!searchQuery.value.trim()) {
         return [...effects];
@@ -72,11 +56,13 @@ const filteredEffects = computed(() => {
     );
 });
 
+// API functions
+
 async function saveEffect() {
 
     const effect = toRaw(selectedEffect.value)
 
-    if (selectedEffect.value.id === 'new') {
+    if (effect.id === 'new') {
 
         effect.session = sessionId
 
@@ -84,8 +70,7 @@ async function saveEffect() {
             RepositoryFactory.create(`effect`, effect)
         )
         if (err) return
-
-        selectedEffect.value = toNewEffect({})
+        reloadEffect('new')
     }
     else {
 
@@ -93,81 +78,72 @@ async function saveEffect() {
             RepositoryFactory.update('effect', effect.id, effect)
         )
         if (err) return
-
+        reloadEffect(res.data.id, res.data)
     }
-
-    const [res, err] = await asyncHandler(
-        RepositoryFactory.getById('session', sessionId)
-    )
-    if (err) return
-
-    state.session = res.data
-    unsavedChanges.value = false
-
     notify({ message: 'Зміни збережені', type: 'info' })
-    socket.emit('session:updateNotify', sessionId)
+    socket.emit('session:updateDataNotify', sessionId);
 }
 
-async function removeEffect() {
+async function deleteEffect() {
 
     const [resEffect, errEffect] = await asyncHandler(
         RepositoryFactory.delete('effect', selectedEffect.value.id)
     )
     if (errEffect) return
-
-    const [res, err] = await asyncHandler(
-        RepositoryFactory.getById('session', sessionId)
-    )
-    if (err) return
-
-    state.session = res.data
-    unsavedChanges.value = false
-    selectedEffect.value = toNewEffect({})
-
+    socket.emit('session:updateDataNotify', sessionId);
     notify({ message: 'Ефект видалено', type: 'info' })
-    socket.emit('session:updateNotify', sessionId)
+    reloadEffect('new')
 }
+
+// service functions
 
 function markUnsaved() {
     unsavedChanges.value = true
 }
 
+function markSaved() {
+    unsavedChanges.value = false
+    copied.value = true
+}
+
 function discardChanges() {
+    markSaved()
 
     if (selectedEffect.value.id === 'new') selectedEffect.value = toNewEffect({})
-    else {
-        selectedEffect.value = toNewEffect(structuredClone(toRaw(state.session.effects.find(el => el.id === selectedEffect.value.id))))
-    }
+    else selectedEffect.value = toNewEffect(structuredClone(toRaw(store.session.effects.find(el => el.id === selectedEffect.value.id))))
 
-    unsavedChanges.value = false
     notify({ message: 'Зміни анульовані', type: 'warning' })
 }
 
-function selectEffect(effect) {
+function reloadEffect(id, data = { id }) {
+    markSaved()
+    if (id === 'new') selectedEffect.value = toNewEffect({})
+    else selectedEffect.value = toNewEffect(data)
+}
+
+function selectEffect(id) {
+    if (selectedEffect.value?.id === id) return
     if (unsavedChanges.value) {
         const confirmSwitch = confirm('Є незбережені зміни. Вийти без збереження?')
         if (!confirmSwitch) return
     }
 
-    unsavedChanges.value = false
-    newEffect.value = {}
-    selectedEffect.value = toNewEffect(structuredClone(toRaw(effect)))
+    markSaved()
+
+    if (id === 'new') selectedEffect.value = toNewEffect({})
+    else selectedEffect.value = toNewEffect(structuredClone(toRaw(store.session.effects.find(el => el.id === id))))
+
+    activeTab.value = 'edit'
 }
 
-function updateEffectField(fieldName, value) {
-    selectedEffect.value[fieldName] = value
+watch(() => selectedEffect.value, () => {
+
+    if (copied.value) {
+        copied.value = false
+        return
+    }
     markUnsaved()
-}
-
-function addCharacteristic(characteristic) {
-    console.log(characteristic);
-
-}
-
-function removeEffectCharacteristic(key) {
-    delete selectedEffect.value.effect[key]
-    markUnsaved()
-}
+}, { deep: true, immediate: false })
 
 </script>
 
@@ -175,79 +151,107 @@ function removeEffectCharacteristic(key) {
 
     <MasterPageNavigation />
 
-    <section v-if="!state.isLoading" class="m-4 grid grid-cols-1 gap-4">
-        <Header1 label="Всі ефекти:" />
-        <div class="flex gap-2">
+    <section v-if="!store.isLoading"
+        class="p-2 grid grid-cols-[25%_1fr] gap-2 items-center justify-start overflow-hidden font-gothic">
 
-            <input v-model="searchQuery" placeholder="Пошук ..."
-                class="h-12 w-full p-2 col-span-3 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+        <section class="h-full p-2 space-y-2 overflow-y-auto">
 
-            <RejectButtonWithText v-if="searchQuery" @click="searchQuery = ''" text="Очистити" />
-        </div>
+            <div class="w-full flex flex-col gap-2">
 
-        <div class="w-full py-2 max-h-[512px] overflow-y-scroll auto-hide-scroll grid grid-cols-4 gap-4">
+                <GraySelectorButton class="w-full" v-for="type in tabs" :key="type.id" @click="activeTab = type.id"
+                    :id="type.id" :label="type.label" :active="activeTab === type.id ? true : false" />
 
-            <div @click="selectEffect({})"
-                :class="selectedEffect.id === 'new' && 'bg-darkred-dark_gray text-darkred-light'"
-                class="border-8 border-darkred-dark rounded-2xl flex justify-center items-center hover:cursor-pointer">
-                <PlusButton class="w-20" />
             </div>
 
+            <div v-if="activeTab === 'edit'" class="w-full flex flex-col gap-2">
 
-            <EffectTile v-for="effect in filteredEffects"
-                :class="selectedEffect.id === effect.id && 'outline outline-4 outline-offset-[-1px] outline-darkred-red'"
-                class="hover:cursor-pointer" @click="selectEffect(effect)" :effect="effect" />
-        </div>
+                <AprroveButtonWithText @click="saveEffect" text="Зберегти зміни"
+                    :class="[!unsavedChanges && 'pointer-events-none opacity-50']" class="w-full" />
 
 
-    </section>
+                <RejectButtonWithText @click="discardChanges" text="Відмінити зміни"
+                    :class="[!unsavedChanges && 'pointer-events-none opacity-50']" class="w-full" />
 
-    <section v-if="!state.isLoading" class="m-4 flex gap-2 items-center">
-        <AprroveButtonWithText :class="[!unsavedChanges && 'pointer-events-none opacity-50']" text="Зберегти зміни"
-            @click="saveEffect" />
+                <RejectButtonWithText v-if="selectedEffect.id !== 'new'" @click="deleteEffect" text="Видалити"
+                    class="w-full" />
 
-        <RejectButtonWithText :class="[!unsavedChanges && 'pointer-events-none opacity-50']" text="Відмінити"
-            @click="discardChanges" />
+                <UnsavedLabel v-if="unsavedChanges" class="w-full" />
+            </div>
 
-        <RejectButtonWithText v-if="selectedEffect.id !== 'new'" text="Видалити ефект" @click="removeEffect" />
+        </section>
 
-        <UnsavedLabel v-if="unsavedChanges" />
+        <section class="h-full space-y-2 grid grid-cols-4 gap-4 overflow-y-auto">
 
-    </section>
+            <section v-if="activeTab === 'base'" class="col-span-4 space-y-2">
 
-    <section v-if="!state.isLoading" class="m-4 grid grid-cols-2 gap-4">
-        <Header1 class="col-span-2" label="Створити\редагувати ефект" />
-
-        <InputTextReactive placeholder="Назва" fieldName="name" type="text" v-model:inputValue="selectedEffect.name"
-            :important="true" class="p-0" />
-        <InputTextReactive placeholder="Опис" fieldName="description" type="text"
-            v-model:inputValue="selectedEffect.description" :important="true" class="p-0" />
-
-        <Header2 label="Характеристики, на які впливає ефект:" />
-
-        <div class="col-span-2 flex flex-wrap gap-4 hover:cursor-pointer">
-            <div v-if="checkObjectFieldExisting(selectedEffect.effect)" v-for="value, key in selectedEffect.effect"
-                class="flex gap-3 items-center p-3 w-fit rounded-lg bg-darkred-dark text-darkred-light">
-                <div>
-                    {{ key }}: {{ value }}
+                <div class="flex justify-center col-span-full">
+                    <SearchInputBlack v-model:searchQuery="searchQuery" class="w-1/2" />
                 </div>
-                <DeleteButton @click="removeEffectCharacteristic(key)" class="bg-darkred-red w-10" />
 
-            </div>
-            <div v-else class="">
-                Пусто
-            </div>
+                <div
+                    class="w-full p-2 max-h-[512px] overflow-y-scroll auto-hide-scroll grid grid-cols-4 gap-4 col-span-full">
 
-        </div>
+                    <div @click="selectEffect('new')"
+                        :class="selectedEffect.id === 'new' && 'outline outline-4 outline-offset-[-1px] outline-darkred-red'"
+                        class="border-8 border-darkred-dark bg-darkred-dark rounded-2xl flex justify-center items-center hover:cursor-pointer">
+                        <PlusButton class="w-20 text-darkred-light" />
+                    </div>
 
-        <div class="col-span-2 justify-self-center text-xl flex gap-4 items-end">
-            <DropdownWithValueField :list="state.session.characteristicsList" :callback="addCharacteristic"
-                name="EffectsCharacteristics" />
-        </div>
+
+                    <EffectTile v-for="effect in filteredEffects"
+                        :class="selectedEffect.id === effect.id && 'outline outline-4 outline-offset-[-1px] outline-darkred-red'"
+                        class="hover:cursor-pointer" @click="selectEffect(effect.id)" :effect="effect" />
+                </div>
+
+            </section>
+
+            <section v-if="activeTab === 'edit'" class="h-full col-span-full grid grid-cols-2">
+
+                <InputTextReactive placeholder="Назва" fieldName="name" type="text"
+                    v-model:inputValue="selectedEffect.name" :important="true" class="" />
+
+                <InputTextReactive placeholder="Опис" fieldName="description" type="text"
+                    v-model:inputValue="selectedEffect.description" :important="true" class="" />
+
+                <Header2 label="Характеристики, на які впливає ефект:" class="col-span-full" />
+
+                <div class="col-span-full flex flex-wrap gap-4 hover:cursor-pointer">
+                    <div v-if="checkObjectFieldExisting(selectedEffect.effect)"
+                        v-for="value, key in selectedEffect.effect"
+                        class="flex gap-3 items-center p-3 w-fit rounded-lg bg-darkred-dark text-darkred-light">
+                        <div>
+                            {{ key }}: {{ value }}
+                        </div>
+                        <DeleteButton @click="delete selectedEffect.effect[key]" class="bg-darkred-red w-10" />
+
+                    </div>
+                    <div v-else class="">
+                        Пусто
+                    </div>
+
+                </div>
+
+
+                <div class="w-full grid grid-cols-1 gap-2 ">
+
+                    <DropDownList v-model:selected="newEffect.name" label="Виберіть характеристику"
+                        entity_name="CharacteristicName" :entity_array="store.session.characteristicsList" />
+
+                    <InputTextReactive v-model:inputValue="newEffect.value" placeholder="Значення"
+                        fieldName="CharacteristicValue" />
+
+                    <AprroveButtonWithText class="flex justify-center items-center text-lg"
+                        @click="Object.assign(selectedEffect.effect, toObject(toRaw(newEffect)))"
+                        text="Додати вимогу" />
+                </div>
+
+            </section>
+
+        </section>
 
     </section>
 
-    <div v-if="state.isLoading" class="text-center py-6">
+    <div v-if="store.isLoading" class="text-center py-6">
         <Loader />
     </div>
 

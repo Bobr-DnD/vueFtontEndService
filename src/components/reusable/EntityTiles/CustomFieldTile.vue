@@ -5,14 +5,8 @@ import { CheckCircleIcon } from '@heroicons/vue/24/outline'
 import DeleteButton from '../Buttons/DeleteButton.vue';
 import { notify } from '/utils/notification';
 
-const field = defineModel('customField', { type: Object, required: true })
+const field = defineModel('fields', { type: Object, required: true })
 
-const props = defineProps({
-    callback_remove: { type: Function, required: true },
-    field_removable: { type: Boolean, required: false, default: false }
-})
-
-const readonly = ref(true)
 const nameInput = ref(null)
 const valueInput = ref(null)
 const descriptionInput = ref(null)
@@ -48,7 +42,6 @@ function validate() {
 
 async function updateField() {
     if (!validate()) return
-    readonly.value = true
     await nextTick()
     autoResize()
 }
@@ -65,7 +58,7 @@ async function updateField() {
                 Назва:
             </label>
 
-            <input ref="nameInput" type="text" :id="`${field.id}-name`" v-model="field.name" :disabled="readonly"
+            <input ref="nameInput" type="text" :id="`${field.id}-name`" v-model="field.name"
                 :class="inputStyle">
 
             <label for="`${field.id}-description`">
@@ -73,28 +66,28 @@ async function updateField() {
             </label>
 
             <textarea ref="descriptionInput" :name="field.name" :id="`${field.id}-description`"
-                v-model="field.description" :disabled="readonly" :class="inputStyle"
+                v-model="field.description"  :class="inputStyle"
                 class="md:auto-hide-scroll resize-none h-fit max-h-[256px]"></textarea>
 
             <label for="`${field.id}-value`">
-                Значення:
+                Значення:Freado
             </label>
 
             <input ref="valueInput" :type="typeof field.value" :id="`${field.id}-value`" v-model="field.value"
-                :disabled="readonly" :class="inputStyle">
+                :class="inputStyle">
         </form>
 
         <div class="h-full self-center flex flex-col justify-between py-4 gap-2">
 
-            <div @click="readonly ? readonly = false : updateField()"
+            <div 
                 class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl md:hover:cursor-pointer">
-                <component :is="readonly ? PencilIcon : CheckCircleIcon" class="text-darkred-light"
-                    :class="readonly ? 'w-5 h-5' : 'w-7 h-7'" />
+                <component class="text-darkred-light"
+                     />
             </div>
 
-            <DeleteButton v-if="props.field_removable"
+            <DeleteButton
                 class="flex justify-center items-center text-xl w-11 h-11 bg-darkred-red text-darkred-light"
-                @click="props.callback_remove(field.id)" />
+                />
         </div>
     </div>
 

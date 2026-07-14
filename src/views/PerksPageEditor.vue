@@ -1,66 +1,48 @@
 <script setup>
-import { reactive, ref, onMounted,onBeforeUnmount, toRaw, computed } from 'vue';
+import { ref, toRaw, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '@utils/asyncHandler';
+import { socket } from '@ws/webSocket'
 import { notify } from '@utils/notification';
-import { toNewPerk, toObject, toNewSession } from '@utils/objects.dto';
+import { toNewPerk } from '@utils/objects.dto';
 import { checkObjectFieldExisting } from '@utils/entityHelper';
-import { socket } from '@ws/webSocket';
+import { useSessionStore } from '@/stores/sessionStore';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import SearchInputBlack from '@/components/reusable/SearchInputs/SearchInputBlack.vue';
-import Header1 from '@/components/reusable/Titles/Header1.vue';
-import Header2 from '@/components/reusable/Titles/Header2.vue';
+import Header2 from '@/components/reusable/Titles/Header1.vue';
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue';
 import PerkTile from '@/components/reusable/EntityTiles/PerkTile.vue';
 import InputTextReactive from '@/components/reusable/Inputs/InputTextReactive.vue';
 import DropDownChoosen from '@/components/reusable/DropDowns/DropDownChoosen.vue';
-import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
+import TextAreaReactive from '@/components/reusable/Inputs/TextAreaReactive.vue';
 import ArraySingleStringForm from '@/components/reusable/Forms/ArraySingleStringForm.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
-import DeleteButton from '@/components/reusable/Buttons/DeleteButton.vue';
 import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
 
 const sessionId = useRoute().params.sessionId
+const store = useSessionStore()
+const activeTab = ref('base')
+
+const tabs = [
+    { id: 'base', label: 'Список навичок' },
+    { id: 'edit', label: "Створити/Редагувати річ" }
+]
+
 const searchQuery = ref('')
 const selectedPerk = ref(toNewPerk({}))
 const selectedType = ref('')
 const perkNewRequirement = ref({})
+const unsavedChanges = ref(false)
+const copied = ref(false)
 
-const state = reactive({
-    isLoading: true,
-    session: {},
-    unsavedChanges: false
-})
-
-onMounted(async () => {
-    const [res, err] = await asyncHandler(
-        RepositoryFactory.getById('session', sessionId)
-    )
-    if (err) {
-        return
-    }
-
-    state.isLoading = false
-    state.session = res.data
-})
-
-onBeforeUnmount(() => {
-    const events = ['session:updateNotify']
-    events.forEach(e => socket.off(e))
-})
-
-socket.on('session:updateNotify', (session) => {
-    state.session = toNewSession(session)
-    notify({ message: `Сесію було оновлено майстром`, type: 'warning' })
-})
 
 const filteredPerks = computed(() => {
-    let perks = toRaw(state.session.perks);
+    let perks = toRaw(store.session.perks);
 
     if (selectedType.value) perks = perks.filter(el => el.type.name === selectedType.value)
 
@@ -74,6 +56,8 @@ const filteredPerks = computed(() => {
     return perks
 });
 
+// API functions
+
 async function savePerk() {
     const perk = toRaw(selectedPerk.value)
 
@@ -82,32 +66,24 @@ async function savePerk() {
         return
     }
 
-    if (selectedPerk.value.id === 'new') {
+    if (perk.id === 'new') {
 
         perk.session = sessionId
         const [res, err] = await asyncHandler(
             RepositoryFactory.create('perk', perk)
         )
         if (err) return
+        reloadPerk('new')
     }
     else {
         const [res, err] = await asyncHandler(
             RepositoryFactory.update('perk', perk.id, perk)
         )
         if (err) return
+        reloadPerk(res.data.id, res.data)
     }
-
-    const [res, err] = await asyncHandler(
-        RepositoryFactory.getById('session', sessionId)
-    )
-    if (err) return
-
-    state.session = res.data
-    state.unsavedChanges = false
-    selectedPerk.value = toNewPerk({ type: perk.type })
-
     notify({ message: 'Зміни збережені', type: 'info' })
-    socket.emit('session:updateNotify', sessionId)
+    socket.emit('session:updateDataNotify', sessionId);
 }
 
 async function deletePerk() {
@@ -116,80 +92,63 @@ async function deletePerk() {
     )
     if (errPerk) return
 
-    const [resSession, errSession] = await asyncHandler(
-        RepositoryFactory.getById('session', sessionId)
-    )
-    if (errSession) return
-
-    state.session = resSession.data
-    state.unsavedChanges = false
-    selectedPerk.value = toNewPerk({})
-
-    notify({ message: 'Ефект видалено', type: 'info' })
-    socket.emit('session:updateNotify', sessionId)
+    socket.emit('session:updateDataNotify', sessionId);
+    notify({ message: 'Навичку видалено', type: 'info' })
+    reloadPerk('new')
 }
 
+// service functions
+
 function discardChanges() {
-    selectedPerk.value = toNewPerk(structuredClone(toRaw(state.session.perks.find(perk => perk.id === selectedPerk.value.id))))
-    state.unsavedChanges = false
+    markSaved()
+
+    if (selectedPerk.value.id === 'new') selectedPerk.value = toNewPerk({})
+    else selectedPerk.value = toNewPerk(structuredClone(toRaw(store.session.perks.find(el => el.id === selectedPerk.value.id))))
+
     notify({ message: 'Зміни анульовані', type: 'warning' })
 }
 
-function selectPerk(perk) {
-    if (state.unsavedChanges) {
+function markUnsaved() {
+    unsavedChanges.value = true;
+}
+
+function markSaved() {
+    unsavedChanges.value = false
+    copied.value = true
+}
+
+function reloadPerk(id, data = { id }) {
+    markSaved()
+
+    if (id === 'new') selectedPerk.value = toNewPerk({})
+    else selectedPerk.value = toNewPerk(data)
+}
+
+function selectPerk(id) {
+    if (selectedPerk.value?.id === id) return
+    if (unsavedChanges.value) {
         const confirmSwitch = confirm('Є незбережені зміни. Вийти без збереження?')
         if (!confirmSwitch) return
     }
 
-    state.unsavedChanges = false
+    markSaved()
+
+    if (id === 'new') selectedPerk.value = toNewPerk({})
+    else selectedPerk.value = toNewPerk(structuredClone(toRaw(store.session.perks.find(el => el.id === id))))
+
     perkNewRequirement.value = { name: perkNewRequirement.value.name }
-
-    selectedPerk.value = toNewPerk(structuredClone(toRaw(perk)))
+    activeTab.value = 'edit'
 }
 
-function markUnsaved() {
-    state.unsavedChanges = true;
-}
+watch(() => selectedPerk.value, () => {
 
-function updatePerkField(field, value) {
-    selectedPerk.value[field] = value
+    if (copied.value) {
+        copied.value = false
+        return
+    }
+    selectedPerk.value.ranks = selectedPerk.value.levels.length
     markUnsaved()
-}
-
-function getPerkType(id) {
-    const type = state.session.perkTypes.find(el => el.id === id)
-
-    selectedPerk.value.type.name = type.name
-    selectedPerk.value.type.color = type.color
-
-    if (selectedPerk.value.id !== 'new') markUnsaved()
-}
-
-function updatePerkDescriptions(field, array) {
-    selectedPerk.value[field] = array
-    selectedPerk.value.ranks = array.length
-    markUnsaved()
-}
-
-function updateEffectCharacteristics() {
-    if (perkNewRequirement.value.value)
-        Object.assign(selectedPerk.value.requirement, toObject(perkNewRequirement.value))
-    else notify({ message: 'Вкажіть значення', type: 'error' })
-    markUnsaved()
-}
-
-function getCharacteristicType(id) {
-    const type = state.session.characteristicsList.find(el => el.id === id)
-    perkNewRequirement.value.name = type.name
-}
-function getCharacteristicValue(fieldName, value) {
-    perkNewRequirement.value[fieldName] = value
-}
-
-function removePerkSingleRequirement(key) {
-    delete selectedPerk.value.requirement[key]
-    markUnsaved()
-}
+}, { deep: true, immediate: false })
 
 </script>
 
@@ -197,111 +156,94 @@ function removePerkSingleRequirement(key) {
 
     <MasterPageNavigation />
 
+    <section v-if="!store.isLoading"
+        class="h-full p-2 grid grid-cols-[25%_1fr] gap-2 justify-start overflow-hidden font-gothic">
 
-    <section v-if="!state.isLoading"
-        class="w-full m-4 flex flex-wrap justify-center items-center gap-2 justify-self-start">
+        <section class="p-2 w-full h-full overflow-y-auto space-y-2">
 
-        <GraySelectorButton class="w-full basis-32" @click="selectedType = ''" id="all" label="Всі"
-            :active="selectedType === '' ? true : false" />
+            <div class="w-full flex flex-col justify-start gap-2">
 
-        <GraySelectorButton class="w-full basis-32" v-for="type in state.session.perkTypes" :key="type.id"
-            @click="selectedType = type.name" :id="type.id" :label="type.name"
-            :active="selectedType === type.name ? true : false" />
+                <GraySelectorButton class="w-full" v-for="type in tabs" :key="type.id" @click="activeTab = type.id"
+                    :id="type.id" :label="type.label" :active="activeTab === type.id ? true : false" />
 
-    </section>
-
-    <section v-if="!state.isLoading" class="m-4 grid grid-cols-1 gap-4">
-        <Header1 label="Усі перки:" />
-
-        <SearchInputBlack v-model:searchQuery="searchQuery" />
-
-        <div class="grid grid-cols-4 gap-4 py-2 max-h-[512px] overflow-y-scroll auto-hide-scroll">
-            <div @click="selectPerk({})" :class="selectedPerk.id === 'new' && 'bg-darkred-dark_gray text-darkred-light'"
-                class="border-8 border-darkred-dark rounded-2xl flex justify-center items-center hover:cursor-pointer">
-                <PlusButton class="w-20" />
             </div>
 
-            <PerkTile v-for="perk in filteredPerks" :perk="perk" @click="selectPerk(perk)"
-                :class="selectedPerk.id === perk.id && 'outline outline-4 outline-offset-[-1px] outline-darkred-red'" />
-        </div>
+            <div v-if="activeTab === 'edit'" class="w-full flex flex-col gap-2">
 
-    </section>
+                <AprroveButtonWithText @click="savePerk" text="Зберегти зміни"
+                    :class="[!unsavedChanges && 'pointer-events-none opacity-50']" class="w-full" />
 
-    <section v-if="!state.isLoading" class="m-4 flex gap-2 items-center">
-        <AprroveButtonWithText :class="[!state.unsavedChanges && 'pointer-events-none opacity-50']"
-            text="Зберегти зміни" @click="savePerk" />
 
-        <RejectButtonWithText :class="[!state.unsavedChanges && 'pointer-events-none opacity-50']" text="Відмінити"
-            @click="discardChanges" />
+                <RejectButtonWithText @click="discardChanges" text="Відмінити зміни"
+                    :class="[!unsavedChanges && 'pointer-events-none opacity-50']" class="w-full" />
 
-        <RejectButtonWithText v-if="selectedPerk.id !== 'new'" text="Видалити перк" @click="deletePerk" />
+                <RejectButtonWithText v-if="selectedPerk.id !== 'new'" @click="deletePerk" text="Видалити"
+                    class="w-full" />
 
-        <UnsavedLabel v-if="state.unsavedChanges" />
-    </section>
+                <UnsavedLabel v-if="unsavedChanges" class="w-full" />
+            </div>
 
-    <section v-if="!state.isLoading" class="m-4 grid grid-cols-3 gap-4">
-        <Header1 class="col-span-full" label="Створити\Редагувати перк:" />
+        </section>
 
-        <InputTextReactive class="col-span-2" placeholder="Назва" fieldName="name" :value="selectedPerk.name"
-            :callback="updatePerkField" type="text" :important="true" />
+        <section class="h-full overflow-y-auto">
 
-        <DropDownChoosen label="Тип перку" entity_name="perkType" :selected="selectedPerk.type.name"
-            :entity_array="state.session.perkTypes" :callback="getPerkType" />
+            <section v-if="activeTab === 'base'" class="space-y-2 w-full grid grid-cols-1">
 
-        <TextAreaEditor class="col-span-full" fieldName="notes" name="Записки Майстра" :value="selectedPerk.notes"
-            :callback="updatePerkField" />
+                <div class="w-full flex flex-wrap justify-center items-center gap-2 justify-self-start">
 
-    </section>
+                    <GraySelectorButton class="w-full basis-32" @click="selectedType = ''" id="all" label="Всі"
+                        :active="selectedType === '' ? true : false" />
 
-    <section v-if="!state.isLoading" class="m-4 grid grid-cols-1 gap-4">
+                    <GraySelectorButton class="w-full basis-32" v-for="type in store.session.perkTypes" :key="type.id"
+                        @click="selectedType = type.id" :id="type.id" :label="type.name"
+                        :active="selectedType === type.id ? true : false" />
 
-        <Header1 label="Вимоги перка для отримання:" />
-
-        <div class="col-span-2 flex flex-wrap gap-4">
-            <div v-if="checkObjectFieldExisting(selectedPerk.requirement)"
-                v-for="value, key in selectedPerk.requirement"
-                class="flex gap-3 items-center p-3 w-fit rounded-lg bg-darkred-dark text-darkred-light">
-                <div>
-                    {{ key }}: {{ value }}
                 </div>
-                <DeleteButton @click="removePerkSingleRequirement(key)" class="bg-darkred-red w-10" />
 
-            </div>
-            <div v-else class="">
-                <Header2 label="Пусто" />
-            </div>
+                <div class="flex justify-center">
+                    <SearchInputBlack v-model:searchQuery="searchQuery" class="w-1/2" />
+                </div>
 
-        </div>
+                <div class="grid grid-cols-4 gap-4 p-2 max-h-[512px] overflow-y-scroll auto-hide-scroll">
+                    <div @click="selectPerk('new')"
+                        :class="selectedPerk.id === 'new' && 'outline outline-4 outline-offset-[-1px] outline-darkred-red'"
+                        class="border-8 border-darkred-dark bg-darkred-dark rounded-2xl flex justify-center items-center hover:cursor-pointer">
+                        <PlusButton class="w-20 text-darkred-light" />
+                    </div>
 
-        <!-- <div v-if="checkObjectFieldExisting(state.session.characteristicsList)"
-            class="col-span-2 justify-self-center flex gap-2 items-center">
-            <TextDropdown label="Характеристика" :entity_array="state.session.characteristicsList"
-                entity_name="perkRequirement" :callback="getCharacteristicType" />
-            <InputTextReactive placeholder="Значення" fieldName="value" type="number" :value="perkNewRequirement.value"
-                :callback="getCharacteristicValue" />
-            <div class="pb-2 self-end">
-                <AprroveButtonWithText @click="updateEffectCharacteristics" text="Додати поле" />
-            </div>
+                    <PerkTile v-for="perk in filteredPerks" :perk="perk" @click="selectPerk(perk.id)"
+                        :class="selectedPerk.id === perk.id && 'outline outline-4 outline-offset-[-1px] outline-darkred-red'" />
+                </div>
 
-        </div>
+            </section>
 
-        <div v-else>
-            <Header2 label="В сесії відсутні характеристики" />
-        </div> -->
+            <section v-if="activeTab === 'edit'" class="grid grid-cols-4 gap-2 items-center justify-start">
+
+                <InputTextReactive class="col-span-3" placeholder="Назва" fieldName="name"
+                    v-model:inputValue="selectedPerk.name" type="text" :important="true" />
+
+                <DropDownChoosen label="Тип перку" entity_name="perkType" v-model:selected="selectedPerk.type.name"
+                    :entity_array="store.session.perkTypes" :important="true" />
+
+                <InputTextReactive class="col-span-full" placeholder="Опис" fieldName="description"
+                    v-model:inputValue="selectedPerk.description" type="text" :important="true" />
+
+                <TextAreaReactive class="col-span-full" label="Записки Майстра" v-model:value="selectedPerk.notes" />
+
+                <Header2 class="justify-self-start col-span-full mx-2"
+                    :label="'Рівні перку(' + selectedPerk.ranks + '):'" />
+
+                <ArraySingleStringForm class="col-span-full" v-model:array="selectedPerk.levels" array_name="levels"
+                    label="Опис кожного рівня" />
+
+            </section>
+
+        </section>
+
 
     </section>
 
-    <section v-if="!state.isLoading" class="m-4 grid grid-cols-1 gap-4 justify-items-center">
-
-        <Header1 class="justify-self-start" :label="'Рівні перку(' + selectedPerk.ranks + '):'" />
-
-        <ArraySingleStringForm class="w-[768px]" :array="selectedPerk.descriptions" array_name="descriptions"
-            label="Опис кожного рівня" :callback="updatePerkDescriptions" />
-
-    </section>
-
-
-    <div v-if="state.isLoading" class="text-center py-6">
+    <div v-if="store.isLoading" class="text-center py-6">
         <Loader />
     </div>
 

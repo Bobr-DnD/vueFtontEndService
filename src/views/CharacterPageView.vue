@@ -15,7 +15,6 @@ import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaio
 import PerkTable from '@/components/character-page components/PerkTable.vue';
 import EntityTable from '@/components/character-page components/EntityTable.vue';
 import EffectsTable from '@/components/character-page components/EffectsTable.vue';
-import QuestsTable from '@/components/character-page components/QuestsTable.vue';
 import CustomFieldTile from '@/components/reusable/EntityTiles/CustomFieldTile.vue';
 import characterCardSmall from '@/components/character-page components/CharacterViewCard.vue';
 import Experience from '@/components/character-page components/Experience.vue';
@@ -39,7 +38,6 @@ const state = reactive({
 })
 
 const effects_hidden = ref(true)
-const quests_hidden = ref(true)
 const currency_hidden = ref(true)
 const custom_hidden = ref(true)
 const custom_modal_hidden = ref(true)
@@ -279,19 +277,6 @@ function togglePicker(healthId) {
                         :style="{ gridTemplateRows: effects_hidden ? '0fr' : '1fr' }">
                         <div class="overflow-hidden">
                             <EffectsTable :effects="state.character.effects" />
-                        </div>
-                    </div>
-
-                </div>
-
-                <div v-if="checkObjectFieldExisting(state.character?.quests)" class="flex flex-col gap-2">
-                    <HideButton class="w-full" textShow="Показати квести" textHide="Приховати квести"
-                        :hidden="quests_hidden" :mainIcon="FlagIcon" @click="quests_hidden = !quests_hidden" />
-
-                    <div class="grid transition-all duration-300 ease-in-out"
-                        :style="{ gridTemplateRows: quests_hidden ? '0fr' : '1fr' }">
-                        <div class="overflow-hidden">
-                            <QuestsTable :quests="state.character.quests" />
                         </div>
                     </div>
 

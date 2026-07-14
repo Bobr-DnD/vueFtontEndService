@@ -91,7 +91,7 @@ function resetFields() {
                 <label :for="props.label" class="text-lg font-gothic">Назва поля:</label>
                 <input ref="name" :name="props.label" :id="props.label" placeholder="Назва"
                     :value="field_exists ? props.health_field.name : ''" type="text"
-                    class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full">
+                    class="p-2 border-2 text-md font-gothic border-darkred-dark_gray rounded-lg text-darkred-dark w-full">
             </section>
 
             <section>
@@ -102,7 +102,7 @@ function resetFields() {
                 <label :for="`${props.label}_min`" class="text-lg font-gothic">Мінімальне значення:</label>
                 <input ref="min" :name="`${props.label}_min`" :id="`${props.label}_min`" placeholder="0"
                     :value="field_exists ? props.health_field.min : null" type="number"
-                    class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full">
+                    class="p-2 border-2 text-md font-gothic border-darkred-dark_gray rounded-lg text-darkred-dark w-full">
             </section>
 
             <section>
@@ -116,7 +116,7 @@ function resetFields() {
                 <label :for="`${props.label}_max`" class="text-lg font-gothic">Максимальне значення:</label>
                 <input ref="max" :name="`${props.label}_max`" :id="`${props.label}_max`" placeholder="25"
                     :value="field_exists ? props.health_field.max : null" type="number"
-                    class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full">
+                    class="p-2 border-2 text-md font-gothic border-darkred-dark_gray rounded-lg text-darkred-dark w-full">
             </section>
 
             <section>
@@ -130,7 +130,7 @@ function resetFields() {
                 <label :for="`${props.label}_value`" class="text-lg font-gothic">Нинішнє значення:</label>
                 <input ref="value" :name="`${props.label}_value`" :id="`${props.label}_value`" placeholder="0"
                     :value="field_exists ? props.health_field.value : null" type="number"
-                    class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full">
+                    class="p-2 border-2 text-md font-gothic border-darkred-dark_gray rounded-lg text-darkred-dark w-full">
             </section>
 
             <section>

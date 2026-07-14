@@ -1,13 +1,8 @@
 <script setup>
-import { reactive, onMounted, ref, toRaw, watch } from 'vue';
+import {  ref, toRaw, watch } from 'vue';
+import { useSessionStore } from '@/stores/sessionStore';
 import { useRoute } from 'vue-router';
-import { asyncHandler } from '@utils/asyncHandler';
-import { toNewSession } from '@utils/objects.dto';
 import { notify } from '@utils/notification';
-import RepositoryFactory from '@http/RepositoryFactory';
-import { socket } from '@ws/webSocket';
-import { useRouter } from 'vue-router'
-import { checkEqualByKeys } from '@utils/entityHelper';
 
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
@@ -25,24 +20,15 @@ import ArrayStringFromWColorPicker from '@/components/reusable/Forms/ArrayString
 import Header1 from '@/components/reusable/Titles/Header1.vue';
 import InputPassword from '@/components/reusable/Inputs/InputPassword.vue';
 
-const state = reactive({
-    session: {},
-    isLoading: true,
-    unsavedChanges: false
-})
-
-const router = useRouter()
+const store = useSessionStore()
+const sessionId = useRoute().params.sessionId
 
 const oldPass = ref('')
 const newPass = ref('')
 const confirmPass = ref('')
 const canChange = ref(false)
 
-const sessionId = useRoute().params.sessionId
-const editedSession = ref()
 const activeTab = ref('base')
-
-const copied = ref(false)
 
 const tabs = [
     { id: 'base', label: 'Характеристики' },
@@ -50,71 +36,19 @@ const tabs = [
     { id: 'security', label: 'Зміна пароля' }
 ]
 
-onMounted(async () => {
-    const [res, err] = await asyncHandler(
-        RepositoryFactory.getById('session', sessionId)
-    )
-    if (err) {
-        notify({ message: err.message, type: 'error' })
-        return
-    }
-
-    state.isLoading = false
-    state.session = res.data
-    copySession()
-})
-
-async function saveSession() {
-    const [res, err] = await asyncHandler(
-        RepositoryFactory.update('session', editedSession.value.id, toRaw(editedSession.value))
-    )
-    if (err) {
-        notify({ message: err.message, type: 'error' })
-        return
-    }
-
-    state.session = res.data
-    copySession()
-    state.unsavedChanges = false
-
-    notify({ message: 'Сесія оновлена', type: 'success' })
-    socket.emit('session:updateNotify', res.data.id)
-}
-
 async function changePassword() {
-    const validationErrors = validatePasses()
+        const validationErrors = validatePasses(newPass.value, confirmPass.value)
 
-    if (validationErrors.length > 0) {
-        validationErrors.forEach(error => notify({ message: error, type: 'error' }))
+        if (validationErrors.length > 0) {
+            validationErrors.forEach(error => notify({ message: error, type: 'error' }))
+            return
+        }
+
+        await store.changePassword(sessionId, toRaw(newPass.value), toRaw(oldPass.value))
+
+        clearPasses()
         return
     }
-
-    const [res, err] = await asyncHandler(
-        RepositoryFactory.changepass('session', sessionId, { password: toRaw(oldPass.value), passwordNew: toRaw(newPass.value) })
-    )
-
-    if (err) {
-        notify({ message: err.message, type: 'error' })
-        return
-    }
-    else if (res.data.success) notify({ message: res.data.message, type: 'success' })
-
-    clearPasses()
-    return
-}
-
-async function deleteSession() {
-
-    const confirmSwitch = confirm('Видалити сесію?')
-    if (!confirmSwitch) return
-
-    const [res, err] = await asyncHandler(
-        RepositoryFactory.delete('session', sessionId)
-    )
-    if (err) return
-    else if (res.data.status) notify({ message: 'Сесію видалено', type: 'success' })
-    router.push('/')
-}
 
 function validatePasses() {
     const errors = []
@@ -136,55 +70,6 @@ function clearPasses() {
     confirmPass.value = ''
 }
 
-function markUnsaved() {
-    state.unsavedChanges = true
-}
-
-function copySession() {
-    editedSession.value = toNewSession(structuredClone(toRaw(state.session)))
-    copied.value = true
-}
-
-function discardChanges() {
-    copySession()
-    state.unsavedChanges = false
-    notify({ message: 'Зміни анульовані', type: 'warning' })
-}
-
-function addCustomField(object) {
-    editedSession.value.customFields.push(object)
-    markUnsaved();
-}
-
-function removeCustomField(id) {
-    editedSession.value.customFields = editedSession.value.customFields.filter(el => el.id !== id)
-    markUnsaved();
-}
-
-const keysToWatch = [
-    'name',
-    'image',
-    'notes',
-    'customFields',
-    'entityTypes',
-    'currencyTypes',
-    'characteristicsList',
-    'enemyTypes',
-    'questTypes',
-    'perkTypes',
-]
-
-watch(() => editedSession.value, () => {
-
-    if (copied.value) {
-        copied.value = false
-        return
-    }
-
-    if (checkEqualByKeys(state.session, editedSession.value, keysToWatch)) markUnsaved()
-
-}, { deep: true, immediate: false })
-
 watch([oldPass, newPass, confirmPass], () => {
     if (oldPass.value.length !== 0 && newPass.value.length !== 0 && confirmPass.value.length !== 0)
         canChange.value = true
@@ -196,52 +81,49 @@ watch([oldPass, newPass, confirmPass], () => {
 
     <MasterPageNavigation />
 
-    <div v-if="!state.isLoading" class="grid grid-cols-[25%_1fr]">
-        <section class="p-4 w-full flex flex-col justify-start gap-2 font-gothic">
+    <div v-if="!store.isLoading" class="grid grid-cols-[25%_1fr] overflow-hidden">
+        
+        <section class="p-4 w-full flex flex-col justify-start gap-2 font-gothic overflow-y-auto">
             <GraySelectorButton v-for="tab in tabs" @click="activeTab = tab.id" :key="tab.id" :id="tab.id"
                 :label="tab.label" :active="activeTab === tab.id ? true : false" />
-            <AprroveButtonWithText @click="saveSession" class="w-full" text="Підтвердити"
-                :class="[!state.unsavedChanges && 'pointer-events-none opacity-50']" />
-            <RejectButtonWithText @click="discardChanges" class="w-full" text="Відминити"
-                :class="[!state.unsavedChanges && 'pointer-events-none opacity-50']" />
-            <UnsavedLabel v-if="state.unsavedChanges" />
+            <AprroveButtonWithText @click="store.saveSession(sessionId)" class="w-full" text="Зберегти зміни"
+                :class="[!store.unsavedChanges && 'pointer-events-none opacity-50']" />
+            <RejectButtonWithText @click="store.discardChanges(sessionId)" class="w-full" text="Відминити зміни"
+                :class="[!store.unsavedChanges && 'pointer-events-none opacity-50']" />
+            <UnsavedLabel v-if="store.unsavedChanges" />
         </section>
 
-        <section class="m-4 p-2">
+        <section class="m-4 p-2 overflow-y-auto">
             <div v-if="activeTab === 'base'" class="grid grid-cols-2 gap-2">
-                <ImageEditor class="w-full col-span-2" v-model:image="editedSession.image" label="Session image" />
+                <ImageEditor class="w-full col-span-2" v-model:image="store.editedSession.image" label="Session image" />
 
-                <InputTextReactive placeholder="Назва сесії" fieldName="Sessionname" type="text" :important="true"
-                    v-model:inputValue="editedSession.name" />
+                <InputTextReactive class="col-span-full" placeholder="Назва сесії" fieldName="Sessionname" type="text" :important="true"
+                    v-model:inputValue="store.editedSession.name" />
 
-                <TextAreaReactive class="col-span-2" label="Записки майстра" v-model:value="editedSession.notes" />
+                <TextAreaReactive class="col-span-2" label="Записки майстра" v-model:value="store.editedSession.notes" />
 
-                <Header1 class="col-span-2 font-medium" label="Список кастомних полей" />
+                <!-- <Header1 class="col-span-2 font-medium" label="Список кастомних полей" />
 
-                <div v-for="(field, index) in editedSession.customFields" :key="field.id">
-                    <CustomFieldTile v-model:customField="editedSession.customFields[index]" :field_removable="true"
-                        :callback_remove="removeCustomField" />
+                <div v-for="(field, index) in store.editedSession.customFields" :key="field.id">
+                    <CustomFieldTile v-model:customField="store.editedSession.customFields[index]" :field_removable="true"
+                        :callback_remove="store.removeCustomField" />
                 </div>
 
                 <div class="col-span-2">
-                    <CustomFieldsEditor name="customFields" :callback="addCustomField" />
-                </div>
+                    <CustomFieldsEditor name="customFields" :callback="store.addCustomField" />
+                </div> -->
 
             </div>
 
             <div v-if="activeTab === 'types'" class="grid grid-cols-2 gap-4">
 
-                <ArrayStringFormWIcons v-model:array="editedSession.entityTypes" label="Інвентар" :setIcon="true" />
+                <ArrayStringFormWIcons v-model:array="store.editedSession.entityTypes" label="Інвентар" :setIcon="true" />
 
-                <ArrayStringFormWIcons v-model:array="editedSession.currencyTypes" label="Валюти" :setIcon="true" />
+                <ArrayStringFormWIcons v-model:array="store.editedSession.currencyTypes" label="Валюти" :setIcon="true" />
 
-                <ArrayStringFormWIcons v-model:array="editedSession.characteristicsList" label="Характеристики" />
+                <ArrayStringFormWIcons v-model:array="store.editedSession.characteristicsList" label="Характеристики" />
 
-                <ArrayStringFormWIcons v-model:array="editedSession.enemyTypes" label="Вороги" />
-
-                <ArrayStringFormWIcons v-model:array="editedSession.questTypes" label="Статуси квестів" />
-
-                <ArrayStringFromWColorPicker v-model:array="editedSession.perkTypes" label="Типи перків" />
+                <ArrayStringFromWColorPicker v-model:array="store.editedSession.perkTypes" label="Типи перків" />
 
             </div>
 
@@ -260,7 +142,7 @@ watch([oldPass, newPass, confirmPass], () => {
                     <AprroveButtonWithText text="Змінити пароль" @click="changePassword"
                         :class="[!canChange && 'pointer-events-none opacity-50']" />
 
-                    <RejectButtonWithText text="Видалити сесію" @click="deleteSession" />
+                    <RejectButtonWithText text="Видалити сесію" @click="store.deleteSession(sessionId)" />
                 </div>
 
             </div>
@@ -268,7 +150,7 @@ watch([oldPass, newPass, confirmPass], () => {
         </section>
     </div>
 
-    <div v-if="state.isLoading" class="text-center py-6">
+    <div v-if="store.isLoading" class="text-center py-6">
         <Loader />
     </div>
 

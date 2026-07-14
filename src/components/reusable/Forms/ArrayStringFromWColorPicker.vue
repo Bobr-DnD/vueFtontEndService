@@ -62,7 +62,7 @@ function updateColor(id, color) {
         <div v-for="item in arrayLocal" :key="item.id" class="grid gap-4 grid-cols-[1fr_40px_40px]">
 
             <input v-model.lazy="item.name" type="text" placeholder="Назва" @change="update" :id="item.id"
-                class="p-1 border-4 text-lg border-darkred-dark rounded-lg text-darkred-dark w-full focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
+                class="p-2 border-2 text-md border-darkred-dark rounded-lg text-darkred-dark w-full focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
 
             <input type="color" :value="item.color || '#3BFF00'" @change="updateColor(item.id, $event.target.value)" :id="`${item.id}-color`"
                 class="w-full h-full p-0">

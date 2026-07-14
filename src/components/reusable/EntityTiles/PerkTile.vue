@@ -17,11 +17,7 @@ const props = defineProps({
             {{ props.perk.name }}
         </div>
 
-        <div class="p-2 bg-darkred-dark_gray rounded-lg">Опис:</div>
-
-        <div class="p-2 bg-darkred-dark_gray rounded-lg" v-for="desc in props.perk.descriptions">
-            • {{ desc }}
-        </div>
+        <div class="w-full p-2 bg-darkred-dark_gray rounded-lg">Опис: {{ props.perk.description }}</div>
 
     </div>
 

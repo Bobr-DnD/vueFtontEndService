@@ -1,145 +1,68 @@
 <script setup>
-import { ref, toRaw, watch, onMounted } from 'vue';
-import AprroveButtonWithText from '../Buttons/AprroveButtonWithText.vue';
-import RejectButtonWithText from '../Buttons/RejectButtonWithText.vue';
+import { ref, watch, nextTick } from 'vue';
 import PlusButton from '../Buttons/PlusButton.vue';
 import DeleteButton from '../Buttons/DeleteButton.vue';
-import { notify } from '@utils/notification';
-import UnsavedLabel from '../UnsavedLabel.vue';
 
 const props = defineProps({
     array: {
         type: Array,
         required: true
     },
-    array_name: {
-        type: String,
-        required: true
-    },
     label: {
         type: String,
-        default: null
-    },
-    callback: {
-        type: Function,
         required: true
-    }
+    },
 })
+
+const emit = defineEmits(['update:array'])
 
 const arrayLocal = ref()
-const inputRefs = ref({})
-const unsavedChanges = ref(false)
 
-let originalArray = structuredClone(toRaw(props.array))
-
-arrayLocal.value = props.array.map(el => {
-    return {
-        id: Math.random().toString(24).slice(2),
-        text: el,
-    }
-})
-
-watch(() => props.array, () => {
-
-    originalArray = structuredClone(toRaw(props.array))
-
-    arrayLocal.value = props.array.map(el => {
-        return {
-            id: Math.random().toString(24).slice(2),
-            text: el,
-        }
-    })
-})
-
-function markUnsaved(){
-    unsavedChanges.value = true
-}
+watch(
+    () => props.array,
+    (val) => {
+        arrayLocal.value = val.map(el => ({ ...el }))
+    },
+    { immediate: true, deep: true }
+)
 
 function addItem() {
     arrayLocal.value.push({
-        id: Math.random().toString(24).slice(2),
-        text: ''
+        id: crypto.randomUUID(),
+        name: ''
     })
-    markUnsaved()
+    update()
 }
 
 function removeItem(id) {
-    const index = arrayLocal.value.findIndex(el => el.id === id)
-    if (index !== -1) arrayLocal.value.splice(index, 1)
-    markUnsaved()
+    arrayLocal.value = arrayLocal.value.filter(el => el.id !== id)
+    update()
 }
 
-function updateItem(id) {
-    arrayLocal.value.forEach(el => {
-        if (el.id === id) el.text = inputRefs.value[id].value
-    })
-    markUnsaved()
-}
-
-function updateArray() {
-    let save = false
-    for (const el of arrayLocal.value) {
-        if (!el.text) {
-            notify({ message: 'Введіть текст у поля опису перку', type: 'error' })
-            save = false
-            break
-        }
-        save = true
-    }
-
-    if (save) {
-        const descriptions = arrayLocal.value.map(el => el.text)
-        props.callback(props.array_name, descriptions)
-        unsavedChanges.value = false
-    }
-
-}
-
-function discardChanges() {
-    arrayLocal.value = originalArray.map(el => {
-        return {
-            id: Math.random().toString(24).slice(2),
-            text: el,
-        }
-    })
-    unsavedChanges.value = false
+async function update() {
+    await nextTick()
+    emit('update:array', arrayLocal.value)
 }
 
 </script>
 
 <template>
-    <div>
+    <div class="grid grid-cols-1 gap-2 font-gothic content-start mx-2">
 
-        <section class="grid grid-cols-1 gap-2 font-gothic">
+        <h1 class="text-lg ">{{ props.label }}:</h1>
+        <h1 v-if="arrayLocal.length === 0" class="text-xl ">Пусто</h1>
 
-            <h1 v-if="props.label" class="text-2xl ">{{ props.label }}:</h1>
-            <h1 v-if="arrayLocal.length === 0" class="text-xl ">Пусто</h1>
+        <div v-for="item in arrayLocal" :key="item.id" class="grid gap-4"
+            :class="props.setIcon ? 'grid-cols-[1fr_120px_40px]' : 'grid-cols-[1fr_40px]'">
 
-            <div v-for="item, index in arrayLocal" :key="item.id" class="grid grid-cols-[1fr_40px] gap-4">
-                <input :ref="el => inputRefs[item.id] = el" :id="item.id" type="text" :value="item.text"
-                    placeholder="Назва" @input="updateItem(item.id)"
-                    class="p-1 border-4 text-lg border-darkred-dark rounded-lg text-darkred-dark w-full focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
+            <input v-model.lazy="item.name" type="text" placeholder="Назва" @change="update" :id="item.id"
+                class="p-2 border-2 text-md border-darkred-light_gray rounded-lg text-darkred-dark w-full focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
 
-                <DeleteButton class="bg-darkred-red text-darkred-light" @click="removeItem(item.id)" />
+            <DeleteButton class="bg-darkred-red text-darkred-light" @click="removeItem(item.id)" />
 
-            </div>
+        </div>
 
-            <div class="flex gap-2">
-
-                <PlusButton class="w-11 h-full text-center border-4 border-darkred-dark rounded-lg md:hover:cursor-pointer
+        <PlusButton class="w-11 h-11 text-center border-4 border-darkred-dark rounded-lg md:hover:cursor-pointer
            md:hover:bg-darkred-gray relative overflow-hidden group" @click="addItem" />
-
-                <AprroveButtonWithText text="Зберегти" @click="updateArray"
-                    class="p-2 flex justify-center text-lg items-center self-end" />
-
-                <RejectButtonWithText text="Відхилити" @click="discardChanges"
-                    class="p-2 flex justify-center text-lg items-center self-end" />
-
-                <UnsavedLabel v-if="unsavedChanges"/>
-            </div>
-
-
-        </section>
-
     </div>
 </template>
