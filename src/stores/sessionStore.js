@@ -16,6 +16,7 @@ export const useSessionStore = defineStore('session', () => {
     const session = ref(null)
     const editedSession = ref(null)
     const isLoading = ref(true)
+    const networkError = ref(false)
     const charactersOnlineIds = ref([])
     const charactersIds = ref([])
     const unsavedChanges = ref(false)
@@ -36,10 +37,16 @@ export const useSessionStore = defineStore('session', () => {
 
     // API calls
     async function loadSession(sessionId) {
+        isLoading.value = true
+
         const [res, err] = await asyncHandler(
             RepositoryFactory.getById('session', sessionId)
         )
-        if (err) return
+        if (err) {
+            networkError.value = true
+            isLoading.value = false
+            return
+        }
 
         session.value = toNewSession(res.data)
         charactersIds.value = session.value.characters.map(el => { return { id: el.id, name: el.name } })
@@ -52,15 +59,19 @@ export const useSessionStore = defineStore('session', () => {
         const [res, err] = await asyncHandler(
             RepositoryFactory.update('session', sessionId, toRaw(editedSession.value))
         )
-        if (err) return
+        if (err) if (err) {
+            networkError.value = true
+            isLoading.value = false
+            return
+        }
 
         session.value = toNewSession(res.data)
-
         copySession()
-        unsavedChanges.value = false
 
-        notify({ message: 'Сесія оновлена', type: 'success' })
         socket.emit('session:updateDataNotify', res.data.id)
+        notify({ message: 'Сесія оновлена', type: 'success' })
+
+        unsavedChanges.value = false
     }
 
     async function deleteSession(sessionId) {
@@ -93,12 +104,12 @@ export const useSessionStore = defineStore('session', () => {
 
     function CloseWebsocketSession(sessionId) {
         socket.emit('session:leave', sessionId)
-        const events = ['session:error', 'session:update', 'session:updateDataNotify']
+        const events = ['session:error', 'session:update', 'session:updateDataNotify', 'disconnect']
         events.forEach(e => socket.off(e))
     }
 
     socket.on('session:updateDataNotify', (newSession) => {
-        session.value = newSession
+        session.value = toNewSession(newSession)
         notify({ message: `Сесію ${newSession.name} було оновлено`, type: 'warning' })
     })
 
@@ -106,7 +117,7 @@ export const useSessionStore = defineStore('session', () => {
 
         const room = session.room
         charactersOnlineIds.value = []
-        
+
         if (room) {
             charactersOnlineIds.value = room.members.filter(el => el[1].role === 'user' && el[1].userId).map(el => el[1].userId)
         }
@@ -114,6 +125,10 @@ export const useSessionStore = defineStore('session', () => {
 
     socket.on('error', async (message) => {
         console.log(message);
+    })
+
+    socket.on('disconnect', () => {
+        charactersOnlineIds.value = []
     })
 
     //service functions
@@ -157,6 +172,24 @@ export const useSessionStore = defineStore('session', () => {
 
     }, { deep: true, immediate: false })
 
-    return { session, editedSession, isLoading, unsavedChanges, charactersOnlineIds, charactersIds, loadSession, markUnsaved, saveSession, deleteSession, changePassword, discardChanges, changeImage, addCustomField, removeCustomField, CloseWebsocketSession }
+    return {
+        session,
+        editedSession,
+        isLoading,
+        unsavedChanges,
+        charactersOnlineIds,
+        charactersIds,
+        networkError,
+        loadSession,
+        markUnsaved,
+        saveSession,
+        deleteSession,
+        changePassword,
+        discardChanges,
+        changeImage,
+        addCustomField,
+        removeCustomField,
+        CloseWebsocketSession
+    }
 
 })

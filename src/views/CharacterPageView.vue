@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, onMounted, onBeforeUnmount, watch, toRaw, computed } from 'vue';
+import { reactive, onBeforeUnmount, watch, toRaw, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { ChartBarIcon, SparklesIcon, FlagIcon, BanknotesIcon } from '@heroicons/vue/24/solid'
 
@@ -7,9 +7,11 @@ import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
 import { checkObjectFieldExisting } from '/utils/entityHelper'
 import { toObject } from '/utils/objects.dto';
-import { toNewCharacterObject, toNewSession } from '/utils/objects.dto';
-import { socket, connected } from '@ws/webSocket';
+import { toNewCharacterObject } from '/utils/objects.dto';
+import { socket } from '@ws/webSocket';
 import { notify } from '@utils/notification';
+import { useSessionStore } from '@/stores/sessionStore';
+import { useGameStore } from '@/stores/gameStore';
 
 import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaion.vue';
 import PerkTable from '@/components/character-page components/PerkTable.vue';
@@ -32,95 +34,78 @@ import { CursorArrowRippleIcon } from '@heroicons/vue/24/outline';
 
 const state = reactive({
     character: {},
-    session: {},
-    isLoading: true,
     characterIsUpdating: false,
 })
 
-const effects_hidden = ref(true)
-const currency_hidden = ref(true)
-const custom_hidden = ref(true)
-const custom_modal_hidden = ref(true)
+const route = useRoute()
+const characterId = computed(() => route.params.characterId)
+const sessionId = computed(() => route.params.sessionId)
+const sessionStore = useSessionStore()
+const gameStore = useGameStore()
 
-const isBackendOffline = ref(false)
-const offlineTimeout = ref(null)
-
-const openHealthIds = ref(new Set())
-
-const characterId = useRoute().params.characterId
-const sessionId = useRoute().params.sessionId
-
-const inventories = computed(() => {
-
+const effects_hidden = computed({
+    get: () => gameStore.effects_hidden[characterId.value],
+    set: (val) => { gameStore.effects_hidden[characterId.value] = val }
 })
+const currency_hidden = computed({
+    get: () => gameStore.currency_hidden[characterId.value],
+    set: (val) => { gameStore.currency_hidden[characterId.value] = val }
+})
+const custom_hidden = computed({
+    get: () => gameStore.custom_hidden[characterId.value],
+    set: (val) => { gameStore.custom_hidden[characterId.value] = val }
+})
+const custom_modal_hidden = computed({
+    get: () => gameStore.custom_modal_hidden[characterId.value],
+    set: (val) => { gameStore.custom_modal_hidden[characterId.value] = val }
+})
+const openHealthIds = computed(() => gameStore.openHealthIds[characterId.value])
 
-onMounted(async () => {
-    const [resCharacter, errCharacter] = await asyncHandler(
-        RepositoryFactory.getById('character', characterId)
-    )
-    const [resSession, errSession] = await asyncHandler(
-        RepositoryFactory.getById('session/plainWithEntitiesAndEffects', sessionId)
-    )
+watch(
+    () => sessionStore.isLoading,
+    (isLoading) => {
+        if (isLoading) return
+        init()
+    },
+    { immediate: true }
+)
 
-    if (errCharacter || errSession) {
-        state.isLoading = false
-        return
+function init() {
+    state.character = toNewCharacterObject(structuredClone(toRaw(sessionStore.session.characters.find(el => el.id === characterId.value))))
+    socket.emit('session:connectCharacter', sessionId.value, characterId.value)
+}
+
+watch(
+    () => sessionStore.session,
+    (newSession) => {
+        if (sessionStore.isLoading || !newSession) return
+        const updated = newSession.characters.find(el => el.id === characterId.value)
+        if (updated) state.character = toNewCharacterObject(structuredClone(toRaw(updated)))
     }
-
-    state.character = toNewCharacterObject(resCharacter.data)
-    state.session = toNewSession(resSession.data)
-
-    socket.emit('session:connectCharacter', sessionId, characterId)
-    state.isLoading = false
-})
+)
 
 onBeforeUnmount(() => {
-    socket.emit('session:disconnectCharacter', sessionId)
-    const events = ['session:join', 'character:get', 'character:updateNotify', 'session:updateNotify']
+    socket.emit('session:disconnectCharacter', sessionId.value)
+    const events = ['session:join', 'character:updateDataNotify']
     events.forEach(e => socket.off(e))
 })
 
 socket.on('session:join', (session) => {
     if (session?.members?.some(member => member[0] === socket.id)) return
-    socket.emit('session:connectCharacter', sessionId, characterId)
-    state.isLoading = false
+    socket.emit('session:connectCharacter', sessionId.value, characterId.value)
 })
 
-socket.on('character:updateNotify', (character) => {
-    state.characterIsUpdating = false
+socket.on('character:updateDataNotify', (character) => {
     state.character = toNewCharacterObject(character)
+    state.characterIsUpdating = false
 })
 
-socket.on('session:updateNotify', (session) => {
-    state.session = toNewSession(session)
-    state.character = toNewCharacterObject(state.session.characters.find(character => character.id === characterId))
-    notify({ message: 'Майстер щось оновив', type: 'warning' })
-})
-
-watch(connected, (isConnected) => {
-    if (isConnected) {
-        if (offlineTimeout.value) {
-            clearTimeout(offlineTimeout.value)
-            offlineTimeout.value = null
-        }
-        isBackendOffline.value = false
-        state.isLoading = false
-    }
-    else {
-        if (!isBackendOffline.value) {
-            offlineTimeout.value = setTimeout(() => {
-
-                isBackendOffline.value = true
-            }, 30 * 1000)
-        }
-        state.isLoading = true
-    }
-})
-
-function updateCharacter() {
-    socket.emit('character:updateData', (toRaw(state.character)))
+function updateCharacter(){
+    socket.emit('character:updateData', state.character)
     state.characterIsUpdating = true
 }
+
+// character functions
 
 function addExperience() {
     state.character.experience++;
@@ -137,7 +122,7 @@ function updateHealthFields(value, title) {
     if (item) {
         item.value += value
     }
-    openHealthIds.value.delete(item.id)
+    gameStore.openHealthIds[characterId.value].delete(item.id)
     updateCharacter()
 }
 
@@ -148,8 +133,8 @@ function updateCurrency(fields) {
 
 function addCustomField(name, value) {
     Object.assign(state.character.customFields, toObject({ name, value }))
-    updateCharacter()
     custom_modal_hidden.value = true
+    updateCharacter()
 }
 
 function updateCustomFields(fields) {
@@ -168,11 +153,8 @@ function updateCharacterNotes(field, value) {
 }
 
 function togglePicker(healthId) {
-    if (openHealthIds.value.has(healthId)) {
-        openHealthIds.value.delete(healthId)
-    } else {
-        openHealthIds.value.add(healthId)
-    }
+    gameStore.toggleHealthId(characterId.value, healthId)
+    updateCharacter()
 }
 
 </script>
@@ -180,12 +162,12 @@ function togglePicker(healthId) {
 <template>
     <SessionViewNavigtaion />
 
-    <div v-if="!state.isLoading" class="grid grid-cols-1 lg:grid-cols-[25%_75%]">
+    <div v-if="!sessionStore.isLoading" class="grid grid-cols-1 lg:grid-cols-[25%_75%]">
 
         <section class="p-2 lg:p-4 space-y-2">
 
             <characterCardSmall :name="state.character.name" :characteristics="state.character.characteristics"
-                :effects="state.character.effects" :characteristicsComputed="state.character.characteristicsComputed"
+                :effects="state.character.effects"
                 :gender="state.character.gender" :class="state.character.class" :race="state.character.race"
                 :image="state.character.image" />
 
@@ -285,11 +267,11 @@ function togglePicker(healthId) {
             </section>
 
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-2 items-start">
-                <PerkTable :session_perks="state.session.perks" :character_perks="state.character.perks"
+                <PerkTable :session_perks="sessionStore.session.perks" :character_perks="state.character.perks"
                     :perkPoints="state.character.perkPoints" :callback="addPerk" />
 
-                <EntityTable :character_entities="state.character.entities" :session_entities="state.session.entities"
-                    :types="state.session.entityTypes" :callback="updateCharacter" />
+                <EntityTable :character_entities="state.character.entities" :session_entities="sessionStore.session.entities"
+                    :types="sessionStore.session.entityTypes" :callback="updateCharacter" />
             </section>
 
             <section>
@@ -300,8 +282,8 @@ function togglePicker(healthId) {
         </section>
     </div>
 
-    <div v-if="state.isLoading" class="w-full h-full text-center py-6 flex flex-col gap-10 justify-center items-center">
-        <BackendOffline v-if="isBackendOffline" class="p-4 w-full lg:w-[650px]" />
+    <div v-if="sessionStore.isLoading || gameStore.isBackendOffline" class="w-full h-full text-center py-6 flex flex-col gap-10 justify-center items-center">
+        <BackendOffline v-if="gameStore.isBackendOffline" class="p-4 w-full lg:w-[650px]" />
 
         <DiceLoader />
     </div>

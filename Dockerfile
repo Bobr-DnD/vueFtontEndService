@@ -8,6 +8,13 @@ RUN npm ci
 
 COPY . .
 
+ARG VITE_API
+ARG VITE_WS
+
+ENV VITE_API=$VITE_API
+ENV VITE_WS=$VITE_WS
+
+
 RUN npm run build
 
 FROM nginx:alpine

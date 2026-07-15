@@ -12,7 +12,6 @@ const props = defineProps({
     race: { type: String, required: true },
     class: { type: String, required: true },
     characteristics: { type: Object, required: true },
-    characteristicsComputed: { type: Object, required: true },
     effects: { type: Array, required: true }
 })
 
@@ -57,22 +56,22 @@ const selectedCharacteristic = ref('')
         </div>
 
         <div class="flex flex-wrap items-center justify-center gap-2">
-            <div v-for="value, key in props.characteristicsComputed" :key="Math.random().toString(24).slice(2)"
+            <div v-for="value, key in props.characteristics" :key="key.id"
                 @click="modalHidden = !modalHidden"
                 class="grow p-2 text-center rounded-lg border-2 border-darkred-red bg-darkred-dark text-darkred-light font-semibold hover:cursor-pointer">
 
                 <div v-if="props.characteristics[key] > value" class="flex gap-2 justify-center items-center">
-                    {{ key }} — {{ value }}
+                    {{ value.name }} — {{ value.value }}
                     <ArrowDownIcon class="w-6 h-6 text-darkred-bright" />
                 </div>
 
                 <div v-else-if="props.characteristics[key] < value" class="flex gap-2 justify-center items-center">
-                    {{ key }} — {{ value }}
+                    {{ value.name }} — {{ value.value }}
                     <ArrowDownIcon class="w-6 h-6 rotate-180 text-greenish-light" />
                 </div>
 
                 <div v-else>
-                    {{ key }} — {{ value }}
+                    {{ value.name }} — {{ value.value }}
                 </div>
 
             </div>
@@ -93,7 +92,7 @@ const selectedCharacteristic = ref('')
                         @click="selectedCharacteristic = key"
                         class="grow p-2 text-center rounded-lg border-2 border-darkred-red bg-darkred-dark_gray text-darkred-light font-semibold hover:cursor-pointer">
                         <div>
-                            {{ key }} — {{ value }}
+                            {{ value.name }} — {{ value.value }}
                         </div>
 
                     </div>

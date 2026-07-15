@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onBeforeUnmount, reactive, watch } from 'vue';
+import { onMounted, onBeforeUnmount, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { socket, connected } from '@ws/webSocket';
 import { useSessionStore } from '@/stores/sessionStore';
@@ -7,7 +7,6 @@ import { useSessionStore } from '@/stores/sessionStore';
 import SideSladierSessionStatus from '@/components/reusable/SideSladierSessionStatus.vue';
 
 const sessionId = useRoute().params.sessionId
-
 const store = useSessionStore()
 
 onMounted(async () => {

@@ -70,20 +70,14 @@ async function updateField() {
                 class="md:auto-hide-scroll resize-none h-fit max-h-[256px]"></textarea>
 
             <label for="`${field.id}-value`">
-                Значення:Freado
+                Значення:
             </label>
 
             <input ref="valueInput" :type="typeof field.value" :id="`${field.id}-value`" v-model="field.value"
                 :class="inputStyle">
         </form>
 
-        <div class="h-full self-center flex flex-col justify-between py-4 gap-2">
-
-            <div 
-                class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl md:hover:cursor-pointer">
-                <component class="text-darkred-light"
-                     />
-            </div>
+        <div class="h-full self-center flex items-center py-4 gap-2">
 
             <DeleteButton
                 class="flex justify-center items-center text-xl w-11 h-11 bg-darkred-red text-darkred-light"

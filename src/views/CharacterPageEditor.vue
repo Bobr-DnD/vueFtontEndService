@@ -70,6 +70,16 @@ watch(
     { immediate: true }
 )
 
+watch(
+    () => store.session,
+    (newSession) => {
+        if (!selectedCharacter.value || selectedCharacter.value.id === 'new') return
+
+        const updated = newSession.characters.find(el => el.id === selectedCharacter.value.id)
+        reloadCharacter(updated ? updated.id : 'new', updated && structuredClone(toRaw(updated)))
+    }
+)
+
 function init() {
     types.value.inventory = buildTypes(store.session.entityTypes)
     types.value.perks = buildTypes(store.session.perkTypes)
@@ -134,10 +144,10 @@ function newCharacterFields() {
     return toNewCharacterObject({ characteristics, currency, session: sessionId })
 }
 
-function reloadCharacter(id, data = {id}) {
+function reloadCharacter(id, data = { id }) {
     markSaved()
 
-    if (id === 'new') 
+    if (id === 'new')
         selectedCharacter.value = newCharacterFields()
     else selectedCharacter.value = toNewCharacterObject(data)
 }
