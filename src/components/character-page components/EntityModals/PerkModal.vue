@@ -36,7 +36,7 @@ const props = defineProps({
                 </div>
                 <div class="font-normal" v-for="level, index in props.perk.levels"
                     :key="Math.random().toString(24).slice(2)">
-                    {{ index + 1 }} -> {{ level }}
+                    {{ index + 1 }} -> {{ level.name }}
                 </div>
             </div>
 

@@ -100,7 +100,7 @@ socket.on('character:updateDataNotify', (character) => {
     state.characterIsUpdating = false
 })
 
-function updateCharacter(){
+function updateCharacter() {
     socket.emit('character:updateData', state.character)
     state.characterIsUpdating = true
 }
@@ -131,8 +131,8 @@ function updateCurrency(fields) {
     updateCharacter()
 }
 
-function addCustomField(name, value) {
-    Object.assign(state.character.customFields, toObject({ name, value }))
+function addCustomField(object) {
+    state.character.customFields.push(object)
     custom_modal_hidden.value = true
     updateCharacter()
 }
@@ -167,9 +167,8 @@ function togglePicker(healthId) {
         <section class="p-2 lg:p-4 space-y-2">
 
             <characterCardSmall :name="state.character.name" :characteristics="state.character.characteristics"
-                :effects="state.character.effects"
-                :gender="state.character.gender" :class="state.character.class" :race="state.character.race"
-                :image="state.character.image" />
+                :effects="state.character.effects" :gender="state.character.gender" :class="state.character.class"
+                :race="state.character.race" :image="state.character.image" />
 
             <Experience :exp="state.character.experience" :expMax="state.character.experienceToLevelUp"
                 :perkPoints="state.character.perkPoints" :level="state.character.level" :callback="addExperience"
@@ -204,18 +203,18 @@ function togglePicker(healthId) {
 
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-2">
 
-                <div class="flex flex-col gap-2">
+                <div class="flex flex-col gap-2 lg:col-span-full">
                     <HideButton class="w-full" textShow="Показати додаткові характеристики"
                         textHide="Приховати додаткові характеристики" :hidden="custom_hidden" :mainIcon="ChartBarIcon"
                         @click="custom_hidden = !custom_hidden" />
 
                     <div class="grid transition-all duration-300 ease-in-out"
                         :style="{ gridTemplateRows: custom_hidden ? '0fr' : '1fr' }">
-                        <div class="overflow-hidden">
-                            <CustomFieldTile :fields="state.character.customFields" :callback="updateCustomFields"
-                                :field_removable="true" />
+                        <div class="overflow-hidden flex flex-col lg:grid lg:grid-cols-2  gap-2">
+                            <CustomFieldTile :fields="state.character.customFields"
+                                @update:fields="updateCustomFields" />
 
-                            <PlusButton @click="custom_modal_hidden = !custom_modal_hidden" class="w-16 h-14 mt-2 mx-auto text-center border-4 border-darkred-dark rounded-lg 
+                            <PlusButton @click="custom_modal_hidden = !custom_modal_hidden" class="w-16 h-14 col-span-full mt-2 mx-auto text-center border-4 border-darkred-dark rounded-lg 
            transition-all duration-300 ease-out md:hover:cursor-pointer
            bg-gradient-to-br from-darkred-dark to-darkred-light
            md:hover:from-darkred-red md:hover:to-darkred-dark relative overflow-hidden group" />
@@ -232,9 +231,22 @@ function togglePicker(healthId) {
                             </div>
 
                             <CustomFieldsEditor class="hover:cursor-default" :name="'CustomFields_'"
-                                :fields="state.character.customFields" :callback="addCustomField" />
+                                :callback="addCustomField" />
                         </div>
                     </div>
+                </div>
+
+                <div v-if="checkObjectFieldExisting(state.character?.effects)" class="flex flex-col gap-2">
+                    <HideButton class="w-full" textShow="Показати ефекти" textHide="Приховати ефекти"
+                        :hidden="effects_hidden" :mainIcon="SparklesIcon" @click="effects_hidden = !effects_hidden" />
+
+                    <div class="grid transition-all duration-300 ease-in-out"
+                        :style="{ gridTemplateRows: effects_hidden ? '0fr' : '1fr' }">
+                        <div class="overflow-hidden">
+                            <EffectsTable :effects="state.character.effects" />
+                        </div>
+                    </div>
+
                 </div>
 
                 <div v-if="checkObjectFieldExisting(state.character?.currency)" class="flex flex-col gap-2">
@@ -251,27 +263,15 @@ function togglePicker(healthId) {
 
                 </div>
 
-                <div v-if="checkObjectFieldExisting(state.character?.effects)" class="flex flex-col gap-2">
-                    <HideButton class="w-full" textShow="Показати ефекти" textHide="Приховати ефекти"
-                        :hidden="effects_hidden" :mainIcon="SparklesIcon" @click="effects_hidden = !effects_hidden" />
-
-                    <div class="grid transition-all duration-300 ease-in-out"
-                        :style="{ gridTemplateRows: effects_hidden ? '0fr' : '1fr' }">
-                        <div class="overflow-hidden">
-                            <EffectsTable :effects="state.character.effects" />
-                        </div>
-                    </div>
-
-                </div>
-
             </section>
 
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-2 items-start">
                 <PerkTable :session_perks="sessionStore.session.perks" :character_perks="state.character.perks"
                     :perkPoints="state.character.perkPoints" :callback="addPerk" />
 
-                <EntityTable :character_entities="state.character.entities" :session_entities="sessionStore.session.entities"
-                    :types="sessionStore.session.entityTypes" :callback="updateCharacter" />
+                <EntityTable :character_entities="state.character.entities"
+                    :session_entities="sessionStore.session.entities" :types="sessionStore.session.entityTypes"
+                    :callback="updateCharacter" />
             </section>
 
             <section>
@@ -282,7 +282,8 @@ function togglePicker(healthId) {
         </section>
     </div>
 
-    <div v-if="sessionStore.isLoading || gameStore.isBackendOffline" class="w-full h-full text-center py-6 flex flex-col gap-10 justify-center items-center">
+    <div v-if="sessionStore.isLoading || gameStore.isBackendOffline"
+        class="w-full h-full text-center py-6 flex flex-col gap-10 justify-center items-center">
         <BackendOffline v-if="gameStore.isBackendOffline" class="p-4 w-full lg:w-[650px]" />
 
         <DiceLoader />

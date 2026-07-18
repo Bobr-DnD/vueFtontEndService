@@ -152,8 +152,8 @@ function reloadCharacter(id, data = { id }) {
     else selectedCharacter.value = toNewCharacterObject(data)
 }
 
-function selectCharacter(id) {
-    if (selectedCharacter.value?.id === id) return
+function selectCharacter(id, check = false) {
+    if (selectedCharacter.value?.id === id && check) return
     if (unsavedChanges.value) {
         const confirmSwitch = confirm('Є незбережені зміни. Вийти без збереження?')
         if (!confirmSwitch) return
@@ -180,16 +180,16 @@ function discardChanges() {
 
 function buildTypes(list) {
     return [
-        ...list.map(type => ({
-            name: type.name,
-            id: type.id,
-            hidden: true
-        })),
         {
             name: 'Всі',
             id: 'all',
             hidden: false
-        }
+        },
+        ...list.map(type => ({
+            name: type.name,
+            id: type.id,
+            hidden: true
+        }))
     ]
 }
 
@@ -318,9 +318,9 @@ watch(() => selectedCharacter.value, () => {
 
             <div class="flex items-center justify-center space-x-4 m-2">
                 <GraySelectorButton v-for="character in store.session.characters" :key="character.id"
-                    @click="selectCharacter(character.id)" :id="character.id" :label="character.name"
+                    @click="selectCharacter(character.id, true)" :id="character.id" :label="character.name"
                     :active="selectedCharacter.id === character.id ? true : false" />
-                <PlusButton @click="selectCharacter('new')" class="w-16 h-14 border-4 border-darkred-dark rounded-lg
+                <PlusButton @click="selectCharacter('new', true)" class="w-16 h-14 border-4 border-darkred-dark rounded-lg
            md:hover:bg-darkred-gray group"
                     :class="selectedCharacter.id === 'new' ? 'bg-darkred-gray text-darkred-light' : 'bg-darkred-light'" />
             </div>
@@ -388,11 +388,8 @@ watch(() => selectedCharacter.value, () => {
                 <Header1 v-if="!checkObjectFieldExisting(selectedCharacter.customFields)" class="col-span-2"
                     label="Пусто" />
 
-                <div v-for="(field, index) in selectedCharacter.customFields" :key="field.id">
-                    <CustomFieldTile v-if="checkObjectFieldExisting(selectedCharacter.customFields)"
-                        v-model:customField="selectedCharacter.customFields[index]" :callback_remove="removeCustomField"
-                        :field_removable="true" />
-                </div>
+                <CustomFieldTile v-if="checkObjectFieldExisting(selectedCharacter.customFields)"
+                    :fields="selectedCharacter.customFields" @update:fields="updateCustomFields" />
 
                 <Header1 class="col-span-2 font-medium" label="Додати нове поле:" />
 

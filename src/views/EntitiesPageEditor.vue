@@ -304,8 +304,8 @@ watch(() => selectedEntity.value, () => {
 
                     <div class="w-full grid grid-cols-1 gap-2 ">
 
-                        <DropDownList v-model:selected="newCharacteristic.name" label="Виберіть характеристику"
-                            entity_name="CharacteristicName" :entity_array="store.session.characteristicsList" />
+                        <InputTextReactive v-model:inputValue="newCharacteristic.name" placeholder="Значення"
+                            fieldName="CharacteristicValue" />
 
                         <InputTextReactive v-model:inputValue="newCharacteristic.value" placeholder="Значення"
                             fieldName="CharacteristicValue" />

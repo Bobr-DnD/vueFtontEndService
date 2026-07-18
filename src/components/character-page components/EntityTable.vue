@@ -64,7 +64,7 @@ function removeEntity(entity) {
 
 function getFilteredCharacterEntities(type) {
     return groupedCharacterEntities.value
-        .filter(e => e.type === type.name)
+        .filter(e => e.type === type.id)
         .filter(e =>
             e.name.toLowerCase().includes(type.search.toLowerCase())
         )
@@ -72,7 +72,7 @@ function getFilteredCharacterEntities(type) {
 
 function getFilteredSessionEntities(type) {
     return props.session_entities
-        .filter(e => e.type === type.name)
+        .filter(e => e.type === type.id)
         .filter(e =>
             e.name.toLowerCase().includes(type.searchGlobal.toLowerCase())
         )

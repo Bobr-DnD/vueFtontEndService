@@ -4,7 +4,7 @@ import AdminGenericView from "@/views/AdminGenericView.vue";
 import SessionGenericView from "@/views/SessionGenericView.vue";
 import Sessions from "@/views/SessionsView.vue";
 import SessionView from "@/views/SingleSessionView.vue";
-import NotFoundView from '@/components/reusable/NotFoundView.vue'
+import NotFoundView from '@/views/NotFoundView.vue'
 import CharacterPageView from "@/views/CharacterPageView.vue";
 import CharacterPageEditor from "@/views/CharacterPageEditor.vue";
 import EntitiesPageEditor from "@/views/EntitiesPageEditor.vue";

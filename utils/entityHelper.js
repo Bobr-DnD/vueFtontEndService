@@ -29,7 +29,7 @@ export function filterPerksByRank(perks, allPerks) {
         count: found?.count ?? 0
       };
     })
-    .filter(perk => perk.count < perk.ranks);
+    .filter(perk => perk.count < (perk.levels?.length || 1));
 }
 
 export function filterPerksByRankWithoutCount(perks, allPerks) {

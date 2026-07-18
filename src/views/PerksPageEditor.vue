@@ -16,7 +16,7 @@ import Header2 from '@/components/reusable/Titles/Header1.vue';
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue';
 import PerkTile from '@/components/reusable/EntityTiles/PerkTile.vue';
 import InputTextReactive from '@/components/reusable/Inputs/InputTextReactive.vue';
-import DropDownChoosen from '@/components/reusable/DropDowns/DropDownChoosen.vue';
+import DropDownPerks from '@/components/reusable/DropDowns/DropDownPerks.vue';
 import TextAreaReactive from '@/components/reusable/Inputs/TextAreaReactive.vue';
 import ArraySingleStringForm from '@/components/reusable/Forms/ArraySingleStringForm.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
@@ -44,7 +44,7 @@ const copied = ref(false)
 const filteredPerks = computed(() => {
     let perks = toRaw(store.session.perks);
 
-    if (selectedType.value) perks = perks.filter(el => el.type.name === selectedType.value)
+    if (selectedType.value) perks = perks.filter(el => el.type.id === selectedType.value)
 
     if (searchQuery.value.trim()) {
         const query = searchQuery.value.toLowerCase();
@@ -222,7 +222,7 @@ watch(() => selectedPerk.value, () => {
                 <InputTextReactive class="col-span-3" placeholder="Назва" fieldName="name"
                     v-model:inputValue="selectedPerk.name" type="text" :important="true" />
 
-                <DropDownChoosen label="Тип перку" entity_name="perkType" v-model:selected="selectedPerk.type.name"
+                <DropDownPerks label="Тип перку" entity_name="perkType" v-model:selected="selectedPerk.type"
                     :entity_array="store.session.perkTypes" :important="true" />
 
                 <InputTextReactive class="col-span-full" placeholder="Опис" fieldName="description"

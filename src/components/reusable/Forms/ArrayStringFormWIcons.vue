@@ -2,7 +2,7 @@
 import { ref, watch, nextTick } from 'vue';
 import PlusButton from '../Buttons/PlusButton.vue';
 import DeleteButton from '../Buttons/DeleteButton.vue';
-import IconsDropdown from '../IconsDropdown.vue';
+import IconsDropdown from '../DropDowns/IconsDropdown.vue';
 
 const props = defineProps({
     array: {

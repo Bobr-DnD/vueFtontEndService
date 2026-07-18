@@ -58,10 +58,8 @@ const modalHidden = ref(true)
 
             <div class="p2 text-clip">Опис: {{ props.perk.description }}</div>
             
-            <div v-if="props.perk.count" class="p2 text-clip">{{ props.perk.levels[props.perk.count - 1] }}
+            <div v-if="props.perk.count && props.perk.ranks > 0" class="p2 text-clip">{{ props.perk.levels[props.perk.count - 1].name }}
             </div>
-
-
 
         </div>
 

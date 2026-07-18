@@ -60,17 +60,7 @@ const selectedCharacteristic = ref('')
                 @click="modalHidden = !modalHidden"
                 class="grow p-2 text-center rounded-lg border-2 border-darkred-red bg-darkred-dark text-darkred-light font-semibold hover:cursor-pointer">
 
-                <div v-if="props.characteristics[key] > value" class="flex gap-2 justify-center items-center">
-                    {{ value.name }} — {{ value.value }}
-                    <ArrowDownIcon class="w-6 h-6 text-darkred-bright" />
-                </div>
-
-                <div v-else-if="props.characteristics[key] < value" class="flex gap-2 justify-center items-center">
-                    {{ value.name }} — {{ value.value }}
-                    <ArrowDownIcon class="w-6 h-6 rotate-180 text-greenish-light" />
-                </div>
-
-                <div v-else>
+                <div>
                     {{ value.name }} — {{ value.value }}
                 </div>
 
@@ -88,7 +78,7 @@ const selectedCharacteristic = ref('')
                     class="text-center font-semibold text-darkred-light mb-1 cursor-pointer" />
 
                 <div class="flex flex-wrap items-center justify-center gap-2">
-                    <div v-for="value, key in props.characteristics" :key="Math.random().toString(24).slice(2)"
+                    <div v-for="value, key in props.characteristics" :key="value.id"
                         @click="selectedCharacteristic = key"
                         class="grow p-2 text-center rounded-lg border-2 border-darkred-red bg-darkred-dark_gray text-darkred-light font-semibold hover:cursor-pointer">
                         <div>
