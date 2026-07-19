@@ -1,6 +1,5 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { ArrowDownIcon } from '@heroicons/vue/24/solid';
 import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue';
 import Header1 from '../reusable/Titles/Header1.vue';
 import { CursorArrowRippleIcon } from '@heroicons/vue/24/solid';
@@ -46,18 +45,16 @@ const selectedCharacteristic = ref('')
         </div>
     </div>
 
-    <section class="border-2 border-darkred-dark p-2 rounded-lg relative">
+    <section @click="modalHidden = !modalHidden" class="border-2 border-darkred-dark p-2 rounded-lg relative">
 
-        <CursorArrowRippleIcon class="w-5 h-5 absolute top-2 right-1"/>
+        <CursorArrowRippleIcon class="w-5 h-5 absolute top-2 right-1" />
 
         <div class="relative">
-            <Header1 label="Характеристики" class="text-center font-bold text-darkred-red mb-1 cursor-pointer"
-                @click="modalHidden = !modalHidden" />
+            <Header1 label="Характеристики" class="text-center font-bold text-darkred-red mb-1 cursor-pointer" />
         </div>
 
         <div class="flex flex-wrap items-center justify-center gap-2">
             <div v-for="value, key in props.characteristics" :key="key.id"
-                @click="modalHidden = !modalHidden"
                 class="grow p-2 text-center rounded-lg border-2 border-darkred-red bg-darkred-dark text-darkred-light font-semibold hover:cursor-pointer">
 
                 <div>
@@ -66,6 +63,10 @@ const selectedCharacteristic = ref('')
 
             </div>
         </div>
+
+    </section>
+
+    <section>
 
         <div v-if="!modalHidden" class="modal-overlay flex items-center justify-center" @click="modalHidden = true">
             <div @click.stop
@@ -79,7 +80,7 @@ const selectedCharacteristic = ref('')
 
                 <div class="flex flex-wrap items-center justify-center gap-2">
                     <div v-for="value, key in props.characteristics" :key="value.id"
-                        @click="selectedCharacteristic = key"
+                        @click="selectedCharacteristic = value.name"
                         class="grow p-2 text-center rounded-lg border-2 border-darkred-red bg-darkred-dark_gray text-darkred-light font-semibold hover:cursor-pointer">
                         <div>
                             {{ value.name }} — {{ value.value }}

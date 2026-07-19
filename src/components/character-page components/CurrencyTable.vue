@@ -1,7 +1,6 @@
 <script setup>
 import { ref } from 'vue';
 import FormAddSubtract from '@/components/reusable/FormAddSubtract.vue';
-import { returnIcon } from '@utils/icons';
 
 const props = defineProps({
     currency_array: { type: Array, required: true },

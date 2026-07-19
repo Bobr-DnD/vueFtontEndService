@@ -1,15 +1,11 @@
 <script setup>
 import { reactive, onBeforeUnmount, watch, toRaw, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { ChartBarIcon, SparklesIcon, FlagIcon, BanknotesIcon } from '@heroicons/vue/24/solid'
+import { ChartBarIcon, SparklesIcon, BanknotesIcon } from '@heroicons/vue/24/solid'
 
-import RepositoryFactory from '@http/RepositoryFactory';
-import { asyncHandler } from '/utils/asyncHandler';
 import { checkObjectFieldExisting } from '/utils/entityHelper'
-import { toObject } from '/utils/objects.dto';
 import { toNewCharacterObject } from '/utils/objects.dto';
 import { socket } from '@ws/webSocket';
-import { notify } from '@utils/notification';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useGameStore } from '@/stores/gameStore';
 

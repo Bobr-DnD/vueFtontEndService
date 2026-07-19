@@ -35,15 +35,18 @@ const props = defineProps({
 const types = ref([])
 
 watch(() => props.types, (newTypes) => {
-    types.value = newTypes.map(type => ({
-        name: type.name,
-        id: type.id,
-        hidden: true,
-        icon: type.icon,
-        search: '',
-        modal_hidden: true,
-        searchGlobal: ''
-    }))
+    types.value = newTypes.map(type => {
+        const existing = types.value.find(t => t.id === type.id)
+        return {
+            name: type.name,
+            id: type.id,
+            hidden: existing ? existing.hidden : true,
+            icon: type.icon,
+            search: '',
+            modal_hidden: true,
+            searchGlobal: ''
+        }
+    })
 }, { immediate: true })
 
 const groupedCharacterEntities = computed(() => {

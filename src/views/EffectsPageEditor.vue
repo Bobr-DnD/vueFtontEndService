@@ -29,7 +29,7 @@ const store = useSessionStore()
 const activeTab = ref('base')
 
 const tabs = [
-    { id: 'base', label: 'Список речей' },
+    { id: 'base', label: 'Список ефектів' },
     { id: 'edit', label: "Створити/Редагувати річ" }
 ]
 

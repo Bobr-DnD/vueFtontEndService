@@ -1,72 +1,254 @@
-import { CheckBadgeIcon, ArchiveBoxIcon, BeakerIcon, ShieldCheckIcon, BoltIcon, ChartBarIcon, SparklesIcon, FlagIcon, CurrencyDollarIcon, SunIcon, MoonIcon, CurrencyEuroIcon, BanknotesIcon, FireIcon, HeartIcon, MapIcon, MapPinIcon, LightBulbIcon, MegaphoneIcon, MusicalNoteIcon, StarIcon, TrophyIcon } from '@heroicons/vue/24/solid'
+import {
+    CheckBadgeIcon,
+    ArchiveBoxIcon,
+    BeakerIcon,
+    ShieldCheckIcon,
+    BoltIcon,
+    ChartBarIcon,
+    SparklesIcon,
+    FlagIcon,
+    CurrencyDollarIcon,
+    SunIcon,
+    MoonIcon,
+    CurrencyEuroIcon,
+    BanknotesIcon,
+    FireIcon,
+    HeartIcon,
+    MapIcon,
+    MapPinIcon,
+    LightBulbIcon,
+    MegaphoneIcon,
+    MusicalNoteIcon,
+    StarIcon,
+    TrophyIcon
+} from '@heroicons/vue/24/solid'
+
+import {
+    Skull,
+    Coins,
+    Sword,
+    Swords,
+    BowArrow,
+    Axe,
+    HandCoins,
+    Cog,
+    Pickaxe,
+    Sparkles as SparklesLucide,
+    Sparkle,
+    MirrorRound,
+    Shield,
+    CircleDollarSign,
+    Banknote,
+    Store,
+    Box,
+    Archive,
+    Medal,
+    Infinity,
+    Pill,
+    PillBottle,
+    Drama,
+    FlameKindling,
+    Heart,
+    Flame,
+    Activity,
+    BookOpenText
+
+} from 'lucide-vue-next'
+
+export const iconsCategories = [
+    'weapons',
+    'tools',
+    'armor',
+    'health',
+    'magic',
+    'storage',
+    'currency',
+    'status',
+    'nature',
+    'misc'
+]
+
+export const iconsCategoryLabels = {
+    status: 'Статус',
+    currency: 'Валюта',
+    weapons: 'Зброя',
+    health: "Здоров'я",
+    tools: 'Інструменти',
+    armor: 'Броня',
+    magic: 'Магія',
+    nature: 'Природа',
+    storage: 'Сховище',
+    misc: 'Інше'
+}
 
 export const iconsList = [
+    // status / progression
     {
-        id: 'checkBadge', icon: CheckBadgeIcon,
+        id: 'checkBadge', icon: CheckBadgeIcon, category: 'status'
     },
     {
-        id: 'archiveBox', icon: ArchiveBoxIcon
+        id: 'chartBar', icon: ChartBarIcon, category: 'status'
     },
     {
-        id: 'beaker', icon: BeakerIcon
+        id: 'flag', icon: FlagIcon, category: 'status'
     },
     {
-        id: 'shieldCheck', icon: ShieldCheckIcon
+        id: 'heart', icon: HeartIcon, category: 'health'
     },
     {
-        id: 'bolt', icon: BoltIcon
+        id: 'activity', icon: Activity, category: 'health'
     },
     {
-        id: 'chartBar', icon: ChartBarIcon
+        id: 'heartLucide', icon: Heart, category: 'health'
     },
     {
-        id: 'sparkles', icon: SparklesIcon
+        id: 'pill', icon: Pill, category: 'health'
     },
     {
-        id: 'flag', icon: FlagIcon
+        id: 'pillBottle', icon: PillBottle, category: 'health'
     },
     {
-        id: 'currencyDollar', icon: CurrencyDollarIcon
+        id: 'infinity', icon: Infinity, category: 'status'
+    },
+
+    // currency / economy
+    {
+        id: 'currencyDollar', icon: CurrencyDollarIcon, category: 'currency'
     },
     {
-        id: 'currencyEuro', icon: CurrencyEuroIcon
+        id: 'currencyEuro', icon: CurrencyEuroIcon, category: 'currency'
     },
     {
-        id: 'banknotes', icon: BanknotesIcon
+        id: 'banknotes', icon: BanknotesIcon, category: 'currency'
     },
     {
-        id: 'sun', icon: SunIcon
+        id: 'coins', icon: Coins, category: 'currency'
     },
     {
-        id: 'moon', icon: MoonIcon
+        id: 'handCoins', icon: HandCoins, category: 'currency'
     },
     {
-        id: 'fire', icon: FireIcon
+        id: 'circleDollarSign', icon: CircleDollarSign, category: 'currency'
     },
     {
-        id: 'heart', icon: HeartIcon
+        id: 'banknote', icon: Banknote, category: 'currency'
+    },
+
+    // weapons
+    {
+        id: 'sword', icon: Sword, category: 'weapons'
     },
     {
-        id: 'map', icon: MapIcon
+        id: 'swords', icon: Swords, category: 'weapons'
     },
     {
-        id: 'mapPin', icon: MapPinIcon
+        id: 'BowArrow', icon: BowArrow, category: 'weapons'
     },
     {
-        id: 'lightBulb', icon: LightBulbIcon
+        id: 'axe', icon: Axe, category: 'weapons'
+    },
+
+    // tools
+    {
+        id: 'pickaxe', icon: Pickaxe, category: 'tools'
     },
     {
-        id: 'musicalNote', icon: MusicalNoteIcon
+        id: 'cog', icon: Cog, category: 'tools'
+    },
+
+    // armor / protection
+    {
+        id: 'shieldCheck', icon: ShieldCheckIcon, category: 'armor'
     },
     {
-        id: 'megaphone', icon: MegaphoneIcon
+        id: 'shield', icon: Shield, category: 'armor'
+    },
+
+    // magic / effects
+    {
+        id: 'beaker', icon: BeakerIcon, category: 'magic'
     },
     {
-        id: 'star', icon: StarIcon
+        id: 'bolt', icon: BoltIcon, category: 'magic'
     },
     {
-        id: 'trophy', icon: TrophyIcon
-    }
+        id: 'sparkles', icon: SparklesIcon, category: 'magic'
+    },
+    {
+        id: 'sparklesLucide', icon: SparklesLucide, category: 'magic'
+    },
+    {
+        id: 'sparkle', icon: Sparkle, category: 'magic'
+    },
+    {
+        id: 'lightBulb', icon: LightBulbIcon, category: 'magic'
+    },
+    {
+        id: 'mirrorRound', icon: MirrorRound, category: 'magic'
+    },
+    {
+        id: 'bookopentext', icon: BookOpenText, category: 'magic'
+    },
+
+    // nature / world
+    {
+        id: 'sun', icon: SunIcon, category: 'nature'
+    },
+    {
+        id: 'moon', icon: MoonIcon, category: 'nature'
+    },
+    {
+        id: 'fire', icon: FireIcon, category: 'nature'
+    },
+    {
+        id: 'flame', icon: Flame, category: 'nature'
+    },
+    {
+        id: 'flameKindling', icon: FlameKindling, category: 'nature'
+    },
+    {
+        id: 'map', icon: MapIcon, category: 'misc'
+    },
+    {
+        id: 'mapPin', icon: MapPinIcon, category: 'misc'
+    },
+
+    // storage / inventory
+    {
+        id: 'archiveBox', icon: ArchiveBoxIcon, category: 'storage'
+    },
+    {
+        id: 'box', icon: Box, category: 'storage'
+    },
+    {
+        id: 'archive', icon: Archive, category: 'storage'
+    },
+    {
+        id: 'store', icon: Store, category: 'storage'
+    },
+
+    // misc
+    {
+        id: 'musicalNote', icon: MusicalNoteIcon, category: 'misc'
+    },
+    {
+        id: 'megaphone', icon: MegaphoneIcon, category: 'misc'
+    },
+    {
+        id: 'skull', icon: Skull, category: 'misc'
+    },
+    {
+        id: 'drama', icon: Drama, category: 'misc'
+    },
+    {
+        id: 'star', icon: StarIcon, category: 'misc'
+    },
+    {
+        id: 'trophy', icon: TrophyIcon, category: 'misc'
+    },
+    {
+        id: 'medal', icon: Medal, category: 'misc'
+    },
 ]
 
 export function returnIcon(name) {
