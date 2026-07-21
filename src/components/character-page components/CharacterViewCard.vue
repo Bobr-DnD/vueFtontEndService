@@ -93,7 +93,7 @@ const selectedCharacteristic = ref('')
                     class="text-center text-darkred-light" />
 
                 <div v-if="appliedEffects.length > 0" class="p-2 flex flex-col gap-2 bg-darkred-dark_gray rounded-2xl">
-                    <div v-for="effect in appliedEffects"
+                    <div v-for="effect in appliedEffects" :key="effect.id"
                         class="p-2 rounded-lg even:bg-darkred-gray text-darkred-light even:text-darkred-dark">
 
                         <div>

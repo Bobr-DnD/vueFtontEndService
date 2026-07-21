@@ -366,7 +366,7 @@ watch(() => selectedCharacter.value, () => {
                 <div v-if="checkObjectFieldExisting(selectedCharacter.characteristics)"
                     class="col-span-full grid grid-cols-2 gap-2">
 
-                    <InputTextReactive v-for="characteristic in selectedCharacter.characteristics"
+                    <InputTextReactive v-for="characteristic in selectedCharacter.characteristics" :key="Math.random().toString(24).slice(2)"
                         :label="characteristic.name" fieldName="characteristicValue"
                         v-model:inputValue="characteristic.value" class="w-full" />
 
@@ -428,7 +428,7 @@ watch(() => selectedCharacter.value, () => {
 
                 <div class="w-full col-span-full flex gap-2 justify-center">
 
-                    <GraySelectorButton v-for="type in types.perks" :label="type.name" :id="type.id"
+                    <GraySelectorButton v-for="type in types.perks" :label="type.name" :key="type.id" :id="type.id"
                         :active="!type.hidden" @click="showType('perks', type.id)" />
                 </div>
 
@@ -442,7 +442,7 @@ watch(() => selectedCharacter.value, () => {
                         text="Очистити" />
                 </div>
 
-                <PerkRowView v-for="perk in filteredCharacterPerks" :perk="perk" :removable="true"
+                <PerkRowView v-for="perk in filteredCharacterPerks" :key="perk.id" :perk="perk" :removable="true"
                     :callback_remove="removerPerk" />
 
                 <Header1 class="col-span-full justify-self-center" label="Усі перки: " />
@@ -455,7 +455,7 @@ watch(() => selectedCharacter.value, () => {
                         text="Очистити" />
                 </div>
 
-                <PerkRowView v-for="perk in filteredSessionPerks" :perk="perk" :addable="true"
+                <PerkRowView v-for="perk in filteredSessionPerks" :key="perk.id" :perk="perk" :addable="true"
                     :callback_add="addPerk" />
 
             </div>
@@ -464,7 +464,7 @@ watch(() => selectedCharacter.value, () => {
                 class="flex flex-col items-center gap-y-4 overflow-y-auto">
 
                 <div class="w-full flex gap-2 justify-center">
-                    <GraySelectorButton v-for="type in types.inventory" :label="type.name" :id="type.id"
+                    <GraySelectorButton v-for="type in types.inventory" :key="type.id" :label="type.name" :id="type.id"
                         :active="!type.hidden" @click="showType('inventory', type.id)" />
                 </div>
 
@@ -483,7 +483,7 @@ watch(() => selectedCharacter.value, () => {
 
                     <div class="w-full grid grid-cols-3 gap-2 max-h-[1024px] overflow-y-auto md:auto-hide-scroll">
 
-                        <EntityRowView v-for="entity in filteredCharacterEntities" :entity="entity"
+                        <EntityRowView v-for="entity in filteredCharacterEntities" :key="entity.id" :entity="entity"
                             :callback_add="addEntity" :callback_remove="removeEntity" />
 
                     </div>
@@ -504,7 +504,7 @@ watch(() => selectedCharacter.value, () => {
 
                     <div class="w-full grid grid-cols-3 gap-2 max-h-[512px] overflow-y-auto md:auto-hide-scroll">
 
-                        <EntityRowView v-for="entity in filteredSessionEntities" :entity="entity"
+                        <EntityRowView v-for="entity in filteredSessionEntities" :key="entity.id" :entity="entity"
                             :callback_add="addEntity" :callback_remove="removeEntity" />
 
                     </div>

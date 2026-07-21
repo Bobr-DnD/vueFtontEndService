@@ -211,7 +211,7 @@ watch(() => selectedPerk.value, () => {
                         <PlusButton class="w-20 text-darkred-light" />
                     </div>
 
-                    <PerkTile v-for="perk in filteredPerks" :perk="perk" @click="selectPerk(perk.id)"
+                    <PerkTile v-for="perk in filteredPerks" :key="perk.id" :perk="perk" @click="selectPerk(perk.id)"
                         :class="selectedPerk.id === perk.id && 'outline outline-4 outline-offset-[-1px] outline-darkred-red'" />
                 </div>
 

@@ -91,7 +91,7 @@ function setOnlineCharacters() {
                 </div>
 
                 <div class="px-6 pb-6 pt-2 text-darkred-light font-gothic text-xl flex flex-col gap-2">
-                    <div v-for="character in props.charactersIds"
+                    <div v-for="character in props.charactersIds" :key="character.id"
                         class="[&>*]:w-fit [&>*]:p-1 [&>*]:border-b-2 [&>*]:relative [&>*]:inline-block rounded-lg [&>*]:rounded-lg">
 
                         <div v-if="characters.includes(character.id)"

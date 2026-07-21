@@ -198,7 +198,7 @@ watch(() => selectedEffect.value, () => {
                     </div>
 
 
-                    <EffectTile v-for="effect in filteredEffects"
+                    <EffectTile v-for="effect in filteredEffects" :key="effect.id"
                         :class="selectedEffect.id === effect.id && 'outline outline-4 outline-offset-[-1px] outline-darkred-red'"
                         class="hover:cursor-pointer" @click="selectEffect(effect.id)" :effect="effect" />
                 </div>
@@ -217,7 +217,7 @@ watch(() => selectedEffect.value, () => {
 
                 <div class="col-span-full flex flex-wrap gap-4 hover:cursor-pointer">
                     <div v-if="checkObjectFieldExisting(selectedEffect.effect)"
-                        v-for="value, key in selectedEffect.effect"
+                        v-for="value, key in selectedEffect.effect" :key="Math.random().toString(24).slice(2)"
                         class="flex gap-3 items-center p-3 w-fit rounded-lg bg-darkred-dark text-darkred-light">
                         <div>
                             {{ key }}: {{ value }}

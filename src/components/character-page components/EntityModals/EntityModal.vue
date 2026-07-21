@@ -85,7 +85,7 @@ const props = defineProps({
                         <div>Опис</div>
                     </div>
 
-                    <div v-for="value in props.entity.effects" :key="Math.random().toString(24).slice(2)"
+                    <div v-for="value in props.entity.effects" :key="value.id"
                         class="py-1 px-2 rounded-lg even:bg-darkred-light_gray grid grid-cols-2">
                         <div>
                             {{ value.name }}:

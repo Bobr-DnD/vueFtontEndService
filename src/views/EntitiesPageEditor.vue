@@ -251,7 +251,7 @@ watch(() => selectedEntity.value, () => {
                     <PlusButton class="w-20 text-darkred-light" />
                 </div>
 
-                <EntityTile v-for="entity in filteredEntities" @click="selectEntity(entity.id)"
+                <EntityTile v-for="entity in filteredEntities" @click="selectEntity(entity.id)" :key="entity.id"
                     :class="selectedEntity.id === entity.id && 'outline outline-4 outline-offset-[-1px] outline-darkred-red'"
                     :entity="entity" />
 
@@ -288,7 +288,7 @@ watch(() => selectedEntity.value, () => {
                     <Header2 class="shrink w-full" label="Харакетристики:" />
 
                     <div v-if="checkObjectFieldExisting(selectedEntity.characteristics)"
-                        v-for="value, key in selectedEntity.characteristics"
+                        v-for="value, key in selectedEntity.characteristics" :key="Math.random().toString(24).slice(2)"
                         class="flex gap-3 items-center p-3 w-fit rounded-lg bg-darkred-dark text-darkred-light">
 
                         <div>
@@ -323,7 +323,7 @@ watch(() => selectedEntity.value, () => {
                     <Header2 class="shrink w-full" label="Вимоги:" />
 
                     <div v-if="checkObjectFieldExisting(selectedEntity.requirement)"
-                        v-for="value, key in selectedEntity.requirement"
+                        v-for="value, key in selectedEntity.requirement" :key="Math.random().toString(24).slice(2)"
                         class="flex gap-3 items-center p-3 w-fit rounded-lg bg-darkred-dark text-darkred-light">
 
                         <div>
@@ -360,7 +360,7 @@ watch(() => selectedEntity.value, () => {
                 <div v-if="checkArrayFieldExisting(selectedEntity.effects)"
                     class="grid grid-cols-3 gap-4 items-center justify-start">
 
-                    <div v-for="effect in selectedEntity.effects"
+                    <div v-for="effect in selectedEntity.effects" :key="Math.random().toString(24).slice(2)"
                         class="bg-darkred-dark  p-2 rounded-2xl flex gap-4 items-center justify-between">
 
                         <EffectTile :effect="effect" class="w-full" />
@@ -379,7 +379,7 @@ watch(() => selectedEntity.value, () => {
 
                 <div
                     class="max-h-[512px] overflow-y-auto auto-hide-scroll grid grid-cols-4 gap-4 items-center justify-start">
-                    <EffectTile v-for="effect in filteredEffects" :effect="effect" @click="addEffect(effect.id)" />
+                    <EffectTile v-for="effect in filteredEffects" :key="effect.id" :effect="effect" @click="addEffect(effect.id)" />
                 </div>
 
             </section>
