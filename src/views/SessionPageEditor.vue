@@ -185,7 +185,7 @@ watch([oldPass, newPass, confirmPass], () => {
                     <RejectButtonWithText text="Видалити сесію" @click="store.deleteSession(sessionId)" />
                 </div>
 
-                <div class="space-y-2 grid auto-rows-min justify-self-center justify-items-center">
+                <!-- <div class="space-y-2 grid auto-rows-min justify-self-center justify-items-center">
                     <Header1 label="Експорт\Імпорт:" />
 
                     <RadioSelector :radios="[{ id: 'export', label: 'Експорт' }, { id: 'import', label: 'Імпорт' }]"
@@ -208,7 +208,7 @@ watch([oldPass, newPass, confirmPass], () => {
                         <ApproveButton class="w-full" @click="exportFile()" />
                     </div>
 
-                </div>
+                </div> -->
 
             </div>
 

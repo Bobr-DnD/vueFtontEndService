@@ -226,7 +226,7 @@ watch(() => selectedPerk.value, () => {
                     :entity_array="store.session.perkTypes" :important="true" />
 
                 <InputTextReactive class="col-span-full" placeholder="Опис" fieldName="description"
-                    v-model:inputValue="selectedPerk.description" type="text" :important="true" />
+                    v-model:inputValue="selectedPerk.description" type="text" />
 
                 <TextAreaReactive class="col-span-full" label="Записки Майстра" v-model:value="selectedPerk.notes" />
 

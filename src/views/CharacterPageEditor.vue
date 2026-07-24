@@ -18,10 +18,11 @@ import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWith
 import HealthFieldsEditor from '@/components/admin-page components/HealthFieldsEditor.vue';
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
 import CurrencyTable from '@/components/character-page components/CurrencyTable.vue';
-import EffectsTableEditor from '@/components/admin-page components/EffectsTableEditor.vue';
+import EffectsTable from '@/components/character-page components/EffectsTable.vue';
 import PerkRowView from '@/components/character-page components/EntityRows/PerkRowView.vue';
 import EntityRowView from '@/components/character-page components/EntityRows/EntityRowView.vue';
 import Header1 from '@/components/reusable/Titles/Header1.vue';
+import { CheckBadgeIcon, PlusCircleIcon, HeartIcon } from '@heroicons/vue/24/solid';
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
@@ -42,13 +43,26 @@ const searchQuery = ref({
     characterEntity: '',
     sessionEntity: '',
     characterPerks: '',
-    sessionPerks: ''
+    sessionPerks: '',
+    characterEffects: '',
+    sessionEffects: ''
 })
 
 const filteredSessionEntities = useFilteredArray(computed(() => store.session.entities), computed(() => searchQuery.value.sessionEntity), computed(() => types.value.inventory))
 const filteredCharacterEntities = useFilteredArray(computed(() => selectedCharacter.value.entities), computed(() => searchQuery.value.characterEntity), computed(() => types.value.inventory), { groupFn: groupById })
 const filteredSessionPerks = useFilteredArray(computed(() => store.session.perks), computed(() => searchQuery.value.sessionPerks), computed(() => types.value.perks), { transformFn: () => filterPerksByRank(selectedCharacter.value.perks, store.session.perks) })
 const filteredCharacterPerks = useFilteredArray(computed(() => selectedCharacter.value.perks), computed(() => searchQuery.value.characterPerks), computed(() => types.value.perks), { groupFn: groupById })
+
+const filteredCharacterEffects = computed(() => {
+    const list = selectedCharacter.value.effects
+    const query = searchQuery.value.characterEffects.trim().toLowerCase()
+    return query ? list.filter(effect => effect.name?.toLowerCase().includes(query)) : list
+})
+const filteredSessionEffects = computed(() => {
+    const list = store.session.effects
+    const query = searchQuery.value.sessionEffects.trim().toLowerCase()
+    return query ? list.filter(effect => effect.name?.toLowerCase().includes(query)) : list
+})
 
 const activeTab = ref('base')
 
@@ -229,13 +243,18 @@ function addCustomField(object) {
     markUnsaved();
 }
 
-function removeCustomField(id) {
-    selectedCharacter.value.customFields = selectedCharacter.value.customFields.filter(el => el.id !== id)
+function updateCustomFields(fields) {
+    selectedCharacter.value.customFields = fields
     markUnsaved();
 }
 
-function updateEffects(effects) {
-    selectedCharacter.value.effects = effects
+function addEffect(effect) {
+    addRow(store.session.effects, selectedCharacter.value.effects, effect.id)
+    markUnsaved()
+}
+
+function removeEffect(effect) {
+    removeRow(selectedCharacter.value.effects, effect.id)
     markUnsaved()
 }
 
@@ -314,7 +333,7 @@ watch(() => selectedCharacter.value, () => {
 
         </section>
 
-        <section class="m-4 h-full space-y-2 overflow-y-auto">
+        <section class="m-4 py-4 h-full space-y-2 overflow-y-auto">
 
             <div class="flex items-center justify-center space-x-4 m-2">
                 <GraySelectorButton v-for="character in store.session.characters" :key="character.id"
@@ -397,29 +416,95 @@ watch(() => selectedCharacter.value, () => {
 
             </div>
 
-            <div id="health" v-if="activeTab === 'health'"
-                class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-2 overflow-y-auto">
+            <div id="health" v-if="activeTab === 'health'" class="grid gap-y-4 overflow-y-auto">
 
-                <Header1 class="col-span-2 justify-self-center font-medium" label="Редагування існуючи полей:" />
+                <div class="p-3 rounded-xl bg-greenish-dark/10 border-2 border-greenish-mid/50 space-y-3">
 
-                <Header1 v-if="!checkObjectFieldExisting(selectedCharacter.health)" class="col-span-2" label="Пусто" />
+                    <div class="flex items-center gap-2 justify-center">
+                        <HeartIcon class="w-6 h-6 text-greenish-mid" />
+                        <Header1 label="Поля здоров'я персонажа:" />
+                        <span
+                            class="text-sm px-2 py-0.5 rounded-full bg-greenish-mid text-darkred-dark font-semibold">{{
+                                selectedCharacter.health.length }}</span>
+                    </div>
 
-                <HealthFieldsEditor v-for="field in selectedCharacter.health" :key="field.id" :label="field.name"
-                    :health_field="field" class="col-span-2" :callback="updateHealthFields"
-                    :callback_remove="deleteHealthField" />
+                    <Header1 v-if="!checkObjectFieldExisting(selectedCharacter.health)"
+                        class="justify-self-center text-lg text-darkred-light_gray" label="Полів ще немає" />
 
-                <Header1 class="col-span-2 justify-self-center font-medium" label="Створити нове поле::" />
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                        <HealthFieldsEditor v-for="field in selectedCharacter.health" :key="field.id"
+                            :label="field.name" :health_field="field" :callback="updateHealthFields"
+                            :callback_remove="deleteHealthField" />
+                    </div>
 
-                <HealthFieldsEditor label="Health" class="col-span-2" :callback="addHealthField" />
+                </div>
+
+                <div class="p-3 rounded-xl bg-orange-gold/10 border-2 border-orange-gold/50 space-y-3">
+
+                    <div class="flex items-center gap-2 justify-center">
+                        <PlusCircleIcon class="w-6 h-6 text-orange-gold" />
+                        <Header1 label="Створити нове поле:" />
+                    </div>
+
+                    <HealthFieldsEditor label="Health" :callback="addHealthField" />
+
+                </div>
 
             </div>
 
             <div id="effects" v-if="activeTab === 'effects'" class="grid gap-x-4 gap-y-3 overflow-y-auto">
 
-                <Header1 class="justify-self-center" label="Еффекти:" />
+                <div class="p-3 rounded-xl bg-greenish-dark/10 border-2 border-greenish-mid/50 space-y-2">
 
-                <EffectsTableEditor :sessionEffects="store.session.effects"
-                    :character_effects="selectedCharacter.effects" :callback="updateEffects" />
+                    <div class="flex items-center gap-2 justify-center">
+                        <CheckBadgeIcon class="w-6 h-6 text-greenish-mid" />
+                        <Header1 label="Ефекти персонажа:" />
+                        <span
+                            class="text-sm px-2 py-0.5 rounded-full bg-greenish-mid text-darkred-dark font-semibold">{{
+                                filteredCharacterEffects.length }}</span>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <input v-model="searchQuery.characterEffects" placeholder="Пошук ..."
+                            class="h-12 w-full p-2 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+
+                        <RejectButtonWithText v-if="searchQuery.characterEffects"
+                            @click="searchQuery.characterEffects = ''" text="Очистити" />
+                    </div>
+
+                    <Header1 v-if="!filteredCharacterEffects.length"
+                        class="justify-self-center text-lg text-darkred-dark_gray" label="Ефектів немає" />
+
+                    <EffectsTable v-else :effects="filteredCharacterEffects" :removable="true"
+                        :callback_remove="removeEffect" />
+
+                </div>
+
+                <div class="p-3 rounded-xl bg-darkred-dark_gray/40 border-2 border-darkred-gray/40 space-y-2">
+
+                    <div class="flex items-center gap-2 justify-center">
+                        <PlusCircleIcon class="w-6 h-6 text-darkred-light_gray" />
+                        <Header1 label="Усі ефекти:" />
+                        <span
+                            class="text-sm px-2 py-0.5 rounded-full bg-darkred-gray text-darkred-dark font-semibold">{{
+                                filteredSessionEffects.length }}</span>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <input v-model="searchQuery.sessionEffects" placeholder="Пошук ..."
+                            class="h-12 w-full p-2 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+
+                        <RejectButtonWithText v-if="searchQuery.sessionEffects"
+                            @click="searchQuery.sessionEffects = ''" text="Очистити" />
+                    </div>
+
+                    <Header1 v-if="!filteredSessionEffects.length"
+                        class="justify-self-center text-lg text-darkred-light_gray" label="Ефектів немає" />
+
+                    <EffectsTable v-else :effects="filteredSessionEffects" :addable="true"
+                        :callback_add="addEffect" />
+
+                </div>
 
             </div>
 
@@ -432,31 +517,61 @@ watch(() => selectedCharacter.value, () => {
                         :active="!type.hidden" @click="showType('perks', type.id)" />
                 </div>
 
-                <Header1 class="col-span-full justify-self-center" label="Перки персонажа: " />
+                <div
+                    class="col-span-full grid grid-cols-3 auto-rows-min gap-x-4 gap-y-3 p-3 rounded-xl bg-greenish-dark/10 border-2 border-greenish-mid/50">
 
-                <div class="col-span-3 flex gap-2">
-                    <input v-model="searchQuery.characterPerks" placeholder="Пошук ..."
-                        class="h-12 w-full p-2 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+                    <div class="col-span-full flex items-center gap-2 justify-center">
+                        <CheckBadgeIcon class="w-6 h-6 text-greenish-mid" />
+                        <Header1 label="Перки персонажа:" />
+                        <span
+                            class="text-sm px-2 py-0.5 rounded-full bg-greenish-mid text-darkred-dark font-semibold">{{
+                                filteredCharacterPerks.length }}</span>
+                    </div>
 
-                    <RejectButtonWithText v-if="searchQuery.characterPerks" @click="searchQuery.characterPerks = ''"
-                        text="Очистити" />
+                    <div class="col-span-3 flex gap-2">
+                        <input v-model="searchQuery.characterPerks" placeholder="Пошук ..."
+                            class="h-12 w-full p-2 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+
+                        <RejectButtonWithText v-if="searchQuery.characterPerks"
+                            @click="searchQuery.characterPerks = ''" text="Очистити" />
+                    </div>
+
+                    <Header1 v-if="!filteredCharacterPerks.length"
+                        class="col-span-full justify-self-center text-lg text-darkred-light_gray"
+                        label="Перків не знайдено" />
+
+                    <PerkRowView v-for="perk in filteredCharacterPerks" :key="perk.id" :perk="perk" :removable="true"
+                        :callback_remove="removerPerk" />
+
                 </div>
 
-                <PerkRowView v-for="perk in filteredCharacterPerks" :key="perk.id" :perk="perk" :removable="true"
-                    :callback_remove="removerPerk" />
+                <div
+                    class="col-span-full grid grid-cols-3 auto-rows-min gap-x-4 gap-y-3 p-3 rounded-xl bg-darkred-dark_gray/40 border-2 border-darkred-gray/40">
 
-                <Header1 class="col-span-full justify-self-center" label="Усі перки: " />
+                    <div class="col-span-full flex items-center gap-2 justify-center">
+                        <PlusCircleIcon class="w-6 h-6 text-darkred-light_gray" />
+                        <Header1 label="Усі перки:" />
+                        <span
+                            class="text-sm px-2 py-0.5 rounded-full bg-darkred-gray text-darkred-dark font-semibold">{{
+                                filteredSessionPerks.length }}</span>
+                    </div>
 
-                <div class="col-span-3 flex gap-2">
-                    <input v-model="searchQuery.sessionPerks" placeholder="Пошук ..."
-                        class="h-12 w-full p-2 col-span-3 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+                    <div class="col-span-3 flex gap-2">
+                        <input v-model="searchQuery.sessionPerks" placeholder="Пошук ..."
+                            class="h-12 w-full p-2 col-span-3 rounded-lg bg-darkred-dark_gray text-darkred-light" />
 
-                    <RejectButtonWithText v-if="searchQuery.sessionPerks" @click="searchQuery.sessionPerks = ''"
-                        text="Очистити" />
+                        <RejectButtonWithText v-if="searchQuery.sessionPerks" @click="searchQuery.sessionPerks = ''"
+                            text="Очистити" />
+                    </div>
+
+                    <Header1 v-if="!filteredSessionPerks.length"
+                        class="col-span-full justify-self-center text-lg text-darkred-light_gray"
+                        label="Перків не знайдено" />
+
+                    <PerkRowView v-for="perk in filteredSessionPerks" :key="perk.id" :perk="perk" :addable="true"
+                        :callback_add="addPerk" />
+
                 </div>
-
-                <PerkRowView v-for="perk in filteredSessionPerks" :key="perk.id" :perk="perk" :addable="true"
-                    :callback_add="addPerk" />
 
             </div>
 
@@ -468,9 +583,15 @@ watch(() => selectedCharacter.value, () => {
                         :active="!type.hidden" @click="showType('inventory', type.id)" />
                 </div>
 
-                <Header1 class="self-start" label="Інвентар персонажа:" />
+                <div class="w-full flex flex-col gap-2 p-3 rounded-xl bg-greenish-dark/10 border-2 border-greenish-mid/50">
 
-                <div class="w-full flex flex-col gap-2">
+                    <div class="w-full flex items-center gap-2 justify-center">
+                        <CheckBadgeIcon class="w-6 h-6 text-greenish-mid" />
+                        <Header1 label="Інвентар персонажа:" />
+                        <span
+                            class="text-sm px-2 py-0.5 rounded-full bg-greenish-mid text-darkred-dark font-semibold">{{
+                                filteredCharacterEntities.length }}</span>
+                    </div>
 
                     <div class="flex gap-2">
 
@@ -481,17 +602,26 @@ watch(() => selectedCharacter.value, () => {
                             @click="searchQuery.characterEntity = ''" text="Очистити" />
                     </div>
 
+                    <Header1 v-if="!filteredCharacterEntities.length"
+                        class="self-center text-lg text-darkred-light_gray" label="Інвентар пустий" />
+
                     <div class="w-full grid grid-cols-3 gap-2 max-h-[1024px] overflow-y-auto md:auto-hide-scroll">
 
                         <EntityRowView v-for="entity in filteredCharacterEntities" :key="entity.id" :entity="entity"
-                            :callback_add="addEntity" :callback_remove="removeEntity" />
+                            :owned="true" :callback_add="addEntity" :callback_remove="removeEntity" />
 
                     </div>
                 </div>
 
-                <Header1 class="self-start" label="Весь інвентар:" />
+                <div class="w-full flex flex-col gap-2 p-3 rounded-xl bg-darkred-dark_gray/40 border-2 border-darkred-gray/40">
 
-                <div class="w-full flex flex-col gap-2">
+                    <div class="w-full flex items-center gap-2 justify-center">
+                        <PlusCircleIcon class="w-6 h-6 text-darkred-light_gray" />
+                        <Header1 label="Весь інвентар:" />
+                        <span
+                            class="text-sm px-2 py-0.5 rounded-full bg-darkred-gray text-darkred-dark font-semibold">{{
+                                filteredSessionEntities.length }}</span>
+                    </div>
 
                     <div class="flex gap-2">
 
@@ -502,10 +632,13 @@ watch(() => selectedCharacter.value, () => {
                             text="Очистити" />
                     </div>
 
+                    <Header1 v-if="!filteredSessionEntities.length"
+                        class="self-center text-lg text-darkred-light_gray" label="Інвентар пустий" />
+
                     <div class="w-full grid grid-cols-3 gap-2 max-h-[512px] overflow-y-auto md:auto-hide-scroll">
 
                         <EntityRowView v-for="entity in filteredSessionEntities" :key="entity.id" :entity="entity"
-                            :callback_add="addEntity" :callback_remove="removeEntity" />
+                            :owned="false" :callback_add="addEntity" :callback_remove="removeEntity" />
 
                     </div>
                 </div>
