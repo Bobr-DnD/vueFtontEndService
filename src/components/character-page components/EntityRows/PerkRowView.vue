@@ -59,10 +59,10 @@ const modalHidden = ref(true)
             <ApproveButton v-if="props.addable" @click.stop @click="props.callback_add(props.perk)"
                 class="row-span-2 w-11 justify-self-center" />
 
-            <div class="p2 text-clip">Опис: {{ props.perk.description }}</div>
+            <div v-if="props.perk.description" class="p2 text-clip">Опис: {{ props.perk.description }}</div>
             
             <div v-if="props.perk.count && props.perk.ranks > 0 && props.perk.levels?.[props.perk.count - 1]"
-                class="p2 text-clip">{{ props.perk.levels[props.perk.count - 1].name }}
+                class="p2 text-clip">Наступний рівень: {{ props.perk.levels[props.perk.count - 1].name }}
             </div>
 
         </div>

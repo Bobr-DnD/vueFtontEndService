@@ -28,6 +28,7 @@ import Header2 from '@/components/reusable/Titles/Header2.vue';
 import DeleteButton from '@/components/reusable/Buttons/DeleteButton.vue';
 import EffectTile from '@/components/reusable/EntityTiles/EffectTile.vue';
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue';
+import { PencilIcon } from '@heroicons/vue/24/solid';
 
 const sessionId = useRoute().params.sessionId
 const store = useSessionStore()
@@ -107,7 +108,7 @@ async function saveEntity() {
             RepositoryFactory.update('entity', entity.id, entity)
         )
         if (err) return
-        reloadEntity(res.data.id)
+        reloadEntity(res.data.id, res.data)
     }
     notify({ message: 'Зміни збережені', type: 'info' })
     socket.emit('session:updateDataNotify', sessionId);
@@ -148,7 +149,7 @@ function markSaved() {
     copied.value = true
 }
 
-function reloadEntity(id, data = {id}){
+function reloadEntity(id, data) {
     markSaved()
 
     if (id === 'new') selectedEntity.value = toNewEntity({})
@@ -172,6 +173,18 @@ function selectEntity(id) {
 }
 
 // Entity functions
+
+function copyEntity(id){
+    selectedEntity.value = toNewEntity(structuredClone(toRaw(store.session.entities.find(el => el.id === id))))
+    selectedEntity.value.id = 'new'
+    activeTab.value = 'edit'
+}
+
+function addCharacteristic(){
+    Object.assign(selectedEntity.value.characteristics, toObject(toRaw(newCharacteristic.value)))
+    newCharacteristic.value.name = ''
+    newCharacteristic.value.value = ''
+}
 
 function addEffect(id) {
     addRow(store.session.effects, selectedEntity.value.effects, id)
@@ -253,7 +266,7 @@ watch(() => selectedEntity.value, () => {
 
                 <EntityTile v-for="entity in filteredEntities" @click="selectEntity(entity.id)" :key="entity.id"
                     :class="selectedEntity.id === entity.id && 'outline outline-4 outline-offset-[-1px] outline-darkred-red'"
-                    :entity="entity" />
+                    :entity="entity" :callback_copy="copyEntity"/>
 
             </div>
 
@@ -295,6 +308,11 @@ watch(() => selectedEntity.value, () => {
                             {{ key }}: {{ value }}
                         </div>
 
+                        <button @click="newCharacteristic.name = key; newCharacteristic.value = value"
+                            class="p-2 rounded-xl border-2 border-darkred-dark bg-darkred-gray text-darkred-light select-none md:hover:bg-darkred-light_gray md:hover:cursor-pointer">
+                            <PencilIcon class="w-4 h-4" />
+                        </button>
+
                         <DeleteButton class="bg-darkred-red" @click="delete selectedEntity.characteristics[key]" />
                     </div>
 
@@ -311,7 +329,7 @@ watch(() => selectedEntity.value, () => {
                             fieldName="CharacteristicValue" />
 
                         <AprroveButtonWithText class="flex justify-center items-center text-lg"
-                            @click="Object.assign(selectedEntity.characteristics, toObject(toRaw(newCharacteristic)))"
+                            @click="addCharacteristic()"
                             text="Додати характеристику" />
                     </div>
 
