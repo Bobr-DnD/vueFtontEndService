@@ -30,12 +30,6 @@ const sessionId = useRoute().params.sessionId
         <RouterLink :to="'/admin/' + sessionId" class="relative text-darkred-bright font-semibold tracking-wide
            after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[3px]
            after:bg-darkred-bright md:hover:after:w-full after:transition-[width] after:duration-400 after:ease-out">
-            Панель керування
-        </RouterLink>
-
-        <RouterLink :to="'/admin/' + sessionId + '/session'" class="relative text-darkred-bright font-semibold tracking-wide
-           after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[3px]
-           after:bg-darkred-bright md:hover:after:w-full after:transition-[width] after:duration-400 after:ease-out">
             Сесія
         </RouterLink>
 
@@ -51,16 +45,10 @@ const sessionId = useRoute().params.sessionId
             Інвентар
         </RouterLink>
 
-        <RouterLink :to="'/admin/' + sessionId + '/quests'" class="relative text-darkred-bright font-semibold tracking-wide
-           after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[3px]
-           after:bg-darkred-bright md:hover:after:w-full after:transition-[width] after:duration-400 after:ease-out">
-            Квести
-        </RouterLink>
-
         <RouterLink :to="'/admin/' + sessionId + '/perks'" class="relative text-darkred-bright font-semibold tracking-wide
            after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[3px]
            after:bg-darkred-bright md:hover:after:w-full after:transition-[width] after:duration-400 after:ease-out">
-            Перки
+            Навички
         </RouterLink>
 
         <RouterLink :to="'/admin/' + sessionId + '/effects'" class="relative text-darkred-bright font-semibold tracking-wide

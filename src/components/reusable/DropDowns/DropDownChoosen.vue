@@ -1,27 +1,27 @@
 <script setup>
 import { ref } from 'vue';
+import ImportantField from '../ImportantField.vue';
+
 
 const selectValue = ref(null)
+
+const selectedValue = defineModel('selected', { type: String, required: true, default: '' })
 
 const props = defineProps({
     label: {
         type: String,
         required: true
     },
+    important: {
+        type: Boolean,
+        deafult: false
+    },
     entity_name: {
         type: String,
         required: true
     },
-    selected: {
-        type: String,
-        default: ''
-    },
     entity_array: {
         type: Array,
-        required: true
-    },
-    callback: {
-        type: Function,
         required: true
     }
 })
@@ -33,21 +33,22 @@ const props = defineProps({
 
         <div>
             {{ props.label }}:
+            <ImportantField v-if="props.important" />
         </div>
 
-        <select ref="selectValue" @change="selectValue.value !== 'none' ? props.callback(selectValue.value) : console.log('xuita')" :name="props.entity_name"
+        <select ref="selectValue" @change="selectedValue = selectValue.value" :name="props.entity_name"
             :id="props.entity_name"
-            class="w-full appearance-none p-1 pl-2 bg-darkred-light border-4 border-darkred-dark rounded-lg text-darkred-dark font-gothic focus:outline-none focus:ring-2 focus:ring-darkred-dark transition cursor-pointer">
-            
-            <option value="none">
+            class="w-full appearance-none p-2 m-1 border-2 rounded-lg border-light_gray text-darkred-dark font-gothic focus:outline-none focus:ring-2 focus:ring-darkred-dark transition cursor-pointer">
+
+            <option value="null">
                 Не вибарно
             </option>
-            
-            <option v-for="entity in props.entity_array" :value="entity.id" :selected="entity.name === props.selected">
+
+            <option v-for="entity in props.entity_array" :key="entity.id" :value="entity.id" :selected="entity.id === selectedValue">
                 {{ entity.name }}
             </option>
 
         </select>
-        
+
     </div>
 </template>

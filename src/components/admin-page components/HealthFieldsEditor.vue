@@ -1,7 +1,9 @@
 <script setup>
+import { ref, computed } from 'vue';
 import AprroveButtonWithText from '../reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '../reusable/Buttons/RejectButtonWithText.vue';
-import { ref } from 'vue';
+import ProgressiveBar from '../reusable/ProgressiveBar.vue';
+import { HeartIcon } from '@heroicons/vue/24/solid';
 import { toHealthObjectField } from '/utils/objects.dto';
 import { notify } from '/utils/notification';
 
@@ -24,136 +26,121 @@ const props = defineProps({
     }
 })
 
-const field_exists = ref(false)
-const name = ref(0)
-const min = ref(0)
-const max = ref(0)
-const value = ref(0)
-const color_min = ref('#8e1616')
-const color_max = ref('#3e5f44')
-const color_mid = ref('#fabc3f')
+const isNew = !props.health_field
 
-if (props.health_field) field_exists.value = true
+const name = ref(props.health_field?.name ?? '')
+const min = ref(props.health_field?.min ?? 0)
+const max = ref(props.health_field?.max ?? 25)
+const value = ref(props.health_field?.value ?? 0)
+const color_max = ref(props.health_field?.colors?.[0] ?? '#3E5F44')
+const color_mid = ref(props.health_field?.colors?.[1] ?? '#FABC3F')
+const color_min = ref(props.health_field?.colors?.[2] ?? '#8E1616')
 
-function addHealthField() {
+const previewColors = computed(() => [color_max.value, color_mid.value, color_min.value])
 
-    const value_parsed = parseInt(value.value.value)
-    const max_parsed = parseInt(max.value.value)
-    const min_parsed = parseInt(min.value.value)
+function saveHealthField() {
 
-    if (!name.value.value) {
+    if (!name.value) {
         notify({ message: 'Вкажіть назву поля', type: 'error' })
         return
     }
-    else if (min_parsed > max_parsed) {
+    if (min.value > max.value) {
         notify({ message: 'Мінімальне значення більше за максимальне', type: 'error' })
         return
     }
-    else if (value_parsed > max_parsed) {
+    if (value.value > max.value) {
         notify({ message: 'Нинішнє значення було встановлено на максимальне', type: 'warning' })
-        actual_value = max_parsed
-        value.value.value = max.value.value
+        value.value = max.value
     }
 
-    let health = {
-        name: name.value.value,
-        min: min_parsed,
-        max: max_parsed,
-        value: value_parsed,
-        colors: [color_max.value.value, color_mid.value.value, color_min.value.value],
+    const health = toHealthObjectField({
+        name: name.value,
+        min: min.value,
+        max: max.value,
+        value: value.value,
+        colors: [color_max.value, color_mid.value, color_min.value],
         id: props.health_field?.id || null
-    }
+    })
 
-    health = toHealthObjectField(health)
-
-    if (!field_exists) resetFields()
     props.callback(health)
-    resetFields()
+    if (isNew) resetFields()
 }
 
 function resetFields() {
-    name.value.value = null
-    min.value.value = null
-    max.value.value = null
-    value.value.value = null
-    color_min.value.value = '#8e1616'
-    color_max.value.value = '#3e5f44'
-    color_mid.value.value = '#fabc3f'
+    name.value = ''
+    min.value = 0
+    max.value = 25
+    value.value = 0
+    color_max.value = '#3E5F44'
+    color_mid.value = '#FABC3F'
+    color_min.value = '#8E1616'
 }
 
 </script>
 
 <template>
-    <div>
-        <form @submit.prevent class="grid grid-cols-2 gap-2 items-start justify-center w-full">
+    <div class="rounded-xl border-2 p-4 space-y-3"
+        :class="isNew ? 'border-orange-gold/50 bg-orange-gold/10' : 'border-greenish-mid/50 bg-greenish-dark/10'">
 
-            <section>
-                <label :for="props.label" class="text-lg font-gothic">Назва поля:</label>
-                <input ref="name" :name="props.label" :id="props.label" placeholder="Назва"
-                    :value="field_exists ? props.health_field.name : ''" type="text"
-                    class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full">
-            </section>
+        <div class="flex items-center gap-2">
+            <HeartIcon class="w-6 h-6 shrink-0" :class="isNew ? 'text-orange-gold' : 'text-greenish-mid'" />
+            <span class="text-lg font-gothic font-medium truncate">{{ isNew ? 'Нове поле' : (name || props.label) }}</span>
 
-            <section>
+            <RejectButtonWithText v-if="!isNew" text="Видалити"
+                class="ml-auto h-9 px-3 shrink-0 flex justify-center items-center"
+                @click="props.callback_remove(props.health_field)" />
+        </div>
 
-            </section>
+        <ProgressiveBar :value="Number(value) || 0" :valueMax="Number(max) || 1" :text="name || props.label"
+            :colors="previewColors" />
 
-            <section>
-                <label :for="`${props.label}_min`" class="text-lg font-gothic">Мінімальне значення:</label>
-                <input ref="min" :name="`${props.label}_min`" :id="`${props.label}_min`" placeholder="0"
-                    :value="field_exists ? props.health_field.min : null" type="number"
-                    class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full">
-            </section>
+        <form @submit.prevent class="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
-            <section>
-                <label for="color_min" class="text-lg font-gothic">Колір мінімального значення:</label>
-                <input ref="color_min" name="color_min" id="color_min" type="color"
-                    :value="field_exists ? props.health_field.colors[2] : '#8e1616'"
-                    class="w-full h-8 cursor-pointer appearance-none overflow-hidden shadow-inner shadow-darkred-black">
-            </section>
+            <label class="flex flex-col gap-1 col-span-full text-sm font-gothic">
+                Назва поля
+                <input v-model="name" placeholder="Назва" type="text"
+                    class="p-2 border-2 text-md font-gothic border-darkred-light_gray rounded-lg text-darkred-dark w-full focus:border-darkred-gray" />
+            </label>
 
-            <section>
-                <label :for="`${props.label}_max`" class="text-lg font-gothic">Максимальне значення:</label>
-                <input ref="max" :name="`${props.label}_max`" :id="`${props.label}_max`" placeholder="25"
-                    :value="field_exists ? props.health_field.max : null" type="number"
-                    class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full">
-            </section>
+            <label class="flex flex-col gap-1 text-sm font-gothic">
+                Мінімальне значення
+                <div class="flex gap-1 items-center">
+                    <input v-model="color_min" type="color"
+                        class="w-9 h-9 shrink-0 cursor-pointer appearance-none overflow-hidden rounded-lg shadow-inner shadow-darkred-black">
+                    <input v-model.number="min" placeholder="0" type="number"
+                        class="p-2 border-2 text-md font-gothic border-darkred-light_gray rounded-lg text-darkred-dark w-full focus:border-darkred-gray">
+                </div>
+            </label>
 
-            <section>
-                <label for="color_max" class="text-lg font-gothic">Колір максимального значення:</label>
-                <input ref="color_max" name="color_max" id="color_max" type="color"
-                    :value="field_exists ? props.health_field.colors[0] : '#3e5f44'"
-                    class="w-full h-8 cursor-pointer appearance-none overflow-hidden shadow-inner shadow-darkred-black">
-            </section>
+            <label class="flex flex-col gap-1 text-sm font-gothic">
+                Нинішнє значення
+                <div class="flex gap-1 items-center">
+                    <input v-model="color_mid" type="color"
+                        class="w-9 h-9 shrink-0 cursor-pointer appearance-none overflow-hidden rounded-lg shadow-inner shadow-darkred-black">
+                    <input v-model.number="value" placeholder="0" type="number"
+                        class="p-2 border-2 text-md font-gothic border-darkred-light_gray rounded-lg text-darkred-dark w-full focus:border-darkred-gray">
+                </div>
+            </label>
 
-            <section>
-                <label :for="`${props.label}_value`" class="text-lg font-gothic">Нинішнє значення:</label>
-                <input ref="value" :name="`${props.label}_value`" :id="`${props.label}_value`" placeholder="0"
-                    :value="field_exists ? props.health_field.value : null" type="number"
-                    class="p-1 border-4 text-lg font-gothic border-darkred-dark rounded-lg text-darkred-dark w-full">
-            </section>
-
-            <section>
-                <label for="color_mid" class="text-lg font-gothic">Колір значення посередині:</label>
-                <input ref="color_mid" name="color_mid" id="color_mid" type="color"
-                    :value="field_exists ? props.health_field.colors[1] : '#fabc3f'"
-                    class="w-full h-8 cursor-pointer appearance-none overflow-hidden shadow-inner shadow-darkred-black">
-            </section>
+            <label class="flex flex-col gap-1 text-sm font-gothic">
+                Максимальне значення
+                <div class="flex gap-1 items-center">
+                    <input v-model="color_max" type="color"
+                        class="w-9 h-9 shrink-0 cursor-pointer appearance-none overflow-hidden rounded-lg shadow-inner shadow-darkred-black">
+                    <input v-model.number="max" placeholder="25" type="number"
+                        class="p-2 border-2 text-md font-gothic border-darkred-light_gray rounded-lg text-darkred-dark w-full focus:border-darkred-gray">
+                </div>
+            </label>
 
         </form>
 
-        <section class="flex items-center justify-start mt-2 gap-4">
+        <div class="flex items-center gap-4">
+            <AprroveButtonWithText :text="isNew ? 'Додати' : 'Зберегти'"
+                class="w-32 h-12 flex justify-center items-center" @click="saveHealthField" />
 
-            <AprroveButtonWithText :text="field_exists ? 'Зберегти' : 'Додати'"
-                class="w-32 h-12 flex justify-center items-center" @click="addHealthField" />
-
-            <RejectButtonWithText v-if="!field_exists" text="Очистити"
-                class="w-32 h-12 flex justify-center items-center" @click="resetFields" />
-
-            <RejectButtonWithText v-if="field_exists" text="Видалити" class="w-32 h-12 flex justify-center items-center"
-                @click="props.callback_remove(props.health_field)" />
-        </section>
+            <RejectButtonWithText v-if="isNew" text="Очистити" class="w-32 h-12 flex justify-center items-center"
+                @click="resetFields" />
+        </div>
 
     </div>
-
 </template>

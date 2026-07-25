@@ -1,124 +1,126 @@
 <script setup>
-import { reactive, ref, onMounted, onBeforeUnmount, watch, toRaw } from 'vue';
+import { reactive, onBeforeUnmount, watch, toRaw, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { ChartBarIcon, SparklesIcon, FlagIcon, BanknotesIcon } from '@heroicons/vue/24/solid'
+import { ChartBarIcon, SparklesIcon, BanknotesIcon, Square3Stack3DIcon } from '@heroicons/vue/24/solid'
 
-import RepositoryFactory from '@http/RepositoryFactory';
-import { asyncHandler } from '/utils/asyncHandler';
 import { checkObjectFieldExisting } from '/utils/entityHelper'
-import { toObject } from '/utils/objects.dto';
-import { toNewCharacterObject, toNewSession } from '/utils/objects.dto';
-import { socket, connected } from '@ws/webSocket';
-import { notify } from '@utils/notification';
+import { toNewCharacterObject } from '/utils/objects.dto';
+import { socket } from '@ws/webSocket';
+import { useSessionStore } from '@/stores/sessionStore';
+import { useGameStore } from '@/stores/gameStore';
 
 import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaion.vue';
 import PerkTable from '@/components/character-page components/PerkTable.vue';
 import EntityTable from '@/components/character-page components/EntityTable.vue';
 import EffectsTable from '@/components/character-page components/EffectsTable.vue';
-import QuestsTable from '@/components/character-page components/QuestsTable.vue';
-import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
+import CustomFieldTile from '@/components/reusable/EntityTiles/CustomFieldTile.vue';
 import characterCardSmall from '@/components/character-page components/CharacterViewCard.vue';
 import Experience from '@/components/character-page components/Experience.vue';
 import CurrencyTable from '@/components/character-page components/CurrencyTable.vue';
 import HideButton from '@/components/reusable/Buttons/HideButton.vue';
 import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue';
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue';
-import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
+import CustomFieldsEditor from '@/components/reusable/CustomFieldsEditor.vue';
 import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
 import BackendOffline from '@/components/reusable/BackendOffline.vue';
 import HorizontalNumberPicker from '@/components/reusable/HorizontalNumberPicker.vue';
 import ProgressiveBar from '@/components/reusable/ProgressiveBar.vue';
 import DiceLoader from '@/components/reusable/Loaders/DiceLoader.vue';
 import { CursorArrowRippleIcon } from '@heroicons/vue/24/outline';
+import LoadoutsPanel from '@/components/character-page components/LoadoutsPanel.vue';
 
 const state = reactive({
     character: {},
-    session: {},
-    isLoading: true,
     characterIsUpdating: false,
 })
 
-const effects_hidden = ref(true)
-const quests_hidden = ref(true)
-const currency_hidden = ref(true)
-const custom_hidden = ref(true)
-const custom_modal_hidden = ref(true)
+const route = useRoute()
+const characterId = computed(() => route.params.characterId)
+const sessionId = computed(() => route.params.sessionId)
+const sessionStore = useSessionStore()
+const gameStore = useGameStore()
 
-const isBackendOffline = ref(false)
-const offlineTimeout = ref(null)
-
-const openHealthIds = ref(new Set())
-
-const characterId = useRoute().params.characterId
-const sessionId = useRoute().params.sessionId
-
-onMounted(async () => {
-    const [resCharacter, errCharacter] = await asyncHandler(
-        RepositoryFactory.getById('character', characterId)
-    )
-    const [resSession, errSession] = await asyncHandler(
-        RepositoryFactory.getById('session/plainWithEntitiesAndEffects', sessionId)
-    )
-
-    if (errCharacter || errSession) {
-        state.isLoading = false
-        return
-    }
-
-    state.character = toNewCharacterObject(resCharacter.data)
-    state.session = toNewSession(resSession.data)
-
-    socket.emit('session:connectCharacter', sessionId, characterId)
-    state.isLoading = false
+const effects_hidden = computed({
+    get: () => gameStore.effects_hidden[characterId.value],
+    set: (val) => { gameStore.effects_hidden[characterId.value] = val }
 })
+const currency_hidden = computed({
+    get: () => gameStore.currency_hidden[characterId.value],
+    set: (val) => { gameStore.currency_hidden[characterId.value] = val }
+})
+const custom_hidden = computed({
+    get: () => gameStore.custom_hidden[characterId.value],
+    set: (val) => { gameStore.custom_hidden[characterId.value] = val }
+})
+const custom_modal_hidden = computed({
+    get: () => gameStore.custom_modal_hidden[characterId.value],
+    set: (val) => { gameStore.custom_modal_hidden[characterId.value] = val }
+})
+const loadouts_hidden = computed({
+    get: () => gameStore.loadouts_hidden[characterId.value],
+    set: (val) => { gameStore.loadouts_hidden[characterId.value] = val }
+})
+const openHealthIds = computed(() => gameStore.openHealthIds[characterId.value])
+
+watch(
+    () => sessionStore.isLoading,
+    (isLoading) => {
+        if (isLoading) return
+        init()
+    },
+    { immediate: true }
+)
+
+function init() {
+    state.character = toNewCharacterObject(structuredClone(toRaw(sessionStore.session.characters.find(el => el.id === characterId.value))))
+    socket.emit('session:connectCharacter', sessionId.value, characterId.value)
+}
+
+watch(
+    () => sessionStore.session,
+    (newSession) => {
+        if (sessionStore.isLoading || !newSession) return
+        const updated = newSession.characters.find(el => el.id === characterId.value)
+        if (updated) state.character = toNewCharacterObject(structuredClone(toRaw(updated)))
+    }
+)
 
 onBeforeUnmount(() => {
-    socket.emit('session:disconnectCharacter', sessionId)
-    const events = ['session:join', 'character:get', 'character:updateNotify', 'session:updateNotify']
+    socket.emit('session:disconnectCharacter', sessionId.value)
+    const events = ['session:join', 'character:updateDataNotify']
     events.forEach(e => socket.off(e))
 })
 
 socket.on('session:join', (session) => {
     if (session?.members?.some(member => member[0] === socket.id)) return
-    socket.emit('session:connectCharacter', sessionId, characterId)
-    state.isLoading = false
+    socket.emit('session:connectCharacter', sessionId.value, characterId.value)
 })
 
-socket.on('character:updateNotify', (character) => {
+let characterUpdatePending = false
+
+socket.on('character:updateDataNotify', (character) => {
     state.characterIsUpdating = false
+
+    if (characterUpdatePending) {
+        updateCharacter()
+        return
+    }
+
     state.character = toNewCharacterObject(character)
 })
 
-socket.on('session:updateNotify', (session) => {
-    state.session = toNewSession(session)
-    state.character = toNewCharacterObject(state.session.characters.find(character => character.id === characterId))
-    notify({ message: 'Майстер щось оновив', type: 'warning' })
-})
-
-watch(connected, (isConnected) => {
-    if (isConnected) {
-        if (offlineTimeout.value) {
-            clearTimeout(offlineTimeout.value)
-            offlineTimeout.value = null
-        }
-        isBackendOffline.value = false
-        state.isLoading = false
-    }
-    else {
-        if (!isBackendOffline.value) {
-            offlineTimeout.value = setTimeout(() => {
-
-                isBackendOffline.value = true
-            }, 30 * 1000)
-        }
-        state.isLoading = true
-    }
-})
-
 function updateCharacter() {
-    socket.emit('character:updateData', (toRaw(state.character)))
+    if (state.characterIsUpdating) {
+        characterUpdatePending = true
+        return
+    }
+
+    characterUpdatePending = false
+    socket.emit('character:updateData', state.character)
     state.characterIsUpdating = true
 }
+
+// character functions
 
 function addExperience() {
     state.character.experience++;
@@ -135,7 +137,7 @@ function updateHealthFields(value, title) {
     if (item) {
         item.value += value
     }
-    openHealthIds.value.delete(item.id)
+    gameStore.openHealthIds[characterId.value].delete(item.id)
     updateCharacter()
 }
 
@@ -144,10 +146,10 @@ function updateCurrency(fields) {
     updateCharacter()
 }
 
-function addCustomField(name, value) {
-    Object.assign(state.character.customFields, toObject({ name, value }))
-    updateCharacter()
+function addCustomField(object) {
+    state.character.customFields.push(object)
     custom_modal_hidden.value = true
+    updateCharacter()
 }
 
 function updateCustomFields(fields) {
@@ -166,11 +168,8 @@ function updateCharacterNotes(field, value) {
 }
 
 function togglePicker(healthId) {
-    if (openHealthIds.value.has(healthId)) {
-        openHealthIds.value.delete(healthId)
-    } else {
-        openHealthIds.value.add(healthId)
-    }
+    gameStore.toggleHealthId(characterId.value, healthId)
+    updateCharacter()
 }
 
 </script>
@@ -178,17 +177,16 @@ function togglePicker(healthId) {
 <template>
     <SessionViewNavigtaion />
 
-    <div v-if="!state.isLoading" class="grid grid-cols-1 lg:grid-cols-[25%_75%]">
+    <div v-if="!sessionStore.isLoading" class="grid grid-cols-1 lg:grid-cols-[25%_75%]">
 
         <section class="p-2 lg:p-4 space-y-2">
 
             <characterCardSmall :name="state.character.name" :characteristics="state.character.characteristics"
-                :effects="state.character.effects" :characteristicsComputed="state.character.characteristicsComputed"
-                :gender="state.character.gender" :class="state.character.class" :race="state.character.race"
-                :image="state.character.image" />
+                :effects="state.character.effects" :gender="state.character.gender" :class="state.character.class"
+                :race="state.character.race" :image="state.character.image" />
 
             <Experience :exp="state.character.experience" :expMax="state.character.experienceToLevelUp"
-                :perkPoints="state.character.perkPoints" :callback="addExperience"
+                :perkPoints="state.character.perkPoints" :level="state.character.level" :callback="addExperience"
                 :class="state.characterIsUpdating && 'pointer-events-none'" />
 
             <TextAreaEditor class="lg:grid hidden" fieldName="playerNotes" name="Записки гравця"
@@ -220,18 +218,18 @@ function togglePicker(healthId) {
 
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-2">
 
-                <div class="flex flex-col gap-2">
+                <div class="flex flex-col gap-2 lg:col-span-full">
                     <HideButton class="w-full" textShow="Показати додаткові характеристики"
                         textHide="Приховати додаткові характеристики" :hidden="custom_hidden" :mainIcon="ChartBarIcon"
                         @click="custom_hidden = !custom_hidden" />
 
                     <div class="grid transition-all duration-300 ease-in-out"
                         :style="{ gridTemplateRows: custom_hidden ? '0fr' : '1fr' }">
-                        <div class="overflow-hidden">
-                            <ObjectFieldsTable :fields="state.character.customFields" :callback="updateCustomFields"
-                                :field_removable="true" />
+                        <div class="overflow-hidden flex flex-col lg:grid lg:grid-cols-2  gap-2">
+                            <CustomFieldTile :fields="state.character.customFields"
+                                @update:fields="updateCustomFields" />
 
-                            <PlusButton @click="custom_modal_hidden = !custom_modal_hidden" class="w-16 h-14 mt-2 mx-auto text-center border-4 border-darkred-dark rounded-lg 
+                            <PlusButton @click="custom_modal_hidden = !custom_modal_hidden" class="w-16 h-14 col-span-full mt-2 mx-auto text-center border-4 border-darkred-dark rounded-lg 
            transition-all duration-300 ease-out md:hover:cursor-pointer
            bg-gradient-to-br from-darkred-dark to-darkred-light
            md:hover:from-darkred-red md:hover:to-darkred-dark relative overflow-hidden group" />
@@ -247,10 +245,23 @@ function togglePicker(healthId) {
                                 <CloseButtonRedBG @click="custom_modal_hidden = true" />
                             </div>
 
-                            <ObjectFieldsEditor class="hover:cursor-default" :name="'CustomFields_'"
-                                :fields="state.character.customFields" :callback="addCustomField" />
+                            <CustomFieldsEditor class="hover:cursor-default" :name="'CustomFields_'"
+                                :callback="addCustomField" />
                         </div>
                     </div>
+                </div>
+
+                <div v-if="checkObjectFieldExisting(state.character?.effects)" class="flex flex-col gap-2">
+                    <HideButton class="w-full" textShow="Показати ефекти" textHide="Приховати ефекти"
+                        :hidden="effects_hidden" :mainIcon="SparklesIcon" @click="effects_hidden = !effects_hidden" />
+
+                    <div class="grid transition-all duration-300 ease-in-out"
+                        :style="{ gridTemplateRows: effects_hidden ? '0fr' : '1fr' }">
+                        <div class="overflow-hidden">
+                            <EffectsTable :effects="state.character.effects" />
+                        </div>
+                    </div>
+
                 </div>
 
                 <div v-if="checkObjectFieldExisting(state.character?.currency)" class="flex flex-col gap-2">
@@ -267,40 +278,33 @@ function togglePicker(healthId) {
 
                 </div>
 
-                <div v-if="checkObjectFieldExisting(state.character?.effects)" class="flex flex-col gap-2">
-                    <HideButton class="w-full" textShow="Показати ефекти" textHide="Приховати ефекти"
-                        :hidden="effects_hidden" :mainIcon="SparklesIcon" @click="effects_hidden = !effects_hidden" />
+            </section>
+
+            <section>
+                <div class="flex flex-col gap-2">
+                    <HideButton class="w-full" textShow="Показати профілі" textHide="Приховати профілі"
+                        :hidden="loadouts_hidden" :mainIcon="Square3Stack3DIcon"
+                        @click="loadouts_hidden = !loadouts_hidden" />
 
                     <div class="grid transition-all duration-300 ease-in-out"
-                        :style="{ gridTemplateRows: effects_hidden ? '0fr' : '1fr' }">
+                        :style="{ gridTemplateRows: loadouts_hidden ? '0fr' : '1fr' }">
                         <div class="overflow-hidden">
-                            <EffectsTable :effects="state.character.effects" />
+                            <LoadoutsPanel v-model:loadouts="state.character.loadouts"
+                                :entities="state.character.entities" :perks="state.character.perks"
+                                :entityTypes="sessionStore.session.entityTypes"
+                                :loadoutLimits="sessionStore.session.loadoutsLimit" :callback="updateCharacter" />
                         </div>
                     </div>
-
                 </div>
-
-                <div v-if="checkObjectFieldExisting(state.character?.quests)" class="flex flex-col gap-2">
-                    <HideButton class="w-full" textShow="Показати квести" textHide="Приховати квести"
-                        :hidden="quests_hidden" :mainIcon="FlagIcon" @click="quests_hidden = !quests_hidden" />
-
-                    <div class="grid transition-all duration-300 ease-in-out"
-                        :style="{ gridTemplateRows: quests_hidden ? '0fr' : '1fr' }">
-                        <div class="overflow-hidden">
-                            <QuestsTable :quests="state.character.quests" />
-                        </div>
-                    </div>
-
-                </div>
-
             </section>
 
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-2 items-start">
-                <PerkTable :session_perks="state.session.perks" :character_perks="state.character.perks"
+                <PerkTable :session_perks="sessionStore.session.perks" :character_perks="state.character.perks"
                     :perkPoints="state.character.perkPoints" :callback="addPerk" />
 
-                <EntityTable :character_entities="state.character.entities" :session_entities="state.session.entities"
-                    :types="state.session.entityTypes" :callback="updateCharacter" />
+                <EntityTable :character_entities="state.character.entities"
+                    :session_entities="sessionStore.session.entities" :types="sessionStore.session.entityTypes"
+                    :callback="updateCharacter" />
             </section>
 
             <section>
@@ -311,8 +315,9 @@ function togglePicker(healthId) {
         </section>
     </div>
 
-    <div v-if="state.isLoading" class="w-full h-full text-center py-6 flex flex-col gap-10 justify-center items-center">
-        <BackendOffline v-if="isBackendOffline" class="p-4 w-full lg:w-[650px]" />
+    <div v-if="sessionStore.isLoading || gameStore.isBackendOffline"
+        class="w-full h-full text-center py-6 flex flex-col gap-10 justify-center items-center">
+        <BackendOffline v-if="gameStore.isBackendOffline" class="p-4 w-full lg:w-[650px]" />
 
         <DiceLoader />
     </div>

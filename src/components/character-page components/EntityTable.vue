@@ -35,15 +35,18 @@ const props = defineProps({
 const types = ref([])
 
 watch(() => props.types, (newTypes) => {
-    types.value = newTypes.map(type => ({
-        name: type.name,
-        id: type.id,
-        hidden: true,
-        icon: type.icon,
-        search: '',
-        modal_hidden: true,
-        searchGlobal: ''
-    }))
+    types.value = newTypes.map(type => {
+        const existing = types.value.find(t => t.id === type.id)
+        return {
+            name: type.name,
+            id: type.id,
+            hidden: existing ? existing.hidden : true,
+            icon: type.icon,
+            search: '',
+            modal_hidden: true,
+            searchGlobal: ''
+        }
+    })
 }, { immediate: true })
 
 const groupedCharacterEntities = computed(() => {
@@ -64,7 +67,7 @@ function removeEntity(entity) {
 
 function getFilteredCharacterEntities(type) {
     return groupedCharacterEntities.value
-        .filter(e => e.type === type.name)
+        .filter(e => e.type === type.id)
         .filter(e =>
             e.name.toLowerCase().includes(type.search.toLowerCase())
         )
@@ -72,7 +75,7 @@ function getFilteredCharacterEntities(type) {
 
 function getFilteredSessionEntities(type) {
     return props.session_entities
-        .filter(e => e.type === type.name)
+        .filter(e => e.type === type.id)
         .filter(e =>
             e.name.toLowerCase().includes(type.searchGlobal.toLowerCase())
         )
@@ -93,7 +96,7 @@ function getFilteredSessionEntities(type) {
 
         <div class="w-full max-h-[680px] overflow-y-auto auto-hide-scroll flex flex-col gap-1">
             <EntityRowView v-if="!type.hidden" v-for="entity in getFilteredCharacterEntities(type)" :key="entity.name"
-                :entity="entity" :callback_add="addEntity" :callback_remove="removeEntity" />
+                :entity="entity" :owned="true" :callback_add="addEntity" :callback_remove="removeEntity" />
         </div>
 
         <div v-if="!type.hidden" class="w-full flex justify-center items-center">

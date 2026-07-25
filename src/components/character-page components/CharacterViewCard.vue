@@ -1,6 +1,5 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { ArrowDownIcon } from '@heroicons/vue/24/solid';
 import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue';
 import Header1 from '../reusable/Titles/Header1.vue';
 import { CursorArrowRippleIcon } from '@heroicons/vue/24/solid';
@@ -12,7 +11,6 @@ const props = defineProps({
     race: { type: String, required: true },
     class: { type: String, required: true },
     characteristics: { type: Object, required: true },
-    characteristicsComputed: { type: Object, required: true },
     effects: { type: Array, required: true }
 })
 
@@ -47,36 +45,28 @@ const selectedCharacteristic = ref('')
         </div>
     </div>
 
-    <section class="border-2 border-darkred-dark p-2 rounded-lg relative">
+    <section @click="modalHidden = !modalHidden" class="border-2 border-darkred-dark p-2 rounded-lg relative">
 
-        <CursorArrowRippleIcon class="w-5 h-5 absolute top-2 right-1"/>
+        <CursorArrowRippleIcon class="w-5 h-5 absolute top-2 right-1" />
 
         <div class="relative">
-            <Header1 label="Характеристики" class="text-center font-bold text-darkred-red mb-1 cursor-pointer"
-                @click="modalHidden = !modalHidden" />
+            <Header1 label="Характеристики" class="text-center font-bold text-darkred-red mb-1 cursor-pointer" />
         </div>
 
         <div class="flex flex-wrap items-center justify-center gap-2">
-            <div v-for="value, key in props.characteristicsComputed" :key="Math.random().toString(24).slice(2)"
-                @click="modalHidden = !modalHidden"
+            <div v-for="value, key in props.characteristics" :key="key.id"
                 class="grow p-2 text-center rounded-lg border-2 border-darkred-red bg-darkred-dark text-darkred-light font-semibold hover:cursor-pointer">
 
-                <div v-if="props.characteristics[key] > value" class="flex gap-2 justify-center items-center">
-                    {{ key }} — {{ value }}
-                    <ArrowDownIcon class="w-6 h-6 text-darkred-bright" />
-                </div>
-
-                <div v-else-if="props.characteristics[key] < value" class="flex gap-2 justify-center items-center">
-                    {{ key }} — {{ value }}
-                    <ArrowDownIcon class="w-6 h-6 rotate-180 text-greenish-light" />
-                </div>
-
-                <div v-else>
-                    {{ key }} — {{ value }}
+                <div>
+                    {{ value.name }} — {{ value.value }}
                 </div>
 
             </div>
         </div>
+
+    </section>
+
+    <section>
 
         <div v-if="!modalHidden" class="modal-overlay flex items-center justify-center" @click="modalHidden = true">
             <div @click.stop
@@ -89,11 +79,11 @@ const selectedCharacteristic = ref('')
                     class="text-center font-semibold text-darkred-light mb-1 cursor-pointer" />
 
                 <div class="flex flex-wrap items-center justify-center gap-2">
-                    <div v-for="value, key in props.characteristics" :key="Math.random().toString(24).slice(2)"
-                        @click="selectedCharacteristic = key"
+                    <div v-for="value, key in props.characteristics" :key="value.id"
+                        @click="selectedCharacteristic = value.name"
                         class="grow p-2 text-center rounded-lg border-2 border-darkred-red bg-darkred-dark_gray text-darkred-light font-semibold hover:cursor-pointer">
                         <div>
-                            {{ key }} — {{ value }}
+                            {{ value.name }} — {{ value.value }}
                         </div>
 
                     </div>
@@ -103,7 +93,7 @@ const selectedCharacteristic = ref('')
                     class="text-center text-darkred-light" />
 
                 <div v-if="appliedEffects.length > 0" class="p-2 flex flex-col gap-2 bg-darkred-dark_gray rounded-2xl">
-                    <div v-for="effect in appliedEffects"
+                    <div v-for="effect in appliedEffects" :key="effect.id"
                         class="p-2 rounded-lg even:bg-darkred-gray text-darkred-light even:text-darkred-dark">
 
                         <div>

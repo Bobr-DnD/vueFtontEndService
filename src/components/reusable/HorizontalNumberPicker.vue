@@ -24,8 +24,6 @@ function handleWheel(e) {
   scroller.value.scrollLeft += e.deltaY
 }
 
-
-
 const items = computed(() => {
   const out = []
   for (let v = props.min; v <= props.max; v += props.step) out.push(v)
@@ -34,6 +32,7 @@ const items = computed(() => {
 
 const scroller = ref(null)
 const itemRefs = ref([])
+const hasScrolledInitially = ref(false)
 
 function throwError(err) {
   console.log(err);
@@ -94,8 +93,13 @@ async function scrollToValue() {
   if (!el || !wrap) return
 
   const offset = el.offsetLeft + el.offsetWidth / 2 - wrap.clientWidth / 2
-  console.log(offset);
-  wrap.scrollTo({ left: offset, behavior: 'smooth' })
+
+  if (!hasScrolledInitially.value) {
+    wrap.scrollTo({ left: offset, behavior: 'instant' })
+    hasScrolledInitially.value = true
+  } else {
+    wrap.scrollTo({ left: offset, behavior: 'smooth' })
+  }
 }
 
 onMounted(() => {
@@ -111,7 +115,13 @@ onUnmounted(() => {
   }
 })
 
-watch(() => props.value.value, scrollToValue)
+const previousValue = ref(props.value.value)
+watch(() => props.value.value, (newVal) => {
+  if (newVal !== previousValue.value) {
+    previousValue.value = newVal
+    scrollToValue()
+  }
+})
 </script>
 
 <template>

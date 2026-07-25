@@ -13,7 +13,7 @@ export function toObject(objectField) {
 
 export function toNewCharacterObject(character) {
   return {
-    id: character.id ?? 'empty',
+    id: character.id ?? 'new',
     name: character.name ?? '',
     image: character.image ?? '',
     gender: character.gender ?? '',
@@ -24,17 +24,17 @@ export function toNewCharacterObject(character) {
     experienceToLevelUp: character.experienceToLevelUp ?? 10,
     perkPoints: character.perkPoints ?? 0,
     health: character.health ?? [],
-    characteristics: character.characteristics ?? {},
+    characteristics: character.characteristics ?? [],
     characteristicsComputed: character.characteristicsComputed ?? {},
     currency: character.currency ?? [],
-    customFields: character.customFields ?? {},
+    customFields: character.customFields ?? [],
     effects: character.effects ?? [],
     adminNotes: character.adminNotes ?? '',
     playerNotes: character.playerNotes ?? '',
     session: character.session,
-    quests: character.quests ?? [],
     perks: character.perks ?? [],
-    entities: character.entities ?? []
+    entities: character.entities ?? [],
+    loadouts: character.loadouts ?? []
   }
 }
 
@@ -54,14 +54,12 @@ export function toNewSession(session){
     id: session.id ?? 'new',
     name: session.name ?? '',
     image: session.image ?? '',
-    move: session.move ?? 0,
-    customFields: session.customFields ?? {},
+    customFields: session.customFields ?? [],
     notes: session.notes ?? '',
     entityTypes: session.entityTypes ?? [],
     enemyTypes: session.enemyTypes ?? [],
     characteristicsList: session.characteristicsList ?? [],
     currencyTypes: session.currencyTypes ?? [],
-    questTypes: session.questTypes ?? [],
     perkTypes: session.perkTypes ?? [],
     characters: session.characters ?? [],
     entities: session.entities ?? [],
@@ -69,7 +67,11 @@ export function toNewSession(session){
     perks: session.perks ?? [],
     effects :session.effects ?? [],
     fractions: session.fractions ?? [],
-    quests: session.quests ?? []
+    loadoutsLimit: {
+      loadouts: session.loadoutsLimit?.loadouts ?? null,
+      items: session.loadoutsLimit?.items ?? null,
+      perks: session.loadoutsLimit?.perks ?? null
+    }
   }
 }
 
@@ -82,23 +84,12 @@ export function toNewEffect(effect){
   }
 }
 
-export function toNewQuest(quest){
-  return {
-    id: quest.id || quest._id || 'new',
-    name: quest.name ?? '',
-    description: quest.description ?? '',
-    status: quest.status ?? '',
-    reward: quest.reward ?? '',
-    steps: quest.steps ?? [],
-    notes: quest.notes ?? ''
-  }
-}
-
 export function toNewPerk(perk){
   return {
     id: perk.id ?? perk._id ?? 'new',
     name: perk.name ?? '',
-    descriptions: perk.descriptions ?? [],
+    description: perk.description ?? '',
+    levels: perk.levels ?? [],
     effects: perk.effects ?? [],
     requirement: perk.requirement ?? {},
     ranks: perk.ranks ?? 0,

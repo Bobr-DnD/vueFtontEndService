@@ -1,58 +1,68 @@
 <script setup>
 import Loader from 'vue-spinner/src/SyncLoader.vue'
-import { reactive, onMounted, ref, computed, toRaw, onBeforeUnmount } from 'vue';
+import { ref, computed, toRaw, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { socket } from '@ws/webSocket';
+import useFilteredArray from '/utils/useFilteredArray';
+import { useSessionStore } from '@/stores/sessionStore';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
 import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue'
-import SingleFieldEditor from '@/components/reusable/SingleFieldEditor.vue';
+import InputTextReactive from '@/components/reusable/Inputs/InputTextReactive.vue';
 import ImageEditor from '@/components/reusable/ImageEditor.vue';
-import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
-import ObjectFieldsTable from '@/components/reusable/ObjectFieldsTable.vue';
-import ObjectFieldsEditor from '@/components/reusable/ObjectFieldsEditor.vue';
+import TextAreaReactive from '@/components/reusable/Inputs/TextAreaReactive.vue';
+import CustomFieldTile from '@/components/reusable/EntityTiles/CustomFieldTile.vue';
+import CustomFieldsEditor from '@/components/reusable/CustomFieldsEditor.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import HealthFieldsEditor from '@/components/admin-page components/HealthFieldsEditor.vue';
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
 import CurrencyTable from '@/components/character-page components/CurrencyTable.vue';
-import EffectsTableEditor from '@/components/admin-page components/EffectsTableEditor.vue';
-import QuestsTableEditor from '@/components/admin-page components/QuestsTableEditor.vue';
+import EffectsTable from '@/components/character-page components/EffectsTable.vue';
 import PerkRowView from '@/components/character-page components/EntityRows/PerkRowView.vue';
 import EntityRowView from '@/components/character-page components/EntityRows/EntityRowView.vue';
 import Header1 from '@/components/reusable/Titles/Header1.vue';
+import { CheckBadgeIcon, PlusCircleIcon, HeartIcon } from '@heroicons/vue/24/solid';
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
+import { socket } from '@ws/webSocket';
 import { checkObjectFieldExisting, filterPerksByRank, groupById, addRow, removeRow, filterPerksByRankWithoutCount } from '/utils/entityHelper';
-import { toObject, toNewCharacterObject, toNewSession } from '/utils/objects.dto';
+import { toNewCharacterObject } from '/utils/objects.dto';
 import { notify } from '/utils/notification';
 
-const state = reactive({
-    session: {},
-    isLoading: true,
-    unsavedChanges: false
+const sessionId = useRoute().params.sessionId
+const store = useSessionStore()
+const selectedCharacter = ref()
+const unsavedChanges = ref(false)
+const copied = ref(false)
+
+const types = ref({})
+
+const searchQuery = ref({
+    characterEntity: '',
+    sessionEntity: '',
+    characterPerks: '',
+    sessionPerks: '',
+    characterEffects: '',
+    sessionEffects: ''
 })
 
-const sessionId = useRoute().params.sessionId
-const selected_character = ref(toNewCharacterObject({}))
-const editingCharacter = ref(selected_character.value.id)
+const filteredSessionEntities = useFilteredArray(computed(() => store.session.entities), computed(() => searchQuery.value.sessionEntity), computed(() => types.value.inventory))
+const filteredCharacterEntities = useFilteredArray(computed(() => selectedCharacter.value.entities), computed(() => searchQuery.value.characterEntity), computed(() => types.value.inventory), { groupFn: groupById })
+const filteredSessionPerks = useFilteredArray(computed(() => store.session.perks), computed(() => searchQuery.value.sessionPerks), computed(() => types.value.perks), { transformFn: () => filterPerksByRank(selectedCharacter.value.perks, store.session.perks) })
+const filteredCharacterPerks = useFilteredArray(computed(() => selectedCharacter.value.perks), computed(() => searchQuery.value.characterPerks), computed(() => types.value.perks), { groupFn: groupById })
 
-//perks variables
-const filteredCharacterPerks = ref([])
-const filteredSessionPerks = ref([])
-const filteredCharacterEntities = ref([])
-
-const inventoryTypes = ref([])
-const perkTypes = ref([])
-const activePerkType = ref('')
-const activeType = ref('')
-
-const characterEntitySearchQuery = ref('')
-const sessionEntitySearchQuery = ref('')
-const characterPerksSearchQuery = ref('')
-const sessionPerksSearchQuery = ref('')
+const filteredCharacterEffects = computed(() => {
+    const list = selectedCharacter.value.effects
+    const query = searchQuery.value.characterEffects.trim().toLowerCase()
+    return query ? list.filter(effect => effect.name?.toLowerCase().includes(query)) : list
+})
+const filteredSessionEffects = computed(() => {
+    const list = store.session.effects
+    const query = searchQuery.value.sessionEffects.trim().toLowerCase()
+    return query ? list.filter(effect => effect.name?.toLowerCase().includes(query)) : list
+})
 
 const activeTab = ref('base')
 
@@ -60,257 +70,63 @@ const tabs = [
     { id: 'base', label: 'Базові характеристики' },
     { id: 'custom', label: 'Кастомні поля' },
     { id: 'health', label: "Здоров'я" },
-    { id: 'quests&effects', label: 'Квести та еффекти' },
+    { id: 'effects', label: 'Еффекти' },
     { id: 'perks', label: 'Перки' },
     { id: 'inventory', label: 'Інвентар' }
 ]
 
-onMounted(async () => {
-    const [resSession, errSession] = await asyncHandler(
-        RepositoryFactory.getById('session', sessionId)
-    )
-    if (errSession) {
-        notify({ message: errSession.message, type: 'error' })
-        return
+watch(
+    () => store.isLoading,
+    (isLoading) => {
+        if (isLoading) return
+        init()
+    },
+    { immediate: true }
+)
+
+watch(
+    () => store.session,
+    (newSession) => {
+        if (!selectedCharacter.value || selectedCharacter.value.id === 'new') return
+
+        const updated = newSession.characters.find(el => el.id === selectedCharacter.value.id)
+        reloadCharacter(updated ? updated.id : 'new', updated && structuredClone(toRaw(updated)))
     }
+)
 
-    state.isLoading = false
-    state.session = toNewSession(resSession.data)
-    checkTypes()
-})
+function init() {
+    types.value.inventory = buildTypes(store.session.entityTypes)
+    types.value.perks = buildTypes(store.session.perkTypes)
 
-function checkTypes() {
-    inventoryTypes.value = state.session.entityTypes.map(type => {
-        return {
-            name: type.name,
-            id: type.id,
-            hidden: true
-        }
-    })
-
-    perkTypes.value = state.session.perkTypes.map(type => {
-        return {
-            name: type.name,
-            id: type.id,
-            hidden: true,
-        }
-    })
-
-    perkTypes.value.push({
-        name: 'Усі',
-        id: 'all',
-        hidden: false
-    })
-
-    inventoryTypes.value.push({
-        name: 'Усі',
-        id: 'all',
-        hidden: false
-    })
-
-    activePerkType.value = 'all'
-    activeType.value = inventoryTypes.value[inventoryTypes.value.length - 1]
+    selectCharacter('new')
 }
 
-onBeforeUnmount(() => {
-    const events = ['character:updateNotify', 'session:updateNotify']
-    events.forEach(e => socket.off(e))
-})
-
-socket.on('character:updateNotify', (character) => {
-    if (character.id === selected_character.value.id) selected_character.value = toNewCharacterObject(character)
-    else {
-        state.session.characters = state.session.characters.map(ch =>
-            ch.id === character.id ? toNewCharacterObject(character) : ch
-        )
-    }
-    notify({ message: `Персонажа ${character.name} було оновлено`, type: 'warning' })
-})
-
-socket.on('session:updateNotify', (session) => {
-    state.session = toNewSession(session)
-    selected_character.value = state.session.characters.find(character => character.id === selected_character.value.id)
-    notify({ message: `Сесію було оновлено майстром`, type: 'warning' })
-})
-
-filteredCharacterEntities.value.entities = computed(() => {
-    const groupedArray = groupById(selected_character.value.entities)
-
-    if (!characterEntitySearchQuery.value.trim()) return groupedArray
-    const query = characterEntitySearchQuery.value.toLowerCase()
-    return groupedArray.filter(el =>
-        el.name.toLowerCase().includes(query)
-    )
-})
-
-filteredCharacterPerks.value.perks = computed(() => {
-    const groupedArray = groupById(selected_character.value.perks)
-
-    if (!characterPerksSearchQuery.value.trim()) return groupedArray
-    const query = characterPerksSearchQuery.value.toLowerCase()
-    return groupedArray.filter(el =>
-        el.name.toLowerCase().includes(query)
-    )
-})
-
-filteredSessionPerks.value.perks = computed(() => {
-    const groupedArray = filterPerksByRank(selected_character.value.perks, state.session.perks)
-    groupedArray.forEach(el => el.count++)  //CHECK may broke some descriptions
-
-    if (!sessionPerksSearchQuery.value.trim()) return groupedArray
-    const query = sessionPerksSearchQuery.value.toLowerCase()
-    return groupedArray.filter(el =>
-        el.name.toLowerCase().includes(query)
-    )
-})
-
-//entities
-function showEntityType(id) {
-    inventoryTypes.value.forEach(type => {
-        if (type.id === id) {
-            type.hidden = false
-            activeType.value = type
-        }
-        else type.hidden = true
-    });
-
-    characterEntitySearchQuery.value = ''
-    sessionEntitySearchQuery.value = ''
-}
-
-function getFilteredCharacterEntities(type) {
-    if (type.id === 'all')
-        return filteredCharacterEntities.value.entities
-            .filter(e =>
-                e.name.toLowerCase().includes(characterEntitySearchQuery.value.toLowerCase())
-            )
-
-    return filteredCharacterEntities.value.entities
-        .filter(e => e.type === type.name)
-        .filter(e =>
-            e.name.toLowerCase().includes(characterEntitySearchQuery.value.toLowerCase())
-        )
-}
-
-function getFilteredSessionEntities(type) {
-    if (type.id === 'all')
-        return state.session.entities
-            .filter(e =>
-                e.name.toLowerCase().includes(sessionEntitySearchQuery.value.toLowerCase())
-            )
-
-    return state.session.entities
-        .filter(e => e.type === type.name)
-        .filter(e =>
-            e.name.toLowerCase().includes(sessionEntitySearchQuery.value.toLowerCase())
-        )
-}
-//perks
-function showPerkType(id) {
-
-    perkTypes.value.forEach(type => {
-        if (type.id === id) {
-            type.hidden = false
-            activePerkType.value = id === 'all' ? type.id : type.name
-        }
-        else type.hidden = true
-    });
-
-    characterPerksSearchQuery.value = ''
-    sessionPerksSearchQuery.value = ''    
-}
-
-function getFilteredSessionPerks(type) {
-
-    if (type === 'all')
-        return filteredSessionPerks.value.perks.filter(e =>
-            e.name.toLowerCase().includes(sessionPerksSearchQuery.value.toLowerCase())
-        )
-
-    return filteredSessionPerks.value.perks
-        .filter(e => e.type.name === type)
-        .filter(e =>
-            e.name.toLowerCase().includes(sessionPerksSearchQuery.value.toLowerCase())
-        )
-}
-
-function getFilteredCharacterPerks(type) {
-
-    if (type === 'all')
-        return filteredCharacterPerks.value.perks.filter(e =>
-            e.name.toLowerCase().includes(characterPerksSearchQuery.value.toLowerCase())
-        )
-
-    return filteredCharacterPerks.value.perks
-        .filter(e => e.type.name === type)
-        .filter(e =>
-            e.name.toLowerCase().includes(characterPerksSearchQuery.value.toLowerCase())
-        )
-}
-
-function selectCharacter(character) {
-    if (state.unsavedChanges) {
-        const confirmSwitch = confirm('Є незбережені зміни. Вийти без збереження?')
-        if (!confirmSwitch) return
-    }
-
-    editingCharacter.value = character.id;
-    state.unsavedChanges = false;
-
-    if (character.id === 'empty') {
-        selected_character.value = toNewCharacterObject({})
-    }
-    else selected_character.value = toNewCharacterObject(structuredClone(toRaw(character)))
-
-    characterPerksSearchQuery.value = ''
-    sessionPerksSearchQuery.value = ''
-}
-
-function markUnsaved() {
-    if (editingCharacter.value) state.unsavedChanges = true
-}
+//API calls
 
 async function saveCharacter() {
 
-    if (selected_character.value.name !== '') {
-        selected_character.value.session = sessionId
+    const character = toRaw(selectedCharacter.value)
 
-        if (selected_character.value.id === 'empty') {
+    if (character.name !== '') {
+
+        if (character.id === 'new') {
             const [res, err] = await asyncHandler(
-                RepositoryFactory.create('character', toRaw(selected_character.value))
+                RepositoryFactory.create('character', character)
             )
             if (err) return
-
-            const [resSession, errSession] = await asyncHandler(
-                RepositoryFactory.getById('session', sessionId)
-            )
-            if (errSession) return
-
-            state.session = toNewSession(resSession.data)
-            state.unsavedChanges = false
-
-            notify({ message: 'Персонаж збережений', type: 'success' })
-            socket.emit('session:updateNotify', resSession.data);
-            selectCharacter(toNewCharacterObject(res.data))
+            reloadCharacter('new')
 
         } else {
             const [res, err] = await asyncHandler(
-                RepositoryFactory.update('character', selected_character.value.id, toRaw(selected_character.value))
+                RepositoryFactory.update('character', character.id, character)
             )
             if (err) return
-
-            const [resSession, errSession] = await asyncHandler(
-                RepositoryFactory.getById('session', sessionId)
-            )
-            if (errSession) return
-
-            state.session = resSession.data
-            state.unsavedChanges = false
-
-            notify({ message: 'Персонаж оновлений', type: 'success' })
-            socket.emit('character:updateNotify', res.data)
-            //selectCharacter(toNewCharacterObject(res.data))
+            reloadCharacter(res.data.id, res.data)
         }
+
+        notify({ message: 'Зміни збережені', type: 'info' })
+        socket.emit('session:updateDataNotify', sessionId);
+
     }
     else {
         notify({ message: "У персонажа повинно бути ім'я", type: 'error' })
@@ -319,80 +135,132 @@ async function saveCharacter() {
 }
 
 async function deleteCharacter() {
+
+    const confirmSwitch = confirm('Видалити персонажа?')
+    if (!confirmSwitch) return
+
     const [res, err] = await asyncHandler(
-        RepositoryFactory.delete('character', selected_character.value.id)
+        RepositoryFactory.delete('character', selectedCharacter.value.id)
     )
     if (err) {
         return
     }
+    socket.emit('session:updateDataNotify', sessionId);
+    notify({ message: 'Персонаж видалений', type: 'success' })
+    reloadCharacter('new')
+}
 
-    const [resSession, errSession] = await asyncHandler(
-        RepositoryFactory.getById('session', sessionId)
-    )
-    if (errSession) {
-        return
+//Select/Reload character
+
+function newCharacterFields() {
+    const characteristics = store.session.characteristicsList.map(ch => ({ 'name': ch.name, 'value': '', id: crypto.randomUUID() }))
+    const currency = store.session.currencyTypes.map(c => ({ 'name': c.name, 'value': 0, 'icon': c.icon, id: crypto.randomUUID() }))
+    return toNewCharacterObject({ characteristics, currency, session: sessionId })
+}
+
+function reloadCharacter(id, data = { id }) {
+    markSaved()
+
+    if (id === 'new')
+        selectedCharacter.value = newCharacterFields()
+    else selectedCharacter.value = toNewCharacterObject(data)
+}
+
+function selectCharacter(id, check = false) {
+    if (selectedCharacter.value?.id === id && check) return
+    if (unsavedChanges.value) {
+        const confirmSwitch = confirm('Є незбережені зміни. Вийти без збереження?')
+        if (!confirmSwitch) return
     }
 
-    state.session = toNewSession(resSession.data)
-    state.unsavedChanges = false
+    markSaved()
 
-    selectCharacter(toNewCharacterObject({}))
-    notify({ message: 'Персонаж видалений', type: 'success' })
-    socket.emit('session:updateNotify', resSession.data);
+    if (id === 'new') {
+        selectedCharacter.value = newCharacterFields()
+    }
+    else selectedCharacter.value = toNewCharacterObject(structuredClone(toRaw(store.session.characters.find(el => el.id === id))))
 }
 
 function discardChanges() {
-    if (!editingCharacter.value) return
-    let current;
+    markSaved()
 
-    if (editingCharacter.value !== 'empty')
-        current = state.session.characters.find(c => c.id === editingCharacter.value);
-    else current = toNewCharacterObject({});
-
-    if (current) selected_character.value = structuredClone(toRaw(current))
-    state.unsavedChanges = false
+    if (selectedCharacter.value.id === 'new') selectCharacter('new')
+    else selectCharacter(selectedCharacter.value.id)
 
     notify({ message: 'Зміни анульовані', type: 'warning' })
 }
 
-function updateCharacterField(field, value) {
-    selected_character.value[field] = value
-    markUnsaved();
+// service functions
+
+function buildTypes(list) {
+    return [
+        {
+            name: 'Всі',
+            id: 'all',
+            hidden: false
+        },
+        ...list.map(type => ({
+            name: type.name,
+            id: type.id,
+            hidden: true
+        }))
+    ]
 }
 
-function updateCharacterCharacteristic(fields) {
-    selected_character.value.characteristics = fields
-    markUnsaved();
+function resetSearchQuery() {
+    Object.entries(searchQuery.value).forEach(([key, val]) => {
+        searchQuery.value[key] = ''
+    })
 }
+
+function markUnsaved() {
+    unsavedChanges.value = true
+}
+
+function markSaved() {
+    unsavedChanges.value = false
+    copied.value = true
+    resetSearchQuery()
+}
+
+function showType(listKey, id) {
+    types.value[listKey].forEach(type => {
+        type.hidden = type.id !== id
+    })
+
+    resetSearchQuery()
+}
+
+// character functions
 
 function updateCurrency(fields) {
-    selected_character.value.currency = fields
+    selectedCharacter.value.currency = fields
     markUnsaved()
+}
+
+function addCustomField(object) {
+    selectedCharacter.value.customFields.push(object)
+    markUnsaved();
 }
 
 function updateCustomFields(fields) {
-    selected_character.value.customFields = fields
+    selectedCharacter.value.customFields = fields
     markUnsaved();
 }
 
-function updateEffects(effects) {
-    selected_character.value.effects = effects
+function addEffect(effect) {
+    addRow(store.session.effects, selectedCharacter.value.effects, effect.id)
     markUnsaved()
 }
 
-function updateQuests(quests) {
-    selected_character.value.quests = quests
+function removeEffect(effect) {
+    removeRow(selectedCharacter.value.effects, effect.id)
     markUnsaved()
-}
-
-function addCustomField(name, value) {
-    Object.assign(selected_character.value.customFields, toObject({ name, value }))
-    markUnsaved();
 }
 
 function updateHealthFields(field) {
-    selected_character.value.health =
-        selected_character.value.health.map(h =>
+    selectedCharacter.value.health =
+        selectedCharacter.value.health.map(h =>
             h.id === field.id ? field : h
         )
 
@@ -400,254 +268,388 @@ function updateHealthFields(field) {
 }
 
 function deleteHealthField(field) {
-    selected_character.value.health = selected_character.value.health.filter(h => h.id !== field.id)
+    selectedCharacter.value.health = selectedCharacter.value.health.filter(h => h.id !== field.id)
     markUnsaved();
 }
 
 function addHealthField(field) {
-    selected_character.value.health.push(field)
+    selectedCharacter.value.health.push(field)
     markUnsaved();
 }
 
 function addEntity(entity) {
-    addRow(state.session.entities, selected_character.value.entities, entity.id)
+    addRow(store.session.entities, selectedCharacter.value.entities, entity.id)
     markUnsaved()
 }
 
 function removeEntity(entity) {
-    removeRow(selected_character.value.entities, entity.id)
+    removeRow(selectedCharacter.value.entities, entity.id)
     markUnsaved()
 }
 
 function removerPerk(perk) {
-    removeRow(selected_character.value.perks, perk.id)
+    removeRow(selectedCharacter.value.perks, perk.id)
     markUnsaved()
 }
 
 function addPerk(perk) {
-    addRow(state.session.perks, selected_character.value.perks, perk.id)
+    addRow(store.session.perks, selectedCharacter.value.perks, perk.id)
     markUnsaved()
 }
 
-function addImage(image) {
-    selected_character.value.image = image
-    markUnsaved()
-}
+const canSave = computed(() => unsavedChanges.value)
 
-const canSave = computed(() => state.unsavedChanges && editingCharacter.value)
+watch(() => selectedCharacter.value, () => {
+
+    if (copied.value) {
+        copied.value = false
+        return
+    }
+
+    markUnsaved()
+}, { deep: true, immediate: false })
 
 </script>
-
 
 <template>
 
     <MasterPageNavigation />
 
-    <div v-if="!state.isLoading" class="flex items-center justify-center space-x-4 m-2">
-        <GraySelectorButton v-for="character in state.session.characters" :key="character.id"
-            @click="selectCharacter(character)" :id="character.id" :label="character.name"
-            :active="selected_character.id === character.id ? true : false" />
-        <PlusButton @click="selectCharacter({ id: 'empty' })" class="w-16 h-14 border-4 border-darkred-dark rounded-lg
+    <section v-if="!store.isLoading" class="p-2 grid grid-cols-[25%_1fr] overflow-hidden">
+
+        <section class="h-full overflow-y-auto">
+
+            <div class="p-2 w-full flex flex-col justify-start gap-2 font-gothic overflow-y-auto">
+                <GraySelectorButton v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id" :id="tab.id"
+                    :label="tab.label" :active="activeTab === tab.id ? true : false" />
+                <RejectButtonWithText @click="deleteCharacter" class="w-full" text="Видалити персонажа"
+                    v-if="selectedCharacter.id !== 'new'" />
+                <AprroveButtonWithText @click="saveCharacter" class="w-full" text="Підтвердити"
+                    :class="[!unsavedChanges && 'pointer-events-none opacity-50']" />
+                <RejectButtonWithText @click="discardChanges" class="w-full" text="Відминити"
+                    :class="[!canSave && 'pointer-events-none opacity-50']" />
+                <UnsavedLabel v-if="unsavedChanges" />
+            </div>
+
+        </section>
+
+        <section class="m-4 py-4 h-full space-y-2 overflow-y-auto">
+
+            <div class="flex items-center justify-center space-x-4 m-2">
+                <GraySelectorButton v-for="character in store.session.characters" :key="character.id"
+                    @click="selectCharacter(character.id, true)" :id="character.id" :label="character.name"
+                    :active="selectedCharacter.id === character.id ? true : false" />
+                <PlusButton @click="selectCharacter('new', true)" class="w-16 h-14 border-4 border-darkred-dark rounded-lg
            md:hover:bg-darkred-gray group"
-            :class="selected_character.id === 'empty' ? 'bg-darkred-gray text-darkred-light' : 'bg-darkred-light'" />
-    </div>
-
-    <section v-if="!state.isLoading" class="m-4 mr-8 grid grid-cols-[25%_75%] gap-2">
-
-        <div class="p-4 w-full flex flex-col justify-start gap-2 font-gothic">
-            <GraySelectorButton v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id" :id="tab.id"
-                :label="tab.label" :active="activeTab === tab.id ? true : false" />
-            <RejectButtonWithText @click="deleteCharacter" class="w-full" text="Видалити персонажа"
-                v-if="selected_character.id !== 'empty'" />
-            <AprroveButtonWithText @click="saveCharacter" class="w-full" text="Підтвердити"
-                :class="[!state.unsavedChanges && 'pointer-events-none opacity-50']" />
-            <RejectButtonWithText @click="discardChanges" class="w-full" text="Відминити"
-                :class="[!canSave && 'pointer-events-none opacity-50']" />
-            <UnsavedLabel v-if="state.unsavedChanges" />
-        </div>
-
-        <div id="base" v-if="activeTab === 'base'" class="grid grid-cols-2 auto-rows-min gap-4">
-
-            <ImageEditor class="w-full col-span-2" :image="selected_character.image" label="Character image"
-                :callback="addImage" />
-
-            <SingleFieldEditor placeholder="Ім'я" fieldName="name" :value="selected_character.name"
-                :callback="updateCharacterField" :important="true" class="w-full" />
-            <SingleFieldEditor placeholder="Стать" fieldName="gender" :value="selected_character.gender"
-                :callback="updateCharacterField" class="w-full" />
-            <SingleFieldEditor placeholder="Клас" fieldName="class" :value="selected_character.class"
-                :callback="updateCharacterField" class="w-full" />
-            <SingleFieldEditor placeholder="Раса" fieldName="race" :value="selected_character.race"
-                :callback="updateCharacterField" class="w-full" />
-
-            <SingleFieldEditor placeholder="Рівень" fieldName="level" :value="selected_character.level"
-                :callback="updateCharacterField" type="number" class="w-full" />
-            <SingleFieldEditor placeholder="Очки перків" fieldName="perkPoints" :value="selected_character.perkPoints"
-                :callback="updateCharacterField" type="number" class="w-full" />
-            <SingleFieldEditor placeholder="Досвід" fieldName="experience" :value="selected_character.experience"
-                :callback="updateCharacterField" type="number" class="w-full" />
-            <SingleFieldEditor placeholder="К-сть досвіду для рівня" fieldName="experienceToLevelUp"
-                :value="selected_character.experienceToLevelUp" :callback="updateCharacterField" type="number"
-                class="w-full" />
-
-            <TextAreaEditor fieldName="playerNotes" name="Записки гравця" :value="selected_character.playerNotes"
-                :callback="updateCharacterField" />
-            <TextAreaEditor fieldName="adminNotes" name="Записки майстра" :value="selected_character.adminNotes"
-                :callback="updateCharacterField" />
-
-            <Header1 class="col-span-2 justify-self-center" label="Список основних характеистик:" />
-
-            <Header1 v-if="!checkObjectFieldExisting(selected_character.characteristics)" class="col-span-2"
-                label="Пусто" />
-
-            <ObjectFieldsTable v-if="checkObjectFieldExisting(selected_character.characteristics)"
-                :fields="selected_character.characteristics" :callback="updateCharacterCharacteristic" />
-
-            <Header1 class="col-span-2 justify-self-center" label="Список фінансів:" />
-
-            <Header1 v-if="!checkObjectFieldExisting(selected_character.currency)" class="col-span-2" label="Пусто" />
-
-            <CurrencyTable :currency_array="selected_character.currency" :callback="updateCurrency" />
-
-        </div>
-
-        <div id="custom" v-if="activeTab === 'custom'" class="grid grid-cols-2 auto-rows-min gap-4">
-
-            <Header1 class="col-span-2 font-medium" label="Список кастомних полей:" />
-
-            <Header1 v-if="!checkObjectFieldExisting(selected_character.customFields)" class="col-span-2"
-                label="Пусто" />
-
-            <ObjectFieldsTable v-if="checkObjectFieldExisting(selected_character.customFields)"
-                :fields="selected_character.customFields" :callback="updateCustomFields" :field_removable="true" />
-
-            <Header1 class="col-span-w font-medium" label="Додати нове поле:" />
-
-            <ObjectFieldsEditor class="col-span-2" name="CustomFields_" :fields="selected_character.customFields"
-                :callback="addCustomField" />
-
-        </div>
-
-        <div id="health" v-if="activeTab === 'health'" class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-3">
-
-
-            <Header1 class="col-span-2 justify-self-center font-medium" label="Редагування існуючи полей:" />
-
-            <Header1 v-if="!checkObjectFieldExisting(selected_character.health)" class="col-span-2" label="Пусто" />
-
-            <HealthFieldsEditor v-for="field in selected_character.health" :key="field.id" :label="field.name"
-                :health_field="field" class="col-span-2" :callback="updateHealthFields"
-                :callback_remove="deleteHealthField" />
-
-            <Header1 class="col-span-2 justify-self-center font-medium" label="Створити нове поле::" />
-
-            <HealthFieldsEditor label="Health" class="col-span-2" :callback="addHealthField" />
-
-        </div>
-
-        <div id="quests&effects" v-if="activeTab === 'quests&effects'"
-            class="grid grid-cols-2 auto-rows-min gap-x-4 gap-y-3">
-
-            <Header1 class="justify-self-center" label="Еффекти:" />
-            <Header1 class="justify-self-center" label="Квести:" />
-
-            <EffectsTableEditor :sessionEffects="state.session.effects" :character_effects="selected_character.effects"
-                :callback="updateEffects" />
-
-            <QuestsTableEditor class="flex flex-col gap-2" :session_quests="state.session.quests"
-                :character_quests="selected_character.quests" :callback="updateQuests" />
-        </div>
-
-        <div id="perks" v-if="activeTab === 'perks'" class="grid grid-cols-3 auto-rows-min gap-x-4 gap-y-3">
-
-            <div class="w-full col-span-full flex gap-2 justify-center">
-
-                <GraySelectorButton v-for="type in perkTypes" :label="type.name" :id="type.id" :active="!type.hidden"
-                    @click="showPerkType(type.id)" />
+                    :class="selectedCharacter.id === 'new' ? 'bg-darkred-gray text-darkred-light' : 'bg-darkred-light'" />
             </div>
 
-            <Header1 class="col-span-full justify-self-center" label="Перки персонажа: " />
+            <div id="base" v-if="activeTab === 'base'" class="grid grid-cols-2 auto-rows-min gap-4">
 
-            <div class="col-span-3 flex gap-2">
-                <input v-model="characterPerksSearchQuery" placeholder="Пошук ..."
-                    class="h-12 w-full p-2 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+                <ImageEditor class="w-full col-span-2" v-model:image="selectedCharacter.image"
+                    label="Character image" />
 
-                <RejectButtonWithText v-if="characterPerksSearchQuery" @click="characterPerksSearchQuery = ''"
-                    text="Очистити" />
-            </div>
+                <InputTextReactive placeholder="Ім'я" fieldName="name" v-model:inputValue="selectedCharacter.name"
+                    :important="true" class="w-full" />
 
-            <PerkRowView v-for="perk in getFilteredCharacterPerks(activePerkType)" :perk="perk" :removable="true"
-                :callback_remove="removerPerk" />
+                <InputTextReactive placeholder="Стать" fieldName="gender" v-model:inputValue="selectedCharacter.gender"
+                    class="w-full" />
 
-            <Header1 class="col-span-full justify-self-center" label="Усі перки: " />
+                <InputTextReactive placeholder="Клас" fieldName="class" v-model:inputValue="selectedCharacter.class"
+                    class="w-full" />
 
-            <div class="col-span-3 flex gap-2">
-                <input v-model="sessionPerksSearchQuery" placeholder="Пошук ..."
-                    class="h-12 w-full p-2 col-span-3 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+                <InputTextReactive placeholder="Раса" fieldName="race" v-model:inputValue="selectedCharacter.race"
+                    class="w-full" />
 
-                <RejectButtonWithText v-if="sessionPerksSearchQuery" @click="sessionPerksSearchQuery = ''"
-                    text="Очистити" />
-            </div>
+                <InputTextReactive placeholder="Рівень" fieldName="level" v-model:inputValue="selectedCharacter.level"
+                    type="number" class="w-full" />
 
-            <PerkRowView v-for="perk in getFilteredSessionPerks(activePerkType)" :perk="perk" :addable="true"
-                :callback_add="addPerk" />
+                <InputTextReactive placeholder="Очки перків" fieldName="perkPoints"
+                    v-model:inputValue="selectedCharacter.perkPoints" type="number" class="w-full" />
 
-        </div>
+                <InputTextReactive placeholder="Досвід" fieldName="experience"
+                    v-model:inputValue="selectedCharacter.experience" type="number" class="w-full" />
 
-        <div id="inventory" v-if="activeTab === 'inventory'" class="flex flex-col items-center gap-y-4">
+                <InputTextReactive placeholder="К-сть досвіду для рівня" fieldName="experienceToLevelUp"
+                    v-model:inputValue="selectedCharacter.experienceToLevelUp" type="number" class="w-full" />
 
-            <div class="w-full flex gap-2 justify-center">
-                <GraySelectorButton v-for="type in inventoryTypes" :label="type.name" :id="type.id"
-                    :active="!type.hidden" @click="showEntityType(type.id)" />
-            </div>
+                <TextAreaReactive label="Записи гравця" v-model:value="selectedCharacter.playerNotes" />
 
-            <Header1 class="self-start" label="Інвентар персонажа:" />
+                <TextAreaReactive label="Записи майстра" v-model:value="selectedCharacter.adminNotes" />
 
-            <div class="w-full flex flex-col gap-2">
+                <Header1 class="col-span-2 justify-self-center" label="Список основних характеистик:" />
 
-                <div class="flex gap-2">
+                <Header1 v-if="!checkObjectFieldExisting(selectedCharacter.characteristics)" class="col-span-2"
+                    label="Пусто" />
 
-                    <input v-model="characterEntitySearchQuery" placeholder="Пошук ..."
-                        class="h-12 w-full p-2 col-span-3 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+                <div v-if="checkObjectFieldExisting(selectedCharacter.characteristics)"
+                    class="col-span-full grid grid-cols-2 gap-2">
 
-                    <RejectButtonWithText v-if="characterEntitySearchQuery" @click="characterEntitySearchQuery = ''"
-                        text="Очистити" />
+                    <InputTextReactive v-for="characteristic in selectedCharacter.characteristics" :key="Math.random().toString(24).slice(2)"
+                        :label="characteristic.name" fieldName="characteristicValue"
+                        v-model:inputValue="characteristic.value" class="w-full" />
+
                 </div>
 
-                <div class="w-full grid grid-cols-3 gap-2 max-h-[1024px] overflow-y-auto md:auto-hide-scroll">
+                <Header1 class="col-span-2 justify-self-center" label="Список фінансів:" />
 
-                    <EntityRowView v-for="entity in getFilteredCharacterEntities(activeType)" :entity="entity"
-                        :callback_add="addEntity" :callback_remove="removeEntity" />
+                <Header1 v-if="!checkObjectFieldExisting(selectedCharacter.currency)" class="col-span-2"
+                    label="Пусто" />
 
-                </div>
+                <CurrencyTable :currency_array="selectedCharacter.currency" :callback="updateCurrency" />
+
             </div>
 
-            <Header1 class="self-start" label="Весь інвентар:" />
+            <div id="custom" v-if="activeTab === 'custom'" class="grid grid-cols-2 auto-rows-min gap-4 overflow-y-auto">
 
-            <div class="w-full flex flex-col gap-2">
+                <Header1 class="col-span-2 font-medium" label="Список кастомних полей:" />
 
-                <div class="flex gap-2">
+                <Header1 v-if="!checkObjectFieldExisting(selectedCharacter.customFields)" class="col-span-2"
+                    label="Пусто" />
 
-                    <input v-model="sessionEntitySearchQuery" placeholder="Пошук ..."
-                        class="h-12 w-full p-2 col-span-3 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+                <CustomFieldTile v-if="checkObjectFieldExisting(selectedCharacter.customFields)"
+                    :fields="selectedCharacter.customFields" @update:fields="updateCustomFields" />
 
-                    <RejectButtonWithText v-if="sessionEntitySearchQuery" @click="sessionEntitySearchQuery = ''"
-                        text="Очистити" />
-                </div>
+                <Header1 class="col-span-2 font-medium" label="Додати нове поле:" />
 
-                <div class="w-full grid grid-cols-3 gap-2 max-h-[512px] overflow-y-auto md:auto-hide-scroll">
+                <CustomFieldsEditor class="col-span-2" name="characterCustomFields" :callback="addCustomField" />
 
-                    <EntityRowView v-for="entity in getFilteredSessionEntities(activeType)" :entity="entity"
-                        :callback_add="addEntity" :callback_remove="removeEntity" />
-
-                </div>
             </div>
 
-        </div>
+            <div id="health" v-if="activeTab === 'health'" class="grid gap-y-4 overflow-y-auto">
+
+                <div class="p-3 rounded-xl bg-greenish-dark/10 border-2 border-greenish-mid/50 space-y-3">
+
+                    <div class="flex items-center gap-2 justify-center">
+                        <HeartIcon class="w-6 h-6 text-greenish-mid" />
+                        <Header1 label="Поля здоров'я персонажа:" />
+                        <span
+                            class="text-sm px-2 py-0.5 rounded-full bg-greenish-mid text-darkred-dark font-semibold">{{
+                                selectedCharacter.health.length }}</span>
+                    </div>
+
+                    <Header1 v-if="!checkObjectFieldExisting(selectedCharacter.health)"
+                        class="justify-self-center text-lg text-darkred-light_gray" label="Полів ще немає" />
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                        <HealthFieldsEditor v-for="field in selectedCharacter.health" :key="field.id"
+                            :label="field.name" :health_field="field" :callback="updateHealthFields"
+                            :callback_remove="deleteHealthField" />
+                    </div>
+
+                </div>
+
+                <div class="p-3 rounded-xl bg-orange-gold/10 border-2 border-orange-gold/50 space-y-3">
+
+                    <div class="flex items-center gap-2 justify-center">
+                        <PlusCircleIcon class="w-6 h-6 text-orange-gold" />
+                        <Header1 label="Створити нове поле:" />
+                    </div>
+
+                    <HealthFieldsEditor label="Health" :callback="addHealthField" />
+
+                </div>
+
+            </div>
+
+            <div id="effects" v-if="activeTab === 'effects'" class="grid gap-x-4 gap-y-3 overflow-y-auto">
+
+                <div class="p-3 rounded-xl bg-greenish-dark/10 border-2 border-greenish-mid/50 space-y-2">
+
+                    <div class="flex items-center gap-2 justify-center">
+                        <CheckBadgeIcon class="w-6 h-6 text-greenish-mid" />
+                        <Header1 label="Ефекти персонажа:" />
+                        <span
+                            class="text-sm px-2 py-0.5 rounded-full bg-greenish-mid text-darkred-dark font-semibold">{{
+                                filteredCharacterEffects.length }}</span>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <input v-model="searchQuery.characterEffects" placeholder="Пошук ..."
+                            class="h-12 w-full p-2 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+
+                        <RejectButtonWithText v-if="searchQuery.characterEffects"
+                            @click="searchQuery.characterEffects = ''" text="Очистити" />
+                    </div>
+
+                    <Header1 v-if="!filteredCharacterEffects.length"
+                        class="justify-self-center text-lg text-darkred-dark_gray" label="Ефектів немає" />
+
+                    <EffectsTable v-else :effects="filteredCharacterEffects" :removable="true"
+                        :callback_remove="removeEffect" />
+
+                </div>
+
+                <div class="p-3 rounded-xl bg-darkred-dark_gray/40 border-2 border-darkred-gray/40 space-y-2">
+
+                    <div class="flex items-center gap-2 justify-center">
+                        <PlusCircleIcon class="w-6 h-6 text-darkred-light_gray" />
+                        <Header1 label="Усі ефекти:" />
+                        <span
+                            class="text-sm px-2 py-0.5 rounded-full bg-darkred-gray text-darkred-dark font-semibold">{{
+                                filteredSessionEffects.length }}</span>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <input v-model="searchQuery.sessionEffects" placeholder="Пошук ..."
+                            class="h-12 w-full p-2 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+
+                        <RejectButtonWithText v-if="searchQuery.sessionEffects"
+                            @click="searchQuery.sessionEffects = ''" text="Очистити" />
+                    </div>
+
+                    <Header1 v-if="!filteredSessionEffects.length"
+                        class="justify-self-center text-lg text-darkred-light_gray" label="Ефектів немає" />
+
+                    <EffectsTable v-else :effects="filteredSessionEffects" :addable="true"
+                        :callback_add="addEffect" />
+
+                </div>
+
+            </div>
+
+            <div id="perks" v-if="activeTab === 'perks'"
+                class="grid grid-cols-3 auto-rows-min gap-x-4 gap-y-3 overflow-y-auto">
+
+                <div class="w-full col-span-full flex gap-2 justify-center">
+
+                    <GraySelectorButton v-for="type in types.perks" :label="type.name" :key="type.id" :id="type.id"
+                        :active="!type.hidden" @click="showType('perks', type.id)" />
+                </div>
+
+                <div
+                    class="col-span-full grid grid-cols-3 auto-rows-min gap-x-4 gap-y-3 p-3 rounded-xl bg-greenish-dark/10 border-2 border-greenish-mid/50">
+
+                    <div class="col-span-full flex items-center gap-2 justify-center">
+                        <CheckBadgeIcon class="w-6 h-6 text-greenish-mid" />
+                        <Header1 label="Перки персонажа:" />
+                        <span
+                            class="text-sm px-2 py-0.5 rounded-full bg-greenish-mid text-darkred-dark font-semibold">{{
+                                filteredCharacterPerks.length }}</span>
+                    </div>
+
+                    <div class="col-span-3 flex gap-2">
+                        <input v-model="searchQuery.characterPerks" placeholder="Пошук ..."
+                            class="h-12 w-full p-2 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+
+                        <RejectButtonWithText v-if="searchQuery.characterPerks"
+                            @click="searchQuery.characterPerks = ''" text="Очистити" />
+                    </div>
+
+                    <Header1 v-if="!filteredCharacterPerks.length"
+                        class="col-span-full justify-self-center text-lg text-darkred-light_gray"
+                        label="Перків не знайдено" />
+
+                    <PerkRowView v-for="perk in filteredCharacterPerks" :key="perk.id" :perk="perk" :removable="true"
+                        :callback_remove="removerPerk" />
+
+                </div>
+
+                <div
+                    class="col-span-full grid grid-cols-3 auto-rows-min gap-x-4 gap-y-3 p-3 rounded-xl bg-darkred-dark_gray/40 border-2 border-darkred-gray/40">
+
+                    <div class="col-span-full flex items-center gap-2 justify-center">
+                        <PlusCircleIcon class="w-6 h-6 text-darkred-light_gray" />
+                        <Header1 label="Усі перки:" />
+                        <span
+                            class="text-sm px-2 py-0.5 rounded-full bg-darkred-gray text-darkred-dark font-semibold">{{
+                                filteredSessionPerks.length }}</span>
+                    </div>
+
+                    <div class="col-span-3 flex gap-2">
+                        <input v-model="searchQuery.sessionPerks" placeholder="Пошук ..."
+                            class="h-12 w-full p-2 col-span-3 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+
+                        <RejectButtonWithText v-if="searchQuery.sessionPerks" @click="searchQuery.sessionPerks = ''"
+                            text="Очистити" />
+                    </div>
+
+                    <Header1 v-if="!filteredSessionPerks.length"
+                        class="col-span-full justify-self-center text-lg text-darkred-light_gray"
+                        label="Перків не знайдено" />
+
+                    <PerkRowView v-for="perk in filteredSessionPerks" :key="perk.id" :perk="perk" :addable="true"
+                        :callback_add="addPerk" />
+
+                </div>
+
+            </div>
+
+            <div id="inventory" v-if="activeTab === 'inventory'"
+                class="flex flex-col items-center gap-y-4 overflow-y-auto">
+
+                <div class="w-full flex gap-2 justify-center">
+                    <GraySelectorButton v-for="type in types.inventory" :key="type.id" :label="type.name" :id="type.id"
+                        :active="!type.hidden" @click="showType('inventory', type.id)" />
+                </div>
+
+                <div class="w-full flex flex-col gap-2 p-3 rounded-xl bg-greenish-dark/10 border-2 border-greenish-mid/50">
+
+                    <div class="w-full flex items-center gap-2 justify-center">
+                        <CheckBadgeIcon class="w-6 h-6 text-greenish-mid" />
+                        <Header1 label="Інвентар персонажа:" />
+                        <span
+                            class="text-sm px-2 py-0.5 rounded-full bg-greenish-mid text-darkred-dark font-semibold">{{
+                                filteredCharacterEntities.length }}</span>
+                    </div>
+
+                    <div class="flex gap-2">
+
+                        <input v-model="searchQuery.characterEntity" placeholder="Пошук ..."
+                            class="h-12 w-full p-2 col-span-3 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+
+                        <RejectButtonWithText v-if="searchQuery.characterEntity"
+                            @click="searchQuery.characterEntity = ''" text="Очистити" />
+                    </div>
+
+                    <Header1 v-if="!filteredCharacterEntities.length"
+                        class="self-center text-lg text-darkred-light_gray" label="Інвентар пустий" />
+
+                    <div class="w-full grid grid-cols-3 gap-2 max-h-[1024px] overflow-y-auto md:auto-hide-scroll">
+
+                        <EntityRowView v-for="entity in filteredCharacterEntities" :key="entity.id" :entity="entity"
+                            :owned="true" :callback_add="addEntity" :callback_remove="removeEntity" />
+
+                    </div>
+                </div>
+
+                <div class="w-full flex flex-col gap-2 p-3 rounded-xl bg-darkred-dark_gray/40 border-2 border-darkred-gray/40">
+
+                    <div class="w-full flex items-center gap-2 justify-center">
+                        <PlusCircleIcon class="w-6 h-6 text-darkred-light_gray" />
+                        <Header1 label="Весь інвентар:" />
+                        <span
+                            class="text-sm px-2 py-0.5 rounded-full bg-darkred-gray text-darkred-dark font-semibold">{{
+                                filteredSessionEntities.length }}</span>
+                    </div>
+
+                    <div class="flex gap-2">
+
+                        <input v-model="searchQuery.sessionEntity" placeholder="Пошук ..."
+                            class="h-12 w-full p-2 col-span-3 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+
+                        <RejectButtonWithText v-if="searchQuery.sessionEntity" @click="searchQuery.sessionEntity = ''"
+                            text="Очистити" />
+                    </div>
+
+                    <Header1 v-if="!filteredSessionEntities.length"
+                        class="self-center text-lg text-darkred-light_gray" label="Інвентар пустий" />
+
+                    <div class="w-full grid grid-cols-3 gap-2 max-h-[512px] overflow-y-auto md:auto-hide-scroll">
+
+                        <EntityRowView v-for="entity in filteredSessionEntities" :key="entity.id" :entity="entity"
+                            :owned="false" :callback_add="addEntity" :callback_remove="removeEntity" />
+
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
 
     </section>
 
-    <div v-if="state.isLoading" class="text-center py-6">
+    <div v-if="store.isLoading" class="text-center py-6">
         <Loader />
     </div>
 

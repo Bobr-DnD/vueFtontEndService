@@ -9,7 +9,7 @@ const socket = io(import.meta.env.VITE_WS, {
   reconnectionAttempts: Infinity,
   reconnectionDelay: 1000,
   reconnectionDelayMax: 2000,
-  randomizationFactor: 1 
+  randomizationFactor: 0.5
 });
 
 socket.on("connect", () => {

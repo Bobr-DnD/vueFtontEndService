@@ -4,16 +4,13 @@ import AdminGenericView from "@/views/AdminGenericView.vue";
 import SessionGenericView from "@/views/SessionGenericView.vue";
 import Sessions from "@/views/SessionsView.vue";
 import SessionView from "@/views/SingleSessionView.vue";
-import NotFoundView from '@/components/reusable/NotFoundView.vue'
+import NotFoundView from '@/views/NotFoundView.vue'
 import CharacterPageView from "@/views/CharacterPageView.vue";
 import CharacterPageEditor from "@/views/CharacterPageEditor.vue";
 import EntitiesPageEditor from "@/views/EntitiesPageEditor.vue";
 import SessionPageEditor from "@/views/SessionPageEditor.vue";
 import EffectsPageEditor from "@/views/EffectsPageEditor.vue";
-import QuestsPageEditor from "@/views/QuestsPageEditor.vue";
 import PerksPageEditor from "@/views/PerksPageEditor.vue";
-
-import AdminPageView from "@/views/AdminPageView.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,11 +32,6 @@ const router = createRouter({
             children:[
                 {
                     path: '',
-                    name: 'session_control_panel',
-                    component: AdminPageView
-                },
-                {
-                    path: 'session',
                     name: 'session_editor',
                     component: SessionPageEditor
                 },
@@ -57,11 +49,6 @@ const router = createRouter({
                     path: 'effects',
                     name: 'effects_editor',
                     component: EffectsPageEditor
-                },
-                {
-                    path: 'quests',
-                    name: 'quests_editor',
-                    component: QuestsPageEditor
                 },
                 {
                     path: 'perks',

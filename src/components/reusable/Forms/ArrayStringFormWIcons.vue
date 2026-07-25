@@ -1,126 +1,86 @@
 <script setup>
-import { ref, toRaw } from 'vue';
-import { iconsList } from '@utils/icons';
-import AprroveButtonWithText from '../Buttons/AprroveButtonWithText.vue';
-import RejectButtonWithText from '../Buttons/RejectButtonWithText.vue';
+import { ref, watch, nextTick } from 'vue';
 import PlusButton from '../Buttons/PlusButton.vue';
 import DeleteButton from '../Buttons/DeleteButton.vue';
-import IconsDropdown from '../IconsDropdown.vue';
+import IconsDropdown from '../DropDowns/IconsDropdown.vue';
 
 const props = defineProps({
     array: {
         type: Array,
         required: true
     },
-    array_name: {
-        type: String,
-        required: true
-    },
     label: {
         type: String,
         required: true
     },
-    callback: {
-        type: Function,
-        required: true
-    },
-    set_icon: {
+    setIcon: {
         type: Boolean,
         default: false
     }
 })
 
+const emit = defineEmits(['update:array'])
+
 const arrayLocal = ref()
-const inputRefs = ref({})
 
-const originalArray = structuredClone(toRaw(props.array))
-
-arrayLocal.value = props.array.map(el => {
-    return {
-        id: el.id,
-        name: el.name,
-        icon: el.icon
-    }
-})
+watch(
+    () => props.array,
+    (val) => {
+        arrayLocal.value = val.map(el => ({ ...el }))
+    },
+    { immediate: true, deep: true }
+)
 
 function addItem() {
-    if (props.set_icon)
-        arrayLocal.value.push({
-            id: Math.random().toString(24).slice(2),
-            name: '',
-            icon: iconsList[0].id
-        })
-    else
-        arrayLocal.value.push({
-            id: Math.random().toString(24).slice(2),
-            name: ''
-        })
+    arrayLocal.value.push({
+        id: crypto.randomUUID(),
+        name: '',
+        ...(props.setIcon && { icon: 'checkBadge' })
+    })
+    update()
 }
 
 function removeItem(id) {
-    const index = arrayLocal.value.findIndex(el => el.id === id)
-    if (index !== -1) arrayLocal.value.splice(index, 1)
-
-    console.log(`${arrayLocal.value.length}   ${originalArray.length}`);
-
-}
-
-function updateItem(id) {
-    arrayLocal.value.forEach(el => {
-        if (el.id === id) el.name = inputRefs.value[id].value
-    })
-}
-
-function updateArray() {
-    props.callback(props.array_name, arrayLocal.value)
-}
-
-function discardChanges() {
-    arrayLocal.value = structuredClone(originalArray)
+    arrayLocal.value = arrayLocal.value.filter(el => el.id !== id)
+    update()
 }
 
 function updateIcon(id, iconName) {
-    arrayLocal.value.forEach(el => {
-        if (el.id === id) el.icon = iconName
-    })
+    const item = arrayLocal.value.find(el => el.id === id)
+    if (item) {
+        item.icon = iconName
+        update()
+    }
+    
+}
+
+async function update(){
+    await nextTick()
+    emit('update:array', arrayLocal.value)
 }
 
 </script>
 
 <template>
-    <div>
+    <div class="grid grid-cols-1 gap-2 font-gothic content-start">
 
-        <section class="grid grid-cols-1 gap-2 font-gothic">
+        <h1 class="text-2xl ">{{ props.label }}:</h1>
+        <h1 v-if="arrayLocal.length === 0" class="text-xl ">Пусто</h1>
 
-            <h1 class="text-2xl ">{{ props.label }}:</h1>
-            <h1 v-if="arrayLocal.length === 0" class="text-xl ">Пусто</h1>
+        <div v-for="item in arrayLocal" :key="item.id" class="grid gap-4"
+            :class="props.setIcon ? 'grid-cols-[1fr_120px_40px]' : 'grid-cols-[1fr_40px]'">
 
-            <div v-for="item in arrayLocal" :key="item.id" class="grid gap-4"
-                :class="props.set_icon ? 'grid-cols-[1fr_120px_40px]' : 'grid-cols-[1fr_40px]'">
-                <input :ref="el => inputRefs[item.id] = el" :id="item.id" type="text" :value="item.name"
-                    placeholder="Назва" @input="updateItem(item.id)"
-                    class="p-1 border-4 text-lg border-darkred-dark rounded-lg text-darkred-dark w-full focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
 
-                <IconsDropdown v-if="props.set_icon" :icon="item.icon" :field_id="item.id" :callback="updateIcon" />
+            <input v-model.lazy="item.name" type="text" placeholder="Назва" @change="update" :id="item.id"
+                class="p-2 border-2 text-md border-darkred-dark rounded-lg text-darkred-dark w-full focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
 
-                <DeleteButton class="bg-darkred-red text-darkred-light" @click="removeItem(item.id)" />
+            <IconsDropdown v-if="props.setIcon" :icon="item.icon" :field_id="item.id" :callback="updateIcon" />
 
-            </div>
+            <DeleteButton class="bg-darkred-red text-darkred-light" @click="removeItem(item.id)" />
 
-            <div class="flex gap-2">
+        </div>
 
-                <PlusButton class="w-11 h-full text-center border-4 border-darkred-dark rounded-lg md:hover:cursor-pointer
+        <PlusButton class="w-11 h-11 text-center border-4 border-darkred-dark rounded-lg md:hover:cursor-pointer
            md:hover:bg-darkred-gray relative overflow-hidden group" @click="addItem" />
-
-                <AprroveButtonWithText text="Зберегти" @click="updateArray"
-                    class="p-2 flex justify-center text-lg items-center self-end" />
-
-                <RejectButtonWithText text="Відхилити" @click="discardChanges"
-                    class="p-2 flex justify-center text-lg items-center self-end" />
-            </div>
-
-
-        </section>
-
     </div>
 </template>

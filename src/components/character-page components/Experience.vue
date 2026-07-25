@@ -5,6 +5,7 @@ const props = defineProps({
     exp: { type: Number, required: true },
     expMax: { type: Number, required: true },
     perkPoints: { type: Number, required: true },
+    level: {type: Number, required: true },
     callback: { type: Function, required: true }
 })
 </script>
@@ -15,11 +16,18 @@ const props = defineProps({
         <div class="grow">
             <div
                 class="p-2 flex items-center justify-center h-full w-full text-mb font-medium font-gothic border-2 rounded-md border-darkred-dark">
-                Очки рівня: {{ props.perkPoints }}
+                Рівень: {{ props.level }}
             </div>
         </div>
 
         <div class="grow">
+            <div
+                class="p-2 flex items-center justify-center h-full w-full text-mb font-medium font-gothic border-2 rounded-md border-darkred-dark">
+                Очки рівня: {{ props.perkPoints }}
+            </div>
+        </div>
+
+        <div class="grow md:w-auto w-1/2">
             <ProgressiveBar :value="props.exp" :valueMax="props.expMax" text="Досвід" />
         </div>
 
