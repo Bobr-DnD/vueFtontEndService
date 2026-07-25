@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, onBeforeUnmount, watch, toRaw, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { ChartBarIcon, SparklesIcon, BanknotesIcon } from '@heroicons/vue/24/solid'
+import { ChartBarIcon, SparklesIcon, BanknotesIcon, Square3Stack3DIcon } from '@heroicons/vue/24/solid'
 
 import { checkObjectFieldExisting } from '/utils/entityHelper'
 import { toNewCharacterObject } from '/utils/objects.dto';
@@ -27,6 +27,7 @@ import HorizontalNumberPicker from '@/components/reusable/HorizontalNumberPicker
 import ProgressiveBar from '@/components/reusable/ProgressiveBar.vue';
 import DiceLoader from '@/components/reusable/Loaders/DiceLoader.vue';
 import { CursorArrowRippleIcon } from '@heroicons/vue/24/outline';
+import LoadoutsPanel from '@/components/character-page components/LoadoutsPanel.vue';
 
 const state = reactive({
     character: {},
@@ -54,6 +55,10 @@ const custom_hidden = computed({
 const custom_modal_hidden = computed({
     get: () => gameStore.custom_modal_hidden[characterId.value],
     set: (val) => { gameStore.custom_modal_hidden[characterId.value] = val }
+})
+const loadouts_hidden = computed({
+    get: () => gameStore.loadouts_hidden[characterId.value],
+    set: (val) => { gameStore.loadouts_hidden[characterId.value] = val }
 })
 const openHealthIds = computed(() => gameStore.openHealthIds[characterId.value])
 
@@ -91,12 +96,26 @@ socket.on('session:join', (session) => {
     socket.emit('session:connectCharacter', sessionId.value, characterId.value)
 })
 
+let characterUpdatePending = false
+
 socket.on('character:updateDataNotify', (character) => {
-    state.character = toNewCharacterObject(character)
     state.characterIsUpdating = false
+
+    if (characterUpdatePending) {
+        updateCharacter()
+        return
+    }
+
+    state.character = toNewCharacterObject(character)
 })
 
 function updateCharacter() {
+    if (state.characterIsUpdating) {
+        characterUpdatePending = true
+        return
+    }
+
+    characterUpdatePending = false
     socket.emit('character:updateData', state.character)
     state.characterIsUpdating = true
 }
@@ -259,6 +278,24 @@ function togglePicker(healthId) {
 
                 </div>
 
+            </section>
+
+            <section>
+                <div class="flex flex-col gap-2">
+                    <HideButton class="w-full" textShow="Показати профілі" textHide="Приховати профілі"
+                        :hidden="loadouts_hidden" :mainIcon="Square3Stack3DIcon"
+                        @click="loadouts_hidden = !loadouts_hidden" />
+
+                    <div class="grid transition-all duration-300 ease-in-out"
+                        :style="{ gridTemplateRows: loadouts_hidden ? '0fr' : '1fr' }">
+                        <div class="overflow-hidden">
+                            <LoadoutsPanel v-model:loadouts="state.character.loadouts"
+                                :entities="state.character.entities" :perks="state.character.perks"
+                                :entityTypes="sessionStore.session.entityTypes"
+                                :loadoutLimits="sessionStore.session.loadoutsLimit" :callback="updateCharacter" />
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-2 items-start">

@@ -33,7 +33,8 @@ export function toNewCharacterObject(character) {
     playerNotes: character.playerNotes ?? '',
     session: character.session,
     perks: character.perks ?? [],
-    entities: character.entities ?? []
+    entities: character.entities ?? [],
+    loadouts: character.loadouts ?? []
   }
 }
 
@@ -66,6 +67,11 @@ export function toNewSession(session){
     perks: session.perks ?? [],
     effects :session.effects ?? [],
     fractions: session.fractions ?? [],
+    loadoutsLimit: {
+      loadouts: session.loadoutsLimit?.loadouts ?? null,
+      items: session.loadoutsLimit?.items ?? null,
+      perks: session.loadoutsLimit?.perks ?? null
+    }
   }
 }
 

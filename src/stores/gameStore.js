@@ -12,6 +12,7 @@ export const useGameStore = defineStore('game', () => {
     const currency_hidden = reactive({})
     const custom_hidden = reactive({})
     const custom_modal_hidden = reactive({})
+    const loadouts_hidden = reactive({})
     const openHealthIds = reactive({})
 
     watch(connected, (isConnected) => {
@@ -36,6 +37,7 @@ export const useGameStore = defineStore('game', () => {
         if (!(characterId in currency_hidden)) currency_hidden[characterId] = true
         if (!(characterId in custom_hidden)) custom_hidden[characterId] = true
         if (!(characterId in custom_modal_hidden)) custom_modal_hidden[characterId] = true
+        if (!(characterId in loadouts_hidden)) loadouts_hidden[characterId] = true
         if (!(characterId in openHealthIds)) openHealthIds[characterId] = new Set()
     }
 
@@ -54,6 +56,7 @@ export const useGameStore = defineStore('game', () => {
         currency_hidden,
         custom_hidden,
         custom_modal_hidden,
+        loadouts_hidden,
         openHealthIds,
         initCharacterUI,
         toggleHealthId,

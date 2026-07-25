@@ -33,6 +33,7 @@ export const useSessionStore = defineStore('session', () => {
         'characteristicsList',
         'enemyTypes',
         'perkTypes',
+        'loadoutsLimit',
     ]
 
     // API calls

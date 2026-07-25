@@ -1,5 +1,5 @@
 <script setup>
-import { ref, toRaw, watch } from 'vue';
+import { ref, toRaw, watch, computed } from 'vue';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useRoute } from 'vue-router';
 import { notify } from '@utils/notification';
@@ -43,6 +43,19 @@ const tabs = [
 ]
 
 const fileRequest = ref({})
+
+function loadoutsLimitField(key) {
+    return computed({
+        get: () => store.editedSession.loadoutsLimit?.[key] ?? '',
+        set: (val) => {
+            store.editedSession.loadoutsLimit[key] = val === '' ? null : Number(val)
+        }
+    })
+}
+
+const loadoutsLimitCount = loadoutsLimitField('loadouts')
+const itemsLimitCount = loadoutsLimitField('items')
+const perksLimitCount = loadoutsLimitField('perks')
 
 const entitiesList = [
     {
@@ -183,6 +196,21 @@ watch([oldPass, newPass, confirmPass], () => {
                         :class="[!canChange && 'pointer-events-none opacity-50']" />
 
                     <RejectButtonWithText text="Видалити сесію" @click="store.deleteSession(sessionId)" />
+                </div>
+
+                <div class="grid grid-cols-1 gap-4">
+
+                    <Header1 label="Ліміти профілів спорядження:" />
+
+                    <InputTextReactive fieldName="loadoutsLimit-loadouts" label="Кількість профілів" type="number"
+                        placeholder="Без ліміту" v-model:inputValue="loadoutsLimitCount" />
+
+                    <InputTextReactive fieldName="loadoutsLimit-items" label="Предметів у профілі" type="number"
+                        placeholder="Без ліміту" v-model:inputValue="itemsLimitCount" />
+
+                    <InputTextReactive fieldName="loadoutsLimit-perks" label="Перків у профілі" type="number"
+                        placeholder="Без ліміту" v-model:inputValue="perksLimitCount" />
+
                 </div>
 
                 <!-- <div class="space-y-2 grid auto-rows-min justify-self-center justify-items-center">
