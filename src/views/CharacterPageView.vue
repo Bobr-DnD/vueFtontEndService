@@ -158,7 +158,7 @@ function updateCustomFields(fields) {
 }
 
 function addPerk() {
-    state.character.perkPoints--;
+    // state.character.perkPoints--;
     updateCharacter()
 }
 
@@ -300,7 +300,7 @@ function togglePicker(healthId) {
 
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-2 items-start">
                 <PerkTable :session_perks="sessionStore.session.perks" :character_perks="state.character.perks"
-                    :perkPoints="state.character.perkPoints" :callback="addPerk" />
+                    :perkPoints="1" :callback="addPerk" />
 
                 <EntityTable :character_entities="state.character.entities"
                     :session_entities="sessionStore.session.entities" :types="sessionStore.session.entityTypes"

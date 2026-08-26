@@ -1,7 +1,6 @@
 <script setup>
 import { ref, watch, computed } from 'vue';
-import { addRow, removeRow, sortByTwoFields, filterPerksByRank, groupById } from '/utils/entityHelper'
-import { notify } from '/utils/notification';
+import { addRow, removeRow, removeAllRows, filterPerksByRank, groupById } from '/utils/entityHelper'
 import ModalOpenButton from '../reusable/Buttons/ModalOpenButton.vue';
 import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue';
 import ApproveButton from '../reusable/Buttons/ApproveButton.vue';
@@ -62,16 +61,22 @@ const filteredSessionArray = computed(() => {
     )
 })
 
-function addPerk(perk) {
+function levelUpPerk(perk) {
+    const maxLevel = perk.levels?.length || 1
+    if (perk.count >= maxLevel) return
     addRow(props.session_perks, props.character_perks, perk.id);
     props.callback();
-    notify({ message: `Додано перк: ${perk.name}`, type: 'info' })
 }
 
-function removePerk(perk) {
+function levelDownPerk(perk) {
+    if (!perk.count) return
     removeRow(props.character_perks, perk.id)
     props.callback()
-    notify({ message: `Видалено перк: ${perk.name}`, type: 'info' })
+}
+
+function removePerkFully(perk) {
+    removeAllRows(props.character_perks, perk.id)
+    props.callback()
 }
 
 </script>
@@ -92,7 +97,9 @@ function removePerk(perk) {
         </div>
 
         <div v-if="!perksHidden" class="w-full max-h-[680px] overflow-y-auto auto-hide-scroll flex flex-col gap-1">
-            <PerkRowView v-for="perk in filteredCharacterArray" :key="perk.id" :perk="perk" :callback_remove="removePerk" />
+            <PerkRowView v-for="perk in filteredCharacterArray" :key="perk.id" :perk="perk"
+                :callback_level_up="levelUpPerk" :callback_level_down="levelDownPerk"
+                :callback_remove="removePerkFully" />
 
         </div>
 
@@ -122,9 +129,9 @@ function removePerk(perk) {
                         class="grid grid-cols-[1fr_40px] gap-2 odd:bg-darkred-gray p-2 rounded-lg">
                         <div>Назва: {{ perk.name }}</div>
 
-                        <ApproveButton @click="addPerk(perk)" class="row-span-2 flex justify-center items-center" />
+                        <ApproveButton @click="levelUpPerk(perk)" class="row-span-2 flex justify-center items-center" />
 
-                        <div>Опис: {{ perk.descriptions[perk.count] }}</div>
+                        <div v-if="perk.description.length">Опис: {{ perk.description }}</div>
 
                     </div>
                 </div>

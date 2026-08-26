@@ -70,7 +70,7 @@ async function saveEffect() {
             RepositoryFactory.create(`effect`, effect)
         )
         if (err) return
-        reloadEffect('new')
+        reloadEffect(res.data.id, res.data)
     }
     else {
 
@@ -80,7 +80,6 @@ async function saveEffect() {
         if (err) return
         reloadEffect(res.data.id, res.data)
     }
-    notify({ message: 'Зміни збережені', type: 'info' })
     socket.emit('session:updateDataNotify', sessionId);
 }
 
@@ -91,7 +90,6 @@ async function deleteEffect() {
     )
     if (errEffect) return
     socket.emit('session:updateDataNotify', sessionId);
-    notify({ message: 'Ефект видалено', type: 'info' })
     reloadEffect('new')
 }
 
@@ -217,7 +215,7 @@ watch(() => selectedEffect.value, () => {
 
                 <div class="col-span-full flex flex-wrap gap-4 hover:cursor-pointer">
                     <div v-if="checkObjectFieldExisting(selectedEffect.effect)"
-                        v-for="value, key in selectedEffect.effect" :key="Math.random().toString(24).slice(2)"
+                        v-for="value, key in selectedEffect.effect" :key="key"
                         class="flex gap-3 items-center p-3 w-fit rounded-lg bg-darkred-dark text-darkred-light">
                         <div>
                             {{ key }}: {{ value }}
