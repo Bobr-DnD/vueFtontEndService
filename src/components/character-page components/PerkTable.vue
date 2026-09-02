@@ -131,7 +131,10 @@ function removePerkFully(perk) {
 
                         <ApproveButton @click="levelUpPerk(perk)" class="row-span-2 flex justify-center items-center" />
 
-                        <div v-if="perk.description.length">Опис: {{ perk.description }}</div>
+                        <div v-if="perk.description">Опис: {{ perk.description }}</div>
+
+                        <div v-if="perk.levels.length > 0 && perk.count" :id="perk.id">Опис: {{ perk.levels[perk.count].name }}</div>
+                        <div v-else-if="perk.levels.length > 0" :id="perk.id">Опис: {{ perk.levels[0].name }}</div>
 
                     </div>
                 </div>
