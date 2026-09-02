@@ -101,7 +101,7 @@ async function saveEntity() {
             RepositoryFactory.create('entity', entity)
         )
         if (err) return
-        reloadEntity('new')
+        reloadEntity(res.data.id, res.data)
     }
     else {
         const [res, err] = await asyncHandler(
@@ -110,7 +110,6 @@ async function saveEntity() {
         if (err) return
         reloadEntity(res.data.id, res.data)
     }
-    notify({ message: 'Зміни збережені', type: 'info' })
     socket.emit('session:updateDataNotify', sessionId);
 }
 
@@ -125,7 +124,6 @@ async function deleteEntity() {
     if (err) return
 
     socket.emit('session:updateDataNotify', sessionId);
-    notify({ message: 'Елемент видалено', type: 'info' })
     reloadEntity('new')
 }
 
@@ -301,7 +299,7 @@ watch(() => selectedEntity.value, () => {
                     <Header2 class="shrink w-full" label="Харакетристики:" />
 
                     <div v-if="checkObjectFieldExisting(selectedEntity.characteristics)"
-                        v-for="value, key in selectedEntity.characteristics" :key="Math.random().toString(24).slice(2)"
+                        v-for="value, key in selectedEntity.characteristics" :key="key"
                         class="flex gap-3 items-center p-3 w-fit rounded-lg bg-darkred-dark text-darkred-light">
 
                         <div>
@@ -341,7 +339,7 @@ watch(() => selectedEntity.value, () => {
                     <Header2 class="shrink w-full" label="Вимоги:" />
 
                     <div v-if="checkObjectFieldExisting(selectedEntity.requirement)"
-                        v-for="value, key in selectedEntity.requirement" :key="Math.random().toString(24).slice(2)"
+                        v-for="value, key in selectedEntity.requirement" :key="key"
                         class="flex gap-3 items-center p-3 w-fit rounded-lg bg-darkred-dark text-darkred-light">
 
                         <div>
@@ -378,7 +376,7 @@ watch(() => selectedEntity.value, () => {
                 <div v-if="checkArrayFieldExisting(selectedEntity.effects)"
                     class="grid grid-cols-3 gap-4 items-center justify-start">
 
-                    <div v-for="effect in selectedEntity.effects" :key="Math.random().toString(24).slice(2)"
+                    <div v-for="effect in selectedEntity.effects" :key="effect.id"
                         class="bg-darkred-dark  p-2 rounded-2xl flex gap-4 items-center justify-between">
 
                         <EffectTile :effect="effect" class="w-full" />

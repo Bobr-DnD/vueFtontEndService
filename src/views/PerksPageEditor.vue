@@ -73,7 +73,7 @@ async function savePerk() {
             RepositoryFactory.create('perk', perk)
         )
         if (err) return
-        reloadPerk('new')
+        reloadPerk(res.data.id, res.data)
     }
     else {
         const [res, err] = await asyncHandler(
@@ -82,7 +82,6 @@ async function savePerk() {
         if (err) return
         reloadPerk(res.data.id, res.data)
     }
-    notify({ message: 'Зміни збережені', type: 'info' })
     socket.emit('session:updateDataNotify', sessionId);
 }
 

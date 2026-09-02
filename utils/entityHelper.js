@@ -32,6 +32,19 @@ export function filterPerksByRank(perks, allPerks) {
     .filter(perk => perk.count < (perk.levels?.length || 1));
 }
 
+export function mapPerksWithCount(perks, allPerks) {
+  const grouped = groupById(perks);
+
+  return allPerks.map(perk => {
+    const found = grouped.find(p => p.id === perk.id);
+
+    return {
+      ...perk,
+      count: found?.count ?? 0
+    };
+  });
+}
+
 export function filterPerksByRankWithoutCount(perks, allPerks) {
   const grouped = groupById(perks);
 
@@ -56,6 +69,12 @@ export function removeRow(entityArray, id) {
 export function addRow(entitiesAll, entitiesArray, id) {
   const entity = entitiesAll.find(entity => entity.id === id)
   entitiesArray.push(entity)
+}
+
+export function removeAllRows(entityArray, id) {
+  for (let i = entityArray.length - 1; i >= 0; i--) {
+    if (entityArray[i].id === id) entityArray.splice(i, 1)
+  }
 }
 
 export function useItem(entityArray, effectsArray, entityEffects, sessionMove, entityId, effectId) {

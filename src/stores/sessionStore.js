@@ -6,7 +6,7 @@ import RepositoryFactory from '@http/RepositoryFactory'
 import { socket, connected } from '@ws/webSocket';
 import { asyncHandler } from '@utils/asyncHandler';
 
-import { notify } from '@utils/notification';
+import { notifySyncSuccess, notify } from '@utils/notification';
 import { toNewSession } from '@utils/objects.dto';
 import { checkEqualByKeys } from '@utils/entityHelper';
 
@@ -70,8 +70,6 @@ export const useSessionStore = defineStore('session', () => {
         copySession()
 
         socket.emit('session:updateDataNotify', res.data.id)
-        notify({ message: 'Сесія оновлена', type: 'success' })
-
         unsavedChanges.value = false
     }
 
@@ -111,7 +109,7 @@ export const useSessionStore = defineStore('session', () => {
 
     socket.on('session:updateDataNotify', (newSession) => {
         session.value = toNewSession(newSession)
-        notify({ message: `Сесію ${newSession.name} було оновлено`, type: 'warning' })
+        notifySyncSuccess()
     })
 
     socket.on('session:update', async (session) => {
