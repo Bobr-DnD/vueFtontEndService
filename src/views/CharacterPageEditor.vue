@@ -216,7 +216,7 @@ function markUnsaved() {
 function markSaved() {
     unsavedChanges.value = false
     copied.value = true
-    resetSearchQuery()
+    // resetSearchQuery()
 }
 
 function showType(listKey, id) {
