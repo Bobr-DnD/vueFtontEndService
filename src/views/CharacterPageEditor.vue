@@ -49,7 +49,21 @@ const searchQuery = ref({
 
 const filteredSessionEntities = useFilteredArray(computed(() => store.session.entities), computed(() => searchQuery.value.sessionEntity), computed(() => types.value.inventory))
 const filteredCharacterEntities = useFilteredArray(computed(() => selectedCharacter.value.entities), computed(() => searchQuery.value.characterEntity), computed(() => types.value.inventory), { groupFn: groupById })
-const filteredPerks = useFilteredArray(computed(() => mapPerksWithCount(selectedCharacter.value.perks, store.session.perks)), computed(() => searchQuery.value.perks), computed(() => types.value.perks))
+
+const perkOwnershipFilter = ref('owned')
+const perkOwnershipOptions = [
+    { id: 'owned', label: 'У персонажа' },
+    { id: 'not_owned', label: 'Відсутні у персонажа' }
+]
+
+const filteredPerksByType = useFilteredArray(computed(() => mapPerksWithCount(selectedCharacter.value.perks, store.session.perks)), computed(() => searchQuery.value.perks), computed(() => types.value.perks))
+
+const filteredPerks = computed(() => {
+    const owned = perkOwnershipFilter.value === 'owned'
+    return [...filteredPerksByType.value]
+        .filter(perk => owned ? perk.count > 0 : perk.count === 0)
+        .sort((a, b) => a.name.localeCompare(b.name, 'uk'))
+})
 
 const filteredCharacterEffects = computed(() => {
     const list = selectedCharacter.value.effects
@@ -521,6 +535,13 @@ watch(() => selectedCharacter.value, () => {
 
                     <GraySelectorButton v-for="type in types.perks" :label="type.name" :key="type.id" :id="type.id"
                         :active="!type.hidden" @click="showType('perks', type.id)" />
+                </div>
+
+                <div class="w-full col-span-full flex gap-2 justify-center">
+
+                    <GraySelectorButton v-for="option in perkOwnershipOptions" :label="option.label" :key="option.id"
+                        :id="option.id" :active="perkOwnershipFilter === option.id"
+                        @click="perkOwnershipFilter = option.id" />
                 </div>
 
                 <div
