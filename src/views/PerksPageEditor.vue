@@ -1,5 +1,5 @@
 <script setup>
-import { ref, toRaw, computed, watch } from 'vue';
+import { ref, toRaw, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '@utils/asyncHandler';
@@ -8,11 +8,12 @@ import { notify } from '@utils/notification';
 import { toNewPerk } from '@utils/objects.dto';
 import { checkObjectFieldExisting } from '@utils/entityHelper';
 import { useSessionStore } from '@/stores/sessionStore';
+import useEntityEditor from '@utils/useEntityEditor';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import SearchInputBlack from '@/components/reusable/SearchInputs/SearchInputBlack.vue';
-import Header2 from '@/components/reusable/Titles/Header1.vue';
+import Header2 from '@/components/reusable/Titles/Header2.vue';
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue';
 import PerkTile from '@/components/reusable/EntityTiles/PerkTile.vue';
 import InputTextReactive from '@/components/reusable/Inputs/InputTextReactive.vue';
@@ -34,12 +35,23 @@ const tabs = [
 ]
 
 const searchQuery = ref('')
-const selectedPerk = ref(toNewPerk({}))
 const selectedType = ref('')
 const perkNewRequirement = ref({})
-const unsavedChanges = ref(false)
-const copied = ref(false)
 
+const {
+    selected: selectedPerk,
+    unsavedChanges,
+    load: loadPerk,
+    select: selectPerk,
+    discardChanges
+} = useEntityEditor({
+    toNew: toNewPerk,
+    getSourceList: () => store.session.perks,
+    afterSelect: () => {
+        perkNewRequirement.value = { name: perkNewRequirement.value.name }
+        activeTab.value = 'edit'
+    }
+})
 
 const filteredPerks = computed(() => {
     let perks = toRaw(store.session.perks);
@@ -60,6 +72,7 @@ const filteredPerks = computed(() => {
 
 async function savePerk() {
     const perk = toRaw(selectedPerk.value)
+    perk.ranks = perk.levels.length
 
     if (!checkObjectFieldExisting(perk.type)) {
         notify({ message: 'перк повинен мати тип' })
@@ -73,19 +86,22 @@ async function savePerk() {
             RepositoryFactory.create('perk', perk)
         )
         if (err) return
-        reloadPerk(res.data.id, res.data)
+        loadPerk(res.data.id, res.data)
     }
     else {
         const [res, err] = await asyncHandler(
             RepositoryFactory.update('perk', perk.id, perk)
         )
         if (err) return
-        reloadPerk(res.data.id, res.data)
+        loadPerk(res.data.id, res.data)
     }
     socket.emit('session:updateDataNotify', sessionId);
 }
 
 async function deletePerk() {
+    const confirmDelete = confirm('Видалити навичку?')
+    if (!confirmDelete) return
+
     const [resPerk, errPerk] = await asyncHandler(
         RepositoryFactory.delete('perk', toRaw(selectedPerk.value.id))
     )
@@ -93,61 +109,8 @@ async function deletePerk() {
 
     socket.emit('session:updateDataNotify', sessionId);
     notify({ message: 'Навичку видалено', type: 'info' })
-    reloadPerk('new')
+    loadPerk('new')
 }
-
-// service functions
-
-function discardChanges() {
-    markSaved()
-
-    if (selectedPerk.value.id === 'new') selectedPerk.value = toNewPerk({})
-    else selectedPerk.value = toNewPerk(structuredClone(toRaw(store.session.perks.find(el => el.id === selectedPerk.value.id))))
-
-    notify({ message: 'Зміни анульовані', type: 'warning' })
-}
-
-function markUnsaved() {
-    unsavedChanges.value = true;
-}
-
-function markSaved() {
-    unsavedChanges.value = false
-    copied.value = true
-}
-
-function reloadPerk(id, data = { id }) {
-    markSaved()
-
-    if (id === 'new') selectedPerk.value = toNewPerk({})
-    else selectedPerk.value = toNewPerk(data)
-}
-
-function selectPerk(id) {
-    if (selectedPerk.value?.id === id) return
-    if (unsavedChanges.value) {
-        const confirmSwitch = confirm('Є незбережені зміни. Вийти без збереження?')
-        if (!confirmSwitch) return
-    }
-
-    markSaved()
-
-    if (id === 'new') selectedPerk.value = toNewPerk({})
-    else selectedPerk.value = toNewPerk(structuredClone(toRaw(store.session.perks.find(el => el.id === id))))
-
-    perkNewRequirement.value = { name: perkNewRequirement.value.name }
-    activeTab.value = 'edit'
-}
-
-watch(() => selectedPerk.value, () => {
-
-    if (copied.value) {
-        copied.value = false
-        return
-    }
-    selectedPerk.value.ranks = selectedPerk.value.levels.length
-    markUnsaved()
-}, { deep: true, immediate: false })
 
 </script>
 
@@ -230,7 +193,7 @@ watch(() => selectedPerk.value, () => {
                 <TextAreaReactive class="col-span-full" label="Записки Майстра" v-model:value="selectedPerk.notes" />
 
                 <Header2 class="justify-self-start col-span-full mx-2"
-                    :label="'Рівні перку(' + selectedPerk.ranks + '):'" />
+                    :label="'Рівні перку(' + selectedPerk.levels.length + '):'" />
 
                 <ArraySingleStringForm class="col-span-full" v-model:array="selectedPerk.levels" array_name="levels"
                     label="Опис кожного рівня" />

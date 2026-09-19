@@ -3,6 +3,7 @@ import Loader from 'vue-spinner/src/SyncLoader.vue'
 import { ref, computed, toRaw, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import useFilteredArray from '/utils/useFilteredArray';
+import useEntityEditor from '@utils/useEntityEditor';
 import { useSessionStore } from '@/stores/sessionStore';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
@@ -33,9 +34,6 @@ import { notify, notifySyncSuccess } from '/utils/notification';
 
 const sessionId = useRoute().params.sessionId
 const store = useSessionStore()
-const selectedCharacter = ref()
-const unsavedChanges = ref(false)
-const copied = ref(false)
 
 const types = ref({})
 
@@ -45,6 +43,21 @@ const searchQuery = ref({
     perks: '',
     characterEffects: '',
     sessionEffects: ''
+})
+
+const {
+    selected: selectedCharacter,
+    unsavedChanges,
+    markUnsaved,
+    load: loadCharacter,
+    select: selectCharacter,
+    discardChanges,
+    syncFromRemote: syncCharacterFromRemote
+} = useEntityEditor({
+    toNew: toNewCharacterObject,
+    getSourceList: () => store.session.characters,
+    buildNew: newCharacterFields,
+    afterSelect: resetSearchQuery
 })
 
 const filteredSessionEntities = useFilteredArray(computed(() => store.session.entities), computed(() => searchQuery.value.sessionEntity), computed(() => types.value.inventory))
@@ -101,8 +114,8 @@ watch(
     (newSession) => {
         if (!selectedCharacter.value || selectedCharacter.value.id === 'new') return
 
-        const updated = newSession.characters.find(el => el.id === selectedCharacter.value.id)
-        reloadCharacter(updated ? updated.id : 'new', updated && structuredClone(toRaw(updated)))
+        const stillExists = newSession.characters.some(el => el.id === selectedCharacter.value.id)
+        syncCharacterFromRemote(stillExists ? selectedCharacter.value.id : 'new')
     }
 )
 
@@ -110,7 +123,7 @@ function init() {
     types.value.inventory = buildTypes(store.session.entityTypes)
     types.value.perks = buildTypes(store.session.perkTypes)
 
-    selectCharacter('new')
+    loadCharacter('new')
 }
 
 //API calls
@@ -126,14 +139,14 @@ async function saveCharacter() {
                 RepositoryFactory.create('character', character)
             )
             if (err) return
-            reloadCharacter(res.data.id, res.data)
+            loadCharacter(res.data.id, res.data)
 
         } else {
             const [res, err] = await asyncHandler(
                 RepositoryFactory.update('character', character.id, character)
             )
             if (err) return
-            reloadCharacter(res.data.id, res.data)
+            loadCharacter(res.data.id, res.data)
         }
 
         socket.emit('session:updateDataNotify', sessionId);
@@ -157,7 +170,7 @@ async function deleteCharacter() {
         return
     }
     socket.emit('session:updateDataNotify', sessionId);
-    reloadCharacter('new')
+    loadCharacter('new')
 }
 
 //Select/Reload character
@@ -166,38 +179,6 @@ function newCharacterFields() {
     const characteristics = store.session.characteristicsList.map(ch => ({ 'name': ch.name, 'value': '', id: crypto.randomUUID() }))
     const currency = store.session.currencyTypes.map(c => ({ 'name': c.name, 'value': 0, 'icon': c.icon, id: crypto.randomUUID() }))
     return toNewCharacterObject({ characteristics, currency, session: sessionId })
-}
-
-function reloadCharacter(id, data = { id }) {
-    markSaved()
-
-    if (id === 'new')
-        selectedCharacter.value = newCharacterFields()
-    else selectedCharacter.value = toNewCharacterObject(data)
-}
-
-function selectCharacter(id, check = false) {
-    if (selectedCharacter.value?.id === id && check) return
-    if (unsavedChanges.value) {
-        const confirmSwitch = confirm('Є незбережені зміни. Вийти без збереження?')
-        if (!confirmSwitch) return
-    }
-
-    markSaved()
-
-    if (id === 'new') {
-        selectedCharacter.value = newCharacterFields()
-    }
-    else selectedCharacter.value = toNewCharacterObject(structuredClone(toRaw(store.session.characters.find(el => el.id === id))))
-}
-
-function discardChanges() {
-    markSaved()
-
-    if (selectedCharacter.value.id === 'new') selectCharacter('new')
-    else selectCharacter(selectedCharacter.value.id)
-
-    notify({ message: 'Зміни анульовані', type: 'warning' })
 }
 
 // service functions
@@ -221,16 +202,6 @@ function resetSearchQuery() {
     Object.entries(searchQuery.value).forEach(([key, val]) => {
         searchQuery.value[key] = ''
     })
-}
-
-function markUnsaved() {
-    unsavedChanges.value = true
-}
-
-function markSaved() {
-    unsavedChanges.value = false
-    copied.value = true
-    // resetSearchQuery()
 }
 
 function showType(listKey, id) {
@@ -319,16 +290,6 @@ function removePerkFully(perk) {
 
 const canSave = computed(() => unsavedChanges.value)
 
-watch(() => selectedCharacter.value, () => {
-
-    if (copied.value) {
-        copied.value = false
-        return
-    }
-
-    markUnsaved()
-}, { deep: true, immediate: false })
-
 </script>
 
 <template>
@@ -357,9 +318,9 @@ watch(() => selectedCharacter.value, () => {
 
             <div class="flex items-center justify-center space-x-4 m-2">
                 <GraySelectorButton v-for="character in store.session.characters" :key="character.id"
-                    @click="selectCharacter(character.id, true)" :id="character.id" :label="character.name"
+                    @click="selectCharacter(character.id)" :id="character.id" :label="character.name"
                     :active="selectedCharacter.id === character.id ? true : false" />
-                <PlusButton @click="selectCharacter('new', true)" class="w-16 h-14 border-4 border-darkred-dark rounded-lg
+                <PlusButton @click="selectCharacter('new')" class="w-16 h-14 border-4 border-darkred-dark rounded-lg
            md:hover:bg-darkred-gray group"
                     :class="selectedCharacter.id === 'new' ? 'bg-darkred-gray text-darkred-light' : 'bg-darkred-light'" />
             </div>

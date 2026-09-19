@@ -123,7 +123,8 @@ export const useSessionStore = defineStore('session', () => {
     })
 
     socket.on('error', async (message) => {
-        console.log(message);
+        console.warn(message);
+        notify({message: message, type: 'error'})
     })
 
     socket.on('disconnect', () => {

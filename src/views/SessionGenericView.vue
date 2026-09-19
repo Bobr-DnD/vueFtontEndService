@@ -1,9 +1,9 @@
 <script setup>
 import { onMounted, onBeforeUnmount, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { socket, connected } from '@ws/webSocket';
+import { socket, reconnectCount } from '@ws/webSocket';
 import { useSessionStore } from '@/stores/sessionStore';
-import {useGameStore } from '@/stores/gameStore';
+import { useGameStore } from '@/stores/gameStore';
 
 
 const sessionId = useRoute().params.sessionId
@@ -27,8 +27,9 @@ onBeforeUnmount(() => {
     sessionStore.CloseWebsocketSession(sessionId)
 })
 
-watch(connected, (isConnected) => {
-    if (isConnected) socket.emit('session:join', sessionId, { role: 'user' })
+watch(reconnectCount, () => {
+    socket.emit('session:join', sessionId, { role: 'user' })
+    sessionStore.loadSession(sessionId)
 })
 
 </script>

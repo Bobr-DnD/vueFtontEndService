@@ -1,14 +1,14 @@
 <script setup>
-import { ref, computed, toRaw, watch } from 'vue'
+import { ref, computed, toRaw } from 'vue'
 import { useRoute } from 'vue-router'
 
 import RepositoryFactory from '@http/RepositoryFactory'
 import { asyncHandler } from '@utils/asyncHandler'
 import { socket } from '@ws/webSocket'
-import { notify } from '@utils/notification'
 import { toNewEffect, toObject } from '@utils/objects.dto'
 import { checkObjectFieldExisting } from '@utils/entityHelper'
 import { useSessionStore } from '@/stores/sessionStore'
+import useEntityEditor from '@utils/useEntityEditor'
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue'
 import EffectTile from '@/components/reusable/EntityTiles/EffectTile.vue'
@@ -38,15 +38,24 @@ const newEffect = ref({
     value: ''
 })
 const searchQuery = ref('')
-const selectedEffect = ref(toNewEffect({}))
-const unsavedChanges = ref(false)
-const copied = ref(false)
+
+const {
+    selected: selectedEffect,
+    unsavedChanges,
+    load: loadEffect,
+    select: selectEffect,
+    discardChanges
+} = useEntityEditor({
+    toNew: toNewEffect,
+    getSourceList: () => store.session.effects,
+    afterSelect: () => { activeTab.value = 'edit' }
+})
 
 const filteredEffects = computed(() => {
     const effects = toRaw(store.session.effects);
 
     if (!searchQuery.value.trim()) {
-        return [...effects];
+        return effects;
     }
 
     const query = searchQuery.value.toLowerCase();
@@ -70,7 +79,7 @@ async function saveEffect() {
             RepositoryFactory.create(`effect`, effect)
         )
         if (err) return
-        reloadEffect(res.data.id, res.data)
+        loadEffect(res.data.id, res.data)
     }
     else {
 
@@ -78,70 +87,23 @@ async function saveEffect() {
             RepositoryFactory.update('effect', effect.id, effect)
         )
         if (err) return
-        reloadEffect(res.data.id, res.data)
+        loadEffect(res.data.id, res.data)
     }
     socket.emit('session:updateDataNotify', sessionId);
 }
 
 async function deleteEffect() {
 
+    const confirmDelete = confirm('Видалити ефект?')
+    if (!confirmDelete) return
+
     const [resEffect, errEffect] = await asyncHandler(
         RepositoryFactory.delete('effect', selectedEffect.value.id)
     )
     if (errEffect) return
     socket.emit('session:updateDataNotify', sessionId);
-    reloadEffect('new')
+    loadEffect('new')
 }
-
-// service functions
-
-function markUnsaved() {
-    unsavedChanges.value = true
-}
-
-function markSaved() {
-    unsavedChanges.value = false
-    copied.value = true
-}
-
-function discardChanges() {
-    markSaved()
-
-    if (selectedEffect.value.id === 'new') selectedEffect.value = toNewEffect({})
-    else selectedEffect.value = toNewEffect(structuredClone(toRaw(store.session.effects.find(el => el.id === selectedEffect.value.id))))
-
-    notify({ message: 'Зміни анульовані', type: 'warning' })
-}
-
-function reloadEffect(id, data = { id }) {
-    markSaved()
-    if (id === 'new') selectedEffect.value = toNewEffect({})
-    else selectedEffect.value = toNewEffect(data)
-}
-
-function selectEffect(id) {
-    if (selectedEffect.value?.id === id) return
-    if (unsavedChanges.value) {
-        const confirmSwitch = confirm('Є незбережені зміни. Вийти без збереження?')
-        if (!confirmSwitch) return
-    }
-
-    markSaved()
-
-    if (id === 'new') selectedEffect.value = toNewEffect({})
-    else selectedEffect.value = toNewEffect(structuredClone(toRaw(store.session.effects.find(el => el.id === id))))
-
-    activeTab.value = 'edit'
-}
-
-watch(() => selectedEffect.value, () => {
-
-    if (copied.value) {
-        copied.value = false
-        return
-    }
-    markUnsaved()
-}, { deep: true, immediate: false })
 
 </script>
 

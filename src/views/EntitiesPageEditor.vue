@@ -1,14 +1,14 @@
 <script setup>
-import { ref, computed, toRaw, watch } from 'vue';
+import { ref, computed, toRaw } from 'vue';
 import { useRoute } from 'vue-router';
 
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '@utils/asyncHandler';
 import { socket } from '@ws/webSocket'
-import { notify } from '@utils/notification';
 import { toNewEntity, toObject } from '@utils/objects.dto';
 import { checkArrayFieldExisting, checkObjectFieldExisting, addRow, removeRow } from '@utils/entityHelper';
 import { useSessionStore } from '@/stores/sessionStore';
+import useEntityEditor from '@utils/useEntityEditor';
 
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
@@ -50,9 +50,21 @@ const newRequirement = ref({
 const selectedType = ref('')
 const searchQuery = ref('')
 const searchQueryEffects = ref('')
-const selectedEntity = ref(toNewEntity({}))
-const unsavedChanges = ref(false)
-const copied = ref(false)
+
+const {
+    selected: selectedEntity,
+    unsavedChanges,
+    load: loadEntity,
+    select: selectEntity,
+    discardChanges
+} = useEntityEditor({
+    toNew: toNewEntity,
+    getSourceList: () => store.session.entities,
+    afterSelect: () => {
+        searchQueryEffects.value = ''
+        activeTab.value = 'edit'
+    }
+})
 
 //Filtering
 
@@ -101,22 +113,22 @@ async function saveEntity() {
             RepositoryFactory.create('entity', entity)
         )
         if (err) return
-        reloadEntity(res.data.id, res.data)
+        loadEntity(res.data.id, res.data)
     }
     else {
         const [res, err] = await asyncHandler(
             RepositoryFactory.update('entity', entity.id, entity)
         )
         if (err) return
-        reloadEntity(res.data.id, res.data)
+        loadEntity(res.data.id, res.data)
     }
     socket.emit('session:updateDataNotify', sessionId);
 }
 
 async function deleteEntity() {
 
-    const confirmSwitch = confirm('Видалити?')
-    if (!confirmSwitch) return
+    const confirmDelete = confirm('Видалити річ?')
+    if (!confirmDelete) return
 
     const [res, err] = await asyncHandler(
         RepositoryFactory.delete('entity', selectedEntity.value.id)
@@ -124,50 +136,7 @@ async function deleteEntity() {
     if (err) return
 
     socket.emit('session:updateDataNotify', sessionId);
-    reloadEntity('new')
-}
-
-//service functions
-
-function discardChanges() {
-    markSaved()
-
-    if (selectedEntity.value.id === 'new') selectedEntity.value = toNewEntity({})
-    else selectedEntity.value = toNewEntity(structuredClone(toRaw(store.session.entities.find(el => el.id === selectedEntity.value.id))))
-
-    notify({ message: 'Зміни анульовані', type: 'warning' })
-}
-
-function markUnsaved() {
-    unsavedChanges.value = true
-}
-
-function markSaved() {
-    unsavedChanges.value = false
-    copied.value = true
-}
-
-function reloadEntity(id, data) {
-    markSaved()
-
-    if (id === 'new') selectedEntity.value = toNewEntity({})
-    else selectedEntity.value = toNewEntity(data)
-}
-
-function selectEntity(id) {
-    if (selectedEntity.value?.id === id) return
-    if (unsavedChanges.value) {
-        const confirmSwitch = confirm('Є незбережені зміни. Вийти без збереження?')
-        if (!confirmSwitch) return
-    }
-
-    markSaved()
-
-    if (id === 'new') selectedEntity.value = toNewEntity({})
-    else selectedEntity.value = toNewEntity(structuredClone(toRaw(store.session.entities.find(el => el.id === id))))
-
-    searchQueryEffects.value = ''
-    activeTab.value = 'edit'
+    loadEntity('new')
 }
 
 // Entity functions
@@ -191,15 +160,6 @@ function addEffect(id) {
 function removeEffect(id) {
     removeRow(selectedEntity.value.effects, id)
 }
-
-watch(() => selectedEntity.value, () => {
-
-    if (copied.value) {
-        copied.value = false
-        return
-    }
-    markUnsaved()
-}, { deep: true, immediate: false })
 
 </script>
 
@@ -282,7 +242,7 @@ watch(() => selectedEntity.value, () => {
                 <DropDownChoosen label="Тип" entity_name="EntityType" :entity_array="store.session.entityTypes"
                     :important="true" v-model:selected="selectedEntity.type" />
 
-                <InputTextReactive class="col-span-3" placeholder="Опис" fieldName="description" ,
+                <InputTextReactive class="col-span-3" placeholder="Опис" fieldName="description"
                     v-model:inputValue="selectedEntity.description" type="text" />
 
                 <InputTextReactive placeholder="Ціна" fieldName="price" v-model:inputValue="selectedEntity.price"
