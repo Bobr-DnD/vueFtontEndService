@@ -1,7 +1,10 @@
 import { ref } from "vue";
 import { io } from "socket.io-client";
+import { notify } from "@utils/notification";
+
 
 const connected = ref(false)
+const reconnectCount = ref(0)
 
 const socket = io(import.meta.env.VITE_WS, {
   transports: ["websocket"],
@@ -20,6 +23,13 @@ socket.on("connect", () => {
 socket.on("disconnect", (reason) => {
   connected.value = false;
   console.warn("Socket disconnected:", reason);
+  notify({message: "З'єднання з сервером втрачено. Потрібно перезавантажити", type: 'error'})
 });
 
-export { socket, connected };
+socket.io.on('reconnect', (attempt) => {
+  reconnectCount.value++;
+  console.warn("Socket reconnected, attempt:", attempt);
+  notify({message: "З'єднання з сервером відновлено", type: 'success'})
+});
+
+export { socket, connected, reconnectCount };

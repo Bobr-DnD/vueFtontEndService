@@ -3,6 +3,7 @@ import Loader from 'vue-spinner/src/SyncLoader.vue'
 import { ref, computed, toRaw, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import useFilteredArray from '/utils/useFilteredArray';
+import useEntityEditor from '@utils/useEntityEditor';
 import { useSessionStore } from '@/stores/sessionStore';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
@@ -27,31 +28,55 @@ import { CheckBadgeIcon, PlusCircleIcon, HeartIcon } from '@heroicons/vue/24/sol
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
 import { socket } from '@ws/webSocket';
-import { checkObjectFieldExisting, filterPerksByRank, groupById, addRow, removeRow, filterPerksByRankWithoutCount } from '/utils/entityHelper';
+import { checkObjectFieldExisting, groupById, addRow, removeRow, removeAllRows, mapPerksWithCount } from '/utils/entityHelper';
 import { toNewCharacterObject } from '/utils/objects.dto';
-import { notify } from '/utils/notification';
+import { notify, notifySyncSuccess } from '/utils/notification';
 
 const sessionId = useRoute().params.sessionId
 const store = useSessionStore()
-const selectedCharacter = ref()
-const unsavedChanges = ref(false)
-const copied = ref(false)
 
 const types = ref({})
 
 const searchQuery = ref({
     characterEntity: '',
     sessionEntity: '',
-    characterPerks: '',
-    sessionPerks: '',
+    perks: '',
     characterEffects: '',
     sessionEffects: ''
 })
 
+const {
+    selected: selectedCharacter,
+    unsavedChanges,
+    markUnsaved,
+    load: loadCharacter,
+    select: selectCharacter,
+    discardChanges,
+    syncFromRemote: syncCharacterFromRemote
+} = useEntityEditor({
+    toNew: toNewCharacterObject,
+    getSourceList: () => store.session.characters,
+    buildNew: newCharacterFields,
+    afterSelect: resetSearchQuery
+})
+
 const filteredSessionEntities = useFilteredArray(computed(() => store.session.entities), computed(() => searchQuery.value.sessionEntity), computed(() => types.value.inventory))
 const filteredCharacterEntities = useFilteredArray(computed(() => selectedCharacter.value.entities), computed(() => searchQuery.value.characterEntity), computed(() => types.value.inventory), { groupFn: groupById })
-const filteredSessionPerks = useFilteredArray(computed(() => store.session.perks), computed(() => searchQuery.value.sessionPerks), computed(() => types.value.perks), { transformFn: () => filterPerksByRank(selectedCharacter.value.perks, store.session.perks) })
-const filteredCharacterPerks = useFilteredArray(computed(() => selectedCharacter.value.perks), computed(() => searchQuery.value.characterPerks), computed(() => types.value.perks), { groupFn: groupById })
+
+const perkOwnershipFilter = ref('owned')
+const perkOwnershipOptions = [
+    { id: 'owned', label: 'У персонажа' },
+    { id: 'not_owned', label: 'Відсутні у персонажа' }
+]
+
+const filteredPerksByType = useFilteredArray(computed(() => mapPerksWithCount(selectedCharacter.value.perks, store.session.perks)), computed(() => searchQuery.value.perks), computed(() => types.value.perks))
+
+const filteredPerks = computed(() => {
+    const owned = perkOwnershipFilter.value === 'owned'
+    return [...filteredPerksByType.value]
+        .filter(perk => owned ? perk.count > 0 : perk.count === 0)
+        .sort((a, b) => a.name.localeCompare(b.name, 'uk'))
+})
 
 const filteredCharacterEffects = computed(() => {
     const list = selectedCharacter.value.effects
@@ -89,8 +114,8 @@ watch(
     (newSession) => {
         if (!selectedCharacter.value || selectedCharacter.value.id === 'new') return
 
-        const updated = newSession.characters.find(el => el.id === selectedCharacter.value.id)
-        reloadCharacter(updated ? updated.id : 'new', updated && structuredClone(toRaw(updated)))
+        const stillExists = newSession.characters.some(el => el.id === selectedCharacter.value.id)
+        syncCharacterFromRemote(stillExists ? selectedCharacter.value.id : 'new')
     }
 )
 
@@ -98,7 +123,7 @@ function init() {
     types.value.inventory = buildTypes(store.session.entityTypes)
     types.value.perks = buildTypes(store.session.perkTypes)
 
-    selectCharacter('new')
+    loadCharacter('new')
 }
 
 //API calls
@@ -114,17 +139,16 @@ async function saveCharacter() {
                 RepositoryFactory.create('character', character)
             )
             if (err) return
-            reloadCharacter('new')
+            loadCharacter(res.data.id, res.data)
 
         } else {
             const [res, err] = await asyncHandler(
                 RepositoryFactory.update('character', character.id, character)
             )
             if (err) return
-            reloadCharacter(res.data.id, res.data)
+            loadCharacter(res.data.id, res.data)
         }
 
-        notify({ message: 'Зміни збережені', type: 'info' })
         socket.emit('session:updateDataNotify', sessionId);
 
     }
@@ -146,8 +170,7 @@ async function deleteCharacter() {
         return
     }
     socket.emit('session:updateDataNotify', sessionId);
-    notify({ message: 'Персонаж видалений', type: 'success' })
-    reloadCharacter('new')
+    loadCharacter('new')
 }
 
 //Select/Reload character
@@ -156,38 +179,6 @@ function newCharacterFields() {
     const characteristics = store.session.characteristicsList.map(ch => ({ 'name': ch.name, 'value': '', id: crypto.randomUUID() }))
     const currency = store.session.currencyTypes.map(c => ({ 'name': c.name, 'value': 0, 'icon': c.icon, id: crypto.randomUUID() }))
     return toNewCharacterObject({ characteristics, currency, session: sessionId })
-}
-
-function reloadCharacter(id, data = { id }) {
-    markSaved()
-
-    if (id === 'new')
-        selectedCharacter.value = newCharacterFields()
-    else selectedCharacter.value = toNewCharacterObject(data)
-}
-
-function selectCharacter(id, check = false) {
-    if (selectedCharacter.value?.id === id && check) return
-    if (unsavedChanges.value) {
-        const confirmSwitch = confirm('Є незбережені зміни. Вийти без збереження?')
-        if (!confirmSwitch) return
-    }
-
-    markSaved()
-
-    if (id === 'new') {
-        selectedCharacter.value = newCharacterFields()
-    }
-    else selectedCharacter.value = toNewCharacterObject(structuredClone(toRaw(store.session.characters.find(el => el.id === id))))
-}
-
-function discardChanges() {
-    markSaved()
-
-    if (selectedCharacter.value.id === 'new') selectCharacter('new')
-    else selectCharacter(selectedCharacter.value.id)
-
-    notify({ message: 'Зміни анульовані', type: 'warning' })
 }
 
 // service functions
@@ -211,16 +202,6 @@ function resetSearchQuery() {
     Object.entries(searchQuery.value).forEach(([key, val]) => {
         searchQuery.value[key] = ''
     })
-}
-
-function markUnsaved() {
-    unsavedChanges.value = true
-}
-
-function markSaved() {
-    unsavedChanges.value = false
-    copied.value = true
-    resetSearchQuery()
 }
 
 function showType(listKey, id) {
@@ -287,27 +268,27 @@ function removeEntity(entity) {
     markUnsaved()
 }
 
-function removerPerk(perk) {
-    removeRow(selectedCharacter.value.perks, perk.id)
-    markUnsaved()
-}
+function levelUpPerk(perk) {
+    const maxLevel = perk.levels?.length || 1
+    if (perk.count >= maxLevel) return
 
-function addPerk(perk) {
     addRow(store.session.perks, selectedCharacter.value.perks, perk.id)
     markUnsaved()
 }
 
-const canSave = computed(() => unsavedChanges.value)
+function levelDownPerk(perk) {
+    if (!perk.count) return
 
-watch(() => selectedCharacter.value, () => {
-
-    if (copied.value) {
-        copied.value = false
-        return
-    }
-
+    removeRow(selectedCharacter.value.perks, perk.id)
     markUnsaved()
-}, { deep: true, immediate: false })
+}
+
+function removePerkFully(perk) {
+    removeAllRows(selectedCharacter.value.perks, perk.id)
+    markUnsaved()
+}
+
+const canSave = computed(() => unsavedChanges.value)
 
 </script>
 
@@ -337,9 +318,9 @@ watch(() => selectedCharacter.value, () => {
 
             <div class="flex items-center justify-center space-x-4 m-2">
                 <GraySelectorButton v-for="character in store.session.characters" :key="character.id"
-                    @click="selectCharacter(character.id, true)" :id="character.id" :label="character.name"
+                    @click="selectCharacter(character.id)" :id="character.id" :label="character.name"
                     :active="selectedCharacter.id === character.id ? true : false" />
-                <PlusButton @click="selectCharacter('new', true)" class="w-16 h-14 border-4 border-darkred-dark rounded-lg
+                <PlusButton @click="selectCharacter('new')" class="w-16 h-14 border-4 border-darkred-dark rounded-lg
            md:hover:bg-darkred-gray group"
                     :class="selectedCharacter.id === 'new' ? 'bg-darkred-gray text-darkred-light' : 'bg-darkred-light'" />
             </div>
@@ -385,7 +366,7 @@ watch(() => selectedCharacter.value, () => {
                 <div v-if="checkObjectFieldExisting(selectedCharacter.characteristics)"
                     class="col-span-full grid grid-cols-2 gap-2">
 
-                    <InputTextReactive v-for="characteristic in selectedCharacter.characteristics" :key="Math.random().toString(24).slice(2)"
+                    <InputTextReactive v-for="characteristic in selectedCharacter.characteristics" :key="characteristic.name"
                         :label="characteristic.name" fieldName="characteristicValue"
                         v-model:inputValue="characteristic.value" class="w-full" />
 
@@ -517,59 +498,39 @@ watch(() => selectedCharacter.value, () => {
                         :active="!type.hidden" @click="showType('perks', type.id)" />
                 </div>
 
-                <div
-                    class="col-span-full grid grid-cols-3 auto-rows-min gap-x-4 gap-y-3 p-3 rounded-xl bg-greenish-dark/10 border-2 border-greenish-mid/50">
+                <div class="w-full col-span-full flex gap-2 justify-center">
 
-                    <div class="col-span-full flex items-center gap-2 justify-center">
-                        <CheckBadgeIcon class="w-6 h-6 text-greenish-mid" />
-                        <Header1 label="Перки персонажа:" />
-                        <span
-                            class="text-sm px-2 py-0.5 rounded-full bg-greenish-mid text-darkred-dark font-semibold">{{
-                                filteredCharacterPerks.length }}</span>
-                    </div>
-
-                    <div class="col-span-3 flex gap-2">
-                        <input v-model="searchQuery.characterPerks" placeholder="Пошук ..."
-                            class="h-12 w-full p-2 rounded-lg bg-darkred-dark_gray text-darkred-light" />
-
-                        <RejectButtonWithText v-if="searchQuery.characterPerks"
-                            @click="searchQuery.characterPerks = ''" text="Очистити" />
-                    </div>
-
-                    <Header1 v-if="!filteredCharacterPerks.length"
-                        class="col-span-full justify-self-center text-lg text-darkred-light_gray"
-                        label="Перків не знайдено" />
-
-                    <PerkRowView v-for="perk in filteredCharacterPerks" :key="perk.id" :perk="perk" :removable="true"
-                        :callback_remove="removerPerk" />
-
+                    <GraySelectorButton v-for="option in perkOwnershipOptions" :label="option.label" :key="option.id"
+                        :id="option.id" :active="perkOwnershipFilter === option.id"
+                        @click="perkOwnershipFilter = option.id" />
                 </div>
 
                 <div
                     class="col-span-full grid grid-cols-3 auto-rows-min gap-x-4 gap-y-3 p-3 rounded-xl bg-darkred-dark_gray/40 border-2 border-darkred-gray/40">
 
                     <div class="col-span-full flex items-center gap-2 justify-center">
-                        <PlusCircleIcon class="w-6 h-6 text-darkred-light_gray" />
-                        <Header1 label="Усі перки:" />
+                        <CheckBadgeIcon class="w-6 h-6 text-greenish-mid" />
+                        <Header1 label="Перки:" />
                         <span
                             class="text-sm px-2 py-0.5 rounded-full bg-darkred-gray text-darkred-dark font-semibold">{{
-                                filteredSessionPerks.length }}</span>
+                                filteredPerks.length }}</span>
                     </div>
 
                     <div class="col-span-3 flex gap-2">
-                        <input v-model="searchQuery.sessionPerks" placeholder="Пошук ..."
-                            class="h-12 w-full p-2 col-span-3 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+                        <input v-model="searchQuery.perks" placeholder="Пошук ..."
+                            class="h-12 w-full p-2 rounded-lg bg-darkred-dark_gray text-darkred-light" />
 
-                        <RejectButtonWithText v-if="searchQuery.sessionPerks" @click="searchQuery.sessionPerks = ''"
+                        <RejectButtonWithText v-if="searchQuery.perks" @click="searchQuery.perks = ''"
                             text="Очистити" />
                     </div>
 
-                    <Header1 v-if="!filteredSessionPerks.length"
+                    <Header1 v-if="!filteredPerks.length"
                         class="col-span-full justify-self-center text-lg text-darkred-light_gray"
                         label="Перків не знайдено" />
 
-                    <PerkRowView v-for="perk in filteredSessionPerks" :key="perk.id" :perk="perk" :addable="true"
-                        :callback_add="addPerk" />
+                    <PerkRowView v-for="perk in filteredPerks" :key="perk.id" :perk="perk"
+                        :callback_level_up="levelUpPerk" :callback_level_down="levelDownPerk"
+                        :callback_remove="removePerkFully" />
 
                 </div>
 

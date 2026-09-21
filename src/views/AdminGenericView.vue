@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, onBeforeUnmount, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { socket, connected } from '@ws/webSocket';
+import { socket, connected, reconnectCount } from '@ws/webSocket';
 import { useSessionStore } from '@/stores/sessionStore';
 
 import SideSladierSessionStatus from '@/components/reusable/SideSladierSessionStatus.vue';
@@ -18,8 +18,9 @@ onBeforeUnmount(() => {
     store.CloseWebsocketSession(sessionId)
 })
 
-watch(connected, (isConnected) => {
-    if (isConnected) socket.emit('session:join', sessionId, { role: 'admin' })
+watch(reconnectCount, () => {
+    socket.emit('session:join', sessionId, { role: 'admin' })
+    store.loadSession(sessionId)
 })
 
 </script>
