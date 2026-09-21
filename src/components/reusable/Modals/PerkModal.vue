@@ -28,9 +28,9 @@ const props = defineProps({
 
             <div v-else class="p2 text-clip w-[90%]">Назва: {{ props.perk.name }}</div>
 
-            <div class="p2 text-clip">Опис: {{ props.perk.description }}</div>
+            <div v-if="props.perk.description" class="p2 text-clip">Опис: {{ props.perk.description }}</div>
 
-            <div class="flex flex-col gap-1">
+            <div v-if="props.perk.levels.length > 0" class="flex flex-col gap-1">
                 <div class="font-normal">
                     Рівні перку:
                 </div>

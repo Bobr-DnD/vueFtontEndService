@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
-import PerkModal from '../EntityModals/PerkModal.vue';
+import PerkModal from '@/components/reusable/Modals/PerkModal.vue';
 import { CursorArrowRippleIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/vue/24/solid';
 
 const props = defineProps({

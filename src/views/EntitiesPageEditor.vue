@@ -17,7 +17,7 @@ import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWi
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
 import SearchInputBlack from '@/components/reusable/SearchInputs/SearchInputBlack.vue';
-import EntityTile from '@/components/reusable/EntityTiles/EntityTile.vue';
+import EntityTile from '@/components/admin-page components/Cards/EntityTile.vue';
 import Header1 from '@/components/reusable/Titles/Header1.vue';
 import InputTextReactive from '@/components/reusable/Inputs/InputTextReactive.vue';
 import DropDownChoosen from '@/components/reusable/DropDowns/DropDownChoosen.vue';
@@ -26,7 +26,7 @@ import ImageEditor from '@/components/reusable/ImageEditor.vue';
 import TextAreaReactive from '@/components/reusable/Inputs/TextAreaReactive.vue';
 import Header2 from '@/components/reusable/Titles/Header2.vue';
 import DeleteButton from '@/components/reusable/Buttons/DeleteButton.vue';
-import EffectTile from '@/components/reusable/EntityTiles/EffectTile.vue';
+import EffectTile from '@/components/admin-page components/Cards/EffectTile.vue';
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue';
 import { PencilIcon } from '@heroicons/vue/24/solid';
 

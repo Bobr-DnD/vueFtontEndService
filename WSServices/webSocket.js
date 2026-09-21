@@ -26,6 +26,11 @@ socket.on("disconnect", (reason) => {
   notify({message: "З'єднання з сервером втрачено. Потрібно перезавантажити", type: 'error'})
 });
 
+socket.on("connect_error", (err) => {
+  connected.value = false;
+  console.warn("Socket connect_error:", err.message);
+});
+
 socket.io.on('reconnect', (attempt) => {
   reconnectCount.value++;
   console.warn("Socket reconnected, attempt:", attempt);

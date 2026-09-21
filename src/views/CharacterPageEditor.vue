@@ -8,11 +8,12 @@ import { useSessionStore } from '@/stores/sessionStore';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
 import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
+import PillSelectorButton from '@/components/reusable/Buttons/PillSelectorButton.vue';
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue'
 import InputTextReactive from '@/components/reusable/Inputs/InputTextReactive.vue';
 import ImageEditor from '@/components/reusable/ImageEditor.vue';
 import TextAreaReactive from '@/components/reusable/Inputs/TextAreaReactive.vue';
-import CustomFieldTile from '@/components/reusable/EntityTiles/CustomFieldTile.vue';
+import CustomFieldTile from '@/components/reusable/CustomFieldTile.vue';
 import CustomFieldsEditor from '@/components/reusable/CustomFieldsEditor.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
@@ -21,7 +22,7 @@ import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
 import CurrencyTable from '@/components/character-page components/CurrencyTable.vue';
 import EffectsTable from '@/components/character-page components/EffectsTable.vue';
 import PerkRowView from '@/components/character-page components/EntityRows/PerkRowView.vue';
-import EntityRowView from '@/components/character-page components/EntityRows/EntityRowView.vue';
+import EntityRowView from '@/components/admin-page components/EntityRows/EntityRowView.vue';
 import Header1 from '@/components/reusable/Titles/Header1.vue';
 import { CheckBadgeIcon, PlusCircleIcon, HeartIcon } from '@heroicons/vue/24/solid';
 
@@ -41,6 +42,7 @@ const searchQuery = ref({
     characterEntity: '',
     sessionEntity: '',
     perks: '',
+    perksOwnership: '',
     characterEffects: '',
     sessionEffects: ''
 })
@@ -63,8 +65,8 @@ const {
 const filteredSessionEntities = useFilteredArray(computed(() => store.session.entities), computed(() => searchQuery.value.sessionEntity), computed(() => types.value.inventory))
 const filteredCharacterEntities = useFilteredArray(computed(() => selectedCharacter.value.entities), computed(() => searchQuery.value.characterEntity), computed(() => types.value.inventory), { groupFn: groupById })
 
-const perkOwnershipFilter = ref('owned')
 const perkOwnershipOptions = [
+    { id: '', label: 'Всі' },
     { id: 'owned', label: 'У персонажа' },
     { id: 'not_owned', label: 'Відсутні у персонажа' }
 ]
@@ -72,9 +74,13 @@ const perkOwnershipOptions = [
 const filteredPerksByType = useFilteredArray(computed(() => mapPerksWithCount(selectedCharacter.value.perks, store.session.perks)), computed(() => searchQuery.value.perks), computed(() => types.value.perks))
 
 const filteredPerks = computed(() => {
-    const owned = perkOwnershipFilter.value === 'owned'
+    const ownership = searchQuery.value.perksOwnership
     return [...filteredPerksByType.value]
-        .filter(perk => owned ? perk.count > 0 : perk.count === 0)
+        .filter(perk => {
+            if (ownership === 'owned') return perk.count > 0
+            if (ownership === 'not_owned') return perk.count === 0
+            return true
+        })
         .sort((a, b) => a.name.localeCompare(b.name, 'uk'))
 })
 
@@ -498,13 +504,6 @@ const canSave = computed(() => unsavedChanges.value)
                         :active="!type.hidden" @click="showType('perks', type.id)" />
                 </div>
 
-                <div class="w-full col-span-full flex gap-2 justify-center">
-
-                    <GraySelectorButton v-for="option in perkOwnershipOptions" :label="option.label" :key="option.id"
-                        :id="option.id" :active="perkOwnershipFilter === option.id"
-                        @click="perkOwnershipFilter = option.id" />
-                </div>
-
                 <div
                     class="col-span-full grid grid-cols-3 auto-rows-min gap-x-4 gap-y-3 p-3 rounded-xl bg-darkred-dark_gray/40 border-2 border-darkred-gray/40">
 
@@ -514,6 +513,12 @@ const canSave = computed(() => unsavedChanges.value)
                         <span
                             class="text-sm px-2 py-0.5 rounded-full bg-darkred-gray text-darkred-dark font-semibold">{{
                                 filteredPerks.length }}</span>
+                    </div>
+
+                    <div class="col-span-full flex gap-2 justify-center">
+                        <PillSelectorButton v-for="option in perkOwnershipOptions" :label="option.label"
+                            :key="option.id" :id="option.id" :active="searchQuery.perksOwnership === option.id"
+                            @click="searchQuery.perksOwnership = option.id" />
                     </div>
 
                     <div class="col-span-3 flex gap-2">

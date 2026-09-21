@@ -15,15 +15,12 @@ import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
-import CustomFieldsEditor from '@/components/reusable/CustomFieldsEditor.vue';
-import CustomFieldTile from '@/components/reusable/EntityTiles/CustomFieldTile.vue';
+
 import ArrayStringFormWIcons from '@/components/reusable/Forms/ArrayStringFormWIcons.vue';
 import ArrayStringFromWColorPicker from '@/components/reusable/Forms/ArrayStringFromWColorPicker.vue';
 import Header1 from '@/components/reusable/Titles/Header1.vue';
 import InputPassword from '@/components/reusable/Inputs/InputPassword.vue';
-import RadioSelector from '@/components/reusable/Buttons/Radios/RadioSelector.vue';
-import { ArrowUpTrayIcon } from '@heroicons/vue/24/solid';
-import ApproveButton from '@/components/reusable/Buttons/ApproveButton.vue';
+
 
 const store = useSessionStore()
 const sessionId = useRoute().params.sessionId

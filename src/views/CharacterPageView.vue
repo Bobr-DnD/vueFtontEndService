@@ -13,7 +13,7 @@ import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaio
 import PerkTable from '@/components/character-page components/PerkTable.vue';
 import EntityTable from '@/components/character-page components/EntityTable.vue';
 import EffectsTable from '@/components/character-page components/EffectsTable.vue';
-import CustomFieldTile from '@/components/reusable/EntityTiles/CustomFieldTile.vue';
+import CustomFieldTile from '@/components/reusable/CustomFieldTile.vue';
 import characterCardSmall from '@/components/character-page components/CharacterViewCard.vue';
 import Experience from '@/components/character-page components/Experience.vue';
 import CurrencyTable from '@/components/character-page components/CurrencyTable.vue';
@@ -177,7 +177,7 @@ function togglePicker(healthId) {
 <template>
     <SessionViewNavigtaion />
 
-    <div v-if="!sessionStore.isLoading" class="grid grid-cols-1 lg:grid-cols-[25%_75%]">
+    <div v-if="!sessionStore.isLoading && !gameStore.isBackendOffline" class="grid grid-cols-1 lg:grid-cols-[25%_75%]">
 
         <section class="p-2 lg:p-4 space-y-2">
 
@@ -317,7 +317,7 @@ function togglePicker(healthId) {
 
     <div v-if="sessionStore.isLoading || gameStore.isBackendOffline"
         class="w-full h-full text-center py-6 flex flex-col gap-10 justify-center items-center">
-        <BackendOffline v-if="gameStore.isBackendOffline" class="p-4 w-full lg:w-[650px]" />
+        <BackendOffline v-if="gameStore.isBackendOffline" class="w-[90vw] lg:w-[650px]" />
 
         <DiceLoader />
     </div>

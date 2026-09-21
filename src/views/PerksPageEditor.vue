@@ -15,7 +15,7 @@ import Loader from 'vue-spinner/src/SyncLoader.vue'
 import SearchInputBlack from '@/components/reusable/SearchInputs/SearchInputBlack.vue';
 import Header2 from '@/components/reusable/Titles/Header2.vue';
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue';
-import PerkTile from '@/components/reusable/EntityTiles/PerkTile.vue';
+import PerkTile from '@/components/admin-page components/Cards/PerkTile.vue';
 import InputTextReactive from '@/components/reusable/Inputs/InputTextReactive.vue';
 import DropDownPerks from '@/components/reusable/DropDowns/DropDownPerks.vue';
 import TextAreaReactive from '@/components/reusable/Inputs/TextAreaReactive.vue';

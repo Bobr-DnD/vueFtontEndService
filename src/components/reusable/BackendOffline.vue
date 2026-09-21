@@ -15,10 +15,6 @@
   </div>
 </template>
 
-<script setup>
-const backendOffline = true // example, replace with actual reactive value
-</script>
-
 <style scoped>
 @keyframes pulse-shadow {
   0% {

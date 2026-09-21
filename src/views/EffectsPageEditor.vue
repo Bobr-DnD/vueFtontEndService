@@ -11,7 +11,7 @@ import { useSessionStore } from '@/stores/sessionStore'
 import useEntityEditor from '@utils/useEntityEditor'
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue'
-import EffectTile from '@/components/reusable/EntityTiles/EffectTile.vue'
+import EffectTile from '@/components/admin-page components/Cards/EffectTile.vue'
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue'
 import Header2 from '@/components/reusable/Titles/Header2.vue'

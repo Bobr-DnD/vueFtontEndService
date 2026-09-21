@@ -103,33 +103,39 @@ export const useSessionStore = defineStore('session', () => {
 
     function CloseWebsocketSession(sessionId) {
         socket.emit('session:leave', sessionId)
-        const events = ['session:error', 'session:update', 'session:updateDataNotify', 'disconnect']
-        events.forEach(e => socket.off(e))
+        socket.off('session:updateDataNotify', onSessionUpdateDataNotify)
+        socket.off('session:update', onSessionUpdate)
+        socket.off('error', onSocketError)
+        socket.off('disconnect', onSocketDisconnect)
     }
 
-    socket.on('session:updateDataNotify', (newSession) => {
+    function onSessionUpdateDataNotify(newSession) {
         session.value = toNewSession(newSession)
         notifySyncSuccess()
-    })
+    }
 
-    socket.on('session:update', async (session) => {
-
+    function onSessionUpdate(session) {
         const room = session.room
         charactersOnlineIds.value = []
 
         if (room) {
             charactersOnlineIds.value = room.members.filter(el => el[1].role === 'user' && el[1].userId).map(el => el[1].userId)
         }
-    })
+    }
 
-    socket.on('error', async (message) => {
+    function onSocketError(message) {
         console.warn(message);
         notify({message: message, type: 'error'})
-    })
+    }
 
-    socket.on('disconnect', () => {
+    function onSocketDisconnect() {
         charactersOnlineIds.value = []
-    })
+    }
+
+    socket.on('session:updateDataNotify', onSessionUpdateDataNotify)
+    socket.on('session:update', onSessionUpdate)
+    socket.on('error', onSocketError)
+    socket.on('disconnect', onSocketDisconnect)
 
     //service functions
     function copySession() {

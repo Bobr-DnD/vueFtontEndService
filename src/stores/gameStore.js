@@ -27,10 +27,11 @@ export const useGameStore = defineStore('game', () => {
             if (!isBackendOffline.value) {
                 offlineTimeout.value = setTimeout(() => {
                     isBackendOffline.value = true
-                }, 30 * 1000)
+                }, 30)
             }
         }
-    })
+
+    }, { immediate: true })
 
     function initCharacterUI(characterId) {
         if (!(characterId in effects_hidden)) effects_hidden[characterId] = true

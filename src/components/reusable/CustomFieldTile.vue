@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue';
 import { CursorArrowRippleIcon } from '@heroicons/vue/24/solid'
-import DeleteButton from '../Buttons/DeleteButton.vue';
+import DeleteButton from './Buttons/DeleteButton.vue';
 import { notify } from '/utils/notification';
 
 const fields = defineModel('fields', { type: Object, required: true })

@@ -16,11 +16,12 @@ const props = defineProps({
 })
 
 const fileInput = ref(null)
+const isDragging = ref(false)
 
-async function loadImage() {
+async function loadImage(file) {
 
     const formData = new FormData();
-    formData.append('file', fileInput.value.files[0])
+    formData.append('file', file)
 
     const [res, err] = await asyncHandler(
         RepositoryFactory.createFile('storage', formData)
@@ -31,6 +32,23 @@ async function loadImage() {
     }
 
     image.value = res.data
+}
+
+function onFileInputChange() {
+    const file = fileInput.value.files[0]
+    if (file) loadImage(file)
+    fileInput.value.value = null
+}
+
+function onDrop(event) {
+    isDragging.value = false
+    const file = event.dataTransfer.files[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+        notify({ message: 'Будь ласка, перетягніть файл зображення', type: 'error' })
+        return
+    }
+    loadImage(file)
 }
 
 async function deleteImage() {
@@ -53,11 +71,13 @@ async function deleteImage() {
 <template>
     <div class="flex flex-col justify-center items-center space-y-2">
 
-        <img @click="fileInput.click()"
-            class="w-1/2 min-h-auto max-h-[512px] object-cover object-top rounded-xl border-4 border-darkred-red shadow-md hover:cursor-pointer"
-            :src="image ? image : `https://placehold.co/400x200?text=${props.label}`" :alt="props.label" />
+        <img @click="fileInput.click()" @dragenter.prevent="isDragging = true" @dragover.prevent="isDragging = true"
+            @dragleave.prevent="isDragging = false" @drop.prevent="onDrop" :class="[
+                'w-1/2 min-h-auto max-h-[512px] object-cover object-top rounded-xl border-4 shadow-md hover:cursor-pointer transition-colors duration-200',
+                isDragging ? 'border-greenish-mid' : 'border-darkred-red'
+            ]" :src="image ? image : `https://placehold.co/400x200?text=${props.label}`" :alt="props.label" />
 
-        <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="loadImage" />
+        <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onFileInputChange" />
 
         <div class="w-1/2 flex gap-2 h-14">
             <button @click="fileInput.click()" class="w-full flex items-center justify-center gap-2 px-5 py-3 font-gothic text-lg font-semibold
