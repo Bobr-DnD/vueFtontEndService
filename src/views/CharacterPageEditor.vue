@@ -21,7 +21,7 @@ import HealthFieldsEditor from '@/components/admin-page components/HealthFieldsE
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
 import CurrencyTable from '@/components/character-page components/CurrencyTable.vue';
 import EffectsTable from '@/components/character-page components/EffectsTable.vue';
-import PerkRowView from '@/components/character-page components/EntityRows/PerkRowView.vue';
+import PerkRowView from '@/components/admin-page components/EntityRows/PerkRowView.vue';
 import EntityRowView from '@/components/admin-page components/EntityRows/EntityRowView.vue';
 import Header1 from '@/components/reusable/Titles/Header1.vue';
 import { CheckBadgeIcon, PlusCircleIcon, HeartIcon } from '@heroicons/vue/24/solid';

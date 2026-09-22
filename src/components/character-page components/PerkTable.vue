@@ -3,7 +3,7 @@ import { ref, watch, computed } from 'vue';
 import { addRow, removeRow, removeAllRows, filterPerksByRank, groupById } from '/utils/entityHelper'
 import ModalOpenButton from '../reusable/Buttons/ModalOpenButton.vue';
 import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue';
-import ApproveButton from '../reusable/Buttons/ApproveButton.vue';
+import AddButton from '../reusable/Buttons/AddButton.vue';
 import RejectButtonWithText from '../reusable/Buttons/RejectButtonWithText.vue';
 import ButtonRedHideFunction from '../reusable/Buttons/ButtonRedHideFunction.vue';
 import PerkRowView from './EntityRows/PerkRowView.vue';
@@ -129,7 +129,7 @@ function removePerkFully(perk) {
                         class="grid grid-cols-[1fr_40px] gap-2 odd:bg-darkred-gray p-2 rounded-lg">
                         <div>Назва: {{ perk.name }}</div>
 
-                        <ApproveButton @click="levelUpPerk(perk)" class="row-span-2 flex justify-center items-center" />
+                        <AddButton @click="levelUpPerk(perk)" class="row-span-2 flex justify-center items-center" />
 
                         <div v-if="perk.description">Опис: {{ perk.description }}</div>
 

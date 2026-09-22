@@ -1,6 +1,6 @@
 <script setup>
 import { reactive, computed, toRaw, ref } from 'vue'
-import ApproveButton from './Buttons/ApproveButton.vue'
+import AddButton from './Buttons/AddButton.vue'
 import ImportantField from './ImportantField.vue'
 import { notify } from '/utils/notification'
 
@@ -73,7 +73,7 @@ function addField() {
         <form @submit.prevent="addField"
             class="flex flex-col w-full items-start justify-start p-2 font-univers mb-2  rounded-xl">
 
-            <label :for="`${props.name}-name`" class=" text-darkred-dark_gray font-semibold text-lg tracking-wide">
+            <label :for="`${props.name}-name`" class=" text-darkred-gray font-semibold text-lg tracking-wide">
                 Назва поля
                 <ImportantField />
                 :
@@ -82,14 +82,14 @@ function addField() {
             <input v-model="form.name" ref="nameInput" :id="`${props.name}-name`" type="text" placeholder="Назва поля"
                 :class="inputStyle" />
 
-            <label :for="`${props.name}-description`" class=" text-darkred-dark_gray">
+            <label :for="`${props.name}-description`" class=" text-darkred-gray">
                 Опис поля:
             </label>
 
             <input v-model="form.description" :id="`${props.name}-description`" type="text" placeholder="Опис поля"
                 :class="inputStyle" />
 
-            <label :for="`${props.name}-value`" class="text-darkred-dark_gray">
+            <label :for="`${props.name}-value`" class="text-darkred-gray">
                 Значення
                 <ImportantField />
                 :
@@ -106,7 +106,7 @@ function addField() {
 
         </form>
 
-        <ApproveButton @click="addField" class="w-32 mx-auto text-2xl" />
+        <AddButton @click="addField" class="w-20 mx-auto text-2xl" />
     </div>
 </template>
 

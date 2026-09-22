@@ -2,7 +2,6 @@
 import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
-import ApproveButton from '@/components/reusable/Buttons/ApproveButton.vue';
 import { checkArrayFieldExisting, checkObjectFieldExisting } from '@utils/entityHelper';
 
 const props = defineProps({
