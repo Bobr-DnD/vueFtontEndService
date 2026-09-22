@@ -1,13 +1,12 @@
 <script setup>
 import { ref, watch, computed } from 'vue';
-import { addRow, removeRow } from '/utils/entityHelper';
+import { addRow, removeRow, addRows, removeRows } from '/utils/entityHelper';
 import { notify } from '/utils/notification';
 import { groupById } from '/utils/entityHelper';
 
 import ButtonRedHideFunction from '../reusable/Buttons/ButtonRedHideFunction.vue';
 import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue';
-import ApproveButton from '../reusable/Buttons/ApproveButton.vue';
-import RejectButtonWithText from '../reusable/Buttons/RejectButtonWithText.vue';
+import AddButton from '../reusable/Buttons/AddButton.vue';
 import EntityRowView from './EntityRows/EntityRowView.vue';
 import ModalOpenButton from '../reusable/Buttons/ModalOpenButton.vue';
 import SearchInputBlack from '../reusable/SearchInputs/SearchInputBlack.vue';
@@ -33,6 +32,11 @@ const props = defineProps({
 })
 
 const types = ref([])
+const expandedEntityId = ref(null)
+
+function toggleExpanded(entity) {
+    expandedEntityId.value = expandedEntityId.value === entity.id ? null : entity.id
+}
 
 watch(() => props.types, (newTypes) => {
     types.value = newTypes.map(type => {
@@ -62,6 +66,19 @@ function addEntity(entity) {
 function removeEntity(entity) {
     removeRow(props.character_entities, entity.id)
     notify({ message: `Видалено ${entity.name}`, type: 'success' })
+    props.callback()
+}
+
+function changeEntityCount(entity, delta) {
+    if (delta > 0) {
+        addRows(props.session_entities, props.character_entities, entity.id, delta)
+        notify({ message: `Додано ${delta > 1 ? `${delta}x ` : ''}${entity.name}`, type: 'success' })
+    } else if (delta < 0) {
+        removeRows(props.character_entities, entity.id, -delta)
+        notify({ message: `Видалено ${-delta > 1 ? `${-delta}x ` : ''}${entity.name}`, type: 'success' })
+    } else {
+        return
+    }
     props.callback()
 }
 
@@ -96,7 +113,8 @@ function getFilteredSessionEntities(type) {
 
         <div class="w-full max-h-[680px] overflow-y-auto auto-hide-scroll flex flex-col gap-1">
             <EntityRowView v-if="!type.hidden" v-for="entity in getFilteredCharacterEntities(type)" :key="entity.name"
-                :entity="entity" :owned="true" :callback_add="addEntity" :callback_remove="removeEntity" />
+                :entity="entity" :owned="true" :callback_change_count="changeEntityCount"
+                :expanded="expandedEntityId === entity.id" :callback_toggle="toggleExpanded" />
         </div>
 
         <div v-if="!type.hidden" class="w-full flex justify-center items-center">
@@ -133,7 +151,7 @@ function getFilteredSessionEntities(type) {
                             {{ entity.name }}
                         </div>
                         <div class="justify-self-center">{{ entity.price }}</div>
-                        <ApproveButton @click="addEntity(entity)" class="w-16" />
+                        <AddButton  @click="addEntity(entity)" class="w-12 justify-self-end" />
                     </div>
                 </div>
 

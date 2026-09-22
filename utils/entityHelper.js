@@ -71,6 +71,14 @@ export function addRow(entitiesAll, entitiesArray, id) {
   entitiesArray.push(entity)
 }
 
+export function addRows(entitiesAll, entitiesArray, id, count) {
+  for (let i = 0; i < count; i++) addRow(entitiesAll, entitiesArray, id)
+}
+
+export function removeRows(entityArray, id, count) {
+  for (let i = 0; i < count; i++) removeRow(entityArray, id)
+}
+
 export function removeAllRows(entityArray, id) {
   for (let i = entityArray.length - 1; i >= 0; i--) {
     if (entityArray[i].id === id) entityArray.splice(i, 1)

@@ -1,6 +1,6 @@
 <script setup>
 import DeleteButton from '../reusable/Buttons/DeleteButton.vue';
-import ApproveButton from '../reusable/Buttons/ApproveButton.vue';
+import AddButton from '../reusable/Buttons/AddButton.vue';
 
 const props = defineProps({
     effects: {
@@ -59,7 +59,7 @@ const props = defineProps({
 
             <DeleteButton @click="props.callback_remove(effect)" v-if="props.removable" class="bg-darkred-red" />
 
-            <ApproveButton @click="props.callback_add(effect)" v-if="props.addable" />
+            <AddButton @click="props.callback_add(effect)" v-if="props.addable" />
         </div>
     </div>
 </template>
