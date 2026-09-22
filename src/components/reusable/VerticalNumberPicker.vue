@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onBeforeUnmount } from 'vue';
 import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/vue/24/solid';
 
 const props = defineProps({
@@ -40,8 +40,12 @@ const dragRatioDown = ref(0)
 
 const totalCost = computed(() => value.value * -props.price)
 
+const showHint = ref(false)
+
+let hintTimeoutId = null
 let startY = 0
 let startValue = 0
+let hasMoved = false
 
 function clamp(n) {
     return Math.min(props.maxNum, Math.max(props.minNum, n))
@@ -55,6 +59,7 @@ function onPointerDown(e) {
     dragging.value = true
     startY = e.clientY
     startValue = value.value
+    hasMoved = false
     e.target.setPointerCapture(e.pointerId)
 }
 
@@ -62,6 +67,8 @@ function onPointerMove(e) {
     if (!dragging.value) return
 
     const deltaY = startY - e.clientY
+    if (Math.abs(deltaY) > 4) hasMoved = true
+
     const steps = Math.round(deltaY / PIXELS_PER_STEP)
     const next = clamp(startValue + steps)
 
@@ -85,8 +92,23 @@ function onPointerUp(e) {
     value.value = 0
     if (finalValue !== 0) emit('release', finalValue, finalValue * props.price)
 
+    if (!hasMoved) {
+        showHint.value = !showHint.value
+        if (hintTimeoutId) clearTimeout(hintTimeoutId)
+        if (showHint.value) {
+            hintTimeoutId = setTimeout(() => {
+                showHint.value = false
+                hintTimeoutId = null
+            }, 3000)
+        }
+    }
+
     e.target.releasePointerCapture?.(e.pointerId)
 }
+
+onBeforeUnmount(() => {
+    if (hintTimeoutId) clearTimeout(hintTimeoutId)
+})
 
 const upIconStyle = computed(() => ({
     filter: `saturate(${1 + dragRatioUp.value})`
@@ -112,15 +134,22 @@ const downIconStyle = computed(() => ({
             </div>
         </div>
 
-        <button type="button"
-            class="w-14 h-14 rounded-full shadow-lg touch-none flex flex-col items-center justify-center gap-0.5 bg-darkred-dark_gray border-2 border-darkred-gray md:hover:cursor-grab active:cursor-grabbing"
-            @pointerdown="onPointerDown" @pointermove="onPointerMove" @pointerup="onPointerUp"
-            @pointercancel="onPointerUp">
-            <ChevronUpIcon class="w-5 h-5 text-greenish-light transition-[filter] duration-100 ease-out"
-                :style="upIconStyle" />
-            <ChevronDownIcon class="w-5 h-5 text-darkred-red transition-[filter] duration-100 ease-out"
-                :style="downIconStyle" />
-        </button>
+        <div class="relative">
+            <div v-if="showHint"
+                class="absolute bottom-full mb-2 right-0 px-3 py-1.5 rounded-lg bg-darkred-dark text-darkred-light text-sm font-univers whitespace-nowrap shadow-lg z-10">
+                тягни вверх, вниз, пчел
+            </div>
+
+            <button type="button"
+                class="w-14 h-14 rounded-full shadow-lg touch-none flex flex-col items-center justify-center gap-0.5 bg-darkred-dark_gray border-2 border-darkred-gray md:hover:cursor-grab active:cursor-grabbing"
+                @pointerdown="onPointerDown" @pointermove="onPointerMove" @pointerup="onPointerUp"
+                @pointercancel="onPointerUp">
+                <ChevronUpIcon class="w-5 h-5 text-greenish-light transition-[filter] duration-100 ease-out"
+                    :style="upIconStyle" />
+                <ChevronDownIcon class="w-5 h-5 text-darkred-red transition-[filter] duration-100 ease-out"
+                    :style="downIconStyle" />
+            </button>
+        </div>
 
     </div>
 </template>
