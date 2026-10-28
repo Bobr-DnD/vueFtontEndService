@@ -164,7 +164,8 @@ function updateCustomFields(fields) {
 }
 
 function addPerk() {
-    // state.character.perkPoints--;
+    
+    if (state.character.perkPoints > 0) state.character.perkPoints--;
     queueUpdate(['perks'])
 }
 
@@ -190,7 +191,12 @@ function togglePicker(healthId) {
 <template>
     <SessionViewNavigtaion />
 
-    <div v-if="!sessionStore.isLoading && !gameStore.isBackendOffline" class="grid grid-cols-1 lg:grid-cols-[25%_75%]">
+    <div v-if="sessionStore.isLoading" class="w-full h-full text-center py-6 flex flex-col gap-10 justify-center items-center">
+        <DiceLoader />
+    </div>
+
+    <div v-else class="relative">
+        <div class="grid grid-cols-1 lg:grid-cols-[25%_75%]">
 
         <section class="p-2 lg:p-4 space-y-2">
 
@@ -328,11 +334,12 @@ function togglePicker(healthId) {
         </section>
     </div>
 
-    <div v-if="sessionStore.isLoading || gameStore.isBackendOffline"
-        class="w-full h-full text-center py-6 flex flex-col gap-10 justify-center items-center">
-        <BackendOffline v-if="gameStore.isBackendOffline" class="w-[90vw] lg:w-[650px]" />
-
-        <DiceLoader />
+    <Transition name="offline-fade">
+        <div v-if="gameStore.isBackendOffline"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-darkred-dark/50">
+            <BackendOffline class="w-[90vw] lg:w-[650px]" />
+        </div>
+    </Transition>
     </div>
 
 </template>
@@ -367,5 +374,15 @@ function togglePicker(healthId) {
     opacity: 0;
     max-height: 0;
     transform: translateY(-10px);
+}
+
+.offline-fade-enter-active,
+.offline-fade-leave-active {
+    transition: opacity 0.2s ease;
+}
+
+.offline-fade-enter-from,
+.offline-fade-leave-to {
+    opacity: 0;
 }
 </style>

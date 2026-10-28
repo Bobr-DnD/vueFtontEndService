@@ -18,11 +18,12 @@ onMounted(() => {
 })
 
 watch(
-    () => sessionStore.isLoading,
-    (isLoading) => {
-        if (isLoading) return
-        sessionStore.session.characters.forEach(el => gameStore.initCharacterUI(el.id))
-    }
+    () => sessionStore.session,
+    (session) => {
+        if (!session) return
+        session.characters.forEach(el => gameStore.initCharacterUI(el.id))
+    },
+    { immediate: true }
 )
 
 onBeforeUnmount(() => {

@@ -26,14 +26,18 @@ export const useSessionStore = defineStore('session', () => {
 
     // API calls
     async function loadSession(sessionId) {
-        isLoading.value = true
+        // A reconnect re-fetches the same session to resync state after a drop
+        // (e.g. phone screen lock) - that should happen quietly in the background,
+        // not re-trigger the full-page loader when we already have data to show.
+        const isFreshSession = session.value?.id !== sessionId
+        if (isFreshSession) isLoading.value = true
 
         const [res, err] = await asyncHandler(
             RepositoryFactory.getById('session', sessionId)
         )
         if (err) {
             networkError.value = true
-            isLoading.value = false
+            if (isFreshSession) isLoading.value = false
             return
         }
 
@@ -41,7 +45,7 @@ export const useSessionStore = defineStore('session', () => {
         charactersIds.value = session.value.characters.map(el => { return { id: el.id, name: el.name } })
 
         copySession()
-        isLoading.value = false
+        if (isFreshSession) isLoading.value = false
     }
 
     async function saveSession(sessionId) {

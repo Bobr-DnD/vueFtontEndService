@@ -10,7 +10,7 @@ import Header1 from '@/components/reusable/Titles/Header1.vue';
 import SearchInputBlack from '@/components/reusable/SearchInputs/SearchInputBlack.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
-import Loader from 'vue-spinner/src/SyncLoader.vue';
+import DiceLoader from '@/components/reusable/Loaders/DiceLoader.vue';
 
 const sessionId = useRoute().params.sessionId
 
@@ -109,18 +109,18 @@ onBeforeUnmount(() => {
 <template>
     <MasterPageNavigation />
 
-    <section class="p-4 flex flex-col gap-4 font-gothic text-darkred-light">
+    <section class="p-4 flex flex-col gap-4 font-gothic text-darkred-dark">
 
         <Header1 label="Логи вебсокетів" />
 
         <div class="w-full flex flex-wrap items-end gap-2">
             <div class="w-56 flex flex-col gap-1">
-                <span class="text-sm text-darkred-light_gray">Ім'я персонажа</span>
+                <span class="text-sm">Ім'я персонажа</span>
                 <SearchInputBlack v-model:searchQuery="characterNameFilter" />
             </div>
 
             <div class="w-56 flex flex-col gap-1">
-                <span class="text-sm text-darkred-light_gray">Подія</span>
+                <span class="text-sm">Подія</span>
                 <SearchInputBlack v-model:searchQuery="eventFilter" />
             </div>
 
@@ -136,7 +136,7 @@ onBeforeUnmount(() => {
         <div class="w-full flex-1 rounded-xl border-2 border-darkred-dark_gray overflow-hidden flex flex-col">
 
             <div v-if="isLoading && !logs.length" class="w-full flex items-center justify-center p-8">
-                <Loader color="#EEEEEE" />
+                <DiceLoader/>
             </div>
 
             <div v-else-if="!logs.length" class="w-full flex items-center justify-center p-8 text-darkred-light_gray">
@@ -145,7 +145,7 @@ onBeforeUnmount(() => {
 
             <div v-else class="w-full overflow-auto max-h-[70vh]">
                 <table class="w-full text-left text-sm font-univers border-collapse">
-                    <thead class="sticky top-0 bg-darkred-dark_gray">
+                    <thead class="sticky top-0 bg-darkred-light">
                         <tr>
                             <th class="p-2 border-b border-darkred-gray">Час</th>
                             <th class="p-2 border-b border-darkred-gray">Персонаж</th>
@@ -160,7 +160,7 @@ onBeforeUnmount(() => {
                             <td class="p-2 align-top whitespace-nowrap">{{ log.characterName || log.characterId || '—' }}</td>
                             <td class="p-2 align-top whitespace-nowrap">{{ log.role || '—' }}</td>
                             <td class="p-2 align-top whitespace-nowrap font-semibold">{{ log.event }}</td>
-                            <td class="p-2 align-top max-w-xs truncate text-darkred-light_gray" :title="log.payload || ''">
+                            <td class="p-2 align-top max-w-xs truncate" :title="log.payload || ''">
                                 {{ log.message || log.payload || '—' }}
                             </td>
                         </tr>

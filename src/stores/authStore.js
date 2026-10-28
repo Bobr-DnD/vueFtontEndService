@@ -5,7 +5,7 @@ const STORAGE_KEY = 'session_tokens'
 
 function loadTokens() {
     try {
-        return JSON.parse(sessionStorage.getItem(STORAGE_KEY)) || {}
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}
     } catch {
         return {}
     }
@@ -13,9 +13,9 @@ function loadTokens() {
 
 function persistTokens(tokens) {
     try {
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(tokens))
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(tokens))
     } catch {
-        // sessionStorage unavailable (private mode, etc.) - tokens stay in-memory only
+        // localStorage unavailable (private mode, etc.) - tokens stay in-memory only
     }
 }
 
