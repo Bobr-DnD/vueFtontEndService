@@ -20,6 +20,8 @@ const searchQuery = ref('')
 const modalShow = ref(false)
 const newPass = ref('')
 const confirmPass = ref('')
+const newAdminPass = ref('')
+const confirmAdminPass = ref('')
 const sessionName = ref('')
 
 onMounted(async () => {
@@ -57,6 +59,7 @@ async function createSession() {
   const [newSessionRes, newSessionErr] = await asyncHandler(
     RepositoryFactory.create('session', {
       password: newPass.value.trim(),
+      adminPassword: newAdminPass.value.trim(),
       name: sessionName.value.trim()
     })
   )
@@ -84,11 +87,23 @@ function validateForm() {
   const errors = []
 
   if (newPass.value.trim().length < 8) {
-    errors.push('Мінімальна довжина пароля - 8 символів')
+    errors.push('Мінімальна довжина пароля гравця - 8 символів')
   }
 
   if (newPass.value !== confirmPass.value) {
-    errors.push('Паролі не співпадають')
+    errors.push('Паролі гравця не співпадають')
+  }
+
+  if (newAdminPass.value.trim().length < 8) {
+    errors.push('Мінімальна довжина пароля майстра - 8 символів')
+  }
+
+  if (newAdminPass.value !== confirmAdminPass.value) {
+    errors.push('Паролі майстра не співпадають')
+  }
+
+  if (newAdminPass.value.trim() && newAdminPass.value.trim() === newPass.value.trim()) {
+    errors.push('Пароль майстра має відрізнятись від пароля гравця')
   }
 
   if (!sessionName.value.trim()) {
@@ -101,6 +116,8 @@ function validateForm() {
 function clearModalValues() {
   newPass.value = ''
   confirmPass.value = ''
+  newAdminPass.value = ''
+  confirmAdminPass.value = ''
   sessionName.value = ''
 }
 
@@ -137,8 +154,14 @@ watch(modalShow, () => clearModalValues())
 
       <form @submit.prevent="createSession" class="flex flex-col gap-2">
         <InputName v-model:nameString="sessionName" />
+
+        <span class="text-sm opacity-80">Пароль гравця</span>
         <InputPassword :new="true" v-model:passString="newPass" />
         <InputPassword :confirm="true" v-model:passString="confirmPass" />
+
+        <span class="text-sm opacity-80">Пароль майстра</span>
+        <InputPassword :new="true" v-model:passString="newAdminPass" />
+        <InputPassword :confirm="true" v-model:passString="confirmAdminPass" />
       </form>
 
       <AprroveButtonWithText @click="createSession" text="Створити сесію" />

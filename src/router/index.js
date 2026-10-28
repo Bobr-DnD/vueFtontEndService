@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { useAuthStore } from "@/stores/authStore";
 import HomeView from "@/views/HomeView.vue";
 import AdminGenericView from "@/views/AdminGenericView.vue";
 import SessionGenericView from "@/views/SessionGenericView.vue";
@@ -11,6 +12,7 @@ import EntitiesPageEditor from "@/views/EntitiesPageEditor.vue";
 import SessionPageEditor from "@/views/SessionPageEditor.vue";
 import EffectsPageEditor from "@/views/EffectsPageEditor.vue";
 import PerksPageEditor from "@/views/PerksPageEditor.vue";
+import LogsPageEditor from "@/views/LogsPageEditor.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -58,6 +60,11 @@ const router = createRouter({
                     path: 'perks',
                     name: 'perks_editor',
                     component: PerksPageEditor
+                },
+                {
+                    path: 'logs',
+                    name: 'logs_editor',
+                    component: LogsPageEditor
                 }
             ]
         },
@@ -85,5 +92,21 @@ const router = createRouter({
         }
     ]
 });
+
+router.beforeEach((to) => {
+    const sessionId = to.params.sessionId
+    if (!sessionId) return true
+
+    const requiredRole = to.path.startsWith('/admin/') ? 'admin'
+        : to.path.startsWith('/session/') ? 'user'
+        : null
+    if (!requiredRole) return true
+
+    if (!useAuthStore().hasRole(sessionId, requiredRole)) {
+        return { path: '/' }
+    }
+
+    return true
+})
 
 export default router;

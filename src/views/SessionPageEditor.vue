@@ -30,6 +30,11 @@ const newPass = ref('')
 const confirmPass = ref('')
 const canChange = ref(false)
 
+const oldAdminPass = ref('')
+const newAdminPass = ref('')
+const confirmAdminPass = ref('')
+const canChangeAdmin = ref(false)
+
 const activeTab = ref('base')
 const fileInput = ref(null)
 
@@ -46,6 +51,7 @@ function loadoutsLimitField(key) {
         get: () => store.editedSession.loadoutsLimit?.[key] ?? '',
         set: (val) => {
             store.editedSession.loadoutsLimit[key] = val === '' ? null : Number(val)
+            store.markDirty('loadoutsLimit')
         }
     })
 }
@@ -77,9 +83,23 @@ async function changePassword() {
         return
     }
 
-    await store.changePassword(sessionId, toRaw(newPass.value), toRaw(oldPass.value))
+    await store.changePassword(sessionId, toRaw(newPass.value), toRaw(oldPass.value), 'password')
 
     clearPasses()
+    return
+}
+
+async function changeAdminPassword() {
+    const validationErrors = validatePasses(newAdminPass.value, confirmAdminPass.value)
+
+    if (validationErrors.length > 0) {
+        validationErrors.forEach(error => notify({ message: error, type: 'error' }))
+        return
+    }
+
+    await store.changePassword(sessionId, toRaw(newAdminPass.value), toRaw(oldAdminPass.value), 'adminPassword')
+
+    clearAdminPasses()
     return
 }
 async function exportFile() {
@@ -116,9 +136,20 @@ function clearPasses() {
     confirmPass.value = ''
 }
 
+function clearAdminPasses() {
+    oldAdminPass.value = ''
+    newAdminPass.value = ''
+    confirmAdminPass.value = ''
+}
+
 watch([oldPass, newPass, confirmPass], () => {
     if (oldPass.value.length !== 0 && newPass.value.length !== 0 && confirmPass.value.length !== 0)
         canChange.value = true
+})
+
+watch([oldAdminPass, newAdminPass, confirmAdminPass], () => {
+    if (oldAdminPass.value.length !== 0 && newAdminPass.value.length !== 0 && confirmAdminPass.value.length !== 0)
+        canChangeAdmin.value = true
 })
 
 </script>
@@ -142,13 +173,14 @@ watch([oldPass, newPass, confirmPass], () => {
         <section class="m-4 p-2 overflow-y-auto">
             <div v-if="activeTab === 'base'" class="grid grid-cols-2 gap-2">
                 <ImageEditor class="w-full col-span-2" v-model:image="store.editedSession.image"
-                    label="Session image" />
+                    @update:image="store.markDirty('image')" label="Session image" />
 
                 <InputTextReactive class="col-span-full" placeholder="Назва сесії" fieldName="Sessionname" type="text"
-                    :important="true" v-model:inputValue="store.editedSession.name" />
+                    :important="true" v-model:inputValue="store.editedSession.name"
+                    @update:inputValue="store.markDirty('name')" />
 
                 <TextAreaReactive class="col-span-2" label="Записки майстра"
-                    v-model:value="store.editedSession.notes" />
+                    v-model:value="store.editedSession.notes" @update:value="store.markDirty('notes')" />
 
                 <!-- <Header1 class="col-span-2 font-medium" label="Список кастомних полей" />
 
@@ -165,15 +197,17 @@ watch([oldPass, newPass, confirmPass], () => {
 
             <div v-if="activeTab === 'types'" class="grid grid-cols-2 gap-4">
 
-                <ArrayStringFormWIcons v-model:array="store.editedSession.entityTypes" label="Інвентар"
-                    :setIcon="true" />
+                <ArrayStringFormWIcons v-model:array="store.editedSession.entityTypes"
+                    @update:array="store.markDirty('entityTypes')" label="Інвентар" :setIcon="true" />
 
-                <ArrayStringFormWIcons v-model:array="store.editedSession.currencyTypes" label="Валюти"
-                    :setIcon="true" />
+                <ArrayStringFormWIcons v-model:array="store.editedSession.currencyTypes"
+                    @update:array="store.markDirty('currencyTypes')" label="Валюти" :setIcon="true" />
 
-                <ArrayStringFormWIcons v-model:array="store.editedSession.characteristicsList" label="Характеристики" />
+                <ArrayStringFormWIcons v-model:array="store.editedSession.characteristicsList"
+                    @update:array="store.markDirty('characteristicsList')" label="Характеристики" />
 
-                <ArrayStringFromWColorPicker v-model:array="store.editedSession.perkTypes" label="Типи перків" />
+                <ArrayStringFromWColorPicker v-model:array="store.editedSession.perkTypes"
+                    @update:array="store.markDirty('perkTypes')" label="Типи перків" />
 
             </div>
 
@@ -181,7 +215,7 @@ watch([oldPass, newPass, confirmPass], () => {
 
                 <div class="grid grid-cols-1 gap-4">
 
-                    <Header1 label="Змінити пароль:" />
+                    <Header1 label="Змінити пароль гравця:" />
 
                     <form @submit.prevent @keyup.enter="changePassword" class="flex flex-col gap-2">
                         <InputPassword v-model:passString="oldPass" />
@@ -191,6 +225,17 @@ watch([oldPass, newPass, confirmPass], () => {
 
                     <AprroveButtonWithText text="Змінити пароль" @click="changePassword"
                         :class="[!canChange && 'pointer-events-none opacity-50']" />
+
+                    <Header1 label="Змінити пароль майстра:" />
+
+                    <form @submit.prevent @keyup.enter="changeAdminPassword" class="flex flex-col gap-2">
+                        <InputPassword v-model:passString="oldAdminPass" />
+                        <InputPassword :new="true" v-model:passString="newAdminPass" />
+                        <InputPassword :confirm="true" v-model:passString="confirmAdminPass" />
+                    </form>
+
+                    <AprroveButtonWithText text="Змінити пароль" @click="changeAdminPassword"
+                        :class="[!canChangeAdmin && 'pointer-events-none opacity-50']" />
 
                     <RejectButtonWithText text="Видалити сесію" @click="store.deleteSession(sessionId)" />
                 </div>

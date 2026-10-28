@@ -1,14 +1,16 @@
 <script setup>
-import { ref, toRaw } from 'vue'
+import { ref, toRaw, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { notify } from '@utils/notification'
 import RepositoryFactory from '@http/RepositoryFactory'
 import { asyncHandler } from '@utils/asyncHandler'
+import { useAuthStore } from '@/stores/authStore'
 
 import InputPassword from './Inputs/InputPassword.vue'
 
 const pass = ref('')
 const router = useRouter()
+const authStore = useAuthStore()
 
 const props = defineProps({
     name: {
@@ -25,31 +27,43 @@ const props = defineProps({
     }
 })
 
-let url = `/session/${props.id}`
-
 const mode = ref('гравець')
+const role = ref('user')
+
+const alreadyAuthed = computed(() => authStore.hasRole(props.id, role.value))
 
 function toggleMode() {
     if (mode.value === 'гравець') {
-        url = `/admin/${props.id}`
+        role.value = 'admin'
         mode.value = 'майстер'
     }
     else {
-        url = `/session/${props.id}`
+        role.value = 'user'
         mode.value = 'гравець'
     }
 }
 
+function enterSession() {
+    router.push(role.value === 'admin' ? `/admin/${props.id}` : `/session/${props.id}`)
+}
 
 async function sessionLogin() {
+    if (alreadyAuthed.value) {
+        enterSession()
+        return
+    }
+
     const password = toRaw(pass.value)
     if (password) {
         const [res, err] = await asyncHandler(
-            RepositoryFactory.login('session', props.id, { password })
+            RepositoryFactory.login('session', props.id, { password, role: role.value })
         )
         if (err) return
 
-        if (res.data.success) router.push(url)
+        if (res.data.success) {
+            authStore.setToken(props.id, res.data.token)
+            enterSession()
+        }
 
     }
     else {
@@ -78,7 +92,7 @@ async function sessionLogin() {
                     {{ props.name }}
                 </h2>
 
-                <form @submit.prevent="sessionLogin">
+                <form v-if="!alreadyAuthed" @submit.prevent="sessionLogin">
                     <InputPassword v-model:passString="pass" />
                 </form>
 
@@ -89,7 +103,7 @@ async function sessionLogin() {
 
                 <div @click="sessionLogin"
                     class="w-full text-lg font-medium font-gothic cursor-pointer inline-flex items-center justify-center py-2.5 px-4 rounded-lg bg-darkred-red md:hover:bg-darkred-bright active:bg-darkred-dark text-white tracking-wide shadow-lg transition-all duration-200 ease-in-out">
-                    Зайти
+                    {{ alreadyAuthed ? 'Продовжити' : 'Зайти' }}
                 </div>
             </div>
         </div>

@@ -96,40 +96,46 @@ socket.on('session:join', (session) => {
     socket.emit('session:connectCharacter', sessionId.value, characterId.value)
 })
 
-let characterUpdatePending = false
+let pendingFields = new Set()
 
 socket.on('character:updateDataNotify', (character) => {
     state.characterIsUpdating = false
 
-    if (characterUpdatePending) {
-        updateCharacter()
+    if (pendingFields.size > 0) {
+        flushUpdate()
         return
     }
 
     state.character = toNewCharacterObject(character)
 })
 
-function updateCharacter() {
-    if (state.characterIsUpdating) {
-        characterUpdatePending = true
-        return
-    }
+function flushUpdate() {
+    if (state.characterIsUpdating || pendingFields.size === 0) return
 
-    characterUpdatePending = false
-    socket.emit('character:updateData', state.character)
+    const ops = [...pendingFields].map(field => ({ op: 'replace', path: `/${field}`, value: state.character[field] }))
+    pendingFields.clear()
+
+    socket.emit('character:updateData', { id: state.character.id, ops })
     state.characterIsUpdating = true
+}
+
+function queueUpdate(fields) {
+    fields.forEach(field => pendingFields.add(field))
+    flushUpdate()
 }
 
 // character functions
 
 function addExperience() {
     state.character.experience++;
+    const fields = ['experience']
     if (state.character.experience >= state.character.experienceToLevelUp) {
         state.character.experience = 0;
         state.character.perkPoints++;
         state.character.level++;
+        fields.push('perkPoints', 'level')
     }
-    updateCharacter()
+    queueUpdate(fields)
 }
 
 function updateHealthFields(value, title) {
@@ -138,38 +144,45 @@ function updateHealthFields(value, title) {
         item.value += value
     }
     gameStore.openHealthIds[characterId.value].delete(item.id)
-    updateCharacter()
+    queueUpdate(['health'])
 }
 
 function updateCurrency(fields) {
     state.character.currency = fields
-    updateCharacter()
+    queueUpdate(['currency'])
 }
 
 function addCustomField(object) {
     state.character.customFields.push(object)
     custom_modal_hidden.value = true
-    updateCharacter()
+    queueUpdate(['customFields'])
 }
 
 function updateCustomFields(fields) {
     state.character.customFields = fields
-    updateCharacter()
+    queueUpdate(['customFields'])
 }
 
 function addPerk() {
     // state.character.perkPoints--;
-    updateCharacter()
+    queueUpdate(['perks'])
+}
+
+function syncLoadouts() {
+    queueUpdate(['loadouts'])
+}
+
+function syncEntities() {
+    queueUpdate(['entities'])
 }
 
 function updateCharacterNotes(field, value) {
     state.character[field] = value;
-    updateCharacter()
+    queueUpdate([field])
 }
 
 function togglePicker(healthId) {
     gameStore.toggleHealthId(characterId.value, healthId)
-    updateCharacter()
 }
 
 </script>
@@ -292,7 +305,7 @@ function togglePicker(healthId) {
                             <LoadoutsPanel v-model:loadouts="state.character.loadouts"
                                 :entities="state.character.entities" :perks="state.character.perks"
                                 :entityTypes="sessionStore.session.entityTypes"
-                                :loadoutLimits="sessionStore.session.loadoutsLimit" :callback="updateCharacter" />
+                                :loadoutLimits="sessionStore.session.loadoutsLimit" :callback="syncLoadouts" />
                         </div>
                     </div>
                 </div>
@@ -304,7 +317,7 @@ function togglePicker(healthId) {
 
                 <EntityTable :character_entities="state.character.entities"
                     :session_entities="sessionStore.session.entities" :types="sessionStore.session.entityTypes"
-                    :callback="updateCharacter" />
+                    :callback="syncEntities" />
             </section>
 
             <section>

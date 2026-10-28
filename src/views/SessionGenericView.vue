@@ -4,14 +4,16 @@ import { useRoute } from 'vue-router';
 import { socket, reconnectCount } from '@ws/webSocket';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useGameStore } from '@/stores/gameStore';
+import { useAuthStore } from '@/stores/authStore';
 
 
 const sessionId = useRoute().params.sessionId
 const sessionStore = useSessionStore()
 const gameStore = useGameStore()
+const authStore = useAuthStore()
 
 onMounted(() => {
-    socket.emit('session:join', sessionId, { role: 'user' })
+    socket.emit('session:join', sessionId, { token: authStore.getToken(sessionId) })
     sessionStore.loadSession(sessionId)
 })
 
@@ -28,7 +30,7 @@ onBeforeUnmount(() => {
 })
 
 watch(reconnectCount, () => {
-    socket.emit('session:join', sessionId, { role: 'user' })
+    socket.emit('session:join', sessionId, { token: authStore.getToken(sessionId) })
     sessionStore.loadSession(sessionId)
 })
 

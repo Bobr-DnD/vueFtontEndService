@@ -41,6 +41,9 @@ const perkNewRequirement = ref({})
 const {
     selected: selectedPerk,
     unsavedChanges,
+    dirtyFields,
+    markDirty,
+    buildPatchOps,
     load: loadPerk,
     select: selectPerk,
     discardChanges
@@ -73,6 +76,8 @@ const filteredPerks = computed(() => {
 async function savePerk() {
     const perk = toRaw(selectedPerk.value)
     perk.ranks = perk.levels.length
+    selectedPerk.value.ranks = perk.ranks
+    if (dirtyFields.value.has('levels')) markDirty('ranks')
 
     if (!checkObjectFieldExisting(perk.type)) {
         notify({ message: 'перк повинен мати тип' })
@@ -90,7 +95,7 @@ async function savePerk() {
     }
     else {
         const [res, err] = await asyncHandler(
-            RepositoryFactory.update('perk', perk.id, perk)
+            RepositoryFactory.update('perk', perk.id, buildPatchOps())
         )
         if (err) return
         loadPerk(res.data.id, res.data)
@@ -182,21 +187,24 @@ async function deletePerk() {
             <section v-if="activeTab === 'edit'" class="grid grid-cols-4 gap-2 items-center justify-start">
 
                 <InputTextReactive class="col-span-3" placeholder="Назва" fieldName="name"
-                    v-model:inputValue="selectedPerk.name" type="text" :important="true" />
+                    v-model:inputValue="selectedPerk.name" @update:inputValue="markDirty('name')" type="text"
+                    :important="true" />
 
                 <DropDownPerks label="Тип перку" entity_name="perkType" v-model:selected="selectedPerk.type"
-                    :entity_array="store.session.perkTypes" :important="true" />
+                    @update:selected="markDirty('type')" :entity_array="store.session.perkTypes" :important="true" />
 
                 <InputTextReactive class="col-span-full" placeholder="Опис" fieldName="description"
-                    v-model:inputValue="selectedPerk.description" type="text" />
+                    v-model:inputValue="selectedPerk.description" @update:inputValue="markDirty('description')"
+                    type="text" />
 
-                <TextAreaReactive class="col-span-full" label="Записки Майстра" v-model:value="selectedPerk.notes" />
+                <TextAreaReactive class="col-span-full" label="Записки Майстра" v-model:value="selectedPerk.notes"
+                    @update:value="markDirty('notes')" />
 
                 <Header2 class="justify-self-start col-span-full mx-2"
                     :label="'Рівні перку(' + selectedPerk.levels.length + '):'" />
 
-                <ArraySingleStringForm class="col-span-full" v-model:array="selectedPerk.levels" array_name="levels"
-                    label="Опис кожного рівня" />
+                <ArraySingleStringForm class="col-span-full" v-model:array="selectedPerk.levels"
+                    @update:array="markDirty('levels')" array_name="levels" label="Опис кожного рівня" />
 
             </section>
 

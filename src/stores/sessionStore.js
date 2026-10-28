@@ -1,18 +1,19 @@
 import { defineStore } from 'pinia'
-import { ref, computed, watch, toRaw } from 'vue'
+import { ref, computed, toRaw } from 'vue'
 import { useRouter } from 'vue-router'
 
 import RepositoryFactory from '@http/RepositoryFactory'
 import { socket, connected } from '@ws/webSocket';
 import { asyncHandler } from '@utils/asyncHandler';
+import { useAuthStore } from '@/stores/authStore';
 
 import { notifySyncSuccess, notify } from '@utils/notification';
 import { toNewSession } from '@utils/objects.dto';
-import { checkEqualByKeys } from '@utils/entityHelper';
 
 
 export const useSessionStore = defineStore('session', () => {
 
+    const authStore = useAuthStore()
     const session = ref(null)
     const editedSession = ref(null)
     const isLoading = ref(true)
@@ -20,21 +21,8 @@ export const useSessionStore = defineStore('session', () => {
     const charactersOnlineIds = ref([])
     const charactersIds = ref([])
     const unsavedChanges = ref(false)
-    const copied = ref(false)
+    const dirtyFields = ref(new Set())
     const router = useRouter()
-
-    const keysToWatch = [
-        'name',
-        'image',
-        'notes',
-        'customFields',
-        'entityTypes',
-        'currencyTypes',
-        'characteristicsList',
-        'enemyTypes',
-        'perkTypes',
-        'loadoutsLimit',
-    ]
 
     // API calls
     async function loadSession(sessionId) {
@@ -58,7 +46,7 @@ export const useSessionStore = defineStore('session', () => {
 
     async function saveSession(sessionId) {
         const [res, err] = await asyncHandler(
-            RepositoryFactory.update('session', sessionId, toRaw(editedSession.value))
+            RepositoryFactory.update('session', sessionId, buildOps())
         )
         if (err) if (err) {
             networkError.value = true
@@ -85,13 +73,14 @@ export const useSessionStore = defineStore('session', () => {
 
         else if (res.data.status) notify({ message: 'Сесію видалено', type: 'success' })
         CloseWebsocketSession(sessionId)
+        authStore.clearToken(sessionId)
         router.push('/')
     }
 
-    async function changePassword(sessionId, newPass, oldPass) {
+    async function changePassword(sessionId, newPass, oldPass, field = 'password') {
 
         const [res, err] = await asyncHandler(
-            RepositoryFactory.changepass('session', sessionId, { password: oldPass, passwordNew: newPass })
+            RepositoryFactory.changepass('session', sessionId, { password: oldPass, passwordNew: newPass, field })
         )
         if (err) return
 
@@ -139,12 +128,25 @@ export const useSessionStore = defineStore('session', () => {
 
     //service functions
     function copySession() {
-        copied.value = true
         editedSession.value = (structuredClone(toRaw(session.value)))
+        dirtyFields.value = new Set()
     }
 
     function markUnsaved() {
         unsavedChanges.value = true
+    }
+
+    function markDirty(field) {
+        dirtyFields.value.add(field)
+        markUnsaved()
+    }
+
+    function buildOps() {
+        return [...dirtyFields.value].map(field => ({
+            op: 'replace',
+            path: `/${field}`,
+            value: toRaw(editedSession.value)[field]
+        }))
     }
 
     function discardChanges() {
@@ -157,37 +159,31 @@ export const useSessionStore = defineStore('session', () => {
 
     function changeImage(image) {
         editedSession.value.image = image
+        markDirty('image')
     }
 
     function addCustomField(object) {
         editedSession.value.customFields.push(object)
+        markDirty('customFields')
     }
 
     function removeCustomField(id) {
         editedSession.value.customFields = editedSession.value.customFields.filter(el => el.id !== id)
+        markDirty('customFields')
     }
-
-    watch(() => editedSession.value, () => {
-
-        if (copied.value) {
-            copied.value = false
-            return
-        }
-
-        if (checkEqualByKeys(session.value, editedSession.value, keysToWatch)) markUnsaved()
-
-    }, { deep: true, immediate: false })
 
     return {
         session,
         editedSession,
         isLoading,
         unsavedChanges,
+        dirtyFields,
         charactersOnlineIds,
         charactersIds,
         networkError,
         loadSession,
         markUnsaved,
+        markDirty,
         saveSession,
         deleteSession,
         changePassword,
