@@ -65,18 +65,18 @@ function levelUpPerk(perk) {
     const maxLevel = perk.levels?.length || 1
     if (perk.count >= maxLevel) return
     addRow(props.session_perks, props.character_perks, perk.id);
-    props.callback();
+    props.callback(`Персонаж додав перк: ${perk.name}`);
 }
 
 function levelDownPerk(perk) {
     if (!perk.count) return
     removeRow(props.character_perks, perk.id)
-    props.callback()
+    props.callback(`Персонаж видалив перк: ${perk.name}`)
 }
 
 function removePerkFully(perk) {
     removeAllRows(props.character_perks, perk.id)
-    props.callback()
+    props.callback(`Персонаж видалив перк: ${perk.name}`)
 }
 
 </script>

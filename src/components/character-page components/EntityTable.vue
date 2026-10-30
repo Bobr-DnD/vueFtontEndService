@@ -60,26 +60,29 @@ const groupedCharacterEntities = computed(() => {
 function addEntity(entity) {
     addRow(props.session_entities, props.character_entities, entity.id)
     notify({ message: `Додано ${entity.name}`, type: 'success' })
-    props.callback()
+    props.callback(`Персонаж додав предмет: ${entity.name}`)
 }
 
 function removeEntity(entity) {
     removeRow(props.character_entities, entity.id)
     notify({ message: `Видалено ${entity.name}`, type: 'success' })
-    props.callback()
+    props.callback(`Персонаж видалив предмет: ${entity.name}`)
 }
 
 function changeEntityCount(entity, delta) {
+    let message
     if (delta > 0) {
         addRows(props.session_entities, props.character_entities, entity.id, delta)
         notify({ message: `Додано ${delta > 1 ? `${delta}x ` : ''}${entity.name}`, type: 'success' })
+        message = `Персонаж додав предмет: ${delta > 1 ? `${delta}x ` : ''}${entity.name}`
     } else if (delta < 0) {
         removeRows(props.character_entities, entity.id, -delta)
         notify({ message: `Видалено ${-delta > 1 ? `${-delta}x ` : ''}${entity.name}`, type: 'success' })
+        message = `Персонаж видалив предмет: ${-delta > 1 ? `${-delta}x ` : ''}${entity.name}`
     } else {
         return
     }
-    props.callback()
+    props.callback(message)
 }
 
 function getFilteredCharacterEntities(type) {
