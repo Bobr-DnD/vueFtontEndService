@@ -98,6 +98,67 @@ export function toNewPerk(perk){
   }
 }
 
+export function toNewFight(fight = {}) {
+  return {
+    id: fight.id ?? 'new',
+    session: fight.session ?? null,
+    name: fight.name ?? '',
+    isActive: fight.isActive ?? false,
+    background: {
+      image: fight.background?.image ?? null,
+      width: fight.background?.width ?? null,
+      height: fight.background?.height ?? null
+    },
+    overlay: {
+      type: fight.overlay?.type ?? 'grid',
+      grid: {
+        cols: fight.overlay?.grid?.cols ?? 10,
+        rows: fight.overlay?.grid?.rows ?? 10,
+        x: fight.overlay?.grid?.x ?? 0,
+        y: fight.overlay?.grid?.y ?? 0,
+        w: fight.overlay?.grid?.w ?? 100,
+        h: fight.overlay?.grid?.h ?? 100
+      },
+      radial: {
+        cx: fight.overlay?.radial?.cx ?? 50,
+        cy: fight.overlay?.radial?.cy ?? 50,
+        rings: fight.overlay?.radial?.rings ?? 5,
+        sectorsPerRing: fight.overlay?.radial?.sectorsPerRing ?? 8,
+        maxRadius: fight.overlay?.radial?.maxRadius ?? 50
+      }
+    },
+    tiles: fight.tiles ?? [],
+    actionPoints: {
+      source: fight.actionPoints?.source ?? 'fixed',
+      fixedAmount: fight.actionPoints?.fixedAmount ?? 3,
+      fieldName: fight.actionPoints?.fieldName ?? ''
+    },
+    attackCost: {
+      source: fight.attackCost?.source ?? 'fixed',
+      fixedAmount: fight.attackCost?.fixedAmount ?? 1,
+      fieldName: fight.attackCost?.fieldName ?? ''
+    },
+    weaponDamageFieldName: fight.weaponDamageFieldName ?? 'damageDice',
+    enemies: fight.enemies ?? [],
+    participants: fight.participants ?? []
+  }
+}
+
+export function toNewFightEnemy(enemy = {}) {
+  return {
+    id: enemy.id ?? crypto.randomUUID(),
+    name: enemy.name ?? '',
+    image: enemy.image ?? null,
+    notes: enemy.notes ?? '',
+    stats: enemy.stats ?? {},
+    perks: enemy.perks ?? [],
+    entities: enemy.entities ?? [],
+    health: enemy.health ?? [],
+    position: { tileId: enemy.position?.tileId ?? null },
+    visibleToPlayers: enemy.visibleToPlayers ?? true
+  }
+}
+
 export function toNewEntity(entity){
   return {
     id: entity.id ?? entity._id ?? 'new',

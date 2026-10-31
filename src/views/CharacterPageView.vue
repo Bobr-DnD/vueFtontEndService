@@ -8,6 +8,8 @@ import { toNewCharacterObject } from '/utils/objects.dto';
 import { socket } from '@ws/webSocket';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useGameStore } from '@/stores/gameStore';
+import { useFightStore } from '@/stores/fightStore';
+import { useRouter } from 'vue-router';
 
 import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaion.vue';
 import PerkTable from '@/components/character-page components/PerkTable.vue';
@@ -41,6 +43,14 @@ const characterId = computed(() => route.params.characterId)
 const sessionId = computed(() => route.params.sessionId)
 const sessionStore = useSessionStore()
 const gameStore = useGameStore()
+const fightStore = useFightStore()
+const router = useRouter()
+
+fightStore.checkActiveFight()
+
+function openFight() {
+    router.push(`/session/${sessionId.value}/character/${characterId.value}/fight`)
+}
 
 const effects_hidden = computed({
     get: () => gameStore.effects_hidden[characterId.value],
@@ -222,6 +232,9 @@ function togglePicker(healthId) {
 
             <AprroveButtonWithText text="🎲 Кинути кубик" class="w-full h-12 flex justify-center items-center"
                 @click="dice_modal_hidden = false" />
+
+            <AprroveButtonWithText v-if="fightStore.activeFightInfo" :text="`⚔ Відкрити бій: ${fightStore.activeFightInfo.name}`"
+                class="w-full h-12 flex justify-center items-center" @click="openFight" />
 
             <TextAreaEditor class="lg:grid hidden" fieldName="playerNotes" name="Записки гравця"
                 :value="state.character.playerNotes" :callback="updateCharacterNotes" />

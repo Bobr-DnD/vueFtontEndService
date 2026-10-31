@@ -13,6 +13,8 @@ import SessionPageEditor from "@/views/SessionPageEditor.vue";
 import EffectsPageEditor from "@/views/EffectsPageEditor.vue";
 import PerksPageEditor from "@/views/PerksPageEditor.vue";
 import LogsPageEditor from "@/views/LogsPageEditor.vue";
+import AdminFightEditor from "@/views/AdminFightEditor.vue";
+import FightPageView from "@/views/FightPageView.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -65,6 +67,16 @@ const router = createRouter({
                     path: 'logs',
                     name: 'logs_editor',
                     component: LogsPageEditor
+                },
+                {
+                    path: 'fight',
+                    name: 'fight_editor',
+                    component: AdminFightEditor
+                },
+                {
+                    path: 'fight/:fightId/live',
+                    name: 'fight_live',
+                    component: FightPageView
                 }
             ]
         },
@@ -82,6 +94,11 @@ const router = createRouter({
                     path: 'character/:characterId',
                     name: 'session_character_view',
                     component: CharacterPageView
+                },
+                {
+                    path: 'character/:characterId/fight',
+                    name: 'session_character_fight',
+                    component: FightPageView
                 }
             ]
         },

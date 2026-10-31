@@ -48,7 +48,12 @@ export default function useEntityEditor({
     }
 
     function select(id) {
-        if (selected.value?.id === id) return
+        // 'new' is special-cased: the initial `selected` ref is already a bare
+        // toNew({}) with id 'new' by coincidence (before buildNew() ever ran),
+        // so the usual "already selected" short-circuit would silently skip
+        // populating required fields (e.g. `session`) on someone's very first
+        // "create" click - always rebuild a fresh draft instead.
+        if (id !== 'new' && selected.value?.id === id) return
         if (unsavedChanges.value && !confirm(confirmSwitchMessage)) return
 
         load(id)

@@ -55,6 +55,12 @@ export default {
     delete(resource, id) {
         return Repository.delete(`/${resource}/${id}`)
     },
+    activate(resource, id) {
+        return Repository.post(`/${resource}/${id}/activate`)
+    },
+    deactivate(resource, id) {
+        return Repository.post(`/${resource}/${id}/deactivate`)
+    },
     login(resource, id, data) {
         return Repository.post(`/${resource}/login/${id}`, data)
     },
