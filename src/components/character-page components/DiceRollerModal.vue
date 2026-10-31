@@ -89,7 +89,7 @@ function roll() {
     result.value = { groups, total }
     persistConfig()
 
-    const notation = groups.map(g => `${g.rolls.length}${g.die}`).join('+') + (mod ? (mod > 0 ? `+${mod}` : mod) : '')
+    const notation = groups.map(g => `${g.rolls.length}${g.die}`).join('+')
     const rollsText = groups.map(g => `${g.die}: [${g.rolls.join(', ')}]`).join('; ')
     const modText = mod ? ` ${mod > 0 ? '+' : '-'} ${Math.abs(mod)}` : ''
 

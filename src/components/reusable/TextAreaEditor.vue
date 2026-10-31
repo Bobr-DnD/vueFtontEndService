@@ -51,7 +51,7 @@ const saveField = () => {
 
 <template>
     <div class="grid grid-cols-[1fr_44px] auto-rows-min gap-2 content-start justify-items-start justify-start p-2">
-
+        
         <form @submit.prevent class="flex flex-col items-start justify-center w-full">
             <label :for="props.fieldName" class="text-lg font-gothic">{{ props.name }}:</label>
             <textarea ref="areaEl" :name="props.fieldName" :id="props.fieldName" :value="editableValue" @input="autoResize"
@@ -62,13 +62,13 @@ const saveField = () => {
                 md:hover:border-darkred-red/70" placeholder="Введіть текст..."></textarea>
         </form>
 
-        <div v-if="fieldReadonly" class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl md:hover:cursor-pointer"
+        <div v-if="fieldReadonly" class="flex justify-center items-center bg-darkred-dark border-2 w-11 h-11 border-darkred-red rounded-xl md:hover:cursor-pointer"
             @click="editField">
             <PencilIcon class="w-4 h-4 text-darkred-light" />
         </div>
 
         <div v-if="!fieldReadonly"
-            class="flex justify-center items-center bg-darkred-dark self-end border-2 w-11 h-11 border-darkred-red rounded-xl md:hover:cursor-pointer"
+            class="flex justify-center items-center bg-darkred-dark border-2 w-11 h-11 border-darkred-red rounded-xl md:hover:cursor-pointer"
             @click="saveField">
             <CheckCircleIcon class="w-7 h-7 text-darkred-light" />
         </div>
