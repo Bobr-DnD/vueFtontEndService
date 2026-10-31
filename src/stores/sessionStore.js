@@ -112,7 +112,10 @@ export const useSessionStore = defineStore('session', () => {
         charactersOnlineIds.value = []
 
         if (room) {
-            charactersOnlineIds.value = room.members.filter(el => el[1].role === 'user' && el[1].userId).map(el => el[1].userId)
+            // "online" means a character is actively connected - the viewer's
+            // own role doesn't matter, since an admin can open a character page
+            // too (the router lets an admin token satisfy a /session/ route).
+            charactersOnlineIds.value = room.members.filter(el => el[1].userId).map(el => el[1].userId)
         }
     }
 

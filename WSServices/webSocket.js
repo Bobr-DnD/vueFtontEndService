@@ -12,6 +12,7 @@ const reconnectCount = ref(0)
 
 let disconnectNotifyTimer = null
 let disconnectNotified = false
+let hasConnectedOnce = false
 
 const socket = io(import.meta.env.VITE_WS, {
   transports: ["websocket"],
@@ -38,6 +39,14 @@ socket.on("connect", () => {
     notify({ message: "З'єднання з сервером відновлено", type: 'success' })
     disconnectNotified = false
   }
+
+  // Every connect after the first is a reconnect - whether socket.io's own
+  // backoff loop did it, or the forced connect() below (visibilitychange) -
+  // both need the same session/character resync downstream.
+  if (hasConnectedOnce) {
+    reconnectCount.value++;
+  }
+  hasConnectedOnce = true;
 });
 
 socket.on("disconnect", (reason) => {
@@ -58,9 +67,19 @@ socket.on("connect_error", (err) => {
   console.warn("Socket connect_error:", err.message);
 });
 
-socket.io.on('reconnect', (attempt) => {
-  reconnectCount.value++;
-  console.warn("Socket reconnected, attempt:", attempt);
+// Mobile browsers freeze JS timers while a tab is hidden (e.g. screen locked),
+// so socket.io's own background retry loop can sit on a stale, frozen backoff
+// timer for however long the screen was off. Forcing a connect() the instant
+// the page is visible again is faster and more deterministic than waiting for
+// that timer to resume - connect() is a safe no-op if already connected.
+// (Deliberately not touching socket.io(false)/skipReconnect here - if that's
+// toggled off while a reconnect attempt is already scheduled, the pending
+// timer bails without resetting its own "reconnecting" flag, permanently
+// stalling future automatic reconnects for the rest of the session.)
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && !socket.connected) {
+    socket.connect();
+  }
 });
 
 export { socket, connected, reconnectCount };

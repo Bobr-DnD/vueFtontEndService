@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router';
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
@@ -28,13 +28,22 @@ onMounted(async () => {
   session.value = res.data
 })
 
-socket.on('session:update', (session) => {
+function onSessionUpdate(update) {
   charactersOnlineIds.value = [];
-  const room = session.room;
+  const room = update.room;
 
   if (room) {
-    charactersOnlineIds.value = room.members.filter(el => el[1].role === 'user' && el[1].userId).map(el => el[1].userId)
+    // "online" means a character is actively connected - the viewer's own
+    // role doesn't matter, since an admin can open a character page too (the
+    // router lets an admin token satisfy a /session/ route).
+    charactersOnlineIds.value = room.members.filter(el => el[1].userId).map(el => el[1].userId)
   }
+}
+
+socket.on('session:update', onSessionUpdate)
+
+onBeforeUnmount(() => {
+  socket.off('session:update', onSessionUpdate)
 })
 </script>
 

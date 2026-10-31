@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, computed, watch } from 'vue';
+import { reactive, ref, computed, watch, onBeforeUnmount } from 'vue';
 import { socket } from '@ws/webSocket';
 
 import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue';
@@ -10,6 +10,23 @@ const emit = defineEmits(['close'])
 const DICE = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100']
 const MAX_PER_DIE = 20
 const STORAGE_KEY = 'diceRoller:config'
+
+// d6 keeps the plain square tile; the rest get an inline SVG outline closer
+// to their real polyhedron (viewBox is 0 0 100 100). d100 is a wider kite
+// than d10 - it's conventionally rolled/shown as a percentile d10, but needs
+// to read as visually distinct from the d10 tile.
+const DIE_SHAPE_POINTS = {
+    d4: '50,0 100,100 0,100',
+    d8: '50,0 100,50 50,100 0,50',
+    d10: '50,0 88,36 70,100 30,100 12,36',
+    d12: '50,0 100,38 82,100 18,100 0,38',
+    d20: '25,0 75,0 100,50 75,100 25,100 0,50',
+    d100: '50,0 96,34 78,100 22,100 4,34'
+}
+
+function dieShapePoints(die) {
+    return DIE_SHAPE_POINTS[die] || null
+}
 
 function defaultDice() {
     return DICE.map(die => ({ die, count: 0 }))
@@ -45,21 +62,46 @@ function persistConfig() {
     }
 }
 
+const ANIMATION_MS = 650
+const TICK_MS = 70
+
 const initial = loadConfig()
 const dice = reactive(initial.dice)
 const modifier = ref(initial.modifier)
-const result = ref(null)
+const isRolling = ref(false)
 
-watch([dice, modifier], persistConfig, { deep: true })
+// Holds the outcome of the roll currently animating/just finished. Cleared
+// whenever the dice selection changes so a stale result can't keep showing
+// for a combo you're no longer about to roll.
+const rollState = ref(null)
+
+let animationInterval = null
+let animationTimeout = null
+
+function stopAnimation() {
+    clearInterval(animationInterval)
+    clearTimeout(animationTimeout)
+    animationInterval = null
+    animationTimeout = null
+}
+
+onBeforeUnmount(stopAnimation)
+
+watch([dice, modifier], () => {
+    persistConfig()
+    if (!isRolling.value) rollState.value = null
+}, { deep: true })
 
 const activeDice = computed(() => dice.filter(d => d.count > 0))
 
-const formula = computed(() => {
-    if (!activeDice.value.length) return ''
-    const mod = Math.round(modifier.value) || 0
-    const diceText = activeDice.value.map(d => `${d.count}${d.die}`).join(' + ')
-    return mod ? `${diceText} ${mod > 0 ? '+' : '-'} ${Math.abs(mod)}` : diceText
+// Same shape as a settled roll, but with no numbers yet - lets the dice
+// appear in the result area as soon as they're selected, before rolling.
+const displayGroups = computed(() => {
+    if (rollState.value) return rollState.value.groups
+    return activeDice.value.map(d => ({ die: d.die, rolls: Array.from({ length: d.count }, () => null) }))
 })
+
+const displayTotal = computed(() => rollState.value?.total ?? null)
 
 function increment(entry) {
     entry.count = Math.min(MAX_PER_DIE, entry.count + 1)
@@ -73,9 +115,19 @@ function rollDie(sides) {
     return Math.floor(Math.random() * sides) + 1
 }
 
-function roll() {
-    if (!activeDice.value.length) return
+function placeholderGroups(groups) {
+    return groups.map(g => ({
+        die: g.die,
+        rolls: g.rolls.map(() => rollDie(Number(g.die.slice(1))))
+    }))
+}
 
+function roll() {
+    if (!activeDice.value.length || isRolling.value) return
+
+    // The actual roll is decided and logged immediately - only the on-screen
+    // reveal is delayed, so the animation is cosmetic and can never affect
+    // (or lag behind) what actually gets recorded.
     const groups = activeDice.value.map(d => ({
         die: d.die,
         rolls: Array.from({ length: d.count }, () => rollDie(Number(d.die.slice(1))))
@@ -86,16 +138,25 @@ function roll() {
     modifier.value = mod
     const total = diceTotal + mod
 
-    result.value = { groups, total }
     persistConfig()
 
-    const notation = groups.map(g => `${g.rolls.length}${g.die}`).join('+')
-    const rollsText = groups.map(g => `${g.die}: [${g.rolls.join(', ')}]`).join('; ')
-    const modText = mod ? ` ${mod > 0 ? '+' : '-'} ${Math.abs(mod)}` : ''
-
     socket.emit('character:rollDice', {
-        message: `Персонаж кинув ${notation}: ${rollsText}${modText} = ${total}`
+        message: `Персонаж кинув кубики: ${total}`
     })
+
+    stopAnimation()
+    isRolling.value = true
+    rollState.value = { groups: placeholderGroups(groups), total: null }
+
+    animationInterval = setInterval(() => {
+        rollState.value = { groups: placeholderGroups(groups), total: null }
+    }, TICK_MS)
+
+    animationTimeout = setTimeout(() => {
+        stopAnimation()
+        rollState.value = { groups, total }
+        isRolling.value = false
+    }, ANIMATION_MS)
 }
 </script>
 
@@ -110,20 +171,19 @@ function roll() {
 
             <h2 class="text-xl text-center">🎲 Кидок кубиків</h2>
 
-            <div class="flex flex-wrap gap-1.5 sm:gap-2">
-                <div v-for="entry in dice" :key="entry.die"
-                    class="dice-row flex items-center justify-center gap-1 sm:gap-2 basis-full sm:basis-1">
-                    <span class="w-10 sm:w-14 text-sm sm:text-base font-semibold">{{ entry.die }}</span>
+            <div class="grid grid-cols-2 gap-2">
+                <div v-for="entry in dice" :key="entry.die" class="dice-row flex items-center justify-center gap-2">
+                    <span class="font-semibold text-lg">{{ entry.die }}</span>
 
                     <button @click="decrement(entry)"
-                        class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg border-2 border-darkred-light_gray md:hover:bg-darkred-gray/60 md:hover:cursor-pointer">
+                        class="w-10 h-10 rounded-lg border-2 border-darkred-light_gray md:hover:bg-darkred-gray/60 md:hover:cursor-pointer">
                         −
                     </button>
 
                     <span class="w-6 text-center tabular-nums">{{ entry.count }}</span>
 
                     <button @click="increment(entry)"
-                        class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg border-2 border-darkred-light_gray md:hover:bg-darkred-gray/60 md:hover:cursor-pointer">
+                        class="w-10 h-10 rounded-lg border-2 border-darkred-light_gray md:hover:bg-darkred-gray/60 md:hover:cursor-pointer">
                         +
                     </button>
                 </div>
@@ -135,18 +195,44 @@ function roll() {
                     class="p-2 border-2 text-md font-gothic border-darkred-light_gray rounded-lg text-darkred-dark w-full focus:border-darkred-gray" />
             </label>
 
-            <div v-if="formula" class="text-center text-sm text-darkred-light_gray">
-                {{ formula }}
-            </div>
-
             <AprroveButtonWithText text="Кинути" class="w-full h-12 flex justify-center items-center"
-                :class="!activeDice.length && 'opacity-50 pointer-events-none'" @click="roll" />
+                :class="(!activeDice.length || isRolling) && 'opacity-50 pointer-events-none'" @click="roll" />
 
-            <div v-if="result" class="text-center space-y-1">
-                <div v-for="g in result.groups" :key="g.die" class="text-sm text-darkred-light_gray">
-                    {{ g.die }}: [{{ g.rolls.join(', ') }}]
+            <div v-if="displayGroups.length || modifier" class="space-y-2">
+                <div class="flex gap-2 items-center justify-center flex-wrap">
+                    <div v-for="g in displayGroups" :key="g.die">
+                        <div class="text-xs text-center text-darkred-light_gray">{{ g.die }}</div>
+
+                        <div class="flex flex-wrap gap-1.5 justify-center">
+                            <div v-for="(r, i) in g.rolls" :key="i" class="dice-face relative w-10 h-10"
+                                :class="isRolling && 'dice-face-rolling'">
+                                <svg v-if="dieShapePoints(g.die)" viewBox="0 0 100 100"
+                                    class="absolute inset-0 w-full h-full">
+                                    <polygon :points="dieShapePoints(g.die)"
+                                        class="fill-darkred-dark stroke-darkred-light_gray" stroke-width="6"
+                                        stroke-linejoin="round" />
+                                </svg>
+                                <div v-else
+                                    class="absolute inset-0 rounded-lg border-2 border-darkred-light_gray bg-darkred-dark">
+                                </div>
+
+                                <span v-if="r !== null"
+                                    class="absolute inset-0 flex items-center justify-center font-bold tabular-nums">{{
+                                        r }}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="text-3xl font-bold">{{ result.total }}</div>
+
+                <div v-if="modifier != 0" class="text-center text-sm text-darkred-light_gray">
+                    {{ modifier > 0 ? `+${modifier}` : modifier }}
+                </div>
+
+                <div v-if="displayTotal !== null || isRolling" class="text-center text-3xl font-bold"
+                    :class="isRolling && 'animate-pulse'">
+                    {{ displayTotal ?? '…' }}
+                </div>
+
             </div>
 
         </div>
@@ -155,10 +241,33 @@ function roll() {
 </template>
 
 <style scoped>
-/* Overrides the sm:basis-[...] two-column width at every breakpoint, so the
-   last (odd, 7th) die row always spans the full row instead of leaving the
-   second column empty - without a per-item class computed in the template. */
 .dice-row:last-child {
-    flex-basis: 100%;
+    grid-column: span 2;
+}
+
+@keyframes dice-tumble {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+
+    25% {
+        transform: rotate(-18deg) scale(0.88);
+    }
+
+    50% {
+        transform: rotate(12deg) scale(1.12);
+    }
+
+    75% {
+        transform: rotate(-10deg) scale(0.92);
+    }
+
+    100% {
+        transform: rotate(0deg) scale(1);
+    }
+}
+
+.dice-face-rolling {
+    animation: dice-tumble 0.3s ease-in-out infinite;
 }
 </style>
