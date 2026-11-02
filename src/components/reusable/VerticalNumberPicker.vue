@@ -39,6 +39,7 @@ const value = computed({
 const active = ref(false)
 const pulseDirection = ref(null)
 const showHint = ref(false)
+const hintStyle = ref({})
 
 const totalCost = computed(() => value.value * -props.price)
 
@@ -81,13 +82,36 @@ function step(direction) {
     applyValue(clamp(value.value + direction))
 }
 
+// Positions the hint via a fixed rect instead of `absolute` inside the
+// component, since the picker can sit inside an `overflow-hidden` ancestor
+// (e.g. an accordion's collapse-animation clip) that would otherwise cut it off.
+function updateHintPosition() {
+    const rect = buttonEl.value?.getBoundingClientRect()
+    if (!rect) return
+    hintStyle.value = {
+        top: `${rect.top}px`,
+        left: `${rect.right}px`,
+        transform: 'translate(-100%, calc(-100% - 8px))'
+    }
+}
+
+function hideHint() {
+    showHint.value = false
+    if (hintTimeoutId) {
+        clearTimeout(hintTimeoutId)
+        hintTimeoutId = null
+    }
+    window.removeEventListener('scroll', updateHintPosition, true)
+    window.removeEventListener('resize', updateHintPosition)
+}
+
 function showHintTemporarily() {
     showHint.value = true
+    updateHintPosition()
+    window.addEventListener('scroll', updateHintPosition, true)
+    window.addEventListener('resize', updateHintPosition)
     if (hintTimeoutId) clearTimeout(hintTimeoutId)
-    hintTimeoutId = setTimeout(() => {
-        showHint.value = false
-        hintTimeoutId = null
-    }, 3000)
+    hintTimeoutId = setTimeout(hideHint, 3000)
 }
 
 function finalize() {
@@ -104,11 +128,7 @@ function arm() {
 function disarm() {
     if (!active.value) return
     active.value = false
-    showHint.value = false
-    if (hintTimeoutId) {
-        clearTimeout(hintTimeoutId)
-        hintTimeoutId = null
-    }
+    hideHint()
     finalize()
 }
 
@@ -181,7 +201,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
     buttonEl.value?.removeEventListener('wheel', onWheel)
     document.removeEventListener('keydown', onKeydown)
-    if (hintTimeoutId) clearTimeout(hintTimeoutId)
+    hideHint()
     if (pulseTimeoutId) clearTimeout(pulseTimeoutId)
 })
 
@@ -209,12 +229,14 @@ const downIconStyle = computed(() => ({
             </div>
         </div>
 
-        <div class="relative z-50">
-            <div v-if="showHint"
-                class="absolute bottom-full mb-2 right-0 w-40 max-w-[60vw] px-3 py-1.5 rounded-lg bg-darkred-dark text-darkred-light text-sm font-univers text-center shadow-lg z-10">
+        <Teleport to="body">
+            <div v-if="showHint" :style="hintStyle"
+                class="fixed w-40 max-w-[60vw] px-3 py-1.5 rounded-lg bg-darkred-dark text-darkred-light text-sm font-univers text-center shadow-lg z-50">
                 Прокрути або проведи пальцем, тапни щоб підтвердити
             </div>
+        </Teleport>
 
+        <div>
             <button ref="buttonEl" type="button" :aria-pressed="active"
                 class="w-14 h-14 rounded-full shadow-lg flex flex-col items-center justify-center gap-0.5 bg-darkred-dark_gray border-2 transition-colors duration-150 md:hover:cursor-pointer"
                 :class="active ? 'border-greenish-light ring-4 ring-greenish-light/30 touch-none' : 'border-darkred-gray'"
