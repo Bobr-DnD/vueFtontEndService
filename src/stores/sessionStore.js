@@ -1,18 +1,19 @@
 import { defineStore } from 'pinia'
-import { ref, computed, watch, toRaw } from 'vue'
+import { ref, computed, toRaw } from 'vue'
 import { useRouter } from 'vue-router'
 
 import RepositoryFactory from '@http/RepositoryFactory'
 import { socket, connected } from '@ws/webSocket';
 import { asyncHandler } from '@utils/asyncHandler';
+import { useAuthStore } from '@/stores/authStore';
 
 import { notifySyncSuccess, notify } from '@utils/notification';
 import { toNewSession } from '@utils/objects.dto';
-import { checkEqualByKeys } from '@utils/entityHelper';
 
 
 export const useSessionStore = defineStore('session', () => {
 
+    const authStore = useAuthStore()
     const session = ref(null)
     const editedSession = ref(null)
     const isLoading = ref(true)
@@ -20,32 +21,23 @@ export const useSessionStore = defineStore('session', () => {
     const charactersOnlineIds = ref([])
     const charactersIds = ref([])
     const unsavedChanges = ref(false)
-    const copied = ref(false)
+    const dirtyFields = ref(new Set())
     const router = useRouter()
-
-    const keysToWatch = [
-        'name',
-        'image',
-        'notes',
-        'customFields',
-        'entityTypes',
-        'currencyTypes',
-        'characteristicsList',
-        'enemyTypes',
-        'perkTypes',
-        'loadoutsLimit',
-    ]
 
     // API calls
     async function loadSession(sessionId) {
-        isLoading.value = true
+        // A reconnect re-fetches the same session to resync state after a drop
+        // (e.g. phone screen lock) - that should happen quietly in the background,
+        // not re-trigger the full-page loader when we already have data to show.
+        const isFreshSession = session.value?.id !== sessionId
+        if (isFreshSession) isLoading.value = true
 
         const [res, err] = await asyncHandler(
             RepositoryFactory.getById('session', sessionId)
         )
         if (err) {
             networkError.value = true
-            isLoading.value = false
+            if (isFreshSession) isLoading.value = false
             return
         }
 
@@ -53,12 +45,12 @@ export const useSessionStore = defineStore('session', () => {
         charactersIds.value = session.value.characters.map(el => { return { id: el.id, name: el.name } })
 
         copySession()
-        isLoading.value = false
+        if (isFreshSession) isLoading.value = false
     }
 
     async function saveSession(sessionId) {
         const [res, err] = await asyncHandler(
-            RepositoryFactory.update('session', sessionId, toRaw(editedSession.value))
+            RepositoryFactory.update('session', sessionId, buildOps())
         )
         if (err) if (err) {
             networkError.value = true
@@ -85,13 +77,14 @@ export const useSessionStore = defineStore('session', () => {
 
         else if (res.data.status) notify({ message: 'Сесію видалено', type: 'success' })
         CloseWebsocketSession(sessionId)
+        authStore.clearToken(sessionId)
         router.push('/')
     }
 
-    async function changePassword(sessionId, newPass, oldPass) {
+    async function changePassword(sessionId, newPass, oldPass, field = 'password') {
 
         const [res, err] = await asyncHandler(
-            RepositoryFactory.changepass('session', sessionId, { password: oldPass, passwordNew: newPass })
+            RepositoryFactory.changepass('session', sessionId, { password: oldPass, passwordNew: newPass, field })
         )
         if (err) return
 
@@ -119,7 +112,10 @@ export const useSessionStore = defineStore('session', () => {
         charactersOnlineIds.value = []
 
         if (room) {
-            charactersOnlineIds.value = room.members.filter(el => el[1].role === 'user' && el[1].userId).map(el => el[1].userId)
+            // "online" means a character is actively connected - the viewer's
+            // own role doesn't matter, since an admin can open a character page
+            // too (the router lets an admin token satisfy a /session/ route).
+            charactersOnlineIds.value = room.members.filter(el => el[1].userId).map(el => el[1].userId)
         }
     }
 
@@ -139,12 +135,25 @@ export const useSessionStore = defineStore('session', () => {
 
     //service functions
     function copySession() {
-        copied.value = true
         editedSession.value = (structuredClone(toRaw(session.value)))
+        dirtyFields.value = new Set()
     }
 
     function markUnsaved() {
         unsavedChanges.value = true
+    }
+
+    function markDirty(field) {
+        dirtyFields.value.add(field)
+        markUnsaved()
+    }
+
+    function buildOps() {
+        return [...dirtyFields.value].map(field => ({
+            op: 'replace',
+            path: `/${field}`,
+            value: toRaw(editedSession.value)[field]
+        }))
     }
 
     function discardChanges() {
@@ -157,37 +166,31 @@ export const useSessionStore = defineStore('session', () => {
 
     function changeImage(image) {
         editedSession.value.image = image
+        markDirty('image')
     }
 
     function addCustomField(object) {
         editedSession.value.customFields.push(object)
+        markDirty('customFields')
     }
 
     function removeCustomField(id) {
         editedSession.value.customFields = editedSession.value.customFields.filter(el => el.id !== id)
+        markDirty('customFields')
     }
-
-    watch(() => editedSession.value, () => {
-
-        if (copied.value) {
-            copied.value = false
-            return
-        }
-
-        if (checkEqualByKeys(session.value, editedSession.value, keysToWatch)) markUnsaved()
-
-    }, { deep: true, immediate: false })
 
     return {
         session,
         editedSession,
         isLoading,
         unsavedChanges,
+        dirtyFields,
         charactersOnlineIds,
         charactersIds,
         networkError,
         loadSession,
         markUnsaved,
+        markDirty,
         saveSession,
         deleteSession,
         changePassword,

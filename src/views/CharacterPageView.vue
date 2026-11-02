@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, onBeforeUnmount, watch, toRaw, computed } from 'vue';
+import { reactive, ref, onBeforeUnmount, watch, toRaw, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { ChartBarIcon, SparklesIcon, BanknotesIcon, Square3Stack3DIcon } from '@heroicons/vue/24/solid'
 
@@ -20,6 +20,7 @@ import CurrencyTable from '@/components/character-page components/CurrencyTable.
 import HideButton from '@/components/reusable/Buttons/HideButton.vue';
 import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue';
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue';
+import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import CustomFieldsEditor from '@/components/reusable/CustomFieldsEditor.vue';
 import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
 import BackendOffline from '@/components/reusable/BackendOffline.vue';
@@ -28,6 +29,7 @@ import ProgressiveBar from '@/components/reusable/ProgressiveBar.vue';
 import DiceLoader from '@/components/reusable/Loaders/DiceLoader.vue';
 import { CursorArrowRippleIcon } from '@heroicons/vue/24/outline';
 import LoadoutsPanel from '@/components/character-page components/LoadoutsPanel.vue';
+import DiceRollerModal from '@/components/character-page components/DiceRollerModal.vue';
 
 const state = reactive({
     character: {},
@@ -61,6 +63,7 @@ const loadouts_hidden = computed({
     set: (val) => { gameStore.loadouts_hidden[characterId.value] = val }
 })
 const openHealthIds = computed(() => gameStore.openHealthIds[characterId.value])
+const dice_modal_hidden = ref(true)
 
 watch(
     () => sessionStore.isLoading,
@@ -96,40 +99,55 @@ socket.on('session:join', (session) => {
     socket.emit('session:connectCharacter', sessionId.value, characterId.value)
 })
 
-let characterUpdatePending = false
+let pendingFields = new Set()
+let pendingMessages = []
 
 socket.on('character:updateDataNotify', (character) => {
     state.characterIsUpdating = false
 
-    if (characterUpdatePending) {
-        updateCharacter()
+    if (pendingFields.size > 0) {
+        flushUpdate()
         return
     }
 
     state.character = toNewCharacterObject(character)
 })
 
-function updateCharacter() {
-    if (state.characterIsUpdating) {
-        characterUpdatePending = true
-        return
-    }
+function flushUpdate() {
+    if (state.characterIsUpdating || pendingFields.size === 0) return
 
-    characterUpdatePending = false
-    socket.emit('character:updateData', state.character)
+    const ops = [...pendingFields].map(field => ({ op: 'replace', path: `/${field}`, value: state.character[field] }))
+    const message = pendingMessages.join('; ') || null
+    pendingFields.clear()
+    pendingMessages = []
+
+    socket.emit('character:updateData', { id: state.character.id, ops, message })
     state.characterIsUpdating = true
+}
+
+// `message` is what shows up in the WS logs - the caller already knows exactly
+// what the player just did, so it builds the human-readable text itself instead
+// of the server guessing it from a before/after diff.
+function queueUpdate(fields, message) {
+    fields.forEach(field => pendingFields.add(field))
+    if (message) pendingMessages.push(message)
+    flushUpdate()
 }
 
 // character functions
 
 function addExperience() {
     state.character.experience++;
+    const fields = ['experience']
+    let message = 'Персонаж отримав досвід (+1)'
     if (state.character.experience >= state.character.experienceToLevelUp) {
         state.character.experience = 0;
         state.character.perkPoints++;
         state.character.level++;
+        fields.push('perkPoints', 'level')
+        message = `Персонаж досяг ${state.character.level} рівня`
     }
-    updateCharacter()
+    queueUpdate(fields, message)
 }
 
 function updateHealthFields(value, title) {
@@ -138,38 +156,46 @@ function updateHealthFields(value, title) {
         item.value += value
     }
     gameStore.openHealthIds[characterId.value].delete(item.id)
-    updateCharacter()
+    queueUpdate(['health'], `"${title}": ${value > 0 ? '+' : ''}${value} (тепер ${item?.value})`)
 }
 
 function updateCurrency(fields) {
     state.character.currency = fields
-    updateCharacter()
+    queueUpdate(['currency'], 'Оновлено валюту')
 }
 
 function addCustomField(object) {
     state.character.customFields.push(object)
     custom_modal_hidden.value = true
-    updateCharacter()
+    queueUpdate(['customFields'], `Додано поле "${object.name}"`)
 }
 
 function updateCustomFields(fields) {
     state.character.customFields = fields
-    updateCharacter()
+    queueUpdate(['customFields'], 'Оновлено додаткові поля')
 }
 
-function addPerk() {
-    // state.character.perkPoints--;
-    updateCharacter()
+function addPerk(message) {
+
+    if (state.character.perkPoints > 0) state.character.perkPoints--;
+    queueUpdate(['perks'], message)
+}
+
+function syncLoadouts() {
+    queueUpdate(['loadouts'], 'Оновлено профілі спорядження')
+}
+
+function syncEntities(message) {
+    queueUpdate(['entities'], message)
 }
 
 function updateCharacterNotes(field, value) {
     state.character[field] = value;
-    updateCharacter()
+    queueUpdate([field], field === 'playerNotes' ? 'Оновлено нотатки гравця' : 'Оновлено нотатки адміна')
 }
 
 function togglePicker(healthId) {
     gameStore.toggleHealthId(characterId.value, healthId)
-    updateCharacter()
 }
 
 </script>
@@ -177,7 +203,12 @@ function togglePicker(healthId) {
 <template>
     <SessionViewNavigtaion />
 
-    <div v-if="!sessionStore.isLoading && !gameStore.isBackendOffline" class="grid grid-cols-1 lg:grid-cols-[25%_75%]">
+    <div v-if="sessionStore.isLoading" class="w-full h-full text-center py-6 flex flex-col gap-10 justify-center items-center">
+        <DiceLoader />
+    </div>
+
+    <div v-else class="relative">
+        <div class="grid grid-cols-1 lg:grid-cols-[25%_75%]">
 
         <section class="p-2 lg:p-4 space-y-2">
 
@@ -188,6 +219,9 @@ function togglePicker(healthId) {
             <Experience :exp="state.character.experience" :expMax="state.character.experienceToLevelUp"
                 :perkPoints="state.character.perkPoints" :level="state.character.level" :callback="addExperience"
                 :class="state.characterIsUpdating && 'pointer-events-none'" />
+
+            <AprroveButtonWithText text="🎲 Кинути кубик" class="w-full h-12 flex justify-center items-center"
+                @click="dice_modal_hidden = false" />
 
             <TextAreaEditor class="lg:grid hidden" fieldName="playerNotes" name="Записки гравця"
                 :value="state.character.playerNotes" :callback="updateCharacterNotes" />
@@ -292,7 +326,7 @@ function togglePicker(healthId) {
                             <LoadoutsPanel v-model:loadouts="state.character.loadouts"
                                 :entities="state.character.entities" :perks="state.character.perks"
                                 :entityTypes="sessionStore.session.entityTypes"
-                                :loadoutLimits="sessionStore.session.loadoutsLimit" :callback="updateCharacter" />
+                                :loadoutLimits="sessionStore.session.loadoutsLimit" :callback="syncLoadouts" />
                         </div>
                     </div>
                 </div>
@@ -304,7 +338,7 @@ function togglePicker(healthId) {
 
                 <EntityTable :character_entities="state.character.entities"
                     :session_entities="sessionStore.session.entities" :types="sessionStore.session.entityTypes"
-                    :callback="updateCharacter" />
+                    :callback="syncEntities" />
             </section>
 
             <section>
@@ -315,11 +349,14 @@ function togglePicker(healthId) {
         </section>
     </div>
 
-    <div v-if="sessionStore.isLoading || gameStore.isBackendOffline"
-        class="w-full h-full text-center py-6 flex flex-col gap-10 justify-center items-center">
-        <BackendOffline v-if="gameStore.isBackendOffline" class="w-[90vw] lg:w-[650px]" />
+    <DiceRollerModal v-if="!dice_modal_hidden" @close="dice_modal_hidden = true" />
 
-        <DiceLoader />
+    <Transition name="offline-fade">
+        <div v-if="gameStore.isBackendOffline"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-darkred-dark/50">
+            <BackendOffline class="w-[90vw] lg:w-[650px]" />
+        </div>
+    </Transition>
     </div>
 
 </template>
@@ -354,5 +391,15 @@ function togglePicker(healthId) {
     opacity: 0;
     max-height: 0;
     transform: translateY(-10px);
+}
+
+.offline-fade-enter-active,
+.offline-fade-leave-active {
+    transition: opacity 0.2s ease;
+}
+
+.offline-fade-enter-from,
+.offline-fade-leave-to {
+    opacity: 0;
 }
 </style>

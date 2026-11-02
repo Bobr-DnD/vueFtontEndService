@@ -50,7 +50,8 @@ const searchQuery = ref({
 const {
     selected: selectedCharacter,
     unsavedChanges,
-    markUnsaved,
+    markDirty,
+    buildPatchOps,
     load: loadCharacter,
     select: selectCharacter,
     discardChanges,
@@ -149,7 +150,7 @@ async function saveCharacter() {
 
         } else {
             const [res, err] = await asyncHandler(
-                RepositoryFactory.update('character', character.id, character)
+                RepositoryFactory.update('character', character.id, buildPatchOps())
             )
             if (err) return
             loadCharacter(res.data.id, res.data)
@@ -222,27 +223,27 @@ function showType(listKey, id) {
 
 function updateCurrency(fields) {
     selectedCharacter.value.currency = fields
-    markUnsaved()
+    markDirty('currency')
 }
 
 function addCustomField(object) {
     selectedCharacter.value.customFields.push(object)
-    markUnsaved();
+    markDirty('customFields');
 }
 
 function updateCustomFields(fields) {
     selectedCharacter.value.customFields = fields
-    markUnsaved();
+    markDirty('customFields');
 }
 
 function addEffect(effect) {
     addRow(store.session.effects, selectedCharacter.value.effects, effect.id)
-    markUnsaved()
+    markDirty('effects')
 }
 
 function removeEffect(effect) {
     removeRow(selectedCharacter.value.effects, effect.id)
-    markUnsaved()
+    markDirty('effects')
 }
 
 function updateHealthFields(field) {
@@ -251,27 +252,27 @@ function updateHealthFields(field) {
             h.id === field.id ? field : h
         )
 
-    markUnsaved();
+    markDirty('health');
 }
 
 function deleteHealthField(field) {
     selectedCharacter.value.health = selectedCharacter.value.health.filter(h => h.id !== field.id)
-    markUnsaved();
+    markDirty('health');
 }
 
 function addHealthField(field) {
     selectedCharacter.value.health.push(field)
-    markUnsaved();
+    markDirty('health');
 }
 
 function addEntity(entity) {
     addRow(store.session.entities, selectedCharacter.value.entities, entity.id)
-    markUnsaved()
+    markDirty('entities')
 }
 
 function removeEntity(entity) {
     removeRow(selectedCharacter.value.entities, entity.id)
-    markUnsaved()
+    markDirty('entities')
 }
 
 function levelUpPerk(perk) {
@@ -279,19 +280,19 @@ function levelUpPerk(perk) {
     if (perk.count >= maxLevel) return
 
     addRow(store.session.perks, selectedCharacter.value.perks, perk.id)
-    markUnsaved()
+    markDirty('perks')
 }
 
 function levelDownPerk(perk) {
     if (!perk.count) return
 
     removeRow(selectedCharacter.value.perks, perk.id)
-    markUnsaved()
+    markDirty('perks')
 }
 
 function removePerkFully(perk) {
     removeAllRows(selectedCharacter.value.perks, perk.id)
-    markUnsaved()
+    markDirty('perks')
 }
 
 const canSave = computed(() => unsavedChanges.value)
@@ -334,35 +335,40 @@ const canSave = computed(() => unsavedChanges.value)
             <div id="base" v-if="activeTab === 'base'" class="grid grid-cols-2 auto-rows-min gap-4">
 
                 <ImageEditor class="w-full col-span-2" v-model:image="selectedCharacter.image"
-                    label="Character image" />
+                    @update:image="markDirty('image')" label="Character image" />
 
                 <InputTextReactive placeholder="Ім'я" fieldName="name" v-model:inputValue="selectedCharacter.name"
-                    :important="true" class="w-full" />
+                    @update:inputValue="markDirty('name')" :important="true" class="w-full" />
 
                 <InputTextReactive placeholder="Стать" fieldName="gender" v-model:inputValue="selectedCharacter.gender"
-                    class="w-full" />
+                    @update:inputValue="markDirty('gender')" class="w-full" />
 
                 <InputTextReactive placeholder="Клас" fieldName="class" v-model:inputValue="selectedCharacter.class"
-                    class="w-full" />
+                    @update:inputValue="markDirty('class')" class="w-full" />
 
                 <InputTextReactive placeholder="Раса" fieldName="race" v-model:inputValue="selectedCharacter.race"
-                    class="w-full" />
+                    @update:inputValue="markDirty('race')" class="w-full" />
 
                 <InputTextReactive placeholder="Рівень" fieldName="level" v-model:inputValue="selectedCharacter.level"
-                    type="number" class="w-full" />
+                    @update:inputValue="markDirty('level')" type="number" class="w-full" />
 
                 <InputTextReactive placeholder="Очки перків" fieldName="perkPoints"
-                    v-model:inputValue="selectedCharacter.perkPoints" type="number" class="w-full" />
+                    v-model:inputValue="selectedCharacter.perkPoints" @update:inputValue="markDirty('perkPoints')"
+                    type="number" class="w-full" />
 
                 <InputTextReactive placeholder="Досвід" fieldName="experience"
-                    v-model:inputValue="selectedCharacter.experience" type="number" class="w-full" />
+                    v-model:inputValue="selectedCharacter.experience" @update:inputValue="markDirty('experience')"
+                    type="number" class="w-full" />
 
                 <InputTextReactive placeholder="К-сть досвіду для рівня" fieldName="experienceToLevelUp"
-                    v-model:inputValue="selectedCharacter.experienceToLevelUp" type="number" class="w-full" />
+                    v-model:inputValue="selectedCharacter.experienceToLevelUp"
+                    @update:inputValue="markDirty('experienceToLevelUp')" type="number" class="w-full" />
 
-                <TextAreaReactive label="Записи гравця" v-model:value="selectedCharacter.playerNotes" />
+                <TextAreaReactive label="Записи гравця" v-model:value="selectedCharacter.playerNotes"
+                    @update:value="markDirty('playerNotes')" />
 
-                <TextAreaReactive label="Записи майстра" v-model:value="selectedCharacter.adminNotes" />
+                <TextAreaReactive label="Записи майстра" v-model:value="selectedCharacter.adminNotes"
+                    @update:value="markDirty('adminNotes')" />
 
                 <Header1 class="col-span-2 justify-self-center" label="Список основних характеистик:" />
 
@@ -374,7 +380,8 @@ const canSave = computed(() => unsavedChanges.value)
 
                     <InputTextReactive v-for="characteristic in selectedCharacter.characteristics" :key="characteristic.name"
                         :label="characteristic.name" fieldName="characteristicValue"
-                        v-model:inputValue="characteristic.value" class="w-full" />
+                        v-model:inputValue="characteristic.value" @update:inputValue="markDirty('characteristics')"
+                        class="w-full" />
 
                 </div>
 

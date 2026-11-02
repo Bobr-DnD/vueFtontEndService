@@ -1,4 +1,4 @@
-import { ref, toRaw, watch } from 'vue'
+import { ref, toRaw } from 'vue'
 import { notify, notifySyncSuccess } from './notification'
 
 export default function useEntityEditor({
@@ -11,15 +11,28 @@ export default function useEntityEditor({
 }) {
     const selected = ref(toNew({}))
     const unsavedChanges = ref(false)
-    const copied = ref(false)
+    const dirtyFields = ref(new Set())
 
     function markUnsaved() {
         unsavedChanges.value = true
     }
 
+    function markDirty(field) {
+        dirtyFields.value.add(field)
+        markUnsaved()
+    }
+
     function markSaved() {
         unsavedChanges.value = false
-        copied.value = true
+        dirtyFields.value = new Set()
+    }
+
+    function buildPatchOps() {
+        return [...dirtyFields.value].map(field => ({
+            op: 'replace',
+            path: `/${field}`,
+            value: toRaw(selected.value)[field]
+        }))
     }
 
     function load(id, data) {
@@ -57,20 +70,14 @@ export default function useEntityEditor({
         load(id, data)
     }
 
-    watch(selected, () => {
-        if (copied.value) {
-            copied.value = false
-            return
-        }
-        markUnsaved()
-    }, { deep: true, immediate: false })
-
     return {
         selected,
         unsavedChanges,
-        copied,
+        dirtyFields,
         markUnsaved,
+        markDirty,
         markSaved,
+        buildPatchOps,
         load,
         select,
         discardChanges,

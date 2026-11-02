@@ -42,6 +42,8 @@ const searchQuery = ref('')
 const {
     selected: selectedEffect,
     unsavedChanges,
+    markDirty,
+    buildPatchOps,
     load: loadEffect,
     select: selectEffect,
     discardChanges
@@ -84,7 +86,7 @@ async function saveEffect() {
     else {
 
         const [res, err] = await asyncHandler(
-            RepositoryFactory.update('effect', effect.id, effect)
+            RepositoryFactory.update('effect', effect.id, buildPatchOps())
         )
         if (err) return
         loadEffect(res.data.id, res.data)
@@ -168,10 +170,12 @@ async function deleteEffect() {
             <section v-if="activeTab === 'edit'" class="h-full col-span-full grid grid-cols-2">
 
                 <InputTextReactive placeholder="Назва" fieldName="name" type="text"
-                    v-model:inputValue="selectedEffect.name" :important="true" class="" />
+                    v-model:inputValue="selectedEffect.name" @update:inputValue="markDirty('name')"
+                    :important="true" class="" />
 
                 <InputTextReactive placeholder="Опис" fieldName="description" type="text"
-                    v-model:inputValue="selectedEffect.description" :important="true" class="" />
+                    v-model:inputValue="selectedEffect.description" @update:inputValue="markDirty('description')"
+                    :important="true" class="" />
 
                 <Header2 label="Характеристики, на які впливає ефект:" class="col-span-full" />
 
@@ -182,7 +186,8 @@ async function deleteEffect() {
                         <div>
                             {{ key }}: {{ value }}
                         </div>
-                        <DeleteButton @click="delete selectedEffect.effect[key]" class="bg-darkred-red w-10" />
+                        <DeleteButton @click="delete selectedEffect.effect[key]; markDirty('effect')"
+                            class="bg-darkred-red w-10" />
 
                     </div>
                     <div v-else class="">
@@ -201,7 +206,7 @@ async function deleteEffect() {
                         fieldName="CharacteristicValue" />
 
                     <AprroveButtonWithText class="flex justify-center items-center text-lg"
-                        @click="Object.assign(selectedEffect.effect, toObject(toRaw(newEffect)))"
+                        @click="Object.assign(selectedEffect.effect, toObject(toRaw(newEffect))); markDirty('effect')"
                         text="Додати вимогу" />
                 </div>
 

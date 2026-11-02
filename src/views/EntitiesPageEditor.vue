@@ -54,6 +54,8 @@ const searchQueryEffects = ref('')
 const {
     selected: selectedEntity,
     unsavedChanges,
+    markDirty,
+    buildPatchOps,
     load: loadEntity,
     select: selectEntity,
     discardChanges
@@ -117,7 +119,7 @@ async function saveEntity() {
     }
     else {
         const [res, err] = await asyncHandler(
-            RepositoryFactory.update('entity', entity.id, entity)
+            RepositoryFactory.update('entity', entity.id, buildPatchOps())
         )
         if (err) return
         loadEntity(res.data.id, res.data)
@@ -151,14 +153,17 @@ function addCharacteristic(){
     Object.assign(selectedEntity.value.characteristics, toObject(toRaw(newCharacteristic.value)))
     newCharacteristic.value.name = ''
     newCharacteristic.value.value = ''
+    markDirty('characteristics')
 }
 
 function addEffect(id) {
     addRow(store.session.effects, selectedEntity.value.effects, id)
+    markDirty('effects')
 }
 
 function removeEffect(id) {
     removeRow(selectedEntity.value.effects, id)
+    markDirty('effects')
 }
 
 </script>
@@ -237,21 +242,23 @@ function removeEffect(id) {
                 <!-- <ImageEditor class="col-span-full" label="Картинка" v-model:image="selectedEntity.image" /> -->
 
                 <InputTextReactive class="col-span-3" placeholder="Назва Речі" fieldName="EntityName" type="text"
-                    :important="true" v-model:inputValue="selectedEntity.name" />
+                    :important="true" v-model:inputValue="selectedEntity.name" @update:inputValue="markDirty('name')" />
 
                 <DropDownChoosen label="Тип" entity_name="EntityType" :entity_array="store.session.entityTypes"
-                    :important="true" v-model:selected="selectedEntity.type" />
+                    :important="true" v-model:selected="selectedEntity.type" @update:selected="markDirty('type')" />
 
                 <InputTextReactive class="col-span-3" placeholder="Опис" fieldName="description"
-                    v-model:inputValue="selectedEntity.description" type="text" />
+                    v-model:inputValue="selectedEntity.description" @update:inputValue="markDirty('description')"
+                    type="text" />
 
                 <InputTextReactive placeholder="Ціна" fieldName="price" v-model:inputValue="selectedEntity.price"
-                    type="number" />
+                    @update:inputValue="markDirty('price')" type="number" />
 
-                <TextAreaReactive class="col-span-3" label="Записки Майстра" v-model:value="selectedEntity.notes" />
+                <TextAreaReactive class="col-span-3" label="Записки Майстра" v-model:value="selectedEntity.notes"
+                    @update:value="markDirty('notes')" />
 
                 <InputTextReactive placeholder="Рідкість" fieldName="rarity" v-model:inputValue="selectedEntity.rarity"
-                    type="text" />
+                    @update:inputValue="markDirty('rarity')" type="text" />
 
                 <div
                     class="col-span-2 self-start flex gap-4 flex-wrap rounded-2xl border-2 border-darkred-light_gray p-4 mx-2">
@@ -271,7 +278,8 @@ function removeEffect(id) {
                             <PencilIcon class="w-4 h-4" />
                         </button>
 
-                        <DeleteButton class="bg-darkred-red" @click="delete selectedEntity.characteristics[key]" />
+                        <DeleteButton class="bg-darkred-red"
+                            @click="delete selectedEntity.characteristics[key]; markDirty('characteristics')" />
                     </div>
 
                     <div class="shrink w-full" v-else>
@@ -306,7 +314,8 @@ function removeEffect(id) {
                             {{ key }}: {{ value }}
                         </div>
 
-                        <DeleteButton class="bg-darkred-red" @click="delete selectedEntity.requirement[key]" />
+                        <DeleteButton class="bg-darkred-red"
+                            @click="delete selectedEntity.requirement[key]; markDirty('requirement')" />
                     </div>
 
                     <div class="shrink w-full" v-else>
@@ -322,7 +331,7 @@ function removeEffect(id) {
                             fieldName="CharacteristicValue" />
 
                         <AprroveButtonWithText class="flex justify-center items-center text-lg"
-                            @click="Object.assign(selectedEntity.requirement, toObject(toRaw(newRequirement)))"
+                            @click="Object.assign(selectedEntity.requirement, toObject(toRaw(newRequirement))); markDirty('requirement')"
                             text="Додати вимогу" />
                     </div>
 
