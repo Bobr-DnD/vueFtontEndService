@@ -36,7 +36,7 @@ socket.on("connect", () => {
   cancelPendingDisconnectNotification()
 
   if (disconnectNotified) {
-    notify({ message: "З'єднання з сервером відновлено", type: 'success' })
+    // notify({ message: "З'єднання з сервером відновлено", type: 'success' })
     disconnectNotified = false
   }
 
@@ -57,7 +57,7 @@ socket.on("disconnect", (reason) => {
   disconnectNotifyTimer = setTimeout(() => {
     disconnectNotifyTimer = null
     if (connected.value) return
-    notify({ message: "З'єднання з сервером втрачено. Потрібно перезавантажити", type: 'error' })
+    // notify({ message: "З'єднання з сервером втрачено. Потрібно перезавантажити", type: 'error' })
     disconnectNotified = true
   }, DISCONNECT_NOTIFY_DELAY_MS)
 });

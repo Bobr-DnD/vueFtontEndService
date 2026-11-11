@@ -111,6 +111,11 @@ function decrement(entry) {
     entry.count = Math.max(0, entry.count - 1)
 }
 
+function resetDice() {
+    dice.forEach(entry => entry.count = 0)
+    modifier.value = 0
+}
+
 function rollDie(sides) {
     return Math.floor(Math.random() * sides) + 1
 }
@@ -197,6 +202,12 @@ function roll() {
 
             <AprroveButtonWithText text="Кинути" class="w-full h-12 flex justify-center items-center"
                 :class="(!activeDice.length || isRolling) && 'opacity-50 pointer-events-none'" @click="roll" />
+
+            <button @click="resetDice" type="button"
+                class="justify-self-center px-3 py-1 text-sm rounded-lg border-2 border-darkred-light_gray md:hover:bg-darkred-gray/60 md:hover:cursor-pointer"
+                :class="!activeDice.length && !modifier && 'opacity-50 pointer-events-none'">
+                Скинути кубики
+            </button>
 
             <div v-if="displayGroups.length || modifier" class="space-y-2">
                 <div class="flex gap-2 items-center justify-center flex-wrap">

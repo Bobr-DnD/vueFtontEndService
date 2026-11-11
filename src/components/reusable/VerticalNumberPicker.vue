@@ -120,15 +120,21 @@ function finalize() {
     if (finalValue !== 0) emit('release', finalValue, finalValue * props.price)
 }
 
+function onOutsidePointerDown(e) {
+    if (buttonEl.value && !buttonEl.value.contains(e.target)) disarm()
+}
+
 function arm() {
     active.value = true
     showHintTemporarily()
+    window.addEventListener('pointerdown', onOutsidePointerDown, true)
 }
 
 function disarm() {
     if (!active.value) return
     active.value = false
     hideHint()
+    window.removeEventListener('pointerdown', onOutsidePointerDown, true)
     finalize()
 }
 
@@ -201,6 +207,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
     buttonEl.value?.removeEventListener('wheel', onWheel)
     document.removeEventListener('keydown', onKeydown)
+    window.removeEventListener('pointerdown', onOutsidePointerDown, true)
     hideHint()
     if (pulseTimeoutId) clearTimeout(pulseTimeoutId)
 })
@@ -238,7 +245,7 @@ const downIconStyle = computed(() => ({
 
         <div>
             <button ref="buttonEl" type="button" :aria-pressed="active"
-                class="w-14 h-14 rounded-full shadow-lg flex flex-col items-center justify-center gap-0.5 bg-darkred-dark_gray border-2 transition-colors duration-150 md:hover:cursor-pointer"
+                class="w-14 h-14 relative z-50 rounded-full shadow-lg flex flex-col items-center justify-center gap-0.5 bg-darkred-dark_gray border-2 transition-colors duration-150 md:hover:cursor-pointer"
                 :class="active ? 'border-greenish-light ring-4 ring-greenish-light/30 touch-none' : 'border-darkred-gray'"
                 @pointerdown="onPointerDown" @pointermove="onPointerMove" @pointerup="onPointerUp"
                 @pointercancel="onPointerCancel">
@@ -248,8 +255,6 @@ const downIconStyle = computed(() => ({
                     :style="downIconStyle" />
             </button>
         </div>
-
-        <div v-if="active" class="fixed inset-0 z-40" @click="disarm"></div>
 
     </div>
 </template>
