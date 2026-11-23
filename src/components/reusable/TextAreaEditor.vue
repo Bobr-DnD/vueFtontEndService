@@ -50,27 +50,27 @@ const saveField = () => {
 
 
 <template>
-    <div class="grid grid-cols-[1fr_44px] auto-rows-min gap-2 content-start justify-items-start justify-start p-2">
+    <div class="grid grid-cols-[1fr_44px] auto-rows-min gap-2 content-start justify-items-start justify-start p-2 text-brand-text">
         
         <form @submit.prevent class="flex flex-col items-start justify-center w-full">
             <label :for="props.fieldName" class="text-lg font-gothic">{{ props.name }}:</label>
             <textarea ref="areaEl" :name="props.fieldName" :id="props.fieldName" :value="editableValue" @input="autoResize"
                 :disabled="fieldReadonly" class="w-full h-fit max-h-[500px] overflow-y-auto md:auto-hide-scroll resize-none
-                p-3 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light
+                p-3 rounded-xl border-2 border-brand-base bg-brand-surface text-brand-text
                 font-gothic text-base transition-all duration-300 ease-in-out focus:outline-none focus:ring-2
-                focus:ring-darkred-red focus:border-darkred-red placeholder:text-darkred-light/60
-                md:hover:border-darkred-red/70" placeholder="Введіть текст..."></textarea>
+                focus:ring-brand-accent focus:border-brand-accent placeholder:text-brand-text/60
+                md:hover:border-brand-accent/70" placeholder="Введіть текст..."></textarea>
         </form>
 
-        <div v-if="fieldReadonly" class="flex justify-center items-center bg-darkred-dark border-2 w-11 h-11 border-darkred-red rounded-xl md:hover:cursor-pointer"
+        <div v-if="fieldReadonly" class="flex justify-center items-center bg-brand-base border-2 w-11 h-11 border-brand-accent rounded-xl md:hover:cursor-pointer"
             @click="editField">
-            <PencilIcon class="w-4 h-4 text-darkred-light" />
+            <PencilIcon class="w-4 h-4" />
         </div>
 
         <div v-if="!fieldReadonly"
-            class="flex justify-center items-center bg-darkred-dark border-2 w-11 h-11 border-darkred-red rounded-xl md:hover:cursor-pointer"
+            class="flex justify-center items-center bg-brand-base border-2 w-11 h-11 border-brand-accent rounded-xl md:hover:cursor-pointer"
             @click="saveField">
-            <CheckCircleIcon class="w-7 h-7 text-darkred-light" />
+            <CheckCircleIcon class="w-7 h-7" />
         </div>
     </div>
 </template>

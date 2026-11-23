@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue'
-import CloseButtonRedBG from './Buttons/CloseButtonRedBG.vue';
+import CloseButtonBackground from './Buttons/CloseButtonBackground.vue';
 import { ArrowRightIcon, ArrowLeftIcon } from '@heroicons/vue/24/solid';
 import Header2 from './Titles/Header2.vue';
 
@@ -47,7 +47,7 @@ function setOnlineCharacters() {
     <div>
 
         <button @click="isOpen = !isOpen"
-            class="pointer-events-auto fixed top-32 -translate-y-1/2 z-50 bg-darkred-dark text-darkred-light px-3 py-6 rounded-lg shadow-lg hover:bg-opacity-90 transition-all duration-300"
+            class="pointer-events-auto fixed top-32 -translate-y-1/2 z-50 bg-brand-base text-brand-text px-3 py-6 rounded-lg shadow-lg hover:bg-opacity-90 transition-all duration-300"
             :class="{
                 'left-0 rounded-l-none': side === 'left' && !isOpen,
                 'left-[calc(var(--panel-width))]': side === 'left' && isOpen,
@@ -70,39 +70,39 @@ function setOnlineCharacters() {
 
         <Transition name="fade">
             <div v-if="isOpen" @click="isOpen = !isOpen"
-                class="fixed inset-0 bg-darkred-dark bg-opacity-50 z-40 backdrop-blur-sm pointer-events-auto"
+                class="fixed inset-0 bg-brand-base bg-opacity-50 z-40 backdrop-blur-sm pointer-events-auto"
                 aria-hidden="true">
             </div>
         </Transition>
 
         <Transition :name="side === 'left' ? 'slide-left' : 'slide-right'">
-            <div v-if="isOpen" class="fixed z-40 bg-darkred-dark shadow-xl rounded-2xl m-2 overflow-y-auto" :class="{
+            <div v-if="isOpen" class="fixed z-40 bg-brand-base shadow-xl rounded-2xl m-2 overflow-y-auto" :class="{
                 'left-0': side === 'left',
                 'right-0': side === 'right'
             }" :style="{ width: width }">
 
-                <CloseButtonRedBG @click="isOpen = false" class="pointer-events-auto" />
+                <CloseButtonBackground @click="isOpen = false" class="pointer-events-auto" />
 
                 <div class="p-6 ">
 
-                    <Header2 v-if="props.status" label="Онлайн" class="text-greenish-mid" />
-                    <Header2 v-else label="Офлайн" class="text-darkred-bright" />
+                    <Header2 v-if="props.status" label="Онлайн" class="text-state-success-accent" />
+                    <Header2 v-else label="Офлайн" class="text-brand-accent-hover" />
 
                 </div>
 
-                <div class="px-6 pb-6 pt-2 text-darkred-light font-gothic text-xl flex flex-col gap-2">
+                <div class="px-6 pb-6 pt-2 text-brand-text font-gothic text-xl flex flex-col gap-2">
                     <div v-for="character in props.charactersIds" :key="character.id"
                         class="[&>*]:w-fit [&>*]:p-1 [&>*]:border-b-2 [&>*]:relative [&>*]:inline-block rounded-lg [&>*]:rounded-lg">
 
                         <div v-if="characters.includes(character.id)"
-                            class="border-greenish-dark">
+                            class="border-state-success">
                             {{ character.name }}
-                            <div class="w-4 h-4 border-1 rounded-full bg-greenish-dark absolute -top-2 -right-3"></div>
+                            <div class="w-4 h-4 border-1 rounded-full bg-state-success absolute -top-2 -right-3"></div>
                         </div>
 
-                        <div v-else class="border-darkred-red">
+                        <div v-else class="border-brand-accent">
                             {{ character.name }}
-                            <div class="w-4 h-4 border-1 rounded-full bg-darkred-red absolute -top-1 -right-3"></div>
+                            <div class="w-4 h-4 border-1 rounded-full bg-brand-accent absolute -top-1 -right-3"></div>
                         </div>
 
                     </div>

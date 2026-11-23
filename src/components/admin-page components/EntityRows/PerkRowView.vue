@@ -39,11 +39,11 @@ const canLevelDown = computed(() => props.perk.count > 0)
     <div class="relative">
 
         <div @click="modalHidden = !modalHidden" :class="[
-            owned ? 'border-l-4 border-greenish-mid' : 'border-l-4 border-darkred-gray'
+            owned ? 'border-l-4 border-state-success-accent' : 'border-l-4 border-brand-muted'
         ]"
-            class="w-full flex gap-2 p-2 items-stretch font-gothic bg-darkred-dark_gray rounded-lg text-darkred-light md:hover:cursor-pointer">
+            class="w-full flex gap-2 p-2 items-stretch font-gothic bg-brand-surface rounded-lg text-brand-text md:hover:cursor-pointer">
 
-            <CursorArrowRippleIcon class="w-4 h-4 shrink-0 mt-1 text-darkred-light_gray" />
+            <CursorArrowRippleIcon class="w-4 h-4 shrink-0 mt-1 text-brand-faint" />
 
             <div class="flex-1 flex flex-col gap-1 min-w-0">
 
@@ -60,7 +60,7 @@ const canLevelDown = computed(() => props.perk.count > 0)
                 </div>
 
                 <div v-else-if="canLevelUp && props.perk.levels?.[props.perk.count]"
-                    class="p2 text-clip text-darkred-light_gray">
+                    class="p2 text-clip text-brand-faint">
                     Наступний рівень: {{ props.perk.levels[props.perk.count].name }}
                 </div>
 
@@ -69,19 +69,19 @@ const canLevelDown = computed(() => props.perk.count > 0)
             <div class="flex flex-col items-center justify-center gap-1 shrink-0">
 
                 <button @click.stop="props.callback_level_up(props.perk)" :disabled="!canLevelUp" :class="canLevelUp
-                    ? 'text-greenish-mid md:hover:cursor-pointer'
-                    : 'text-darkred-gray/30 cursor-not-allowed'">
+                    ? 'text-state-success-accent md:hover:cursor-pointer'
+                    : 'text-brand-muted/30 cursor-not-allowed'">
                     <ChevronUpIcon class="w-6 h-6" />
                 </button>
 
                 <button @click.stop="props.callback_level_down(props.perk)" :disabled="!canLevelDown" :class="canLevelDown
-                    ? 'text-darkred-bright md:hover:cursor-pointer'
-                    : 'text-darkred-gray/30 cursor-not-allowed'">
+                    ? 'text-brand-accent-hover md:hover:cursor-pointer'
+                    : 'text-brand-muted/30 cursor-not-allowed'">
                     <ChevronDownIcon class="w-6 h-6" />
                 </button>
 
                 <button v-if="owned" @click.stop="props.callback_remove(props.perk)"
-                    class="mt-1 w-6 h-6 flex items-center justify-center rounded-md border border-darkred-red text-darkred-red text-xs leading-none select-none md:hover:bg-darkred-red md:hover:text-darkred-light md:hover:cursor-pointer">
+                    class="mt-1 w-6 h-6 flex items-center justify-center rounded-md border border-brand-accent text-brand-accent text-xs leading-none select-none md:hover:bg-brand-accent md:hover:text-brand-text md:hover:cursor-pointer">
                     ✕
                 </button>
 

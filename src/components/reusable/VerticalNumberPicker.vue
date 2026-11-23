@@ -222,36 +222,36 @@ const downIconStyle = computed(() => ({
 </script>
 
 <template>
-    <div class="w-full flex items-center justify-between gap-4 p-3 bg-darkred-dark_gray rounded-2xl select-none">
+    <div class="w-full flex items-center justify-between gap-4 p-3 bg-brand-surface rounded-2xl select-none">
 
         <div class="flex gap-1">
             <div class="text-3xl font-semibold font-univers tabular-nums"
-                :class="value > 0 ? 'text-greenish-light' : value < 0 ? 'text-darkred-red' : 'text-darkred-light'">
+                :class="value > 0 ? 'text-state-success-hover' : value < 0 ? 'text-brand-accent' : 'text-brand-text'">
                 {{ value > 0 ? `+${value}` : value }}
             </div>
 
             <div v-if="price" class="text-sm font-univers tabular-nums"
-                :class="totalCost > 0 ? 'text-greenish-light' : totalCost < 0 ? 'text-darkred-red' : 'text-darkred-light_gray'">
+                :class="totalCost > 0 ? 'text-state-success-hover' : totalCost < 0 ? 'text-brand-accent' : 'text-brand-faint'">
                 {{ totalCost > 0 ? `+${totalCost}` : totalCost }}
             </div>
         </div>
 
         <Teleport to="body">
             <div v-if="showHint" :style="hintStyle"
-                class="fixed w-40 max-w-[60vw] px-3 py-1.5 rounded-lg bg-darkred-dark text-darkred-light text-sm font-univers text-center shadow-lg z-50">
+                class="fixed w-40 max-w-[60vw] px-3 py-1.5 rounded-lg bg-brand-base text-brand-text text-sm font-univers text-center shadow-lg z-50">
                 Прокрути або проведи пальцем, тапни щоб підтвердити
             </div>
         </Teleport>
 
         <div>
             <button ref="buttonEl" type="button" :aria-pressed="active"
-                class="w-14 h-14 relative z-50 rounded-full shadow-lg flex flex-col items-center justify-center gap-0.5 bg-darkred-dark_gray border-2 transition-colors duration-150 md:hover:cursor-pointer"
-                :class="active ? 'border-greenish-light ring-4 ring-greenish-light/30 touch-none' : 'border-darkred-gray'"
+                class="w-14 h-14 relative z-50 rounded-full shadow-lg flex flex-col items-center justify-center gap-0.5 bg-brand-surface border-2 transition-colors duration-150 md:hover:cursor-pointer"
+                :class="active ? 'border-state-success-hover ring-4 ring-state-success-hover/30 touch-none' : 'border-brand-muted'"
                 @pointerdown="onPointerDown" @pointermove="onPointerMove" @pointerup="onPointerUp"
                 @pointercancel="onPointerCancel">
-                <ChevronUpIcon class="w-5 h-5 text-greenish-light transition-[filter] duration-100 ease-out"
+                <ChevronUpIcon class="w-5 h-5 text-state-success-hover transition-[filter] duration-100 ease-out"
                     :style="upIconStyle" />
-                <ChevronDownIcon class="w-5 h-5 text-darkred-red transition-[filter] duration-100 ease-out"
+                <ChevronDownIcon class="w-5 h-5 text-state-error transition-[filter] duration-100 ease-out"
                     :style="downIconStyle" />
             </button>
         </div>

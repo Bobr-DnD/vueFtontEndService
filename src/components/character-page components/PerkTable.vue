@@ -2,10 +2,10 @@
 import { ref, watch, computed } from 'vue';
 import { addRow, removeRow, removeAllRows, filterPerksByRank, groupById } from '/utils/entityHelper'
 import ModalOpenButton from '../reusable/Buttons/ModalOpenButton.vue';
-import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue';
+import CloseButtonBackground from '../reusable/Buttons/CloseButtonBackground.vue';
 import AddButton from '../reusable/Buttons/AddButton.vue';
 import RejectButtonWithText from '../reusable/Buttons/RejectButtonWithText.vue';
-import ButtonRedHideFunction from '../reusable/Buttons/ButtonRedHideFunction.vue';
+import ButtonHideFunction from '../reusable/Buttons/ButtonHideFunction.vue';
 import PerkRowView from './EntityRows/PerkRowView.vue';
 
 const props = defineProps({
@@ -85,12 +85,12 @@ function removePerkFully(perk) {
 
     <div class="w-full space-y-1 font-gothic">
 
-        <ButtonRedHideFunction class="w-full" @click="perksHidden = !perksHidden" text="Перки" mainIcon="checkBadge"
+        <ButtonHideFunction class="w-full" @click="perksHidden = !perksHidden" text="Перки" mainIcon="checkBadge"
             :hidden="perksHidden" />
 
-        <div v-if="!perksHidden" class="w-full flex gap-2">
+        <div v-if="!perksHidden" class="w-full flex gap-2 ">
             <input v-model="characterPerksSearchQuery" placeholder="Пошук ..."
-                class="h-12 w-full p-2 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+                class="h-12 w-full p-2 rounded-lg bg-brand-surface text-brand-text" />
 
             <RejectButtonWithText v-if="characterPerksSearchQuery" @click="characterPerksSearchQuery = ''"
                 text="Очистити" />
@@ -109,16 +109,16 @@ function removePerkFully(perk) {
 
 
         <div v-if="!modalHidden" @click="modalHidden = true"
-            class="w-full p-2 modal-overlay flex flex-col gap-1 items-center justify-center md:hover:cursor-pointer text-darkred-light">
+            class="w-full p-2 modal-overlay flex flex-col gap-1 items-center justify-center md:hover:cursor-pointer text-brand-text">
 
             <div @click.stop
-                class="max-w-[480px] max-h-[680px] h-90% w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-gothic md:hover:cursor-default">
+                class="max-w-[480px] max-h-[680px] h-90% w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl border-2 border-brand-base bg-brand-surface text-brand-text shadow-xl space-y-2 relative font-gothic md:hover:cursor-default">
 
-                <CloseButtonRedBG @click="modalHidden = true" />
+                <CloseButtonBackground @click="modalHidden = true" />
 
                 <div v-if="!perksHidden" class="w-[85%] flex gap-2">
                     <input v-model="sessionPerksSearchQuery" placeholder="Пошук ..."
-                        class="h-12 w-full p-2 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+                        class="h-12 w-full p-2 rounded-lg bg-brand-surface text-brand-text" />
 
                     <RejectButtonWithText v-if="sessionPerksSearchQuery" @click="sessionPerksSearchQuery = ''"
                         text="Очистити" />
@@ -126,7 +126,7 @@ function removePerkFully(perk) {
 
                 <div class="max-h-[680px] overflow-y-auto auto-hide-scroll">
                     <div v-for="perk in filteredSessionArray" :key="perk.id"
-                        class="grid grid-cols-[1fr_40px] gap-2 odd:bg-darkred-gray p-2 rounded-lg">
+                        class="grid grid-cols-[1fr_40px] gap-2 odd:bg-brand-muted p-2 rounded-lg">
                         <div>Назва: {{ perk.name }}</div>
 
                         <AddButton @click="levelUpPerk(perk)" class="row-span-2 flex justify-center items-center" />

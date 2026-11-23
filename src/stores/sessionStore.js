@@ -62,7 +62,6 @@ export const useSessionStore = defineStore('session', () => {
         copySession()
 
         socket.emit('session:updateDataNotify', res.data.id)
-        unsavedChanges.value = false
     }
 
     async function deleteSession(sessionId) {
@@ -100,6 +99,7 @@ export const useSessionStore = defineStore('session', () => {
         socket.off('session:update', onSessionUpdate)
         socket.off('error', onSocketError)
         socket.off('disconnect', onSocketDisconnect)
+        session.value = null
     }
 
     function onSessionUpdateDataNotify(newSession) {
@@ -135,8 +135,12 @@ export const useSessionStore = defineStore('session', () => {
 
     //service functions
     function copySession() {
+        // editedSession now matches session exactly, so nothing is unsaved -
+        // loadSession relies on this to clear stale state from a prior edit
+        // that was never saved or discarded (e.g. navigating away mid-edit).
         editedSession.value = (structuredClone(toRaw(session.value)))
         dirtyFields.value = new Set()
+        unsavedChanges.value = false
     }
 
     function markUnsaved() {
@@ -158,7 +162,6 @@ export const useSessionStore = defineStore('session', () => {
 
     function discardChanges() {
         copySession()
-        unsavedChanges.value = false
         notify({ message: 'Зміни анульовані', type: 'warning' })
     }
 

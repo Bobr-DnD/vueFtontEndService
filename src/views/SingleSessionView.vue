@@ -4,12 +4,14 @@ import { useRoute } from 'vue-router';
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
 import { socket } from '@ws/webSocket';
+import { useSessionStore } from '@/stores/sessionStore';
 
 import CardsLoader from '@/components/reusable/Loaders/CardsLoader.vue';
 import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaion.vue';
 import characterCard from '@/components/reusable/CharacterCard.vue';
 
 const sessionId = useRoute().params.sessionId
+const sessionStore = useSessionStore()
 
 const session = ref({})
 const isLoading = ref(true)
@@ -33,9 +35,6 @@ function onSessionUpdate(update) {
   const room = update.room;
 
   if (room) {
-    // "online" means a character is actively connected - the viewer's own
-    // role doesn't matter, since an admin can open a character page too (the
-    // router lets an admin token satisfy a /session/ route).
     charactersOnlineIds.value = room.members.filter(el => el[1].userId).map(el => el[1].userId)
   }
 }
@@ -48,7 +47,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <SessionViewNavigtaion />
+  <SessionViewNavigtaion v-if="!isLoading && !sessionStore.isLoading" />
   <div v-if="!isLoading" class="flex gap-8 items-start justify-center flex-wrap mt-5">
     <characterCard v-for="character in session.characters" :key="character.id" :character="character"
       :routing="true" :online="charactersOnlineIds.includes(character.id)" />

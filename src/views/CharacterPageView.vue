@@ -18,8 +18,7 @@ import characterCardSmall from '@/components/character-page components/Character
 import Experience from '@/components/character-page components/Experience.vue';
 import CurrencyTable from '@/components/character-page components/CurrencyTable.vue';
 import HideButton from '@/components/reusable/Buttons/HideButton.vue';
-import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue';
-import PlusButton from '@/components/reusable/Buttons/PlusButton.vue';
+import CloseButtonBackground from '@/components/reusable/Buttons/CloseButtonBackground.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import CustomFieldsEditor from '@/components/reusable/CustomFieldsEditor.vue';
 import TextAreaEditor from '@/components/reusable/TextAreaEditor.vue';
@@ -201,7 +200,7 @@ function togglePicker(healthId) {
 </script>
 
 <template>
-    <SessionViewNavigtaion />
+    <SessionViewNavigtaion v-if="!sessionStore.isLoading" />
 
     <div v-if="sessionStore.isLoading" class="w-full h-full text-center py-6 flex flex-col gap-10 justify-center items-center">
         <DiceLoader />
@@ -234,7 +233,7 @@ function togglePicker(healthId) {
                 <div v-for="h in state.character.health" :key="h.id">
 
                     <div class=" p-1 grow cursor-pointer relative">
-                        <CursorArrowRippleIcon class="w-5 h-5 absolute top-2 right-2 text-darkred-dark" />
+                        <CursorArrowRippleIcon class="w-5 h-5 absolute top-2 right-2 text-brand-accent" />
                         <ProgressiveBar @click="togglePicker(h.id)" :value="h.value" :valueMax="h.max" :text="h.name"
                             :colors="h.colors" />
                     </div>
@@ -263,20 +262,17 @@ function togglePicker(healthId) {
                             <CustomFieldTile :fields="state.character.customFields"
                                 @update:fields="updateCustomFields" />
 
-                            <PlusButton @click="custom_modal_hidden = !custom_modal_hidden" class="w-16 h-14 col-span-full mt-2 mx-auto text-center border-4 border-darkred-dark rounded-lg 
-           transition-all duration-300 ease-out md:hover:cursor-pointer
-           bg-gradient-to-br from-darkred-dark to-darkred-light
-           md:hover:from-darkred-red md:hover:to-darkred-dark relative overflow-hidden group" />
+                            <AprroveButtonWithText @click="custom_modal_hidden = !custom_modal_hidden" text="Створити нове поле" class="col-span-full mt-2 mx-auto px-4 text-xl" />
                         </div>
                     </div>
 
                     <div @click="custom_modal_hidden = true" v-if="!custom_modal_hidden && !custom_hidden"
-                        class="fixed inset-0 flex items-center justify-center z-50 bg-darkred-dark/50 md:hover:cursor-pointer">
+                        class="fixed inset-0 flex items-center justify-center z-50 bg-brand-base/50 md:hover:cursor-pointer">
 
                         <div @click.stop
-                            class="max-w-[480px] w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl bg-darkred-dark relative">
+                            class="max-w-[480px] w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl bg-brand-base relative">
                             <div>
-                                <CloseButtonRedBG @click="custom_modal_hidden = true" />
+                                <CloseButtonBackground @click="custom_modal_hidden = true" />
                             </div>
 
                             <CustomFieldsEditor class="hover:cursor-default" :name="'CustomFields_'"
@@ -353,7 +349,7 @@ function togglePicker(healthId) {
 
     <Transition name="offline-fade">
         <div v-if="gameStore.isBackendOffline"
-            class="fixed inset-0 z-50 flex items-center justify-center bg-darkred-dark/50">
+            class="fixed inset-0 z-50 flex items-center justify-center bg-brand-base/50">
             <BackendOffline class="w-[90vw] lg:w-[650px]" />
         </div>
     </Transition>

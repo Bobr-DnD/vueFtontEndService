@@ -11,7 +11,7 @@ const valueInput = ref(null)
 const descriptionInputs = ref(null)
 const openDescriptions = ref({})
 
-const inputStyle = 'py-1 px-2 border-2 text-base text-clip font-gothic border-darkred-light_gray rounded-lg text-darkred-dark w-full focus:border-darkred-dark transition disabled:bg-darkred-dark disabled:text-darkred-light'
+const inputStyle = 'py-1 px-2 border-2 text-base text-clip font-gothic border-brand-subtle rounded-lg text-brand-ink w-full focus:border-brand-base transition disabled:bg-brand-base disabled:text-brand-text'
 
 function autoResize(el) {
     if (!el) return
@@ -72,7 +72,7 @@ function removeField(id) {
 <template>
 
     <div v-for="field in fields" :key="field.id"
-        class='grid justify-center items-center gap-4 p-2 border-2 rounded-lg border-darkred-light_gray grid-cols-[1fr_44px]'>
+        class='grid justify-center items-center gap-4 p-2 border-2 rounded-lg border-brand-subtle grid-cols-[1fr_44px]'>
 
         <form class="grid grid-cols-2 gap-2 font-univers">
 
@@ -99,7 +99,7 @@ function removeField(id) {
             </div>
 
             <div v-if="!openDescriptions[field.id]" @click="openDescription(field)"
-                class="col-span-full flex items-center gap-2 py-1 px-2 border-2 rounded-lg border-darkred-light_gray text-darkred-dark cursor-pointer">
+                class="col-span-full flex items-center gap-2 py-1 px-2 border-2 rounded-lg border-brand-subtle text-brand-text cursor-pointer">
                 <CursorArrowRippleIcon class="w-5 h-5 shrink-0" />
                 <span class="truncate">{{ field.description || 'Опис' }}</span>
             </div>
@@ -113,7 +113,7 @@ function removeField(id) {
         <div class="h-full self-center flex items-center py-4 gap-2">
 
             <DeleteButton @click="removeField(field.id)"
-                class="flex justify-center items-center text-xl w-11 h-11 bg-darkred-red text-darkred-light" />
+                class="flex justify-center items-center text-xl w-11 h-11 bg-brand-accent text-brand-text" />
         </div>
     </div>
 

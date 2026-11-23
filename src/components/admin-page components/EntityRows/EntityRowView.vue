@@ -29,10 +29,10 @@ const modal_hidden = ref(true)
 <template>
     <div class="w-full relative">
 
-        <CursorArrowRippleIcon class="w-5 h-5 absolute top-2 right-2 text-darkred-light"/>
+        <CursorArrowRippleIcon class="w-5 h-5 absolute top-2 right-2 text-brand-text"/>
 
-        <div @click="modal_hidden = !modal_hidden" :class="props.owned ? 'border-l-4 border-l-greenish-mid' : 'border-l-4 border-l-darkred-gray'"
-            class="p-2 w-full bg-darkred-dark text-darkred-light border-2 rounded-2xl
+        <div @click="modal_hidden = !modal_hidden" :class="props.owned ? 'border-l-4 border-l-state-success-accent' : 'border-l-4 border-l-brand-muted'"
+            class="p-2 w-full bg-brand-base text-brand-text border-2 rounded-2xl
             grid grid-cols-4 gap-2 justify-items-center items-center font-univers font-medium text-lg md:hover:cursor-pointer">
 
             <div v-if="props.entity.count" class="col-span-4 text-xl font-semibold">{{ props.entity.name }} x{{ props.entity.count }}</div>

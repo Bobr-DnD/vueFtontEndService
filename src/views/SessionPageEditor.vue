@@ -1,6 +1,7 @@
 <script setup>
 import { ref, toRaw, watch, computed } from 'vue';
 import { useSessionStore } from '@/stores/sessionStore';
+import { useThemeStore } from '@/stores/themeStore';
 import { useRoute } from 'vue-router';
 import { notify } from '@utils/notification';
 import { asyncHandler } from '@utils/asyncHandler';
@@ -11,19 +12,30 @@ import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.
 import ImageEditor from '@/components/reusable/ImageEditor.vue';
 import InputTextReactive from '@/components/reusable/Inputs/InputTextReactive.vue';
 import TextAreaReactive from '@/components/reusable/Inputs/TextAreaReactive.vue';
-import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
+import SelectorButton from '@/components/reusable/Buttons/SelectorButton.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
 
 import ArrayStringFormWIcons from '@/components/reusable/Forms/ArrayStringFormWIcons.vue';
 import ArrayStringFromWColorPicker from '@/components/reusable/Forms/ArrayStringFromWColorPicker.vue';
+import ThemeEditor from '@/components/reusable/Forms/ThemeEditor.vue';
 import Header1 from '@/components/reusable/Titles/Header1.vue';
 import InputPassword from '@/components/reusable/Inputs/InputPassword.vue';
 
 
 const store = useSessionStore()
+const themeStore = useThemeStore()
 const sessionId = useRoute().params.sessionId
+
+// Live preview: push in-progress edits straight to the page while this
+// editor is open. Discarding reverts editedSession.theme to the saved one,
+// which this watcher picks up and re-applies automatically.
+watch(
+    () => store.editedSession?.theme,
+    (theme) => theme && themeStore.applyTheme(theme),
+    { deep: true }
+)
 
 const oldPass = ref('')
 const newPass = ref('')
@@ -41,6 +53,7 @@ const fileInput = ref(null)
 const tabs = [
     { id: 'base', label: 'Характеристики' },
     { id: 'types', label: "Типи об'єктів" },
+    { id: 'branding', label: 'Брендування' },
     { id: 'security', label: 'Налаштування сесії' }
 ]
 
@@ -156,12 +169,12 @@ watch([oldAdminPass, newAdminPass, confirmAdminPass], () => {
 
 <template>
 
-    <MasterPageNavigation />
+    <MasterPageNavigation v-if="!store.isLoading" />
 
     <div v-if="!store.isLoading" class="grid grid-cols-[25%_1fr] overflow-hidden">
 
         <section class="p-4 w-full flex flex-col justify-start gap-2 font-gothic overflow-y-auto">
-            <GraySelectorButton v-for="tab in tabs" @click="activeTab = tab.id" :key="tab.id" :id="tab.id"
+            <SelectorButton v-for="tab in tabs" @click="activeTab = tab.id" :key="tab.id" :id="tab.id"
                 :label="tab.label" :active="activeTab === tab.id ? true : false" />
             <AprroveButtonWithText @click="store.saveSession(sessionId)" class="w-full" text="Зберегти зміни"
                 :class="[!store.unsavedChanges && 'pointer-events-none opacity-50']" />
@@ -208,6 +221,12 @@ watch([oldAdminPass, newAdminPass, confirmAdminPass], () => {
 
                 <ArrayStringFromWColorPicker v-model:array="store.editedSession.perkTypes"
                     @update:array="store.markDirty('perkTypes')" label="Типи перків" />
+
+            </div>
+
+            <div v-if="activeTab === 'branding'" class="grid grid-cols-2 gap-4">
+
+                <ThemeEditor v-model:theme="store.editedSession.theme" @update:theme="store.markDirty('theme')" />
 
             </div>
 
@@ -268,7 +287,7 @@ watch([oldAdminPass, newAdminPass, confirmAdminPass], () => {
                         <input ref="fileInput" type="file" accept="file/*" class="hidden" @change="loadImage" />
 
                         <button @click="fileInput.click()" class="flex items-center justify-center gap-2 p-4 font-gothic text-md font-semibold
-         text-darkred-light bg-darkred-dark_gray border-2 border-darkred-dark rounded-lg">
+         text-brand-text bg-brand-surface border-2 border-brand-base rounded-lg">
                             <ArrowUpTrayIcon class="w-6 h-6" />
                             Завантажити зображення
                         </button>

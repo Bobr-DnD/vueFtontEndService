@@ -5,7 +5,12 @@ const apiUrl = import.meta.env.VITE_API
 
 function currentSessionIdFromPath() {
     const match = window.location.pathname.match(/^\/(?:admin|session)\/([^/]+)/)
-    return match ? match[1] : null
+    if (match) return match[1]
+
+    // Falls back to ?sessionId= for routes outside /admin or /session that
+    // still need an authenticated request for a specific session (e.g.
+    // /theme-test opened from MasterPageNavigation).
+    return new URLSearchParams(window.location.search).get('sessionId')
 }
 
 const instance = axios.create({

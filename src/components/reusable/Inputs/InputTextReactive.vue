@@ -26,7 +26,7 @@ const props = defineProps({
 
             <input :id="props.fieldName" :type="props.type" v-model="value" :name="props.fieldName"
                 :placeholder="props.placeholder"
-                class="p-2 border-2 text-md font-gothic border-darkred-light_gray rounded-lg text-darkred-dark w-full focus:border-darkred-gray" />
+                class="p-2 border-2 text-md font-gothic border-brand-subtle rounded-lg text-brand-ink w-full focus:border-brand-muted" />
         </form>
 
     </div>

@@ -74,19 +74,19 @@ async function deleteImage() {
         <img @click="fileInput.click()" @dragenter.prevent="isDragging = true" @dragover.prevent="isDragging = true"
             @dragleave.prevent="isDragging = false" @drop.prevent="onDrop" :class="[
                 'w-1/2 min-h-auto max-h-[512px] object-cover object-top rounded-xl border-4 shadow-md hover:cursor-pointer transition-colors duration-200',
-                isDragging ? 'border-greenish-mid' : 'border-darkred-red'
+                isDragging ? 'border-state-success-accent' : 'border-brand-accent'
             ]" :src="image ? image : `https://placehold.co/400x200?text=${props.label}`" :alt="props.label" />
 
         <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onFileInputChange" />
 
         <div class="w-1/2 flex gap-2 h-14">
             <button @click="fileInput.click()" class="w-full flex items-center justify-center gap-2 px-5 py-3 font-gothic text-lg font-semibold
-         text-darkred-light bg-darkred-dark_gray border-2 border-darkred-dark rounded-xl">
+         text-brand-text bg-brand-surface border-2 border-brand-base rounded-xl">
                 <ArrowUpTrayIcon class="w-6 h-6" />
                 Завантажити зображення
             </button>
 
-            <DeleteButton v-if="image" class="h-14 w-14 bg-darkred-red text-darkred-light" @click="deleteImage" />
+            <DeleteButton v-if="image" class="h-14 w-14 bg-brand-accent text-brand-text" @click="deleteImage" />
         </div>
 
     </div>

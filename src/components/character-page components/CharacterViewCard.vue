@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
-import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue';
+import CloseButtonBackground from '../reusable/Buttons/CloseButtonBackground.vue';
 import Header1 from '../reusable/Titles/Header1.vue';
 import { CursorArrowRippleIcon } from '@heroicons/vue/24/solid';
 
@@ -25,37 +25,37 @@ const selectedCharacteristic = ref('')
 </script>
 
 <template>
-    <img class="w-full h-[512px] top-0 object-cover object-top rounded-xl border-4 border-darkred-red shadow-md"
+    <img class="w-full h-[512px] top-0 object-cover object-top rounded-xl border-4 border-brand-accent shadow-md"
         :src="props.image ? props.image : 'https://placehold.co/400x400?text=Character'" alt="Character image" />
 
-    <h1 class="p-2 bg-darkred-dark text-darkred-light text-3xl font-bold text-center rounded-lg shadow font-gothic">
+    <h1 class="p-2 bg-brand-base text-brand-text text-3xl font-bold text-center rounded-lg shadow font-gothic">
         {{ props.name }}
     </h1>
 
     <div v-if="character_fields"
-        class="flex flex-wrap items-center justify-center p-2 bg-darkred-dark_gray rounded-lg shadow-sm">
-        <div v-if="props.gender" class="grow text-center text-darkred-light font-medium text-lg">
+        class="flex flex-wrap items-center justify-center p-2 bg-brand-surface rounded-lg shadow-sm">
+        <div v-if="props.gender" class="grow text-center text-brand-text font-medium text-lg">
             Стать: <span class="font-semibold">{{ props.gender }}</span>
         </div>
-        <div v-if="props.class" class="grow text-center text-darkred-light font-medium text-lg">
+        <div v-if="props.class" class="grow text-center text-brand-text font-medium text-lg">
             Клас: <span class="font-semibold">{{ props.class }}</span>
         </div>
-        <div v-if="props.race" class="grow text-center text-darkred-light font-medium text-lg">
+        <div v-if="props.race" class="grow text-center text-brand-text font-medium text-lg">
             Раса: <span class="font-semibold">{{ props.race }}</span>
         </div>
     </div>
 
-    <section @click="modalHidden = !modalHidden" class="border-2 border-darkred-dark p-2 rounded-lg relative">
+    <section @click="modalHidden = !modalHidden" class="border-2 border-brand-muted p-2 rounded-lg relative">
 
-        <CursorArrowRippleIcon class="w-5 h-5 absolute top-2 right-1" />
+        <CursorArrowRippleIcon class="w-5 h-5 absolute top-2 right-1 text-brand-accent" />
 
         <div class="relative">
-            <Header1 label="Характеристики" class="text-center font-bold text-darkred-red mb-1 cursor-pointer" />
+            <Header1 label="Характеристики" class="text-center font-bold text-brand-accent mb-1 cursor-pointer" />
         </div>
 
         <div class="flex flex-wrap items-center justify-center gap-2">
             <div v-for="value, key in props.characteristics" :key="key.id"
-                class="grow p-2 text-center rounded-lg border-2 border-darkred-red bg-darkred-dark text-darkred-light font-semibold hover:cursor-pointer">
+                class="grow p-2 text-center rounded-lg border-2 border-brand-muted bg-brand-base text-brand-text font-semibold hover:cursor-pointer">
 
                 <div>
                     {{ value.name }} — {{ value.value }}
@@ -70,18 +70,18 @@ const selectedCharacteristic = ref('')
 
         <div v-if="!modalHidden" class="modal-overlay flex items-center justify-center" @click="modalHidden = true">
             <div @click.stop
-                class="max-w-[400px] w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl bg-darkred-dark text-darkred-light shadow-xl space-y-2 relative font-gothic text-lg hover:cursor-default">
+                class="max-w-[400px] w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl bg-brand-base text-brand-text shadow-xl space-y-2 relative font-gothic text-lg hover:cursor-default">
 
-                <CloseButtonRedBG @click="modalHidden = true" />
+                <CloseButtonBackground @click="modalHidden = true" />
                 <div class="h-6"></div>
 
                 <Header1 label="Стандарті характеристики"
-                    class="text-center font-semibold text-darkred-light mb-1 cursor-pointer" />
+                    class="text-center font-semibold text-brand-text mb-1 cursor-pointer" />
 
                 <div class="flex flex-wrap items-center justify-center gap-2">
                     <div v-for="value, key in props.characteristics" :key="value.id"
                         @click="selectedCharacteristic = value.name"
-                        class="grow p-2 text-center rounded-lg border-2 border-darkred-red bg-darkred-dark_gray text-darkred-light font-semibold hover:cursor-pointer">
+                        class="grow p-2 text-center rounded-lg border-2 border-brand-muted bg-brand-surface text-brand-text font-semibold hover:cursor-pointer">
                         <div>
                             {{ value.name }} — {{ value.value }}
                         </div>
@@ -90,11 +90,11 @@ const selectedCharacteristic = ref('')
                 </div>
 
                 <Header1 v-if="appliedEffects.length > 0" label="Поля, на які впливають ефекти:"
-                    class="text-center text-darkred-light" />
+                    class="text-center text-brand-text" />
 
-                <div v-if="appliedEffects.length > 0" class="p-2 flex flex-col gap-2 bg-darkred-dark_gray rounded-2xl">
+                <div v-if="appliedEffects.length > 0" class="p-2 flex flex-col gap-2 bg-brand-surface rounded-2xl">
                     <div v-for="effect in appliedEffects" :key="effect.id"
-                        class="p-2 rounded-lg even:bg-darkred-gray text-darkred-light even:text-darkred-dark">
+                        class="p-2 rounded-lg even:bg-brand-muted text-brand-text even:text-brand-ink">
 
                         <div>
                             Назва: {{ effect.name }}
@@ -102,7 +102,7 @@ const selectedCharacteristic = ref('')
                             Поля:
                             <template v-for="([key, value], index) in Object.entries(effect.effect)" :key="key">
                                 <span
-                                    :class="{ 'border-b-4 border-darkred-red font-semibold': key === selectedCharacteristic }"
+                                    :class="{ 'border-b-4 border-brand-accent font-semibold': key === selectedCharacteristic }"
                                     class="transition-colors">
                                     {{ key }}: {{ value }}
                                 </span>

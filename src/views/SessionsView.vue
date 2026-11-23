@@ -10,7 +10,7 @@ import SearchInputBlack from '@/components/reusable/SearchInputs/SearchInputBlac
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue'
 import InputPassword from '@/components/reusable/Inputs/InputPassword.vue'
 import InputName from '@/components/reusable/Inputs/InputName.vue'
-import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue'
+import CloseButtonBackground from '@/components/reusable/Buttons/CloseButtonBackground.vue'
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue'
 import Header1 from '@/components/reusable/Titles/Header1.vue'
 
@@ -131,7 +131,7 @@ watch(modalShow, () => clearModalValues())
     <SearchInputBlack v-model:searchQuery="searchQuery" />
 
     <div @click="modalShow = !modalShow"
-      class="border-8 border-darkred-dark rounded-2xl flex justify-center items-center hover:cursor-pointer hover:bg-darkred-dark_gray hover:text-darkred-light">
+      class="border-8 border-brand-base rounded-2xl flex justify-center items-center hover:cursor-pointer hover:bg-brand-surface hover:text-brand-text">
       <PlusButton class="w-20" />
     </div>
   </div>
@@ -147,9 +147,9 @@ watch(modalShow, () => clearModalValues())
 
   <div v-if="modalShow" @click="modalShow = false" class="modal-overlay flex justify-center items-center">
     <div @click.stop
-      class="max-w-[480px] w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-gothic md:hover:cursor-default">
+      class="max-w-[480px] w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl border-2 border-brand-base bg-brand-surface text-brand-text shadow-xl space-y-2 relative font-gothic md:hover:cursor-default">
 
-      <CloseButtonRedBG @click="modalShow = false" />
+      <CloseButtonBackground @click="modalShow = false" />
       <Header1 label="Створити сесію:" class="px-1" />
 
       <form @submit.prevent="createSession" class="flex flex-col gap-2">

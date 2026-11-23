@@ -1,5 +1,5 @@
 <script setup>
-import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue';
+import CloseButtonBackground from '@/components/reusable/Buttons/CloseButtonBackground.vue';
 
 const props = defineProps({
     perk: {
@@ -16,12 +16,12 @@ const props = defineProps({
 <template>
 
     <div @click="props.callback_close"
-        class="fixed inset-0 flex items-center justify-center z-50 bg-darkred-dark/50 md:hover:cursor-pointer">
+        class="fixed inset-0 flex items-center justify-center z-50 bg-brand-base/50 md:hover:cursor-pointer">
 
         <div @click.stop
-            class="max-w-[480px] w-full mx-2 p-2 grid grid-cols-1 gap-1 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-gothic md:hover:cursor-default">
+            class="max-w-[480px] w-full mx-2 p-2 grid grid-cols-1 gap-1 rounded-xl border-2 border-brand-base bg-brand-surface text-brand-text shadow-xl space-y-2 relative font-gothic md:hover:cursor-default">
 
-            <CloseButtonRedBG @click="props.callback_close" />
+            <CloseButtonBackground @click="props.callback_close" />
 
             <div v-if="props.perk.type" class="p2 text-clip w-[90%]">Назва: {{ props.perk.name }} <sup
                     :style="{ color: props.perk.type.color }">{{ props.perk.type.name }}</sup></div>

@@ -80,10 +80,10 @@ function resetFields() {
 
 <template>
     <div class="rounded-xl border-2 p-4 space-y-3"
-        :class="isNew ? 'border-orange-gold/50 bg-orange-gold/10' : 'border-greenish-mid/50 bg-greenish-dark/10'">
+        :class="isNew ? 'border-state-new/50 bg-state-new/10' : 'border-state-success-accent/50 bg-state-success/10'">
 
         <div class="flex items-center gap-2">
-            <HeartIcon class="w-6 h-6 shrink-0" :class="isNew ? 'text-orange-gold' : 'text-greenish-mid'" />
+            <HeartIcon class="w-6 h-6 shrink-0" :class="isNew ? 'text-state-new' : 'text-state-success-accent'" />
             <span class="text-lg font-gothic font-medium truncate">{{ isNew ? 'Нове поле' : (name || props.label) }}</span>
 
             <RejectButtonWithText v-if="!isNew" text="Видалити"
@@ -99,7 +99,7 @@ function resetFields() {
             <label class="flex flex-col gap-1 col-span-full text-sm font-gothic">
                 Назва поля
                 <input v-model="name" placeholder="Назва" type="text"
-                    class="p-2 border-2 text-md font-gothic border-darkred-light_gray rounded-lg text-darkred-dark w-full focus:border-darkred-gray" />
+                    class="p-2 border-2 text-md font-gothic border-brand-subtle rounded-lg text-brand-ink w-full focus:border-brand-muted" />
             </label>
 
             <label class="flex flex-col gap-1 text-sm font-gothic">
@@ -108,7 +108,7 @@ function resetFields() {
                     <input v-model="color_min" type="color"
                         class="w-9 h-9 shrink-0 cursor-pointer appearance-none overflow-hidden rounded-lg shadow-inner shadow-darkred-black">
                     <input v-model.number="min" placeholder="0" type="number"
-                        class="p-2 border-2 text-md font-gothic border-darkred-light_gray rounded-lg text-darkred-dark w-full focus:border-darkred-gray">
+                        class="p-2 border-2 text-md font-gothic border-brand-subtle rounded-lg text-brand-ink w-full focus:border-brand-muted">
                 </div>
             </label>
 
@@ -118,7 +118,7 @@ function resetFields() {
                     <input v-model="color_mid" type="color"
                         class="w-9 h-9 shrink-0 cursor-pointer appearance-none overflow-hidden rounded-lg shadow-inner shadow-darkred-black">
                     <input v-model.number="value" placeholder="0" type="number"
-                        class="p-2 border-2 text-md font-gothic border-darkred-light_gray rounded-lg text-darkred-dark w-full focus:border-darkred-gray">
+                        class="p-2 border-2 text-md font-gothic border-brand-subtle rounded-lg text-brand-ink w-full focus:border-brand-muted">
                 </div>
             </label>
 
@@ -128,7 +128,7 @@ function resetFields() {
                     <input v-model="color_max" type="color"
                         class="w-9 h-9 shrink-0 cursor-pointer appearance-none overflow-hidden rounded-lg shadow-inner shadow-darkred-black">
                     <input v-model.number="max" placeholder="25" type="number"
-                        class="p-2 border-2 text-md font-gothic border-darkred-light_gray rounded-lg text-darkred-dark w-full focus:border-darkred-gray">
+                        class="p-2 border-2 text-md font-gothic border-brand-subtle rounded-lg text-brand-ink w-full focus:border-brand-muted">
                 </div>
             </label>
 

@@ -2,7 +2,7 @@
 import { reactive, ref, computed, watch, onBeforeUnmount } from 'vue';
 import { socket } from '@ws/webSocket';
 
-import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue';
+import CloseButtonBackground from '../reusable/Buttons/CloseButtonBackground.vue';
 import AprroveButtonWithText from '../reusable/Buttons/AprroveButtonWithText.vue';
 
 const emit = defineEmits(['close'])
@@ -167,12 +167,12 @@ function roll() {
 
 <template>
     <div @click="emit('close')"
-        class="fixed inset-0 flex items-center justify-center z-50 bg-darkred-dark/50 md:hover:cursor-pointer">
+        class="fixed inset-0 flex items-center justify-center z-50 bg-brand-base/50 md:hover:cursor-pointer">
 
         <div @click.stop
-            class="max-w-[420px] w-full mx-2 p-4 grid grid-cols-1 gap-3 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl relative font-gothic md:hover:cursor-default">
+            class="max-w-[420px] w-full mx-2 p-4 grid grid-cols-1 gap-3 rounded-xl border-2 border-brand-base bg-brand-surface text-brand-text shadow-xl relative font-gothic md:hover:cursor-default">
 
-            <CloseButtonRedBG @click="emit('close')" />
+            <CloseButtonBackground @click="emit('close')" />
 
             <h2 class="text-xl text-center">🎲 Кидок кубиків</h2>
 
@@ -181,14 +181,14 @@ function roll() {
                     <span class="font-semibold text-lg">{{ entry.die }}</span>
 
                     <button @click="decrement(entry)"
-                        class="w-10 h-10 rounded-lg border-2 border-darkred-light_gray md:hover:bg-darkred-gray/60 md:hover:cursor-pointer">
+                        class="w-10 h-10 rounded-lg border-2 border-brand-subtle md:hover:bg-brand-muted/60 md:hover:cursor-pointer">
                         −
                     </button>
 
                     <span class="w-6 text-center tabular-nums">{{ entry.count }}</span>
 
                     <button @click="increment(entry)"
-                        class="w-10 h-10 rounded-lg border-2 border-darkred-light_gray md:hover:bg-darkred-gray/60 md:hover:cursor-pointer">
+                        class="w-10 h-10 rounded-lg border-2 border-brand-subtle md:hover:bg-brand-muted/60 md:hover:cursor-pointer">
                         +
                     </button>
                 </div>
@@ -197,14 +197,14 @@ function roll() {
             <label class="flex items-center gap-2 text-sm">
                 Модифікатор
                 <input v-model.number="modifier" type="number"
-                    class="p-2 border-2 text-md font-gothic border-darkred-light_gray rounded-lg text-darkred-dark w-full focus:border-darkred-gray" />
+                    class="p-2 border-2 text-md font-gothic border-brand-subtle rounded-lg text-brand-ink w-full focus:border-brand-muted" />
             </label>
 
             <AprroveButtonWithText text="Кинути" class="w-full h-12 flex justify-center items-center"
                 :class="(!activeDice.length || isRolling) && 'opacity-50 pointer-events-none'" @click="roll" />
 
             <button @click="resetDice" type="button"
-                class="justify-self-center px-3 py-1 text-sm rounded-lg border-2 border-darkred-light_gray md:hover:bg-darkred-gray/60 md:hover:cursor-pointer"
+                class="justify-self-center px-3 py-1 text-sm rounded-lg border-2 border-brand-subtle md:hover:bg-brand-muted/60 md:hover:cursor-pointer"
                 :class="!activeDice.length && !modifier && 'opacity-50 pointer-events-none'">
                 Скинути кубики
             </button>
@@ -212,7 +212,7 @@ function roll() {
             <div v-if="displayGroups.length || modifier" class="space-y-2">
                 <div class="flex gap-2 items-center justify-center flex-wrap">
                     <div v-for="g in displayGroups" :key="g.die">
-                        <div class="text-xs text-center text-darkred-light_gray">{{ g.die }}</div>
+                        <div class="text-xs text-center text-brand-faint">{{ g.die }}</div>
 
                         <div class="flex flex-wrap gap-1.5 justify-center">
                             <div v-for="(r, i) in g.rolls" :key="i" class="dice-face relative w-10 h-10"
@@ -220,11 +220,11 @@ function roll() {
                                 <svg v-if="dieShapePoints(g.die)" viewBox="0 0 100 100"
                                     class="absolute inset-0 w-full h-full">
                                     <polygon :points="dieShapePoints(g.die)"
-                                        class="fill-darkred-dark stroke-darkred-light_gray" stroke-width="6"
+                                        class="fill-brand-ink stroke-brand-faint" stroke-width="6"
                                         stroke-linejoin="round" />
                                 </svg>
                                 <div v-else
-                                    class="absolute inset-0 rounded-lg border-2 border-darkred-light_gray bg-darkred-dark">
+                                    class="absolute inset-0 rounded-lg border-2 border-brand-subtle bg-brand-base">
                                 </div>
 
                                 <span v-if="r !== null"
@@ -235,7 +235,7 @@ function roll() {
                     </div>
                 </div>
 
-                <div v-if="modifier != 0" class="text-center text-sm text-darkred-light_gray">
+                <div v-if="modifier != 0" class="text-center text-sm text-brand-faint">
                     {{ modifier > 0 ? `+${modifier}` : modifier }}
                 </div>
 

@@ -1,5 +1,9 @@
+<script setup>
+import { Check } from 'lucide-vue-next';
+</script>
+
 <template>
-    <div
-        class="p-2 bg-greenish-dark text-center rounded-xl border-2 border-darkred-dark text-darkred-light font-medium md:hover:cursor-pointer select-none">
-        ✓</div>
+    <button class="p-2 bg-state-success md:hover:bg-state-success-accent text-center rounded-xl border-2 border-brand-base text-brand-text font-medium">
+        <Check class="w-6 h-6" />
+    </button>
 </template>

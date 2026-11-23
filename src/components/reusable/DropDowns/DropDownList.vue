@@ -37,7 +37,7 @@ onMounted(() => {
 
         <select ref="selectValue" @change="selectedValue = selectValue.value" :name="props.entity_name"
             :id="props.entity_name"
-            class="w-full appearance-none p-1 pl-2 bg-darkred-light border-4  rounded-lg text-darkred-dark font-gothic focus:outline-none focus:ring-2 focus:ring-darkred-dark transition cursor-pointer">
+            class="w-full appearance-none p-1 pl-2 bg-brand-surface-inverted border-4  rounded-lg text-brand-ink font-gothic focus:outline-none focus:ring-2 focus:ring-brand-ink transition cursor-pointer">
 
             <option v-for="entity in props.entity_array" :key="entity.id" :value="entity.name">
                 {{ entity.name }}

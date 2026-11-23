@@ -1,6 +1,6 @@
 <script setup>
 import { reactive, computed, toRaw, ref } from 'vue'
-import AddButton from './Buttons/AddButton.vue'
+import ApproveButtonwithText from './Buttons/AprroveButtonWithText.vue'
 import ImportantField from './ImportantField.vue'
 import { notify } from '/utils/notification'
 
@@ -19,7 +19,7 @@ const form = reactive({
 const nameInput = ref(null)
 const valueInput = ref(null)
 
-const inputStyle = 'w-full font-gothic text-lg text-darkred-dark text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-darkred-dark transition'
+const inputStyle = 'w-full font-gothic text-lg text-brand-ink text-md placeholder-brand-ink border border-brand-base rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-ink transition'
 const valueType = computed(() => (form.isString ? 'text' : 'number'))
 
 function switchTypeField(event) {
@@ -73,7 +73,7 @@ function addField() {
         <form @submit.prevent="addField"
             class="flex flex-col w-full items-start justify-start p-2 font-univers mb-2  rounded-xl">
 
-            <label :for="`${props.name}-name`" class=" text-darkred-gray font-semibold text-lg tracking-wide">
+            <label :for="`${props.name}-name`" class=" text-brand-muted font-semibold text-lg tracking-wide">
                 Назва поля
                 <ImportantField />
                 :
@@ -82,14 +82,14 @@ function addField() {
             <input v-model="form.name" ref="nameInput" :id="`${props.name}-name`" type="text" placeholder="Назва поля"
                 :class="inputStyle" />
 
-            <label :for="`${props.name}-description`" class=" text-darkred-gray">
+            <label :for="`${props.name}-description`" class=" text-brand-muted">
                 Опис поля:
             </label>
 
             <input v-model="form.description" :id="`${props.name}-description`" type="text" placeholder="Опис поля"
                 :class="inputStyle" />
 
-            <label :for="`${props.name}-value`" class="text-darkred-gray">
+            <label :for="`${props.name}-value`" class="text-brand-muted">
                 Значення
                 <ImportantField />
                 :
@@ -101,12 +101,12 @@ function addField() {
                     :placeholder="form.isString ? 'Значення' : 0" :class="inputStyle" />
 
                 <button @click="switchTypeField($event)" type="button"
-                    class="p-2 w-full border-2 rounded-lg bg-darkred-light_gray border-darkred-light_gray text-darkred-dark font-gothic text-lg">Текст</button>
+                    class="p-2 w-full border-2 rounded-lg bg-brand-subtle border-brand-subtle text-brand-ink font-gothic text-lg hover:bg-brand-muted">Текст</button>
             </div>
 
         </form>
 
-        <AddButton @click="addField" class="w-20 mx-auto text-2xl" />
+        <ApproveButtonwithText @click="addField" text="Додати поле"/>
     </div>
 </template>
 
