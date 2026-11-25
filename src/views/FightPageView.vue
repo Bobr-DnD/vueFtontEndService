@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { ArrowLeftIcon } from '@heroicons/vue/24/solid'
 
 import { reconnectCount } from '@ws/webSocket'
 import { useSessionStore } from '@/stores/sessionStore'
@@ -9,16 +10,15 @@ import { useFightStore } from '@/stores/fightStore'
 import DesktopOnlyGate from '@/components/reusable/DesktopOnlyGate.vue'
 import BattleMap from '@/components/fight-page components/BattleMap.vue'
 import EnemyBar from '@/components/fight-page components/EnemyBar.vue'
-import FightSidePanel from '@/components/fight-page components/FightSidePanel.vue'
-import CharacterSheetStrip from '@/components/fight-page components/CharacterSheetStrip.vue'
+import FightStatsPanel from '@/components/fight-page components/FightStatsPanel.vue'
 import DiceRollerModal from '@/components/character-page components/DiceRollerModal.vue'
 import DiceLoader from '@/components/reusable/Loaders/DiceLoader.vue'
-import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue'
 
 // Mode is derived from the route: a characterId param means this is the
 // player's own view (bound to that one character); its absence means this
 // is the admin/GM live view (/admin/:sessionId/fight/:fightId/live).
 const route = useRoute()
+const router = useRouter()
 const sessionId = computed(() => route.params.sessionId)
 const characterId = computed(() => route.params.characterId ?? null)
 const isGM = computed(() => !characterId.value)
@@ -48,19 +48,19 @@ watch(reconnectCount, () => {
 
 const fight = computed(() => fightStore.fight)
 
-const myParticipant = computed(() => {
-    if (!fight.value || !characterId.value) return null
-    return fight.value.participants.find(p => p.character === characterId.value) ?? null
-})
-
 const myCharacter = computed(() => {
     if (!characterId.value) return null
     return sessionStore.session.characters.find(c => c.id === characterId.value) ?? null
 })
 
-function canMoveToken(token) {
-    if (isGM.value) return true
-    return token.type === 'character' && token.id === characterId.value
+const selectedEnemy = computed(() => {
+    if (!fight.value) return null
+    return fight.value.enemies.find(e => e.id === selectedEnemyId.value) ?? null
+})
+
+// Only the admin arranges the board - players just watch it update.
+function canMoveToken() {
+    return isGM.value
 }
 
 function onPickToken(token) {
@@ -75,80 +75,59 @@ function onMoveToTile(tileId) {
     pickedToken.value = null
 }
 
-const moverBudget = computed(() => {
-    if (isGM.value || pickedToken.value?.type !== 'character') return null
-    return myParticipant.value?.actionPoints?.current ?? 0
-})
+function onUpdateEnemyHealth({ healthId, value }) {
+    if (!selectedEnemy.value) return
 
-function onResolve({ characterId: cid, approve }) {
-    fightStore.resolveAttack(sessionId.value, fight.value.id, cid, approve)
+    const enemies = fight.value.enemies.map(e => e.id !== selectedEnemy.value.id ? e : {
+        ...e,
+        health: e.health.map(h => h.id === healthId ? { ...h, value } : h)
+    })
+
+    fightStore.adminUpdate(sessionId.value, fight.value.id, [{ op: 'replace', path: '/enemies', value: enemies }])
 }
 
-function onSetAP({ characterId: cid, current, max }) {
-    fightStore.adminSetAP(sessionId.value, fight.value.id, cid, current, max)
-}
-
-function newRound() {
-    fightStore.newRound(sessionId.value, fight.value.id)
-}
-
-function onSetActiveLoadout(loadoutId) {
-    fightStore.setActiveLoadout(sessionId.value, fight.value.id, loadoutId)
-}
-
-function onSetActiveWeapon(entityId) {
-    fightStore.setActiveWeapon(sessionId.value, fight.value.id, entityId)
-}
-
-function onReadyAttack(payload) {
-    fightStore.readyAttack(sessionId.value, fight.value.id, payload)
-}
-
-function onCancelReady() {
-    fightStore.cancelReady(sessionId.value, fight.value.id)
+function goBack() {
+    router.back()
 }
 </script>
 
 <template>
     <DesktopOnlyGate>
-        <div class="min-h-screen bg-darkred-dark_gray flex flex-col">
+        <div class="min-h-screen bg-brand-page flex flex-col">
 
             <div v-if="fightStore.isLoading" class="flex-1 flex items-center justify-center">
                 <DiceLoader />
             </div>
 
-            <div v-else-if="!fight" class="flex-1 flex items-center justify-center text-darkred-light font-gothic text-xl">
+            <div v-else-if="!fight" class="flex-1 flex items-center justify-center text-brand-text font-gothic text-xl">
                 Активного бою немає
             </div>
 
             <template v-else>
-                <EnemyBar :enemies="fight.enemies" :isAdmin="isGM" :selectedEnemyId="selectedEnemyId"
+                <EnemyBar :enemies="fight.enemies" :participants="fight.participants"
+                    :allCharacters="sessionStore.session.characters" :isAdmin="isGM" :selectedEnemyId="selectedEnemyId"
                     @select="selectedEnemyId = $event">
-                    <template v-if="isGM" #actions>
-                        <AprroveButtonWithText text="Новий раунд" class="h-10 px-4 flex items-center justify-center"
-                            @click="newRound" />
+                    <template #actions>
+                        <button @click="goBack"
+                            class="flex items-center gap-1 px-3 h-10 rounded-lg bg-brand-surface text-brand-text md:hover:cursor-pointer">
+                            <ArrowLeftIcon class="w-5 h-5" />
+                            <span class="text-sm">Назад</span>
+                        </button>
                     </template>
                 </EnemyBar>
 
-                <div class="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-2 p-2 min-h-0">
+                <div class="flex-1 p-2 min-h-0">
                     <BattleMap :fight="fight" :characters="sessionStore.session.characters" :pickedToken="pickedToken"
-                        :canMoveToken="canMoveToken" :moverBudget="moverBudget" @pick-token="onPickToken"
-                        @move-to-tile="onMoveToTile" />
-
-                    <FightSidePanel :sessionId="sessionId" :isGM="isGM" :participants="fight.participants"
-                        :characters="sessionStore.session.characters" :enemies="fight.enemies"
-                        @resolve="onResolve" @set-ap="onSetAP" />
+                        :canMoveToken="canMoveToken" @pick-token="onPickToken" @move-to-tile="onMoveToTile" />
                 </div>
 
-                <div class="p-2 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-2">
-                    <CharacterSheetStrip v-if="!isGM && myCharacter && myParticipant" :character="myCharacter"
-                        :participant="myParticipant" :fight="fight" :allEntities="sessionStore.session.entities"
-                        @set-active-loadout="onSetActiveLoadout" @set-active-weapon="onSetActiveWeapon"
-                        @ready-attack="onReadyAttack" @cancel-ready="onCancelReady" />
-                    <div v-else class="hidden lg:block" />
+                <div class="p-2 grid grid-cols-1 lg:grid-cols-[1fr_200px] gap-2">
+                    <FightStatsPanel :isAdmin="isGM" :selectedEnemy="selectedEnemy" :character="myCharacter"
+                        :perks="sessionStore.session.perks" :entities="sessionStore.session.entities"
+                        @update-enemy-health="onUpdateEnemyHealth" />
 
                     <button @click="diceModalHidden = false"
-                        class="h-full min-h-[96px] flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-darkred-dark_gray bg-darkred-dark text-darkred-light font-gothic md:hover:bg-darkred-dark_gray md:hover:cursor-pointer">
+                        class="h-full min-h-[96px] flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-brand-surface bg-brand-base text-brand-text font-gothic md:hover:bg-brand-surface md:hover:cursor-pointer">
                         <span class="text-3xl">🎲</span>
                         <span class="text-sm">Кинути кубик</span>
                     </button>

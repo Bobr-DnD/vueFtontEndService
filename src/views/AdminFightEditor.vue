@@ -6,13 +6,12 @@ import { useSessionStore } from '@/stores/sessionStore';
 import { useFightStore } from '@/stores/fightStore';
 import { notify } from '@utils/notification';
 import { toNewFight, toNewFightEnemy, toObject } from '@utils/objects.dto';
-import { buildTiles } from '@utils/tileGraph';
 import useEntityEditor from '@utils/useEntityEditor';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
 import Header1 from '@/components/reusable/Titles/Header1.vue';
 import Header2 from '@/components/reusable/Titles/Header2.vue';
-import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
+import SelectorButton from '@/components/reusable/Buttons/SelectorButton.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
@@ -37,7 +36,6 @@ const activeTab = ref('base');
 const fights = ref([]);
 const isLoading = ref(true);
 const editingEnemyId = ref(null);
-const editingTileId = ref(null);
 const newCharacteristic = ref({ name: '', value: '' });
 const perkSearch = ref('');
 const entitySearch = ref('');
@@ -65,7 +63,6 @@ const {
     buildNew: buildNewFight,
     afterSelect: (id) => {
         editingEnemyId.value = null;
-        editingTileId.value = null;
         if (id !== 'new') activeTab.value = 'edit';
     }
 });
@@ -130,32 +127,6 @@ function toggleActive() {
 
 function openLiveView() {
     router.push(`/admin/${sessionId}/fight/${selectedFight.value.id}/live`);
-}
-
-// Overlay / tiles
-
-function regenerateTiles() {
-    selectedFight.value.tiles = buildTiles(toRaw(selectedFight.value.overlay), toRaw(selectedFight.value.tiles));
-    markDirty('tiles');
-    markDirty('overlay');
-}
-
-const editingTile = computed(() => selectedFight.value.tiles.find(t => t.id === editingTileId.value) ?? null);
-
-function selectTile(tileId) {
-    editingTileId.value = editingTileId.value === tileId ? null : tileId;
-}
-
-function applyTileWeight(value) {
-    if (!editingTile.value) return;
-    editingTile.value.weight = Math.max(0, Number(value) || 0);
-    markDirty('tiles');
-}
-
-function toggleTileBlocked() {
-    if (!editingTile.value) return;
-    editingTile.value.blocked = !editingTile.value.blocked;
-    markDirty('tiles');
 }
 
 // Enemies
@@ -250,7 +221,7 @@ function removeEnemyStat(key) {
         <section class="p-2 w-full h-full font-gothic overflow-y-auto space-y-2">
 
             <div class="w-full flex flex-col gap-2">
-                <GraySelectorButton class="w-full" v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
+                <SelectorButton class="w-full" v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
                     :id="tab.id" :label="tab.label" :active="activeTab === tab.id" />
             </div>
 
@@ -282,13 +253,13 @@ function removeEnemyStat(key) {
 
             <div class="grid grid-cols-4 gap-4 p-2">
                 <div @click="selectFight('new')"
-                    :class="selectedFight.id === 'new' && 'outline outline-4 outline-offset-[-1px] outline-darkred-red'"
-                    class="border-8 border-darkred-dark bg-darkred-dark rounded-2xl flex justify-center items-center hover:cursor-pointer">
-                    <PlusButton class="w-20 text-darkred-light" />
+                    :class="selectedFight.id === 'new' && 'outline outline-4 outline-offset-[-1px] outline-brand-accent'"
+                    class="border-8 border-brand-base bg-brand-base rounded-2xl flex justify-center items-center hover:cursor-pointer">
+                    <PlusButton class="w-20 text-brand-text" />
                 </div>
 
                 <FightTile v-for="fight in fights" @click="selectFight(fight.id)" :key="fight.id"
-                    :class="selectedFight.id === fight.id && 'outline outline-4 outline-offset-[-1px] outline-darkred-red'"
+                    :class="selectedFight.id === fight.id && 'outline outline-4 outline-offset-[-1px] outline-brand-accent'"
                     :fight="fight" />
             </div>
         </section>
@@ -308,9 +279,9 @@ function removeEnemyStat(key) {
                 <Header1 label="Оверлей руху" class="col-span-full" />
 
                 <div class="col-span-full flex gap-2">
-                    <GraySelectorButton id="grid" label="Квадрати" :active="selectedFight.overlay.type === 'grid'"
+                    <SelectorButton id="grid" label="Квадрати" :active="selectedFight.overlay.type === 'grid'"
                         @click="selectedFight.overlay.type = 'grid'; markDirty('overlay')" />
-                    <GraySelectorButton id="radial" label="Кругова зона" :active="selectedFight.overlay.type === 'radial'"
+                    <SelectorButton id="radial" label="Кругова зона" :active="selectedFight.overlay.type === 'radial'"
                         @click="selectedFight.overlay.type = 'radial'; markDirty('overlay')" />
                 </div>
 
@@ -342,67 +313,11 @@ function removeEnemyStat(key) {
                         v-model:inputValue="selectedFight.overlay.radial.maxRadius" @update:inputValue="markDirty('overlay')" />
                 </template>
 
-                <AprroveButtonWithText class="col-span-full" text="Згенерувати клітинки" @click="regenerateTiles" />
-
-                <div class="col-span-full flex flex-wrap gap-1 p-2 rounded-xl border-2 border-darkred-light_gray max-h-64 overflow-y-auto auto-hide-scroll">
-                    <button v-for="tile in selectedFight.tiles" :key="tile.id" @click="selectTile(tile.id)"
-                        :class="[
-                            tile.blocked ? 'bg-darkred-red text-darkred-light' : 'bg-darkred-dark_gray text-darkred-light',
-                            editingTileId === tile.id && 'outline outline-2 outline-darkred-bright'
-                        ]"
-                        class="px-2 py-1 rounded text-xs md:hover:cursor-pointer">
-                        {{ tile.id }} · {{ tile.weight }}
-                    </button>
-                    <div v-if="!selectedFight.tiles.length" class="text-sm text-darkred-light_gray">Клітинок ще немає - натисніть "Згенерувати клітинки"</div>
-                </div>
-
-                <div v-if="editingTile" class="col-span-full flex items-end gap-2 p-2 rounded-xl border-2 border-darkred-bright">
-                    <InputTextReactive fieldName="TileWeight" placeholder="Вага клітинки" type="number"
-                        :inputValue="editingTile.weight" @update:inputValue="applyTileWeight" />
-                    <RejectButtonWithText :text="editingTile.blocked ? 'Розблокувати' : 'Заблокувати'" @click="toggleTileBlocked" class="h-12" />
-                </div>
-
                 <div class="col-span-full space-y-1">
                     <Header2 label="Попередній перегляд карти" />
-                    <div class="text-xs text-darkred-light_gray">Клік по клітинці на карті = вибрати її нижче для редагування ваги</div>
                     <BattleMap :fight="selectedFight" :characters="sessionStore.session.characters"
-                        :canMoveToken="() => false" :selectedTileId="editingTileId" @tile-click="selectTile" />
+                        :canMoveToken="() => false" />
                 </div>
-            </section>
-
-            <section class="m-4 grid grid-cols-3 gap-2 items-start">
-                <Header1 label="Очки дій" class="col-span-full" />
-
-                <div class="flex gap-2 col-span-full">
-                    <GraySelectorButton id="ap-fixed" label="Фіксовано" :active="selectedFight.actionPoints.source === 'fixed'"
-                        @click="selectedFight.actionPoints.source = 'fixed'; markDirty('actionPoints')" />
-                    <GraySelectorButton id="ap-field" label="З характеристики персонажа" :active="selectedFight.actionPoints.source === 'characterField'"
-                        @click="selectedFight.actionPoints.source = 'characterField'; markDirty('actionPoints')" />
-                </div>
-
-                <InputTextReactive fieldName="APFixed" placeholder="Кількість ОД" type="number"
-                    v-model:inputValue="selectedFight.actionPoints.fixedAmount" @update:inputValue="markDirty('actionPoints')" />
-                <InputTextReactive v-if="selectedFight.actionPoints.source === 'characterField'" fieldName="APField"
-                    placeholder="Назва характеристики" type="text" v-model:inputValue="selectedFight.actionPoints.fieldName"
-                    @update:inputValue="markDirty('actionPoints')" />
-
-                <Header1 label="Вартість атаки" class="col-span-full" />
-
-                <div class="flex gap-2 col-span-full">
-                    <GraySelectorButton id="atk-fixed" label="Фіксовано" :active="selectedFight.attackCost.source === 'fixed'"
-                        @click="selectedFight.attackCost.source = 'fixed'; markDirty('attackCost')" />
-                    <GraySelectorButton id="atk-weapon" label="Зі зброї" :active="selectedFight.attackCost.source === 'activeWeapon'"
-                        @click="selectedFight.attackCost.source = 'activeWeapon'; markDirty('attackCost')" />
-                </div>
-
-                <InputTextReactive fieldName="AttackFixed" placeholder="Вартість (ОД)" type="number"
-                    v-model:inputValue="selectedFight.attackCost.fixedAmount" @update:inputValue="markDirty('attackCost')" />
-                <InputTextReactive v-if="selectedFight.attackCost.source === 'activeWeapon'" fieldName="AttackField"
-                    placeholder="Поле характеристики зброї (напр. apCost)" type="text"
-                    v-model:inputValue="selectedFight.attackCost.fieldName" @update:inputValue="markDirty('attackCost')" />
-
-                <InputTextReactive class="col-span-full" fieldName="DamageField" placeholder="Поле формули шкоди зброї (напр. damageDice)"
-                    type="text" v-model:inputValue="selectedFight.weaponDamageFieldName" @update:inputValue="markDirty('weaponDamageFieldName')" />
             </section>
 
             <section class="m-4 space-y-2">
@@ -410,7 +325,7 @@ function removeEnemyStat(key) {
 
                 <div class="grid grid-cols-1 gap-2">
                     <div v-for="enemy in selectedFight.enemies" :key="enemy.id"
-                        class="rounded-xl border-2 border-darkred-light_gray p-3 space-y-2">
+                        class="rounded-xl border-2 border-brand-subtle p-3 space-y-2">
 
                         <div class="flex items-center justify-between gap-2">
                             <span class="text-lg font-semibold md:hover:cursor-pointer" @click="toggleEnemyEditor(enemy.id)">
@@ -421,7 +336,7 @@ function removeEnemyStat(key) {
                                     <input type="checkbox" v-model="enemy.visibleToPlayers" @change="markDirty('enemies')" />
                                     Видимий гравцям
                                 </label>
-                                <DeleteButton class="bg-darkred-red" @click="removeEnemy(enemy.id)" />
+                                <DeleteButton class="bg-brand-accent" @click="removeEnemy(enemy.id)" />
                             </div>
                         </div>
 
@@ -434,12 +349,12 @@ function removeEnemyStat(key) {
                             <TextAreaReactive label="Нотатки адміна (не бачать гравці)" v-model:value="enemy.notes"
                                 @update:value="markDirty('enemies')" />
 
-                            <div class="rounded-xl border-2 border-darkred-light_gray p-3 space-y-2">
+                            <div class="rounded-xl border-2 border-brand-subtle p-3 space-y-2">
                                 <Header2 label="Характеристики" />
                                 <div v-for="value, key in enemy.stats" :key="key"
-                                    class="flex gap-3 items-center p-2 w-fit rounded-lg bg-darkred-dark text-darkred-light">
+                                    class="flex gap-3 items-center p-2 w-fit rounded-lg bg-brand-base text-brand-text">
                                     <div>{{ key }}: {{ value }}</div>
-                                    <DeleteButton class="bg-darkred-red" @click="removeEnemyStat(key)" />
+                                    <DeleteButton class="bg-brand-accent" @click="removeEnemyStat(key)" />
                                 </div>
                                 <div class="grid grid-cols-2 gap-2">
                                     <InputTextReactive fieldName="EnemyStatName" placeholder="Назва" type="text"
@@ -450,7 +365,7 @@ function removeEnemyStat(key) {
                                 <AprroveButtonWithText text="Додати характеристику" @click="addEnemyStat" />
                             </div>
 
-                            <div class="rounded-xl border-2 border-darkred-light_gray p-3 space-y-2">
+                            <div class="rounded-xl border-2 border-brand-subtle p-3 space-y-2">
                                 <Header2 label="Здоров'я" />
                                 <HealthFieldsEditor v-for="h in enemy.health" :key="h.id" :label="h.name"
                                     :health_field="h" :callback="addEnemyHealth" :callback_remove="removeEnemyHealth" />
@@ -458,7 +373,7 @@ function removeEnemyStat(key) {
                             </div>
 
                             <div class="grid grid-cols-2 gap-2">
-                                <div class="rounded-xl border-2 border-darkred-light_gray p-3 space-y-1">
+                                <div class="rounded-xl border-2 border-brand-subtle p-3 space-y-1">
                                     <Header2 label="Перки" />
                                     <SearchInputBlack v-model:searchQuery="perkSearch" />
                                     <label v-for="perk in filteredPerks" :key="perk.id"
@@ -466,9 +381,9 @@ function removeEnemyStat(key) {
                                         <input type="checkbox" :checked="enemy.perks.includes(perk.id)" @change="toggleEnemyPerk(perk.id)" />
                                         {{ perk.name }}
                                     </label>
-                                    <div v-if="!filteredPerks.length" class="text-xs text-darkred-light_gray">Нічого не знайдено</div>
+                                    <div v-if="!filteredPerks.length" class="text-xs text-brand-faint">Нічого не знайдено</div>
                                 </div>
-                                <div class="rounded-xl border-2 border-darkred-light_gray p-3 space-y-1">
+                                <div class="rounded-xl border-2 border-brand-subtle p-3 space-y-1">
                                     <Header2 label="Предмети (зброя тощо)" />
                                     <SearchInputBlack v-model:searchQuery="entitySearch" />
                                     <label v-for="entity in filteredEntities" :key="entity.id"
@@ -476,7 +391,7 @@ function removeEnemyStat(key) {
                                         <input type="checkbox" :checked="enemy.entities.includes(entity.id)" @change="toggleEnemyEntity(entity.id)" />
                                         {{ entity.name }}
                                     </label>
-                                    <div v-if="!filteredEntities.length" class="text-xs text-darkred-light_gray">Нічого не знайдено</div>
+                                    <div v-if="!filteredEntities.length" class="text-xs text-brand-faint">Нічого не знайдено</div>
                                 </div>
                             </div>
                         </template>

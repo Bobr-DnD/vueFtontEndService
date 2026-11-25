@@ -48,36 +48,9 @@ export const useFightStore = defineStore('fight', () => {
         fight.value = null
     }
 
+    // Admin-only - free positioning, no AP/path cost.
     function move(sessionId, fightId, targetType, targetId, tileId) {
         socket.emit('fight:move', { sessionId, fightId, targetType, targetId, tileId })
-    }
-
-    function setActiveLoadout(sessionId, fightId, loadoutId) {
-        socket.emit('fight:setActiveLoadout', { sessionId, fightId, loadoutId })
-    }
-
-    function setActiveWeapon(sessionId, fightId, entityId) {
-        socket.emit('fight:setActiveWeapon', { sessionId, fightId, entityId })
-    }
-
-    function readyAttack(sessionId, fightId, payload) {
-        socket.emit('fight:readyAttack', { sessionId, fightId, ...payload })
-    }
-
-    function cancelReady(sessionId, fightId) {
-        socket.emit('fight:cancelReady', { sessionId, fightId })
-    }
-
-    function resolveAttack(sessionId, fightId, characterId, approve) {
-        socket.emit('fight:resolveAttack', { sessionId, fightId, characterId, approve })
-    }
-
-    function adminSetAP(sessionId, fightId, characterId, current, max) {
-        socket.emit('fight:adminSetAP', { sessionId, fightId, characterId, current, max })
-    }
-
-    function newRound(sessionId, fightId) {
-        socket.emit('fight:newRound', { sessionId, fightId })
     }
 
     function adminUpdate(sessionId, fightId, ops) {
@@ -121,13 +94,6 @@ export const useFightStore = defineStore('fight', () => {
         joinFight,
         leaveFight,
         move,
-        setActiveLoadout,
-        setActiveWeapon,
-        readyAttack,
-        cancelReady,
-        resolveAttack,
-        adminSetAP,
-        newRound,
         adminUpdate,
         setActive,
         deactivate

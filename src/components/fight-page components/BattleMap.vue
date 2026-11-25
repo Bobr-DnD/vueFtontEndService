@@ -1,14 +1,13 @@
 <script setup>
 import { computed, ref } from 'vue'
-import { tileCenterPercent, gridTileSizePercent, reachableTiles, findPathCost } from '@utils/tileGraph'
+import { tileCenterPercent, gridTileSizePercent, buildTiles } from '@utils/tileGraph'
 
 const props = defineProps({
     fight: { type: Object, required: true },
     characters: { type: Array, default: () => [] },
     pickedToken: { type: Object, default: null }, // { type: 'character'|'enemy', id }
     canMoveToken: { type: Function, default: () => false }, // (token) => boolean
-    moverBudget: { type: Number, default: null }, // AP available for the picked token - null means unconstrained (admin)
-    selectedTileId: { type: String, default: null } // externally-selected tile (e.g. the admin editor's weight editor) to highlight, independent of hover/reachable
+    selectedTileId: { type: String, default: null } // externally-selected tile (e.g. admin preview) to highlight, independent of hover
 })
 
 const emit = defineEmits(['pick-token', 'move-to-tile', 'tile-click'])
@@ -16,7 +15,10 @@ const emit = defineEmits(['pick-token', 'move-to-tile', 'tile-click'])
 const hoveredTileId = ref(null)
 
 const overlay = computed(() => props.fight.overlay)
-const tiles = computed(() => props.fight.tiles ?? [])
+// There's no persisted tile data anymore (no weight/blocked - nothing costs
+// AP or gets blocked) - the grid is purely a visual/snapping aid generated
+// straight from the overlay's own dimensions.
+const tiles = computed(() => buildTiles(overlay.value))
 const isGrid = computed(() => overlay.value?.type !== 'radial')
 const gridSize = computed(() => gridTileSizePercent(overlay.value))
 
@@ -31,9 +33,7 @@ const characterTokens = computed(() => (props.fight.participants ?? []).map(p =>
         id: p.character,
         name: character?.name ?? '?',
         image: character?.image ?? null,
-        position: p.position,
-        ready: p.ready,
-        ap: p.actionPoints
+        position: p.position
     }
 }))
 
@@ -47,36 +47,18 @@ const enemyTokens = computed(() => (props.fight.enemies ?? []).map(e => ({
 
 const allTokens = computed(() => [...characterTokens.value, ...enemyTokens.value])
 
-const pickedPosition = computed(() => {
-    if (!props.pickedToken) return null
-    const token = allTokens.value.find(t => t.type === props.pickedToken.type && t.id === props.pickedToken.id)
-    return token?.position?.tileId ?? null
-})
-
-const reachable = computed(() => {
-    if (!pickedPosition.value || props.moverBudget === null) return new Map()
-    return reachableTiles(pickedPosition.value, overlay.value, tiles.value, props.moverBudget)
-})
-
 function tileClass(tile) {
     return [
         'battle-tile',
-        tile.blocked && 'battle-tile--blocked',
-        reachable.value.has(tile.id) && 'battle-tile--reachable',
         hoveredTileId.value === tile.id && 'battle-tile--hover',
         props.selectedTileId === tile.id && 'battle-tile--selected'
     ]
 }
 
-function hoverCost(tileId) {
-    if (!pickedPosition.value) return null
-    return findPathCost(pickedPosition.value, tileId, overlay.value, tiles.value)
-}
-
 function onTileClick(tile) {
     emit('tile-click', tile.id)
 
-    if (!props.pickedToken || tile.blocked) return
+    if (!props.pickedToken) return
     emit('move-to-tile', tile.id)
 }
 
@@ -139,13 +121,12 @@ const radialSpokes = computed(() => {
 </script>
 
 <template>
-    <div class="relative w-full rounded-xl overflow-hidden border-4 border-darkred-dark bg-darkred-dark_gray select-none"
-        style="aspect-ratio: 16 / 9">
+    <div class="relative w-full h-full min-h-[420px] rounded-xl overflow-hidden border-4 border-brand-base bg-brand-surface select-none">
 
         <img v-if="fight.background?.image" :src="fight.background.image" alt="Карта бою" draggable="false"
             class="absolute inset-0 w-full h-full object-contain pointer-events-none" />
 
-        <div v-else class="absolute inset-0 flex items-center justify-center text-darkred-light_gray font-gothic">
+        <div v-else class="absolute inset-0 flex items-center justify-center text-brand-faint font-gothic">
             Фон карти не завантажено
         </div>
 
@@ -153,13 +134,13 @@ const radialSpokes = computed(() => {
             preserveAspectRatio="none">
             <template v-if="isGrid">
                 <line v-for="(l, i) in gridLines" :key="`gl${i}`" :x1="l.x1" :y1="l.y1" :x2="l.x2" :y2="l.y2"
-                    stroke="rgba(238,238,238,0.4)" stroke-width="0.15" vector-effect="non-scaling-stroke" />
+                    stroke="rgba(242,233,228,0.4)" stroke-width="0.15" vector-effect="non-scaling-stroke" />
             </template>
             <template v-else>
                 <circle v-for="(c, i) in radialCircles" :key="`rc${i}`" :cx="c.cx" :cy="c.cy" :r="c.r" fill="none"
-                    stroke="rgba(238,238,238,0.4)" stroke-width="0.15" vector-effect="non-scaling-stroke" />
+                    stroke="rgba(242,233,228,0.4)" stroke-width="0.15" vector-effect="non-scaling-stroke" />
                 <line v-for="(l, i) in radialSpokes" :key="`rs${i}`" :x1="l.x1" :y1="l.y1" :x2="l.x2" :y2="l.y2"
-                    stroke="rgba(238,238,238,0.4)" stroke-width="0.15" vector-effect="non-scaling-stroke" />
+                    stroke="rgba(242,233,228,0.4)" stroke-width="0.15" vector-effect="non-scaling-stroke" />
             </template>
         </svg>
 
@@ -170,9 +151,7 @@ const radialSpokes = computed(() => {
                 width: `${gridSize.w}%`,
                 height: `${gridSize.h}%`
             }" @click="onTileClick(tile)" @mouseenter="hoveredTileId = tile.id" @mouseleave="hoveredTileId = null">
-                <span class="battle-tile__dot" :class="tile.blocked && 'battle-tile__dot--blocked'" />
-                <span v-if="hoveredTileId === tile.id && pickedToken && hoverCost(tile.id) !== null"
-                    class="battle-tile__cost">{{ hoverCost(tile.id) }}</span>
+                <span class="battle-tile__dot" />
             </div>
         </template>
 
@@ -181,9 +160,7 @@ const radialSpokes = computed(() => {
                 left: `${tilePosition(tile.id).x}%`,
                 top: `${tilePosition(tile.id).y}%`
             }" @click="onTileClick(tile)" @mouseenter="hoveredTileId = tile.id" @mouseleave="hoveredTileId = null">
-                <span class="battle-tile__dot" :class="tile.blocked && 'battle-tile__dot--blocked'" />
-                <span v-if="hoveredTileId === tile.id && pickedToken && hoverCost(tile.id) !== null"
-                    class="battle-tile__cost">{{ hoverCost(tile.id) }}</span>
+                <span class="battle-tile__dot" />
             </div>
         </template>
 
@@ -199,9 +176,6 @@ const radialSpokes = computed(() => {
             <img v-if="token.image" :src="token.image" :alt="token.name" draggable="false"
                 class="w-full h-full object-cover rounded-full pointer-events-none" />
             <span v-else class="battle-token__initial">{{ token.name?.[0] ?? '?' }}</span>
-
-            <span v-if="token.type === 'character' && token.ready" class="battle-token__ready-dot"
-                title="Готовий до атаки" />
         </div>
 
     </div>
@@ -224,49 +198,27 @@ const radialSpokes = computed(() => {
     transform: translate(-50%, -50%);
 }
 
-/* Always-visible marker at the tile's center, independent of hover/reachable/
-   selected state - those still layer a colored background on .battle-tile
-   itself, this is just "a clickable point exists here". */
+/* Always-visible marker at the tile's center, independent of hover/selected
+   state - those still layer an outline on .battle-tile itself, this is just
+   "a clickable point exists here". */
 .battle-tile__dot {
     width: 8px;
     height: 8px;
     border-radius: 9999px;
-    background: rgba(238, 238, 238, 0.75);
-    border: 1px solid rgba(29, 22, 22, 0.7);
+    background: rgba(242, 233, 228, 0.75);
+    border: 1px solid rgba(13, 13, 13, 0.7);
     pointer-events: none;
 }
 
-.battle-tile__dot--blocked {
-    background: rgba(216, 64, 64, 0.85);
-}
-
-.battle-tile--blocked {
-    background: rgba(142, 22, 22, 0.35);
-    cursor: not-allowed;
-}
-
-.battle-tile--reachable {
-    background: rgba(94, 147, 108, 0.35);
-}
-
 .battle-tile--hover {
-    outline: 2px solid #D84040;
+    outline: 2px solid rgb(var(--brand-accent-hover));
     outline-offset: -2px;
 }
 
 .battle-tile--selected {
-    outline: 2px solid #FABC3F;
+    outline: 2px solid rgb(var(--brand-accent-hover));
     outline-offset: -2px;
-    background: rgba(250, 188, 63, 0.25);
-}
-
-.battle-tile__cost {
-    font-size: 11px;
-    font-weight: 700;
-    color: #EEEEEE;
-    background: rgba(29, 22, 22, 0.8);
-    padding: 1px 4px;
-    border-radius: 6px;
+    background: rgba(230, 57, 70, 0.2);
 }
 
 .battle-token {
@@ -281,7 +233,7 @@ const radialSpokes = computed(() => {
     justify-content: center;
     font-weight: 700;
     font-size: 14px;
-    border: 2px solid #1D1616;
+    border: 2px solid rgb(var(--brand-page));
     z-index: 5;
     overflow: hidden;
     transition: left 0.25s ease, top 0.25s ease;
@@ -289,12 +241,12 @@ const radialSpokes = computed(() => {
 
 .battle-token--character {
     background: #3E5F44;
-    color: #EEEEEE;
+    color: #F2E9E4;
 }
 
 .battle-token--enemy {
-    background: #8E1616;
-    color: #EEEEEE;
+    background: rgb(var(--brand-accent));
+    color: #F2E9E4;
 }
 
 .battle-token--movable {
@@ -303,17 +255,6 @@ const radialSpokes = computed(() => {
 }
 
 .battle-token--picked {
-    box-shadow: 0 0 0 3px #D84040;
-}
-
-.battle-token__ready-dot {
-    position: absolute;
-    top: -3px;
-    right: -3px;
-    width: 10px;
-    height: 10px;
-    border-radius: 9999px;
-    background: #FABC3F;
-    border: 2px solid #1D1616;
-}
+    box-shadow: 0 0 0 3px rgb(var(--brand-accent-hover));
+ }
 </style>

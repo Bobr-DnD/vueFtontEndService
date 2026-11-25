@@ -149,18 +149,6 @@ export function toNewFight(fight = {}) {
         maxRadius: fight.overlay?.radial?.maxRadius ?? 50
       }
     },
-    tiles: fight.tiles ?? [],
-    actionPoints: {
-      source: fight.actionPoints?.source ?? 'fixed',
-      fixedAmount: fight.actionPoints?.fixedAmount ?? 3,
-      fieldName: fight.actionPoints?.fieldName ?? ''
-    },
-    attackCost: {
-      source: fight.attackCost?.source ?? 'fixed',
-      fixedAmount: fight.attackCost?.fixedAmount ?? 1,
-      fieldName: fight.attackCost?.fieldName ?? ''
-    },
-    weaponDamageFieldName: fight.weaponDamageFieldName ?? 'damageDice',
     enemies: fight.enemies ?? [],
     participants: fight.participants ?? []
   }

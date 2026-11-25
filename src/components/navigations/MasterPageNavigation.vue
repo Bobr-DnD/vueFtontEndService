@@ -27,47 +27,56 @@ const sessionId = useRoute().params.sessionId
         <hr
             class="w-1 h-6 bg-brand-accent-hover border-0 mx-4 bg-gradient-to-r from-transparent via-brand-accent-hover to-transparent rounded" />
 
-        <RouterLink :to="'/admin/' + sessionId" class="relative text-brand-accent-hover font-semibold tracking-wide
+        <RouterLink :to="'/admin/' + sessionId"
+            class="relative text-brand-accent-hover font-semibold tracking-wide
            after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[3px]
            after:bg-brand-accent-hover md:hover:after:w-full after:transition-[width] after:duration-400 after:ease-out">
             Сесія
         </RouterLink>
 
-        <RouterLink :to="'/admin/' + sessionId + '/characters'" class="relative text-brand-accent-hover font-semibold tracking-wide
+        <RouterLink :to="'/admin/' + sessionId + '/characters'"
+            class="relative text-brand-accent-hover font-semibold tracking-wide
            after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[3px]
            after:bg-brand-accent-hover md:hover:after:w-full after:transition-[width] after:duration-400 after:ease-out">
             Персонажі
         </RouterLink>
 
-        <RouterLink :to="'/admin/' + sessionId + '/entities'" class="relative text-brand-accent-hover font-semibold tracking-wide
+        <RouterLink :to="'/admin/' + sessionId + '/entities'"
+            class="relative text-brand-accent-hover font-semibold tracking-wide
            after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[3px]
            after:bg-brand-accent-hover md:hover:after:w-full after:transition-[width] after:duration-400 after:ease-out">
             Інвентар
         </RouterLink>
 
-        <RouterLink :to="'/admin/' + sessionId + '/perks'" class="relative text-brand-accent-hover font-semibold tracking-wide
+        <RouterLink :to="'/admin/' + sessionId + '/perks'"
+            class="relative text-brand-accent-hover font-semibold tracking-wide
            after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[3px]
            after:bg-brand-accent-hover md:hover:after:w-full after:transition-[width] after:duration-400 after:ease-out">
             Навички
         </RouterLink>
 
-        <RouterLink :to="'/admin/' + sessionId + '/effects'" class="relative text-brand-accent-hover font-semibold tracking-wide
+        <RouterLink :to="'/admin/' + sessionId + '/effects'"
+            class="relative text-brand-accent-hover font-semibold tracking-wide
            after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[3px]
            after:bg-brand-accent-hover md:hover:after:w-full after:transition-[width] after:duration-400 after:ease-out">
             Ефекти
         </RouterLink>
 
-        <RouterLink :to="'/admin/' + sessionId + '/logs'" class="relative text-brand-accent-hover font-semibold tracking-wide
+        <RouterLink :to="'/admin/' + sessionId + '/logs'"
+            class="relative text-brand-accent-hover font-semibold tracking-wide
            after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[3px]
            after:bg-brand-accent-hover md:hover:after:w-full after:transition-[width] after:duration-400 after:ease-out">
             Логи
         </RouterLink>
 
-        <RouterLink :to="'/admin/' + sessionId + '/fight'" class="relative text-darkred-bright font-semibold tracking-wide
+        <RouterLink :to="'/admin/' + sessionId + '/fight'" class="relative text-brand-accent-hover text-brand-accent-hover font-semibold tracking-wide
            after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[3px]
-           after:bg-darkred-bright md:hover:after:w-full after:transition-[width] after:duration-400 after:ease-out">
+           after:bg-brand-accent-hover md:hover:after:w-full after:transition-[width] after:duration-400 after:ease-out">
             Бій
-        <RouterLink :to="{ path: '/theme-test', query: { sessionId } }" class="relative text-brand-accent-hover font-semibold tracking-wide
+        </RouterLink>
+
+        <RouterLink :to="{ path: '/theme-test', query: { sessionId } }"
+            class="relative text-brand-accent-hover font-semibold tracking-wide
            after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[3px]
            after:bg-brand-accent-hover md:hover:after:w-full after:transition-[width] after:duration-400 after:ease-out">
             Тест кольорів

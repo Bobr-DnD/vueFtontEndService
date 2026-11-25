@@ -1,6 +1,8 @@
 <script setup>
-defineProps({
+const props = defineProps({
     enemies: { type: Array, default: () => [] },
+    participants: { type: Array, default: () => [] }, // fight.participants
+    allCharacters: { type: Array, default: () => [] }, // sessionStore.session.characters, to resolve name/image/health
     isAdmin: { type: Boolean, default: false },
     selectedEnemyId: { type: String, default: null }
 })
@@ -17,15 +19,22 @@ function healthColor(h) {
     if (ratio > 0.25) return '#FABC3F'
     return '#8E1616'
 }
+
+function characterOf(participant) {
+    return props.allCharacters.find(c => c.id === participant.character)
+}
 </script>
 
 <template>
-    <div class="flex items-stretch gap-2 p-2 bg-darkred-dark border-b-2 border-darkred-red font-gothic">
+    <div class="flex items-stretch gap-2 p-2 bg-brand-base border-b-2 border-brand-accent font-gothic">
 
         <div class="flex-1 min-w-0 flex gap-2 overflow-x-auto auto-hide-scroll">
-            <div v-for="enemy in enemies" :key="enemy.id" @click="emit('select', enemy.id)"
-                :class="selectedEnemyId === enemy.id ? 'border-darkred-bright' : 'border-darkred-dark_gray'"
-                class="shrink-0 w-56 p-2 rounded-xl border-2 bg-darkred-dark_gray text-darkred-light md:hover:cursor-pointer">
+
+            <!-- Enemies are admin-selectable (drives the stats panel below);
+                 characters are informational only, no click handler. -->
+            <div v-for="enemy in enemies" :key="enemy.id" @click="isAdmin && emit('select', enemy.id)"
+                :class="[selectedEnemyId === enemy.id ? 'border-brand-accent-hover' : 'border-brand-surface', isAdmin && 'md:hover:cursor-pointer']"
+                class="shrink-0 w-56 p-2 rounded-xl border-2 bg-brand-surface text-brand-text">
 
                 <div class="flex items-center gap-2 mb-1">
                     <img v-if="enemy.image" :src="enemy.image" :alt="enemy.name" class="w-8 h-8 rounded-full object-cover" />
@@ -39,21 +48,30 @@ function healthColor(h) {
                             :style="{ width: `${healthRatio(h) * 100}%`, backgroundColor: healthColor(h) }"></div>
                     </div>
                 </div>
+            </div>
 
-                <div v-if="isAdmin && enemy.notes" class="text-xs italic text-darkred-light_gray mt-1 truncate" :title="enemy.notes">
-                    📝 {{ enemy.notes }}
+            <div v-for="participant in participants" :key="participant.character"
+                class="shrink-0 w-56 p-2 rounded-xl border-2 border-brand-surface bg-brand-surface/60 text-brand-text">
+
+                <div class="flex items-center gap-2 mb-1">
+                    <img v-if="characterOf(participant)?.image" :src="characterOf(participant).image"
+                        :alt="characterOf(participant)?.name" class="w-8 h-8 rounded-full object-cover" />
+                    <span class="font-semibold truncate">{{ characterOf(participant)?.name ?? '?' }}</span>
                 </div>
 
-                <div v-if="isAdmin && enemy.stats && Object.keys(enemy.stats).length"
-                    class="text-xs text-darkred-light_gray mt-1 flex flex-wrap gap-1">
-                    <span v-for="(v, k) in enemy.stats" :key="k" class="px-1.5 py-0.5 bg-darkred-dark rounded">{{ k }}: {{ v }}</span>
+                <div v-for="h in characterOf(participant)?.health ?? []" :key="h.id" class="text-xs mb-1">
+                    <div class="flex justify-between"><span>{{ h.name }}</span><span>{{ h.value }}/{{ h.max }}</span></div>
+                    <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
+                        <div class="h-full transition-all duration-300"
+                            :style="{ width: `${healthRatio(h) * 100}%`, backgroundColor: healthColor(h) }"></div>
+                    </div>
                 </div>
             </div>
 
-            <div v-if="!enemies.length" class="text-darkred-light_gray text-sm p-2 self-center">Ворогів немає</div>
+            <div v-if="!enemies.length && !participants.length" class="text-brand-faint text-sm p-2 self-center">Ще нікого немає</div>
         </div>
 
-        <div v-if="$slots.actions" class="flex items-center gap-2 shrink-0 pl-2 border-l-2 border-darkred-dark_gray">
+        <div v-if="$slots.actions" class="flex items-center gap-2 shrink-0 pl-2 border-l-2 border-brand-surface">
             <slot name="actions" />
         </div>
     </div>
