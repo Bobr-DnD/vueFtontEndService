@@ -155,8 +155,8 @@ async function deleteEffect() {
 
                     <div @click="selectEffect('new')"
                         :class="selectedEffect.id === 'new' && 'outline outline-4 outline-offset-[-1px] outline-brand-accent'"
-                        class="border-8 border-brand-base bg-brand-base rounded-2xl flex justify-center items-center hover:cursor-pointer">
-                        <PlusButton class="w-20 text-brand-text" />
+                        class="p-1 rounded-2xl flex justify-center items-center hover:cursor-pointer">
+                        <PlusButton class="w-full h-full" />
                     </div>
 
 

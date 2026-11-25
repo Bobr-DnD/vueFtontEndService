@@ -174,8 +174,8 @@ async function deletePerk() {
                 <div class="grid grid-cols-4 gap-4 p-2 max-h-[512px] overflow-y-scroll auto-hide-scroll">
                     <div @click="selectPerk('new')"
                         :class="selectedPerk.id === 'new' && 'outline outline-4 outline-offset-[-1px] outline-brand-accent'"
-                        class="border-8 border-brand-base bg-brand-base rounded-2xl flex justify-center items-center hover:cursor-pointer">
-                        <PlusButton class="w-20 text-brand-text" />
+                        class="p-1 rounded-2xl flex justify-center items-center hover:cursor-pointer">
+                        <PlusButton class="w-full h-full" />
                     </div>
 
                     <PerkTile v-for="perk in filteredPerks" :key="perk.id" :perk="perk" @click="selectPerk(perk.id)"

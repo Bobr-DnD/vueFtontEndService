@@ -20,7 +20,7 @@ const icon = returnIcon(props.mainIcon)
 </script>
 
 <template>
-    <button class="mx-auto p-2 bg-gradient-to-tr from-brand-accent-hover to-brand-base text-center text-3xl font-bold text-brand-text
+    <button class="mx-auto p-2 bg-brand-accent/75 text-center text-3xl font-bold text-brand-text
             rounded-xl font-gothic grid grid-cols-[40px_1fr_60px] items-center justify-items-center">
         <!-- <mainIcon class="w-8 h-8" /> -->
         <component :is="icon.icon" class="w-8 h-8" />

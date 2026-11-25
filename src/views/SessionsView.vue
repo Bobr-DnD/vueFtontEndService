@@ -130,9 +130,9 @@ watch(modalShow, () => clearModalValues())
   <div v-if="!isLoading" class="mx-auto my-4 w-96 flex flex-col gap-2">
     <SearchInputBlack v-model:searchQuery="searchQuery" />
 
-    <div @click="modalShow = !modalShow"
-      class="border-8 border-brand-base rounded-2xl flex justify-center items-center hover:cursor-pointer hover:bg-brand-surface hover:text-brand-text">
-      <PlusButton class="w-20" />
+    <div
+      class="flex justify-center items-center hover:cursor-pointer hover:bg-brand-surface hover:text-brand-text">
+      <PlusButton class="w-full h-16 text-2xl" @click="modalShow = !modalShow" />
     </div>
   </div>
 

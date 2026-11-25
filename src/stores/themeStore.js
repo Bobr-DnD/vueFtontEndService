@@ -20,7 +20,7 @@ const CSS_VAR_BY_COLOR_KEY = {
 
 const DEFAULT_THEME = {
     colors: {
-        page: '255 255 255',
+        page: '13 13 13',
         base: '26 26 26',
         ink: '26 26 26',
         surface: '38 34 32',

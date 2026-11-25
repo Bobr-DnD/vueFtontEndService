@@ -219,8 +219,9 @@ function togglePicker(healthId) {
                 :perkPoints="state.character.perkPoints" :level="state.character.level" :callback="addExperience"
                 :class="state.characterIsUpdating && 'pointer-events-none'" />
 
-            <AprroveButtonWithText text="🎲 Кинути кубик" class="w-full h-12 flex justify-center items-center"
-                @click="dice_modal_hidden = false" />
+            <button @click="dice_modal_hidden = false" class="w-full h-12 p-2 rounded-lg border-2 border-brand-base bg-brand-subtle 
+                text-brand-ink text-xl font-semibold tracking-wide md:hover:bg-brand-accent md:hover:text-brand-text active:bg-brand-accent-hover">
+                    🎲 Кинути кубик</button>
 
             <TextAreaEditor class="lg:grid hidden" fieldName="playerNotes" name="Записки гравця"
                 :value="state.character.playerNotes" :callback="updateCharacterNotes" />

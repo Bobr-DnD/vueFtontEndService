@@ -27,7 +27,8 @@ export default {
           'success-surface': '#E8FFD7',
           new: '#FABC3F',
           warning: '#E85C0D',
-          error: '#8E1616'
+          error: '#8E1616',
+          'text-white': '#ffffff'
         },
         system: {
           

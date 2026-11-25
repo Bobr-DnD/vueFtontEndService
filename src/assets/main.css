@@ -2,9 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* App shell default (DEFAULT_THEME in themeStore.js) - the original "darkred"
-   look, shown before any session loads so first paint matches what JS
-   applies immediately after. Session presets override these at runtime. */
 :root {
   --brand-page: 13 13 13;
   --brand-base: 26 26 26;
@@ -31,6 +28,7 @@ body,
 #app {
   height: 100%;
   background-color: rgb(var(--brand-page));
+  color: rgb(var(--brand-text));
 }
 #app {
   display: flex;
@@ -80,7 +78,7 @@ body,
 
 .auto-hide-scroll:hover,
 .auto-hide-scroll:focus-within {
-  scrollbar-color: #8E1616 rgba(255, 255, 255, 0);
+  scrollbar-color: rgb(var(--brand-accent)) rgba(255, 255, 255, 0);
 }
 
 .auto-hide-scroll::-webkit-scrollbar-thumb {

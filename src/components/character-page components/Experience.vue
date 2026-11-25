@@ -32,8 +32,7 @@ const props = defineProps({
         </div>
 
         <div class="grow"> <button @click="callback()" class="w-full h-full p-2 rounded-lg border-2 border-brand-base bg-brand-subtle 
-                text-brand-ink text-xl font-semibold tracking-wide md:hover:bg-brand-accent md:hover:text-brand-text active:bg-brand-accent-hover active:scale-95 
-                transition-all duration-200 ease-in-out shadow-md md:hover:shadow-lg">
+                text-brand-ink text-xl font-semibold tracking-wide md:hover:bg-brand-accent md:hover:text-brand-text active:bg-brand-accent-hover">
                 +1 досвід </button> </div>
     </div>
 </template>

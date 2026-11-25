@@ -53,7 +53,7 @@ export function toNewTheme(theme) {
   return {
     presetId: theme?.presetId ?? 'crimson-keep',
     colors: {
-      page: theme?.colors?.page ?? '#ffffff',
+      page: theme?.colors?.page ?? '#0D0D0D',
       base: theme?.colors?.base ?? '#1A1A1A',
       ink: theme?.colors?.ink ?? '#1A1A1A',
       surface: theme?.colors?.surface ?? '#262220',

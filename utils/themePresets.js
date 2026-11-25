@@ -3,7 +3,7 @@ export const THEME_PRESETS = [
         id: 'crimson-keep',
         name: 'Crimson Keep',
         colors: {
-            page: '#ffffff',
+            page: '#0D0D0D',
             base: '#1A1A1A',
             ink: '#1A1A1A',
             surface: '#262220',
@@ -48,7 +48,7 @@ export const THEME_PRESETS = [
             faint: '#D8CDBB',
             accent: '#B5651D',
             accentHover: '#D97D33',
-            text: '#ffffff',
+            text: '#000000',
             surfaceInverted: '#FFFFFF',
             accentSecondary: '#6B4226'
         }
@@ -69,6 +69,45 @@ export const THEME_PRESETS = [
             text: '#F4ECD8',
             surfaceInverted: '#F4ECD8',
             accentSecondary: '#4A2E12'
+        }
+    },
+    {
+        // Warm, brown-tinted gray ash - like ash still sitting over hot coals.
+        id: 'smoldering-ash',
+        name: 'Smoldering Ash',
+        colors: {
+            page: '#17120F',
+            base: '#211B17',
+            ink: '#211B17',
+            surface: '#332821',
+            muted: '#9C8F82',
+            subtle: '#D3C7B8',
+            faint: '#D3C7B8',
+            accent: '#E8752A',
+            accentHover: '#FF9142',
+            text: '#F4ECE2',
+            surfaceInverted: '#F4ECE2',
+            accentSecondary: '#5C3A22'
+        }
+    },
+    {
+        // Cool slate-gray ash (closer to real volcanic ash) for maximum
+        // contrast against a hot orange accent.
+        id: 'volcanic-ash',
+        name: 'Volcanic Ash',
+        colors: {
+            page: '#111113',
+            base: '#1C1C1F',
+            ink: '#1C1C1F',
+            surface: '#2B2B2F',
+            muted: '#84848C',
+            subtle: '#BFBFC7',
+            faint: '#BFBFC7',
+            accent: '#F2650C',
+            accentHover: '#FF8533',
+            text: '#EDEDF0',
+            surfaceInverted: '#EDEDF0',
+            accentSecondary: '#3A2416'
         }
     }
 ]
