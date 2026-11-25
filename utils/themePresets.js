@@ -1,5 +1,41 @@
 export const THEME_PRESETS = [
     {
+        id: 'sunlit-parchment',
+        name: 'Sunlit Parchment',
+        colors: {
+            page: '#F5F1E8',
+            base: '#EDE4D3',
+            ink: '#3B2F2F',
+            surface: '#FFFFFF',
+            muted: '#A89F91',
+            subtle: '#D8CDBB',
+            faint: '#D8CDBB',
+            accent: '#B5651D',
+            accentHover: '#D97D33',
+            text: '#000000',
+            surfaceInverted: '#FFFFFF',
+            accentSecondary: '#6B4226'
+        }
+    },
+    {
+        id: 'golden-meadow',
+        name: 'Golden Meadow',
+        colors: {
+            page: '#FFFBEA',
+            base: '#FDF1C7',
+            ink: '#3A2E0F',
+            surface: '#FFFFFF',
+            muted: '#A89B6E',
+            subtle: '#E8DCA0',
+            faint: '#E8DCA0',
+            accent: '#D4A017',
+            accentHover: '#F0B90B',
+            text: '#3A2E0F',
+            surfaceInverted: '#FFFFFF',
+            accentSecondary: '#8B6914'
+        }
+    },
+    {
         id: 'crimson-keep',
         name: 'Crimson Keep',
         colors: {
@@ -36,63 +72,7 @@ export const THEME_PRESETS = [
         }
     },
     {
-        id: 'sunlit-parchment',
-        name: 'Sunlit Parchment',
-        colors: {
-            page: '#F5F1E8',
-            base: '#EDE4D3',
-            ink: '#3B2F2F',
-            surface: '#FFFFFF',
-            muted: '#A89F91',
-            subtle: '#D8CDBB',
-            faint: '#D8CDBB',
-            accent: '#B5651D',
-            accentHover: '#D97D33',
-            text: '#000000',
-            surfaceInverted: '#FFFFFF',
-            accentSecondary: '#6B4226'
-        }
-    },
-    {
-        id: 'ember-forge',
-        name: 'Ember Forge',
-        colors: {
-            page: '#0A0A0A',
-            base: '#141414',
-            ink: '#141414',
-            surface: '#1F1B16',
-            muted: '#8C8176',
-            subtle: '#C9BFAE',
-            faint: '#C9BFAE',
-            accent: '#E8871E',
-            accentHover: '#FFA94D',
-            text: '#F4ECD8',
-            surfaceInverted: '#F4ECD8',
-            accentSecondary: '#4A2E12'
-        }
-    },
-    {
-        // Warm, brown-tinted gray ash - like ash still sitting over hot coals.
-        id: 'smoldering-ash',
-        name: 'Smoldering Ash',
-        colors: {
-            page: '#17120F',
-            base: '#211B17',
-            ink: '#211B17',
-            surface: '#332821',
-            muted: '#9C8F82',
-            subtle: '#D3C7B8',
-            faint: '#D3C7B8',
-            accent: '#E8752A',
-            accentHover: '#FF9142',
-            text: '#F4ECE2',
-            surfaceInverted: '#F4ECE2',
-            accentSecondary: '#5C3A22'
-        }
-    },
-    {
-        // Cool slate-gray ash (closer to real volcanic ash) for maximum
-        // contrast against a hot orange accent.
+
         id: 'volcanic-ash',
         name: 'Volcanic Ash',
         colors: {
@@ -109,7 +89,7 @@ export const THEME_PRESETS = [
             surfaceInverted: '#EDEDF0',
             accentSecondary: '#3A2416'
         }
-    }
+    },
 ]
 
 export function findPresetById(id) {
