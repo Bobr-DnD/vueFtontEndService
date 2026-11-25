@@ -200,77 +200,77 @@ function toggleInventoryItem(item) {
 </script>
 
 <template>
-    <div class="p-4 rounded-2xl bg-darkred-dark text-darkred-light font-gothic">
+    <div class="p-4 rounded-2xl bg-brand-base text-brand-text font-gothic">
 
         <div class="flex items-center justify-between mb-4">
-            <span class="text-xl font-semibold text-darkred-bright">⚔ Профілі</span>
-            <span class="text-xs text-darkred-light_gray border-2 border-darkred-dark_gray rounded-full px-3 py-1">{{
+            <span class="text-xl font-semibold text-brand-accent-hover">⚔ Профілі</span>
+            <span class="text-xs text-brand-faint border-2 border-brand-surface rounded-full px-3 py-1">{{
                 loadouts.length }} / {{ loadoutLimits?.loadouts ?? '∞' }} профілів</span>
         </div>
 
         <div class="flex gap-2 flex-wrap mb-4">
             <button v-for="l in loadouts" :key="l.id" @click="selectLoadout(l.id)"
-                :class="l.id === activeLoadoutId ? 'bg-darkred-gray border-darkred-gray' : 'border-darkred-dark_gray'"
-                class="group flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 text-sm md:hover:bg-darkred-gray/60 md:hover:cursor-pointer transition-colors">
+                :class="l.id === activeLoadoutId ? 'bg-brand-muted border-brand-muted' : 'border-brand-surface'"
+                class="group flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 text-sm md:hover:bg-brand-muted/60 md:hover:cursor-pointer transition-colors">
                 {{ l.name }}
                 <span @click.stop="removeLoadout(l.id)"
-                    class="opacity-0 group-hover:opacity-100 text-xs md:hover:text-darkred-bright transition-opacity">✕</span>
+                    class="opacity-0 group-hover:opacity-100 text-xs md:hover:text-brand-accent-hover transition-opacity">✕</span>
             </button>
 
             <button v-if="!loadoutsMaxReached" @click="addLoadout"
-                class="px-3 py-1.5 rounded-full border-2 border-dashed border-darkred-dark_gray text-sm text-darkred-light_gray md:hover:bg-darkred-gray/60 md:hover:cursor-pointer transition-colors">
+                class="px-3 py-1.5 rounded-full border-2 border-dashed border-brand-surface text-sm md:hover:bg-brand-muted/60 md:hover:cursor-pointer transition-colors">
                 + Новий
             </button>
         </div>
 
-        <div v-if="!activeLoadout" class="text-center italic text-darkred-light_gray py-6">Немає жодного профіля.
+        <div v-if="!activeLoadout" class="text-center italic py-6">Немає жодного профіля.
             Створіть перший.</div>
 
         <template v-else>
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <div
-                        class="text-xs uppercase tracking-wider text-darkred-light_gray border-b-2 border-darkred-dark_gray pb-1 mb-2">
+                        class="text-xs uppercase tracking-wider border-b-2 border-brand-surface pb-1 mb-2">
                         Екіпіроване спорядження</div>
 
                     <div class="flex flex-col gap-1.5">
 
                         <div v-for="(slot, i) in itemSlots" :key="slot.id ?? `empty-item-${i}`"
-                            :class="slot.item ? 'border-darkred-gray' : 'border-darkred-dark_gray'"
-                            class="group relative flex items-center gap-2.5 border-2 rounded-lg px-2.5 py-2 bg-darkred-dark_gray/40 md:hover:bg-darkred-gray/20 md:hover:cursor-pointer transition-colors"
+                            :class="slot.item ? 'border-brand-muted' : 'border-brand-surface'"
+                            class="group relative flex items-center gap-2.5 border-2 rounded-lg px-2.5 py-2 bg-brand-surface/40 md:hover:bg-brand-muted/20 md:hover:cursor-pointer transition-colors"
                             @click="!slot.item && (activeFilter = 'all')">
 
                             <template v-if="slot.item">
                                 <div
-                                    class="w-7 h-7 rounded-md flex items-center justify-center text-base shrink-0 overflow-hidden bg-darkred-red/20">
+                                    class="w-7 h-7 rounded-md flex items-center justify-center text-base shrink-0 overflow-hidden bg-brand-accent/20">
                                     <component :is="typeIcon(slot.item)" v-if="typeIcon(slot.item)" class="w-4 h-4" />
                                     <span v-else>📦</span>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <div class="text-sm font-medium text-darkred-light text-ellipsis">{{ slot.item.name
+                                    <div class="text-sm font-medium  text-ellipsis">{{ slot.item.name
                                         }}
                                     </div>
                                     <div v-if="slot.item.description"
-                                        class="text-xs text-darkred-light_gray italic text-ellipsis">{{
+                                        class="text-xs italic text-ellipsis">{{
                                         slot.item.description }}</div>
                                 </div>
                                 <div @click.stop="removeItem(slot.id)"
-                                    class="opacity-0 group-hover:opacity-100 w-[18px] h-[18px] flex items-center justify-center text-darkred-light_gray text-sm shrink-0 md:hover:text-darkred-bright transition-opacity">
+                                    class="opacity-0 group-hover:opacity-100 w-[18px] h-[18px] flex items-center justify-center text-sm shrink-0 md:hover:text-brand-accent-hover transition-opacity">
                                     ✕</div>
                             </template>
 
                             <template v-else>
                                 <div
-                                    class="w-7 h-7 rounded-md shrink-0 bg-darkred-dark border-2 border-dashed border-darkred-dark_gray">
+                                    class="w-7 h-7 rounded-md shrink-0 bg-brand-base border-2 border-dashed border-brand-surface">
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <div class="text-xs text-darkred-light_gray italic">— порожній слот —</div>
+                                    <div class="text-xs  italic">— порожній слот —</div>
                                 </div>
                             </template>
 
                         </div>
 
-                        <div v-if="!itemSlots.length" class="text-xs text-darkred-light_gray italic text-center py-3">
+                        <div v-if="!itemSlots.length" class="text-xs  italic text-center py-3">
                             Немає предметів</div>
 
                     </div>
@@ -278,60 +278,60 @@ function toggleInventoryItem(item) {
 
                 <div>
                     <div
-                        class="text-xs uppercase tracking-wider text-darkred-light_gray border-b-2 border-darkred-dark_gray pb-1 mb-2">
+                        class="text-xs uppercase tracking-wider  border-b-2 border-brand-surface pb-1 mb-2">
                         Активні перки</div>
 
                     <div class="flex flex-col gap-1.5">
 
                         <div v-for="(slot, i) in perkSlots" :key="slot.id ?? `empty-perk-${i}`"
-                            :class="slot.item ? 'border-darkred-gray' : 'border-darkred-dark_gray'"
-                            class="group relative flex items-center gap-2.5 border-2 rounded-lg px-2.5 py-2 bg-darkred-dark_gray/40 md:hover:bg-darkred-gray/20 md:hover:cursor-pointer transition-colors"
+                            :class="slot.item ? 'border-brand-muted' : 'border-brand-surface'"
+                            class="group relative flex items-center gap-2.5 border-2 rounded-lg px-2.5 py-2 bg-brand-surface/40 md:hover:bg-brand-muted/20 md:hover:cursor-pointer transition-colors"
                             @click="!slot.item && (activeFilter = 'perks')">
 
                             <template v-if="slot.item">
                                 <div
-                                    class="w-7 h-7 rounded-md flex items-center justify-center text-base shrink-0 bg-darkred-brown">
+                                    class="w-7 h-7 rounded-md flex items-center justify-center text-base shrink-0 bg-brand-accent-secondary">
                                     ✦</div>
                                 <div class="flex-1 min-w-0">
-                                    <div class="text-sm font-medium text-darkred-light text-ellipsis">{{ slot.item.name
+                                    <div class="text-sm font-medium text-ellipsis">{{ slot.item.name
                                         }}
                                     </div>
                                     <div v-if="slot.item.description"
-                                        class="text-xs text-darkred-light_gray italic text-ellipsis">{{
+                                        class="text-xs italic text-ellipsis">{{
                                             slot.item.description }}</div>
                                     <div v-if="slot.item.count && slot.item.levels?.[slot.item.count - 1]"
-                                        class="text-xs text-darkred-light_gray italic text-ellipsis">{{
+                                        class="text-xs italic text-ellipsis">{{
                                             slot.item.levels[slot.item.count - 1].name }}</div>
                                 </div>
                                 <div @click.stop="removePerkFromLoadout(slot.id)"
-                                    class="opacity-0 group-hover:opacity-100 w-[18px] h-[18px] flex items-center justify-center text-darkred-light_gray text-sm shrink-0 md:hover:text-darkred-bright transition-opacity">
+                                    class="opacity-0 group-hover:opacity-100 w-[18px] h-[18px] flex items-center justify-center  text-sm shrink-0 md:hover:text-brand-accent-hover transition-opacity">
                                     ✕</div>
                             </template>
 
                             <template v-else>
                                 <div
-                                    class="w-7 h-7 rounded-md shrink-0 bg-darkred-dark border-2 border-dashed border-darkred-dark_gray">
+                                    class="w-7 h-7 rounded-md shrink-0 bg-brand-base border-2 border-dashed border-brand-surface">
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <div class="text-xs text-darkred-light_gray italic">— порожній слот —</div>
+                                    <div class="text-xst italic">— порожній слот —</div>
                                 </div>
                             </template>
 
                         </div>
 
-                        <div v-if="!perkSlots.length" class="text-xs text-darkred-light_gray italic text-center py-3">
+                        <div v-if="!perkSlots.length" class="text-xs italic text-center py-3">
                             Немає перків</div>
 
                     </div>
                 </div>
             </div>
 
-            <div class="mt-4 border-t-2 border-darkred-dark_gray pt-4">
+            <div class="mt-4 border-t-2 border-brand-surface pt-4">
 
                 <div class="flex gap-1.5 flex-wrap mb-2.5">
                     <button v-for="f in filterOptions" :key="f.id" @click="activeFilter = f.id"
-                        :class="activeFilter === f.id ? 'bg-darkred-gray border-darkred-gray text-darkred-light' : 'border-darkred-dark_gray text-darkred-light_gray'"
-                        class="text-xs px-2.5 py-1 rounded-full border-2 md:hover:bg-darkred-gray/60 md:hover:cursor-pointer transition-colors">
+                        :class="activeFilter === f.id ? 'bg-brand-muted border-brand-muted' : 'border-brand-surface text-brand-muted'"
+                        class="text-xs px-2.5 py-1 rounded-full border-2 md:hover:bg-brand-muted/60 md:hover:cursor-pointer transition-colors">
                         {{ f.label }}
                     </button>
                 </div>
@@ -339,27 +339,27 @@ function toggleInventoryItem(item) {
                 <div class="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-1.5">
                     <div v-for="it in inventoryList" :key="`${it.isPerk ? 'perk' : 'entity'}-${it.id}`"
                         @click="toggleInventoryItem(it)"
-                        :class="it.inLoadout ? 'border-darkred-bright bg-darkred-red/10' : 'border-darkred-dark_gray'"
-                        class="flex items-center gap-2 border-2 rounded-lg px-2.5 py-2 md:hover:bg-darkred-gray/20 md:hover:cursor-pointer transition-colors">
+                        :class="it.inLoadout ? 'border-brand-accent-hover bg-brand-accent/10' : 'border-brand-surface'"
+                        class="flex items-center gap-2 border-2 rounded-lg px-2.5 py-2 md:hover:bg-brand-muted/20 md:hover:cursor-pointer transition-colors">
 
                         <div class="w-6 h-6 rounded flex items-center justify-center text-xs shrink-0"
-                            :class="it.isPerk ? 'bg-darkred-brown' : 'bg-darkred-red/20'">
+                            :class="it.isPerk ? 'bg-brand-accent-secondary' : 'bg-brand-accent/20'">
                             <component :is="it.icon" v-if="it.icon" class="w-3.5 h-3.5" />
                             <span v-else>{{ it.isPerk ? '✦' : '📦' }}</span>
                         </div>
 
                         <div>
                             <div class="text-xs font-medium text-ellipsis"
-                                :class="it.inLoadout ? 'text-darkred-bright' : 'text-darkred-light'">
+                                :class="it.inLoadout ? 'text-brand-accent-hover' : 'text-brand-text'">
                                 {{ it.name }}<span v-if="it.count > 1"> x{{ it.count }}</span>
-                                <span v-if="it.inLoadout" class="text-greenish-mid text-sm">✓</span>
+                                <span v-if="it.inLoadout" class="text-state-success-accent text-sm">✓</span>
                             </div>
                         </div>
 
                     </div>
 
                     <div v-if="!inventoryList.length"
-                        class="text-xs text-darkred-light_gray italic text-center py-3 col-span-full">
+                        class="text-xs text-brand-faint italic text-center py-3 col-span-full">
                         Нічого не
                         знайдено</div>
                 </div>

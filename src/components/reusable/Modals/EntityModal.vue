@@ -1,5 +1,5 @@
 <script setup>
-import CloseButtonRedBG from '@/components/reusable/Buttons/CloseButtonRedBG.vue';
+import CloseButtonBackground from '@/components/reusable/Buttons/CloseButtonBackground.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import { checkArrayFieldExisting, checkObjectFieldExisting } from '@utils/entityHelper';
@@ -26,13 +26,13 @@ const props = defineProps({
 
 <template>
     <div @click="callback_close"
-        class="fixed inset-0 flex items-center justify-center z-50 bg-darkred-dark/50 md:hover:cursor-pointer">
+        class="fixed inset-0 flex items-center justify-center z-50 bg-brand-base/50 md:hover:cursor-pointer">
         <div @click.stop
-            class="max-w-[480px] w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-gothic md:hover:cursor-default">
+            class="max-w-[480px] w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl border-2 border-brand-base bg-brand-surface text-brand-text shadow-xl space-y-2 relative font-gothic md:hover:cursor-default">
 
-            <CloseButtonRedBG @click="callback_close" />
+            <CloseButtonBackground @click="callback_close" />
 
-            <div class="font-bold text-2xl text-center border-b border-darkred-red pb-2">
+            <div class="font-bold text-2xl text-center border-b border-brand-accent pb-2">
                 <div class="w-[90%]">
                     {{ entity.name }}
                 </div>
@@ -40,7 +40,7 @@ const props = defineProps({
             </div>
 
             <div v-if="props.entity.image">
-                <img class="w-full h-40 object-cover border-4 border-darkred-bright rounded-lg shadow-lg"
+                <img class="w-full h-40 object-cover border-4 border-brand-accent-hover rounded-lg shadow-lg"
                     :src="props.entity.image" alt="Entity image" />
             </div>
 
@@ -52,9 +52,9 @@ const props = defineProps({
 
                 <div class="basis-full text-center text-xl">Характеристики: </div>
 
-                <div class="p-1 w-full bg-darkred-light rounded-lg text-darkred-dark flex flex-col gap-1">
+                <div class="p-1 w-full bg-brand-surface-inverted rounded-lg text-brand-ink flex flex-col gap-1">
                     <div v-for="value, name in props.entity.characteristics" :key="Math.random().toString(24).slice(2)"
-                        class="py-1 px-2 rounded-lg even:bg-darkred-light_gray ">
+                        class="py-1 px-2 rounded-lg even:bg-brand-subtle ">
                         {{ name }}: {{ value }}
                     </div>
                 </div>
@@ -65,9 +65,9 @@ const props = defineProps({
 
                 <div class="basis-full text-center text-xl">Вимоги: </div>
 
-                <div class="p-1 w-full bg-darkred-light rounded-lg text-darkred-dark flex flex-col gap-1">
+                <div class="p-1 w-full bg-brand-surface-inverted rounded-lg text-brand-ink flex flex-col gap-1">
                     <div v-for="value, name in props.entity.requirement" :key="Math.random().toString(24).slice(2)"
-                        class="py-1 px-2 rounded-lg even:bg-darkred-light_gray ">
+                        class="py-1 px-2 rounded-lg even:bg-brand-subtle ">
                         {{ name }}: {{ value }}
                     </div>
                 </div>
@@ -78,14 +78,14 @@ const props = defineProps({
 
                 <div class="basis-full text-center text-xl">Ефекти: </div>
 
-                <div class="p-1 w-full bg-darkred-light rounded-lg text-darkred-dark flex flex-col gap-1">
-                    <div class="grid grid-cols-2 py-1 px-2 rounded-lg bg-darkred-light">
+                <div class="p-1 w-full bg-brand-surface-inverted rounded-lg text-brand-ink flex flex-col gap-1">
+                    <div class="grid grid-cols-2 py-1 px-2 rounded-lg bg-brand-surface-inverted">
                         <div>Назва</div>
                         <div>Опис</div>
                     </div>
 
                     <div v-for="value in props.entity.effects" :key="value.id"
-                        class="py-1 px-2 rounded-lg even:bg-darkred-light_gray grid grid-cols-2">
+                        class="py-1 px-2 rounded-lg even:bg-brand-subtle grid grid-cols-2">
                         <div>
                             {{ value.name }}:
                         </div>
@@ -98,15 +98,15 @@ const props = defineProps({
 
             </div>
 
-            <div v-if="props.entity.price || props.entity.rarity" class="p-1 w-full rounded-lg bg-darkred-light text-darkred-dark flex-col flex-wrap gap-1">
+            <div v-if="props.entity.price || props.entity.rarity" class="p-1 w-full rounded-lg bg-brand-surface-inverted text-brand-ink flex-col flex-wrap gap-1">
 
                 <div v-if="props.entity.price"
-                    class="rounded-lg odd:bg-darkred-light even:bg-darkred-light_gray py-1 px-2">
+                    class="rounded-lg odd:bg-brand-surface-inverted even:bg-brand-subtle py-1 px-2">
                     Ціна: {{ props.entity.price }}
                 </div>
 
                 <div v-if="props.entity.rarity"
-                    class="rounded-lg odd:bg-darkred-light even:bg-darkred-light_gray py-1 px-2">
+                    class="rounded-lg odd:bg-brand-surface-inverted even:bg-brand-subtle py-1 px-2">
                     Рідкість: {{ props.entity.rarity }}
                 </div>
 

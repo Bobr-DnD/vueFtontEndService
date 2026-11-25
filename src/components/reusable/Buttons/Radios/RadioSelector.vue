@@ -11,10 +11,10 @@ const selected = defineModel({ type: [String, Number, null], default: null });
 </script>
 
 <template>
-    <div class="radio-inputs bg-darkred-dark_gray">
+    <div class="radio-inputs bg-brand-surface">
         <label class="radio" v-for="radio in props.radios" :key="radio.id">
             <input type="radio" :name="groupName" class="peer" :value="radio.id" v-model="selected">
-            <span class="name text-darkred-light peer-checked:bg-orange-orange peer-checked:font-semibold">{{
+            <span class="name text-brand-text peer-checked:bg-state-warning peer-checked:font-semibold">{{
                 radio.label }}</span>
         </label>
     </div>

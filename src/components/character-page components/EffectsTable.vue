@@ -30,8 +30,8 @@ const props = defineProps({
 <template>
     <div class="space-y-2 font-univers">
 
-        <div class="grid px-4 py-2 gap-2 justify-items-center items-center bg-darkred-dark_gray
-                border-darkred-gray rounded-xl shadow-sm text-darkred-light"
+        <div class="grid px-4 py-2 gap-2 justify-items-center items-center bg-brand-surface
+                border-brand-muted rounded-xl shadow-sm text-brand-text"
             :class="props.removable || props.addable ? 'grid-cols-[1fr_1fr_40px]' : 'grid-cols-[1fr_1fr]'">
             <div>
                 Назва
@@ -42,11 +42,11 @@ const props = defineProps({
         </div>
 
         <div v-for="effect in props.effects" :key=effect.id class="grid gap-2 px-4 py-2 justify-items-center items-center
-         bg-darkred-dark_gray  border-darkred-gray rounded-xl shadow-sm text-darkred-light"
+         bg-brand-surface  border-brand-muted rounded-xl shadow-sm text-brand-text"
             :class="[
                 props.removable || props.addable ? 'grid-cols-[1fr_1fr_40px]' : 'grid-cols-[1fr_1fr]',
-                props.removable ? 'border-l-4 border-l-greenish-mid' : '',
-                props.addable ? 'border-l-4 border-l-darkred-gray' : ''
+                props.removable ? 'border-l-4 border-l-state-success-accent' : '',
+                props.addable ? 'border-l-4 border-l-brand-muted' : ''
             ]">
 
             <div class="text-lg font-semibold">
@@ -57,7 +57,7 @@ const props = defineProps({
                 {{ effect.description }}
             </div>
 
-            <DeleteButton @click="props.callback_remove(effect)" v-if="props.removable" class="bg-darkred-red" />
+            <DeleteButton @click="props.callback_remove(effect)" v-if="props.removable" />
 
             <AddButton @click="props.callback_add(effect)" v-if="props.addable" />
         </div>

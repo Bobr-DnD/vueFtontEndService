@@ -4,8 +4,8 @@ import { addRow, removeRow, addRows, removeRows } from '/utils/entityHelper';
 import { notify } from '/utils/notification';
 import { groupById } from '/utils/entityHelper';
 
-import ButtonRedHideFunction from '../reusable/Buttons/ButtonRedHideFunction.vue';
-import CloseButtonRedBG from '../reusable/Buttons/CloseButtonRedBG.vue';
+import ButtonHideFunction from '../reusable/Buttons/ButtonHideFunction.vue';
+import CloseButtonBackground from '../reusable/Buttons/CloseButtonBackground.vue';
 import AddButton from '../reusable/Buttons/AddButton.vue';
 import EntityRowView from './EntityRows/EntityRowView.vue';
 import ModalOpenButton from '../reusable/Buttons/ModalOpenButton.vue';
@@ -106,7 +106,7 @@ function getFilteredSessionEntities(type) {
 <template>
 
     <section v-for="type in types" :key="type.id" class="w-full flex flex-col gap-1 items-center justify-center">
-        <ButtonRedHideFunction class="w-full" @click="type.hidden = !type.hidden" :text="type.name"
+        <ButtonHideFunction class="w-full" @click="type.hidden = !type.hidden" :text="type.name"
             :mainIcon="type.icon" :hidden="type.hidden" />
 
         <div v-if="!type.hidden" class="w-full flex gap-2 font-gothic">
@@ -126,12 +126,12 @@ function getFilteredSessionEntities(type) {
         </div>
 
         <div v-if="!type.modal_hidden" @click="type.modal_hidden = true"
-            class="w-full p-2 fixed inset-0 flex flex-col gap-1 items-center justify-center z-50 bg-darkred-dark/50 md:hover:cursor-pointer text-darkred-light">
+            class="w-full p-2 fixed inset-0 flex flex-col gap-1 items-center justify-center z-50 bg-brand-base/50 md:hover:cursor-pointer text-brand-text">
 
             <div @click.stop
-                class="max-w-[480px] max-h-[680px] h-90% w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl border-2 border-darkred-dark bg-darkred-dark_gray text-darkred-light shadow-xl space-y-2 relative font-gothic md:hover:cursor-default">
+                class="max-w-[480px] max-h-[680px] h-90% w-full mx-2 p-2 grid grid-cols-1 gap-2 rounded-xl border-2 border-brand-base bg-brand-surface text-brand-text shadow-xl space-y-2 relative font-gothic md:hover:cursor-default">
 
-                <CloseButtonRedBG @click="type.modal_hidden = true" />
+                <CloseButtonBackground @click="type.modal_hidden = true" />
 
                 <div v-if="!type.hidden" class="w-[85%] flex gap-2">
                     <SearchInputBlack class="w-full" v-model:searchQuery="type.searchGlobal" />
@@ -149,7 +149,7 @@ function getFilteredSessionEntities(type) {
 
                 <div class="max-h-[680px] overflow-y-auto auto-hide-scroll flex flex-col gap-2">
                     <div v-for="entity in getFilteredSessionEntities(type)" :key="entity.name"
-                        class="grid grid-cols-[1fr_100px_64px] items-center px-2 py-1 rounded-lg font-univers text-lg odd:bg-darkred-gray">
+                        class="grid grid-cols-[1fr_100px_64px] items-center px-2 py-1 rounded-lg font-univers text-lg odd:bg-brand-muted">
                         <div>
                             {{ entity.name }}
                         </div>

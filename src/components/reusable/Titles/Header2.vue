@@ -10,5 +10,5 @@ const props = defineProps({
 </script>
 
 <template>
-    <h1 class="text-xl font-gothic">{{ props.label }}</h1>
+    <h1 class="text-xl text-brand-text font-gothic">{{ props.label }}</h1>
 </template>

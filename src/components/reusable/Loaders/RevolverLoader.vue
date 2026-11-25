@@ -166,8 +166,10 @@
 </style>
 
 <template>
-  <div class="loader">
-    <div class="inner">
+  <div class="relative w-56 h-56">
+    <div class="loader">
+      <div class="inner">
+      </div>
     </div>
   </div>
 </template>

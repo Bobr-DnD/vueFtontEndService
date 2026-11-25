@@ -1,13 +1,13 @@
 <script setup>
 import { notifications, removeNotification } from '/utils/notification'
-import CloseButtonRedBG from './Buttons/CloseButtonRedBG.vue'
+import CloseButtonBackground from './Buttons/CloseButtonBackground.vue'
 import { CheckCircleIcon } from '@heroicons/vue/24/solid'
 
 const typeStyles = {
-    success: 'border-greenish-dark',
-    error: 'border-darkred-red',
-    warning: 'border-orange-orange/90',
-    info: 'border-darkred-gray'
+    success: 'border-state-success',
+    error: 'border-state-error',
+    warning: 'border-state-warning/90',
+    info: 'border-brand-muted'
 }
 
 const typeMessage = {
@@ -28,13 +28,13 @@ const typeMessage = {
             <template v-for="n in notifications" :key="n.id">
 
                 <div v-if="n.type === 'sync-success'"
-                    class="fade-opacity-only pointer-events-none rounded-full p-2 bg-darkred-dark/80 border-2 border-greenish-mid shadow-xl backdrop-blur-md">
-                    <CheckCircleIcon class="w-6 h-6 text-greenish-mid" />
+                    class="fade-opacity-only pointer-events-none rounded-full p-2 bg-brand-base/80 border-2 border-state-success-accent shadow-xl backdrop-blur-md">
+                    <CheckCircleIcon class="w-6 h-6 text-state-success-accent" />
                 </div>
 
                 <div v-else :class="[
                     'pointer-events-auto rounded-xl p-4 shadow-xl border-2 w-full',
-                    'bg-darkred-dark text-darkred-light font-gothic text-base',
+                    'bg-brand-base text-brand-text font-gothic text-base',
                     'backdrop-blur-md transition-all duration-300',
                     'grid grid-cols-[1fr_36px] gap-3 items-center',
                     typeStyles[n.type] || typeStyles.info
@@ -50,7 +50,7 @@ const typeMessage = {
                         </div>
                     </div>
 
-                    <CloseButtonRedBG @click="removeNotification(n.id)" />
+                    <CloseButtonBackground @click="removeNotification(n.id)" />
 
                 </div>
 

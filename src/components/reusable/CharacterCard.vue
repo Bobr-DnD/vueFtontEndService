@@ -22,7 +22,7 @@ const sessionId = useRoute().params.sessionId
 
 <template>
     <div
-        class="rounded-xl border-4 border-darkred-dark font-gothic text-lg h-fit min-h-96 w-full max-w-sm flex flex-col gap-3">
+        class="rounded-xl border-4 border-brand-base font-gothic text-lg text-brand-text h-fit min-h-96 w-full max-w-sm flex flex-col gap-3">
         <div class="w-full flex flex-col items-center gap-3">
 
             <RouterLink v-if="props.routing" :to="'/session/' + sessionId + '/character/' + props.character.id"
@@ -32,7 +32,7 @@ const sessionId = useRoute().params.sessionId
                     alt="Character image" />
 
                 <span class="absolute top-2 right-2">
-                    <div :class="props.online ? 'bg-greenish-dark' : 'bg-darkred-red'"
+                    <div :class="props.online ? 'bg-state-success' : 'bg-brand-accent'"
                         class="w-7 h-7 border-1 rounded-full">
                     </div>
                 </span>
@@ -44,14 +44,14 @@ const sessionId = useRoute().params.sessionId
                     alt="Character image" />
 
                 <span class="absolute top-2 right-2">
-                    <div :class="props.online ? 'bg-greenish-dark' : 'bg-darkred-red'"
+                    <div :class="props.online ? 'bg-state-success' : 'bg-brand-accent'"
                         class="w-7 h-7 border-1 rounded-full">
                     </div>
                 </span>
             </div>
 
             <RouterLink v-if="props.routing" :to="'/session/' + sessionId + '/character/' + props.character.id"
-                class="font-semibold text-2xl bg-darkred-red text-darkred-light rounded-lg p-2">{{ props.character.name
+                class="font-semibold text-2xl bg-brand-accent text-brand-ink rounded-lg p-2">{{ props.character.name
                 }}</RouterLink>
 
             <div v-else class="font-semibold text-2xl">{{ props.character.name }}</div>
@@ -60,7 +60,7 @@ const sessionId = useRoute().params.sessionId
 
         <div class="w-full flex justify-center">
             <div
-                class="grid auto-rows-max w-full max-w-xs grid-cols-2 items-center justify-items-center mb-3 border-y-2 border-darkred-red rounded-md">
+                class="grid auto-rows-max w-full max-w-xs grid-cols-2 items-center justify-items-center mb-3 border-y-2 border-brand-accent rounded-md">
                 <div>Рівень: {{ props.character.level }}</div>
                 <div>Досвід: {{ props.character.experience }}/{{ props.character.experienceToLevelUp }}</div>
                 <div class="col-span-2" v-for="h in props.character.health" :key="h.id">{{ h.name }}: {{ h.value
@@ -70,12 +70,12 @@ const sessionId = useRoute().params.sessionId
         </div>
 
 
-        <div v-if="!props.routing" class="border-b-2 border-darkred-bright rounded-lg mb-4">
-            <div class="text-center border-t-2 border-darkred-bright rounded-lg">Характеристики:</div>
+        <div v-if="!props.routing" class="border-b-2 border-brand-accent-hover rounded-lg mb-4">
+            <div class="text-center border-t-2 border-brand-accent-hover rounded-lg">Характеристики:</div>
             <div class="flex flex-wrap items-center justify-start">
                 <div class="p-2 grow" v-for="c, index in props.character.characteristics"
                     :key="Math.random().toString(24).slice(2)">
-                    <div class="p-1 text-center border-2 rounded-md border-darkred-dark">{{ index }} - {{ c }}</div>
+                    <div class="p-1 text-center border-2 rounded-md border-brand-base">{{ index }} - {{ c }}</div>
                 </div>
             </div>
         </div>

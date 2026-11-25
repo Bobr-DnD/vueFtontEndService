@@ -75,10 +75,10 @@ async function sessionLogin() {
 <template>
     <div class="flex flex-col items-center justify-center min-h-lg">
         <div
-            class="max-w-sm w-full rounded-xl shadow-lg overflow-hidden border-4 border-darkred-red bg-darkred-dark">
+            class="max-w-sm w-full rounded-xl shadow-lg overflow-hidden border-4 border-brand-accent bg-brand-base">
             <div class="relative">
 
-                <img class="w-full h-96 object-cover object-top border-darkred-light"
+                <img class="w-full h-96 object-cover object-top border-brand-surface-inverted"
                     :src="props.image ? props.image : 'https://placehold.co/400x400?text=Session'"
                     alt="Session image" />
 
@@ -87,8 +87,8 @@ async function sessionLogin() {
 
             </div>
 
-            <div class="p-4 space-y-4 text-darkred-light">
-                <h2 class="text-2xl tracking-wide text-center text-darkred-light font-gothic drop-shadow-md">
+            <div class="p-4 space-y-4 text-brand-text">
+                <h2 class="text-2xl tracking-wide text-center text-brand-text font-gothic drop-shadow-md">
                     {{ props.name }}
                 </h2>
 
@@ -97,12 +97,12 @@ async function sessionLogin() {
                 </form>
 
                 <button @click="toggleMode"
-                    class="w-full text-md font-medium font-gothic py-2 px-3 rounded-lg bg-darkred-red md:hover:bg-darkred-bright transition-colors  tracking-wide shadow-md">
+                    class="w-full text-md font-medium font-gothic py-2 px-3 rounded-lg bg-brand-accent md:hover:bg-brand-accent-hover transition-colors  tracking-wide shadow-md">
                     Режим: <span class="capitalize">{{ mode }}</span>
                 </button>
 
                 <div @click="sessionLogin"
-                    class="w-full text-lg font-medium font-gothic cursor-pointer inline-flex items-center justify-center py-2.5 px-4 rounded-lg bg-darkred-red md:hover:bg-darkred-bright active:bg-darkred-dark text-white tracking-wide shadow-lg transition-all duration-200 ease-in-out">
+                    class="w-full text-lg font-medium font-gothic cursor-pointer inline-flex items-center justify-center py-2.5 px-4 rounded-lg bg-brand-accent md:hover:bg-brand-accent-hover active:bg-brand-base text-white tracking-wide shadow-lg transition-all duration-200 ease-in-out">
                     {{ alreadyAuthed ? 'Продовжити' : 'Зайти' }}
                 </div>
             </div>

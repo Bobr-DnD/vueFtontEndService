@@ -1,15 +1,17 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router';
 import RepositoryFactory from '@http/RepositoryFactory';
 import { asyncHandler } from '/utils/asyncHandler';
 import { socket } from '@ws/webSocket';
+import { useSessionStore } from '@/stores/sessionStore';
 
 import CardsLoader from '@/components/reusable/Loaders/CardsLoader.vue';
 import SessionViewNavigtaion from '@/components/navigations/SessionViewNavigtaion.vue';
 import characterCard from '@/components/reusable/CharacterCard.vue';
 
 const sessionId = useRoute().params.sessionId
+const sessionStore = useSessionStore()
 
 const session = ref({})
 const isLoading = ref(true)
@@ -28,18 +30,24 @@ onMounted(async () => {
   session.value = res.data
 })
 
-socket.on('session:update', (session) => {
+function onSessionUpdate(update) {
   charactersOnlineIds.value = [];
-  const room = session.room;
+  const room = update.room;
 
   if (room) {
-    charactersOnlineIds.value = room.members.filter(el => el[1].role === 'user' && el[1].userId).map(el => el[1].userId)
+    charactersOnlineIds.value = room.members.filter(el => el[1].userId).map(el => el[1].userId)
   }
+}
+
+socket.on('session:update', onSessionUpdate)
+
+onBeforeUnmount(() => {
+  socket.off('session:update', onSessionUpdate)
 })
 </script>
 
 <template>
-  <SessionViewNavigtaion />
+  <SessionViewNavigtaion v-if="!isLoading && !sessionStore.isLoading" />
   <div v-if="!isLoading" class="flex gap-8 items-start justify-center flex-wrap mt-5">
     <characterCard v-for="character in session.characters" :key="character.id" :character="character"
       :routing="true" :online="charactersOnlineIds.includes(character.id)" />

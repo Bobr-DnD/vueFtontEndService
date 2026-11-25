@@ -109,7 +109,7 @@ onBeforeUnmount(() => {
 <template>
     <MasterPageNavigation />
 
-    <section class="p-4 flex flex-col gap-4 font-gothic text-darkred-dark">
+    <section class="p-4 flex flex-col gap-4 font-gothic text-brand-text">
 
         <Header1 label="Логи вебсокетів" />
 
@@ -133,29 +133,29 @@ onBeforeUnmount(() => {
             </label>
         </div>
 
-        <div class="w-full flex-1 rounded-xl border-2 border-darkred-dark_gray overflow-hidden flex flex-col">
+        <div class="w-full flex-1 rounded-xl border-2 border-brand-surface overflow-hidden flex flex-col">
 
             <div v-if="isLoading && !logs.length" class="w-full flex items-center justify-center p-8">
                 <DiceLoader/>
             </div>
 
-            <div v-else-if="!logs.length" class="w-full flex items-center justify-center p-8 text-darkred-light_gray">
+            <div v-else-if="!logs.length" class="w-full flex items-center justify-center p-8 text-brand-faint">
                 Логів не знайдено
             </div>
 
             <div v-else class="w-full overflow-auto max-h-[70vh]">
                 <table class="w-full text-left text-sm font-univers border-collapse">
-                    <thead class="sticky top-0 bg-darkred-light">
+                    <thead class="sticky top-0 bg-brand-surface-inverted">
                         <tr>
-                            <th class="p-2 border-b border-darkred-gray">Час</th>
-                            <th class="p-2 border-b border-darkred-gray">Персонаж</th>
-                            <th class="p-2 border-b border-darkred-gray">Роль</th>
-                            <th class="p-2 border-b border-darkred-gray">Подія</th>
-                            <th class="p-2 border-b border-darkred-gray">Дані</th>
+                            <th class="p-2 border-b border-brand-muted">Час</th>
+                            <th class="p-2 border-b border-brand-muted">Персонаж</th>
+                            <th class="p-2 border-b border-brand-muted">Роль</th>
+                            <th class="p-2 border-b border-brand-muted">Подія</th>
+                            <th class="p-2 border-b border-brand-muted">Дані</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="log in logs" :key="log.id" class="odd:bg-darkred-dark_gray/40">
+                        <tr v-for="log in logs" :key="log.id" class="odd:bg-brand-surface/40">
                             <td class="p-2 align-top whitespace-nowrap">{{ formatTime(log.createdAt) }}</td>
                             <td class="p-2 align-top whitespace-nowrap">{{ log.characterName || log.characterId || '—' }}</td>
                             <td class="p-2 align-top whitespace-nowrap">{{ log.role || '—' }}</td>

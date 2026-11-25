@@ -15,6 +15,7 @@ import PerksPageEditor from "@/views/PerksPageEditor.vue";
 import LogsPageEditor from "@/views/LogsPageEditor.vue";
 import AdminFightEditor from "@/views/AdminFightEditor.vue";
 import FightPageView from "@/views/FightPageView.vue";
+import ColorSchemaTestView from "@/views/ColorSchemaTestView.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -101,6 +102,11 @@ const router = createRouter({
                     component: FightPageView
                 }
             ]
+        },
+        {
+            path: '/theme-test',
+            name: 'theme_test',
+            component: ColorSchemaTestView
         },
         {
             path: '/:catchAll(.*)',

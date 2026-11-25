@@ -7,7 +7,7 @@ import useEntityEditor from '@utils/useEntityEditor';
 import { useSessionStore } from '@/stores/sessionStore';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
-import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
+import SelectorButton from '@/components/reusable/Buttons/SelectorButton.vue';
 import PillSelectorButton from '@/components/reusable/Buttons/PillSelectorButton.vue';
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue'
 import InputTextReactive from '@/components/reusable/Inputs/InputTextReactive.vue';
@@ -301,14 +301,14 @@ const canSave = computed(() => unsavedChanges.value)
 
 <template>
 
-    <MasterPageNavigation />
+    <MasterPageNavigation v-if="!store.isLoading" />
 
     <section v-if="!store.isLoading" class="p-2 grid grid-cols-[25%_1fr] overflow-hidden">
 
         <section class="h-full overflow-y-auto">
 
             <div class="p-2 w-full flex flex-col justify-start gap-2 font-gothic overflow-y-auto">
-                <GraySelectorButton v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id" :id="tab.id"
+                <SelectorButton v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id" :id="tab.id"
                     :label="tab.label" :active="activeTab === tab.id ? true : false" />
                 <RejectButtonWithText @click="deleteCharacter" class="w-full" text="Видалити персонажа"
                     v-if="selectedCharacter.id !== 'new'" />
@@ -324,12 +324,12 @@ const canSave = computed(() => unsavedChanges.value)
         <section class="m-4 py-4 h-full space-y-2 overflow-y-auto">
 
             <div class="flex items-center justify-center space-x-4 m-2">
-                <GraySelectorButton v-for="character in store.session.characters" :key="character.id"
+                <SelectorButton v-for="character in store.session.characters" :key="character.id"
                     @click="selectCharacter(character.id)" :id="character.id" :label="character.name"
                     :active="selectedCharacter.id === character.id ? true : false" />
-                <PlusButton @click="selectCharacter('new')" class="w-16 h-14 border-4 border-darkred-dark rounded-lg
-           md:hover:bg-darkred-gray group"
-                    :class="selectedCharacter.id === 'new' ? 'bg-darkred-gray text-darkred-light' : 'bg-darkred-light'" />
+                <PlusButton @click="selectCharacter('new')" class="w-16 h-14 border-4 border-brand-base rounded-lg
+           md:hover:bg-brand-muted group"
+                    :class="selectedCharacter.id === 'new' ? 'bg-brand-muted text-brand-text' : 'bg-brand-surface-inverted'" />
             </div>
 
             <div id="base" v-if="activeTab === 'base'" class="grid grid-cols-2 auto-rows-min gap-4">
@@ -412,18 +412,18 @@ const canSave = computed(() => unsavedChanges.value)
 
             <div id="health" v-if="activeTab === 'health'" class="grid gap-y-4 overflow-y-auto">
 
-                <div class="p-3 rounded-xl bg-greenish-dark/10 border-2 border-greenish-mid/50 space-y-3">
+                <div class="p-3 rounded-xl bg-state-success/10 border-2 border-state-success-accent/50 space-y-3">
 
                     <div class="flex items-center gap-2 justify-center">
-                        <HeartIcon class="w-6 h-6 text-greenish-mid" />
+                        <HeartIcon class="w-6 h-6 text-state-success-accent" />
                         <Header1 label="Поля здоров'я персонажа:" />
                         <span
-                            class="text-sm px-2 py-0.5 rounded-full bg-greenish-mid text-darkred-dark font-semibold">{{
+                            class="text-sm px-2 py-0.5 rounded-full bg-state-success-accent text-brand-ink font-semibold">{{
                                 selectedCharacter.health.length }}</span>
                     </div>
 
                     <Header1 v-if="!checkObjectFieldExisting(selectedCharacter.health)"
-                        class="justify-self-center text-lg text-darkred-light_gray" label="Полів ще немає" />
+                        class="justify-self-center text-lg text-brand-faint" label="Полів ще немає" />
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
                         <HealthFieldsEditor v-for="field in selectedCharacter.health" :key="field.id"
@@ -433,10 +433,10 @@ const canSave = computed(() => unsavedChanges.value)
 
                 </div>
 
-                <div class="p-3 rounded-xl bg-orange-gold/10 border-2 border-orange-gold/50 space-y-3">
+                <div class="p-3 rounded-xl bg-state-new/10 border-2 border-state-new/50 space-y-3">
 
                     <div class="flex items-center gap-2 justify-center">
-                        <PlusCircleIcon class="w-6 h-6 text-orange-gold" />
+                        <PlusCircleIcon class="w-6 h-6 text-state-new" />
                         <Header1 label="Створити нове поле:" />
                     </div>
 
@@ -448,52 +448,52 @@ const canSave = computed(() => unsavedChanges.value)
 
             <div id="effects" v-if="activeTab === 'effects'" class="grid gap-x-4 gap-y-3 overflow-y-auto">
 
-                <div class="p-3 rounded-xl bg-greenish-dark/10 border-2 border-greenish-mid/50 space-y-2">
+                <div class="p-3 rounded-xl bg-state-success/10 border-2 border-state-success-accent/50 space-y-2">
 
                     <div class="flex items-center gap-2 justify-center">
-                        <CheckBadgeIcon class="w-6 h-6 text-greenish-mid" />
+                        <CheckBadgeIcon class="w-6 h-6 text-state-success-accent" />
                         <Header1 label="Ефекти персонажа:" />
                         <span
-                            class="text-sm px-2 py-0.5 rounded-full bg-greenish-mid text-darkred-dark font-semibold">{{
+                            class="text-sm px-2 py-0.5 rounded-full bg-state-success-accent text-brand-ink font-semibold">{{
                                 filteredCharacterEffects.length }}</span>
                     </div>
 
                     <div class="flex gap-2">
                         <input v-model="searchQuery.characterEffects" placeholder="Пошук ..."
-                            class="h-12 w-full p-2 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+                            class="h-12 w-full p-2 rounded-lg bg-brand-surface text-brand-text" />
 
                         <RejectButtonWithText v-if="searchQuery.characterEffects"
                             @click="searchQuery.characterEffects = ''" text="Очистити" />
                     </div>
 
                     <Header1 v-if="!filteredCharacterEffects.length"
-                        class="justify-self-center text-lg text-darkred-dark_gray" label="Ефектів немає" />
+                        class="justify-self-center text-lg text-brand-surface" label="Ефектів немає" />
 
                     <EffectsTable v-else :effects="filteredCharacterEffects" :removable="true"
                         :callback_remove="removeEffect" />
 
                 </div>
 
-                <div class="p-3 rounded-xl bg-darkred-dark_gray/40 border-2 border-darkred-gray/40 space-y-2">
+                <div class="p-3 rounded-xl bg-brand-surface/40 border-2 border-brand-muted/40 space-y-2">
 
                     <div class="flex items-center gap-2 justify-center">
-                        <PlusCircleIcon class="w-6 h-6 text-darkred-light_gray" />
+                        <PlusCircleIcon class="w-6 h-6 text-brand-faint" />
                         <Header1 label="Усі ефекти:" />
                         <span
-                            class="text-sm px-2 py-0.5 rounded-full bg-darkred-gray text-darkred-dark font-semibold">{{
+                            class="text-sm px-2 py-0.5 rounded-full bg-brand-muted text-brand-ink font-semibold">{{
                                 filteredSessionEffects.length }}</span>
                     </div>
 
                     <div class="flex gap-2">
                         <input v-model="searchQuery.sessionEffects" placeholder="Пошук ..."
-                            class="h-12 w-full p-2 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+                            class="h-12 w-full p-2 rounded-lg bg-brand-surface text-brand-text" />
 
                         <RejectButtonWithText v-if="searchQuery.sessionEffects"
                             @click="searchQuery.sessionEffects = ''" text="Очистити" />
                     </div>
 
                     <Header1 v-if="!filteredSessionEffects.length"
-                        class="justify-self-center text-lg text-darkred-light_gray" label="Ефектів немає" />
+                        class="justify-self-center text-lg text-brand-faint" label="Ефектів немає" />
 
                     <EffectsTable v-else :effects="filteredSessionEffects" :addable="true"
                         :callback_add="addEffect" />
@@ -507,18 +507,18 @@ const canSave = computed(() => unsavedChanges.value)
 
                 <div class="w-full col-span-full flex gap-2 justify-center">
 
-                    <GraySelectorButton v-for="type in types.perks" :label="type.name" :key="type.id" :id="type.id"
+                    <SelectorButton v-for="type in types.perks" :label="type.name" :key="type.id" :id="type.id"
                         :active="!type.hidden" @click="showType('perks', type.id)" />
                 </div>
 
                 <div
-                    class="col-span-full grid grid-cols-3 auto-rows-min gap-x-4 gap-y-3 p-3 rounded-xl bg-darkred-dark_gray/40 border-2 border-darkred-gray/40">
+                    class="col-span-full grid grid-cols-3 auto-rows-min gap-x-4 gap-y-3 p-3 rounded-xl bg-brand-surface/40 border-2 border-brand-muted/40">
 
                     <div class="col-span-full flex items-center gap-2 justify-center">
-                        <CheckBadgeIcon class="w-6 h-6 text-greenish-mid" />
+                        <CheckBadgeIcon class="w-6 h-6 text-state-success-accent" />
                         <Header1 label="Перки:" />
                         <span
-                            class="text-sm px-2 py-0.5 rounded-full bg-darkred-gray text-darkred-dark font-semibold">{{
+                            class="text-sm px-2 py-0.5 rounded-full bg-brand-muted text-brand-ink font-semibold">{{
                                 filteredPerks.length }}</span>
                     </div>
 
@@ -530,14 +530,14 @@ const canSave = computed(() => unsavedChanges.value)
 
                     <div class="col-span-3 flex gap-2">
                         <input v-model="searchQuery.perks" placeholder="Пошук ..."
-                            class="h-12 w-full p-2 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+                            class="h-12 w-full p-2 rounded-lg bg-brand-surface text-brand-text" />
 
                         <RejectButtonWithText v-if="searchQuery.perks" @click="searchQuery.perks = ''"
                             text="Очистити" />
                     </div>
 
                     <Header1 v-if="!filteredPerks.length"
-                        class="col-span-full justify-self-center text-lg text-darkred-light_gray"
+                        class="col-span-full justify-self-center text-lg text-brand-faint"
                         label="Перків не знайдено" />
 
                     <PerkRowView v-for="perk in filteredPerks" :key="perk.id" :perk="perk"
@@ -552,31 +552,31 @@ const canSave = computed(() => unsavedChanges.value)
                 class="flex flex-col items-center gap-y-4 overflow-y-auto">
 
                 <div class="w-full flex gap-2 justify-center">
-                    <GraySelectorButton v-for="type in types.inventory" :key="type.id" :label="type.name" :id="type.id"
+                    <SelectorButton v-for="type in types.inventory" :key="type.id" :label="type.name" :id="type.id"
                         :active="!type.hidden" @click="showType('inventory', type.id)" />
                 </div>
 
-                <div class="w-full flex flex-col gap-2 p-3 rounded-xl bg-greenish-dark/10 border-2 border-greenish-mid/50">
+                <div class="w-full flex flex-col gap-2 p-3 rounded-xl bg-state-success/10 border-2 border-state-success-accent/50">
 
                     <div class="w-full flex items-center gap-2 justify-center">
-                        <CheckBadgeIcon class="w-6 h-6 text-greenish-mid" />
+                        <CheckBadgeIcon class="w-6 h-6 text-state-success-accent" />
                         <Header1 label="Інвентар персонажа:" />
                         <span
-                            class="text-sm px-2 py-0.5 rounded-full bg-greenish-mid text-darkred-dark font-semibold">{{
+                            class="text-sm px-2 py-0.5 rounded-full bg-state-success-accent text-brand-ink font-semibold">{{
                                 filteredCharacterEntities.length }}</span>
                     </div>
 
                     <div class="flex gap-2">
 
                         <input v-model="searchQuery.characterEntity" placeholder="Пошук ..."
-                            class="h-12 w-full p-2 col-span-3 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+                            class="h-12 w-full p-2 col-span-3 rounded-lg bg-brand-surface text-brand-text" />
 
                         <RejectButtonWithText v-if="searchQuery.characterEntity"
                             @click="searchQuery.characterEntity = ''" text="Очистити" />
                     </div>
 
                     <Header1 v-if="!filteredCharacterEntities.length"
-                        class="self-center text-lg text-darkred-light_gray" label="Інвентар пустий" />
+                        class="self-center text-lg text-brand-faint" label="Інвентар пустий" />
 
                     <div class="w-full grid grid-cols-3 gap-2 max-h-[1024px] overflow-y-auto md:auto-hide-scroll">
 
@@ -586,27 +586,27 @@ const canSave = computed(() => unsavedChanges.value)
                     </div>
                 </div>
 
-                <div class="w-full flex flex-col gap-2 p-3 rounded-xl bg-darkred-dark_gray/40 border-2 border-darkred-gray/40">
+                <div class="w-full flex flex-col gap-2 p-3 rounded-xl bg-brand-surface/40 border-2 border-brand-muted/40">
 
                     <div class="w-full flex items-center gap-2 justify-center">
-                        <PlusCircleIcon class="w-6 h-6 text-darkred-light_gray" />
+                        <PlusCircleIcon class="w-6 h-6 text-brand-faint" />
                         <Header1 label="Весь інвентар:" />
                         <span
-                            class="text-sm px-2 py-0.5 rounded-full bg-darkred-gray text-darkred-dark font-semibold">{{
+                            class="text-sm px-2 py-0.5 rounded-full bg-brand-muted text-brand-ink font-semibold">{{
                                 filteredSessionEntities.length }}</span>
                     </div>
 
                     <div class="flex gap-2">
 
                         <input v-model="searchQuery.sessionEntity" placeholder="Пошук ..."
-                            class="h-12 w-full p-2 col-span-3 rounded-lg bg-darkred-dark_gray text-darkred-light" />
+                            class="h-12 w-full p-2 col-span-3 rounded-lg bg-brand-surface text-brand-text" />
 
                         <RejectButtonWithText v-if="searchQuery.sessionEntity" @click="searchQuery.sessionEntity = ''"
                             text="Очистити" />
                     </div>
 
                     <Header1 v-if="!filteredSessionEntities.length"
-                        class="self-center text-lg text-darkred-light_gray" label="Інвентар пустий" />
+                        class="self-center text-lg text-brand-faint" label="Інвентар пустий" />
 
                     <div class="w-full grid grid-cols-3 gap-2 max-h-[512px] overflow-y-auto md:auto-hide-scroll">
 

@@ -29,8 +29,8 @@ const barStyle = computed(() => ({
 </script>
 
 <template>
-    <div class="p-2 border-2 rounded-md border-darkred-dark">
-        <div class="text-md mb-1 text-center font-medium font-gothic">
+    <div class="p-2 border-2 rounded-md border-brand-muted">
+        <div class="text-md mb-1 text-brand-text text-center font-medium font-gothic">
             {{ text }}: {{ props.value }}/{{ props.valueMax }}
         </div>
 

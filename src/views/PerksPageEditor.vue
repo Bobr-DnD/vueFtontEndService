@@ -23,7 +23,7 @@ import ArraySingleStringForm from '@/components/reusable/Forms/ArraySingleString
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
-import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
+import SelectorButton from '@/components/reusable/Buttons/SelectorButton.vue';
 
 const sessionId = useRoute().params.sessionId
 const store = useSessionStore()
@@ -121,7 +121,7 @@ async function deletePerk() {
 
 <template>
 
-    <MasterPageNavigation />
+    <MasterPageNavigation v-if="!store.isLoading" />
 
     <section v-if="!store.isLoading"
         class="h-full p-2 grid grid-cols-[25%_1fr] gap-2 justify-start overflow-hidden font-gothic">
@@ -130,7 +130,7 @@ async function deletePerk() {
 
             <div class="w-full flex flex-col justify-start gap-2">
 
-                <GraySelectorButton class="w-full" v-for="type in tabs" :key="type.id" @click="activeTab = type.id"
+                <SelectorButton class="w-full" v-for="type in tabs" :key="type.id" @click="activeTab = type.id"
                     :id="type.id" :label="type.label" :active="activeTab === type.id ? true : false" />
 
             </div>
@@ -158,10 +158,10 @@ async function deletePerk() {
 
                 <div class="w-full flex flex-wrap justify-center items-center gap-2 justify-self-start">
 
-                    <GraySelectorButton class="w-full basis-32" @click="selectedType = ''" id="all" label="Всі"
+                    <SelectorButton class="w-full basis-32" @click="selectedType = ''" id="all" label="Всі"
                         :active="selectedType === '' ? true : false" />
 
-                    <GraySelectorButton class="w-full basis-32" v-for="type in store.session.perkTypes" :key="type.id"
+                    <SelectorButton class="w-full basis-32" v-for="type in store.session.perkTypes" :key="type.id"
                         @click="selectedType = type.id" :id="type.id" :label="type.name"
                         :active="selectedType === type.id ? true : false" />
 
@@ -173,13 +173,13 @@ async function deletePerk() {
 
                 <div class="grid grid-cols-4 gap-4 p-2 max-h-[512px] overflow-y-scroll auto-hide-scroll">
                     <div @click="selectPerk('new')"
-                        :class="selectedPerk.id === 'new' && 'outline outline-4 outline-offset-[-1px] outline-darkred-red'"
-                        class="border-8 border-darkred-dark bg-darkred-dark rounded-2xl flex justify-center items-center hover:cursor-pointer">
-                        <PlusButton class="w-20 text-darkred-light" />
+                        :class="selectedPerk.id === 'new' && 'outline outline-4 outline-offset-[-1px] outline-brand-accent'"
+                        class="p-1 rounded-2xl flex justify-center items-center hover:cursor-pointer">
+                        <PlusButton class="w-full h-full" />
                     </div>
 
                     <PerkTile v-for="perk in filteredPerks" :key="perk.id" :perk="perk" @click="selectPerk(perk.id)"
-                        :class="selectedPerk.id === perk.id && 'outline outline-4 outline-offset-[-1px] outline-darkred-red'" />
+                        :class="selectedPerk.id === perk.id && 'outline outline-4 outline-offset-[-1px] outline-brand-accent'" />
                 </div>
 
             </section>

@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --brand-page: 13 13 13;
+  --brand-base: 26 26 26;
+  --brand-ink: 26 26 26;
+  --brand-surface: 38 34 32;
+  --brand-muted: 138 129 120;
+  --brand-subtle: 201 194 184;
+  --brand-faint: 201 194 184;
+  --brand-accent: 166 28 28;
+  --brand-accent-hover: 230 57 70;
+  --brand-text: 242 233 228;
+  --brand-surface-inverted: 242 233 228;
+  --brand-accent-secondary: 64 32 26;
+  --brand-font-heading: 'Rubik';
+}
+
 nav {
   background-image: radial-gradient(rgba(255, 0, 0, 0.05) 1px, transparent 1px);
   background-size: 4px 4px;
@@ -11,6 +27,8 @@ html,
 body,
 #app {
   height: 100%;
+  background-color: rgb(var(--brand-page));
+  color: rgb(var(--brand-text));
 }
 #app {
   display: flex;
@@ -60,7 +78,7 @@ body,
 
 .auto-hide-scroll:hover,
 .auto-hide-scroll:focus-within {
-  scrollbar-color: #8E1616 rgba(255, 255, 255, 0);
+  scrollbar-color: rgb(var(--brand-accent)) rgba(255, 255, 255, 0);
 }
 
 .auto-hide-scroll::-webkit-scrollbar-thumb {

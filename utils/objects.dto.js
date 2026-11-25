@@ -49,11 +49,33 @@ export function toHealthObjectField(health) {
   }
 }
 
+export function toNewTheme(theme) {
+  return {
+    presetId: theme?.presetId ?? 'crimson-keep',
+    colors: {
+      page: theme?.colors?.page ?? '#0D0D0D',
+      base: theme?.colors?.base ?? '#1A1A1A',
+      ink: theme?.colors?.ink ?? '#1A1A1A',
+      surface: theme?.colors?.surface ?? '#262220',
+      muted: theme?.colors?.muted ?? '#8A8178',
+      subtle: theme?.colors?.subtle ?? '#C9C2B8',
+      faint: theme?.colors?.faint ?? '#C9C2B8',
+      accent: theme?.colors?.accent ?? '#A61C1C',
+      accentHover: theme?.colors?.accentHover ?? '#E63946',
+      text: theme?.colors?.text ?? '#F2E9E4',
+      surfaceInverted: theme?.colors?.surfaceInverted ?? '#F2E9E4',
+      accentSecondary: theme?.colors?.accentSecondary ?? '#40201A'
+    },
+    faviconUrl: theme?.faviconUrl ?? ''
+  }
+}
+
 export function toNewSession(session){
   return {
     id: session.id ?? 'new',
     name: session.name ?? '',
     image: session.image ?? '',
+    theme: toNewTheme(session.theme),
     customFields: session.customFields ?? [],
     notes: session.notes ?? '',
     entityTypes: session.entityTypes ?? [],

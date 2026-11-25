@@ -39,6 +39,7 @@ const value = computed({
 const active = ref(false)
 const pulseDirection = ref(null)
 const showHint = ref(false)
+const hintStyle = ref({})
 
 const totalCost = computed(() => value.value * -props.price)
 
@@ -81,13 +82,36 @@ function step(direction) {
     applyValue(clamp(value.value + direction))
 }
 
+// Positions the hint via a fixed rect instead of `absolute` inside the
+// component, since the picker can sit inside an `overflow-hidden` ancestor
+// (e.g. an accordion's collapse-animation clip) that would otherwise cut it off.
+function updateHintPosition() {
+    const rect = buttonEl.value?.getBoundingClientRect()
+    if (!rect) return
+    hintStyle.value = {
+        top: `${rect.top}px`,
+        left: `${rect.right}px`,
+        transform: 'translate(-100%, calc(-100% - 8px))'
+    }
+}
+
+function hideHint() {
+    showHint.value = false
+    if (hintTimeoutId) {
+        clearTimeout(hintTimeoutId)
+        hintTimeoutId = null
+    }
+    window.removeEventListener('scroll', updateHintPosition, true)
+    window.removeEventListener('resize', updateHintPosition)
+}
+
 function showHintTemporarily() {
     showHint.value = true
+    updateHintPosition()
+    window.addEventListener('scroll', updateHintPosition, true)
+    window.addEventListener('resize', updateHintPosition)
     if (hintTimeoutId) clearTimeout(hintTimeoutId)
-    hintTimeoutId = setTimeout(() => {
-        showHint.value = false
-        hintTimeoutId = null
-    }, 3000)
+    hintTimeoutId = setTimeout(hideHint, 3000)
 }
 
 function finalize() {
@@ -96,19 +120,21 @@ function finalize() {
     if (finalValue !== 0) emit('release', finalValue, finalValue * props.price)
 }
 
+function onOutsidePointerDown(e) {
+    if (buttonEl.value && !buttonEl.value.contains(e.target)) disarm()
+}
+
 function arm() {
     active.value = true
     showHintTemporarily()
+    window.addEventListener('pointerdown', onOutsidePointerDown, true)
 }
 
 function disarm() {
     if (!active.value) return
     active.value = false
-    showHint.value = false
-    if (hintTimeoutId) {
-        clearTimeout(hintTimeoutId)
-        hintTimeoutId = null
-    }
+    hideHint()
+    window.removeEventListener('pointerdown', onOutsidePointerDown, true)
     finalize()
 }
 
@@ -181,7 +207,8 @@ onMounted(() => {
 onBeforeUnmount(() => {
     buttonEl.value?.removeEventListener('wheel', onWheel)
     document.removeEventListener('keydown', onKeydown)
-    if (hintTimeoutId) clearTimeout(hintTimeoutId)
+    window.removeEventListener('pointerdown', onOutsidePointerDown, true)
+    hideHint()
     if (pulseTimeoutId) clearTimeout(pulseTimeoutId)
 })
 
@@ -195,39 +222,39 @@ const downIconStyle = computed(() => ({
 </script>
 
 <template>
-    <div class="w-full flex items-center justify-between gap-4 p-3 bg-darkred-dark_gray rounded-2xl select-none">
+    <div class="w-full flex items-center justify-between gap-4 p-3 bg-brand-surface rounded-2xl select-none">
 
         <div class="flex gap-1">
             <div class="text-3xl font-semibold font-univers tabular-nums"
-                :class="value > 0 ? 'text-greenish-light' : value < 0 ? 'text-darkred-red' : 'text-darkred-light'">
+                :class="value > 0 ? 'text-state-success-hover' : value < 0 ? 'text-brand-accent' : 'text-brand-text'">
                 {{ value > 0 ? `+${value}` : value }}
             </div>
 
             <div v-if="price" class="text-sm font-univers tabular-nums"
-                :class="totalCost > 0 ? 'text-greenish-light' : totalCost < 0 ? 'text-darkred-red' : 'text-darkred-light_gray'">
+                :class="totalCost > 0 ? 'text-state-success-hover' : totalCost < 0 ? 'text-brand-accent' : 'text-brand-faint'">
                 {{ totalCost > 0 ? `+${totalCost}` : totalCost }}
             </div>
         </div>
 
-        <div class="relative z-50">
-            <div v-if="showHint"
-                class="absolute bottom-full mb-2 right-0 w-40 max-w-[60vw] px-3 py-1.5 rounded-lg bg-darkred-dark text-darkred-light text-sm font-univers text-center shadow-lg z-10">
+        <Teleport to="body">
+            <div v-if="showHint" :style="hintStyle"
+                class="fixed w-40 max-w-[60vw] px-3 py-1.5 rounded-lg bg-brand-base text-brand-text text-sm font-univers text-center shadow-lg z-50">
                 Прокрути або проведи пальцем, тапни щоб підтвердити
             </div>
+        </Teleport>
 
+        <div>
             <button ref="buttonEl" type="button" :aria-pressed="active"
-                class="w-14 h-14 rounded-full shadow-lg flex flex-col items-center justify-center gap-0.5 bg-darkred-dark_gray border-2 transition-colors duration-150 md:hover:cursor-pointer"
-                :class="active ? 'border-greenish-light ring-4 ring-greenish-light/30 touch-none' : 'border-darkred-gray'"
+                class="w-14 h-14 relative z-50 rounded-full shadow-lg flex flex-col items-center justify-center gap-0.5 bg-brand-surface border-2 transition-colors duration-150 md:hover:cursor-pointer"
+                :class="active ? 'border-state-success-hover ring-4 ring-state-success-hover/30 touch-none' : 'border-brand-muted'"
                 @pointerdown="onPointerDown" @pointermove="onPointerMove" @pointerup="onPointerUp"
                 @pointercancel="onPointerCancel">
-                <ChevronUpIcon class="w-5 h-5 text-greenish-light transition-[filter] duration-100 ease-out"
+                <ChevronUpIcon class="w-5 h-5 text-state-success-hover transition-[filter] duration-100 ease-out"
                     :style="upIconStyle" />
-                <ChevronDownIcon class="w-5 h-5 text-darkred-red transition-[filter] duration-100 ease-out"
+                <ChevronDownIcon class="w-5 h-5 text-state-error transition-[filter] duration-100 ease-out"
                     :style="downIconStyle" />
             </button>
         </div>
-
-        <div v-if="active" class="fixed inset-0 z-40" @click="disarm"></div>
 
     </div>
 </template>

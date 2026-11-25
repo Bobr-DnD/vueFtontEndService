@@ -72,15 +72,14 @@ async function update(){
 
 
             <input v-model.lazy="item.name" type="text" placeholder="Назва" @change="update" :id="item.id"
-                class="p-2 border-2 text-md border-darkred-dark rounded-lg text-darkred-dark w-full focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
+                class="p-2 border-2 text-md border-brand-base rounded-lg text-brand-ink w-full focus:outline-none focus:ring-2 focus:ring-brand-ink transition" />
 
             <IconsDropdown v-if="props.setIcon" :icon="item.icon" :field_id="item.id" :callback="updateIcon" />
 
-            <DeleteButton class="bg-darkred-red text-darkred-light" @click="removeItem(item.id)" />
+            <DeleteButton class="bg-brand-accent text-brand-text" @click="removeItem(item.id)" />
 
         </div>
 
-        <PlusButton class="w-11 h-11 text-center border-4 border-darkred-dark rounded-lg md:hover:cursor-pointer
-           md:hover:bg-darkred-gray relative overflow-hidden group" @click="addItem" />
+        <PlusButton @click="addItem" />
     </div>
 </template>

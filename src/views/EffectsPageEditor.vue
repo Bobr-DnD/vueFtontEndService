@@ -20,7 +20,7 @@ import DeleteButton from '@/components/reusable/Buttons/DeleteButton.vue'
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue'
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue'
 import PlusButton from '@/components/reusable/Buttons/PlusButton.vue'
-import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue'
+import SelectorButton from '@/components/reusable/Buttons/SelectorButton.vue'
 import SearchInputBlack from '@/components/reusable/SearchInputs/SearchInputBlack.vue'
 import DropDownList from '@/components/reusable/DropDowns/DropDownList.vue'
 
@@ -111,7 +111,7 @@ async function deleteEffect() {
 
 <template>
 
-    <MasterPageNavigation />
+    <MasterPageNavigation v-if="!store.isLoading" />
 
     <section v-if="!store.isLoading"
         class="p-2 grid grid-cols-[25%_1fr] gap-2 items-center justify-start overflow-hidden font-gothic">
@@ -120,7 +120,7 @@ async function deleteEffect() {
 
             <div class="w-full flex flex-col gap-2">
 
-                <GraySelectorButton class="w-full" v-for="type in tabs" :key="type.id" @click="activeTab = type.id"
+                <SelectorButton class="w-full" v-for="type in tabs" :key="type.id" @click="activeTab = type.id"
                     :id="type.id" :label="type.label" :active="activeTab === type.id ? true : false" />
 
             </div>
@@ -154,14 +154,14 @@ async function deleteEffect() {
                     class="w-full p-2 max-h-[512px] overflow-y-scroll auto-hide-scroll grid grid-cols-4 gap-4 col-span-full">
 
                     <div @click="selectEffect('new')"
-                        :class="selectedEffect.id === 'new' && 'outline outline-4 outline-offset-[-1px] outline-darkred-red'"
-                        class="border-8 border-darkred-dark bg-darkred-dark rounded-2xl flex justify-center items-center hover:cursor-pointer">
-                        <PlusButton class="w-20 text-darkred-light" />
+                        :class="selectedEffect.id === 'new' && 'outline outline-4 outline-offset-[-1px] outline-brand-accent'"
+                        class="p-1 rounded-2xl flex justify-center items-center hover:cursor-pointer">
+                        <PlusButton class="w-full h-full" />
                     </div>
 
 
                     <EffectTile v-for="effect in filteredEffects" :key="effect.id"
-                        :class="selectedEffect.id === effect.id && 'outline outline-4 outline-offset-[-1px] outline-darkred-red'"
+                        :class="selectedEffect.id === effect.id && 'outline outline-4 outline-offset-[-1px] outline-brand-accent'"
                         class="hover:cursor-pointer" @click="selectEffect(effect.id)" :effect="effect" />
                 </div>
 
@@ -182,12 +182,12 @@ async function deleteEffect() {
                 <div class="col-span-full flex flex-wrap gap-4 hover:cursor-pointer">
                     <div v-if="checkObjectFieldExisting(selectedEffect.effect)"
                         v-for="value, key in selectedEffect.effect" :key="key"
-                        class="flex gap-3 items-center p-3 w-fit rounded-lg bg-darkred-dark text-darkred-light">
+                        class="flex gap-3 items-center p-3 w-fit rounded-lg bg-brand-base text-brand-text">
                         <div>
                             {{ key }}: {{ value }}
                         </div>
                         <DeleteButton @click="delete selectedEffect.effect[key]; markDirty('effect')"
-                            class="bg-darkred-red w-10" />
+                            class="bg-brand-accent w-10" />
 
                     </div>
                     <div v-else class="">

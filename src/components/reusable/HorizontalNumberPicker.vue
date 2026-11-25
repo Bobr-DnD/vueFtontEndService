@@ -145,12 +145,12 @@ watch(() => props.value.value, (newVal) => {
     </div>
 
     <div class="relative h-0">
-      <div class="absolute left-1/2 -translate-x-1/2 -top-8 h-8 w-0.5 bg-darkred-bright/90 rounded"></div>
+      <div class="absolute left-1/2 -translate-x-1/2 -top-8 h-8 w-0.5 bg-brand-accent-hover/90 rounded"></div>
     </div>
   </div>
 
   <div class="w-full flex items-center justify-center font-gothic">
-    <button @click="getItemUnderIndicator" class="mx-auto p-2 w-32 h-16 border-2 rounded-xl text-darkred-light text-3xl font-medium
+    <button @click="getItemUnderIndicator" class="mx-auto p-2 w-32 h-16 border-2 border-brand-base rounded-xl text-brand-text text-3xl font-medium
            bg-[length:200%_200%] animate-gradient-pulse" :style="{
             '--from': colors[2],
             '--via': colors[1],

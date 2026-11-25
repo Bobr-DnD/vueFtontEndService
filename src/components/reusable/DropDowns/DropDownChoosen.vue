@@ -38,7 +38,7 @@ const props = defineProps({
 
         <select ref="selectValue" @change="selectedValue = selectValue.value" :name="props.entity_name"
             :id="props.entity_name"
-            class="w-full appearance-none p-2 m-1 border-2 rounded-lg border-light_gray text-darkred-dark font-gothic focus:outline-none focus:ring-2 focus:ring-darkred-dark transition cursor-pointer">
+            class="w-full appearance-none p-2 m-1 border-2 rounded-lg border-light_gray text-brand-ink font-gothic focus:outline-none focus:ring-2 focus:ring-brand-ink transition cursor-pointer">
 
             <option value="null">
                 Не вибарно

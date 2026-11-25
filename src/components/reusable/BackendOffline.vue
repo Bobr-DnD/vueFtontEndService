@@ -4,7 +4,7 @@
 
 <template>
   <div>
-    <div class="bg-darkred-dark/90  border-4 border-darkred-red px-8 py-6 text-center rounded-xl text-darkred-bright animate-pulse-shadow">
+    <div class="bg-brand-base/90  border-4 border-brand-accent px-8 py-6 text-center rounded-xl text-brand-accent-hover animate-pulse-shadow">
       <h1 class="mb-2 text-4xl font-bold drop-shadow-[0_0_8px_#ff4f4f]">
         ⚠ BACKEND OFFLINE ⚠
       </h1>

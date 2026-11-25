@@ -49,7 +49,7 @@ function changeValue(operation) {
     <div class="grid grid-cols-[1fr_104px] font-gothic p-2 gap-2">
 
         <label :for="entity_name"
-            class="w-full col-span-2 flex gap-2 overflow-hidden text-ellipsis text-darkred-dark font-semibold text-lg tracking-wide">
+            class="w-full col-span-2 flex gap-2 overflow-hidden text-ellipsis text-brand-text font-semibold text-lg tracking-wide">
 
             <span v-if="props.icon">
                 <component :is="returnIcon(props.icon).icon" class="w-6 h-6" />
@@ -57,12 +57,12 @@ function changeValue(operation) {
 
             {{ entity_name.toUpperCase() }}: {{ value }}</label>
 
-        <div class=" col-span-full text-darkred-dark font-medium text-md">Додати\Відняти від значення:</div>
+        <div class=" col-span-full text-brand-text font-medium text-md">Додати\Відняти від значення:</div>
         <section>
 
             <form @submit.prevent class="flex gap-2 flex-col items-start justify-center w-full font-gothic rounded-lg">
-                <input ref="input" :id="entity_name" type="number" :value="default_number" class="no-arrows h-11 bg-darkred-dark_gray w-full text-darkred-light text-md placeholder-darkred-dark border border-darkred-dark rounded-md px-3 py-2
-           focus:outline-none focus:ring-2 focus:ring-darkred-dark transition" />
+                <input ref="input" :id="entity_name" type="number" :value="default_number" class="no-arrows h-11 bg-brand-surface w-full text-brand-text text-md placeholder-brand-faint border border-brand-base rounded-md px-3 py-2
+           focus:outline-none focus:ring-2 focus:ring-brand-ink transition" />
             </form>
 
         </section>
@@ -71,12 +71,12 @@ function changeValue(operation) {
 
             <button class="">
                 <PlusIcon @click="changeValue('plus')"
-                    class="w-11 h-11 p-2 border-2 bg-darkred-dark text-darkred-light border-darkred-red rounded-lg" />
+                    class="w-11 h-11 p-2 border-2 bg-brand-base text-brand-text border-brand-accent rounded-lg hover:bg-brand-accent/75" />
             </button>
 
             <button class="">
                 <MinusIcon @click="changeValue('minus')"
-                    class="w-11 h-11 p-2 border-2 bg-darkred-dark text-darkred-light border-darkred-red rounded-lg" />
+                    class="w-11 h-11 p-2 border-2 bg-brand-base text-brand-text border-brand-accent rounded-lg hover:bg-brand-accent/75" />
             </button>
 
         </section>

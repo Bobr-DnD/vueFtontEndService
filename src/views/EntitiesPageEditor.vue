@@ -12,7 +12,7 @@ import useEntityEditor from '@utils/useEntityEditor';
 
 import Loader from 'vue-spinner/src/SyncLoader.vue'
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
-import GraySelectorButton from '@/components/reusable/Buttons/GraySelectorButton.vue';
+import SelectorButton from '@/components/reusable/Buttons/SelectorButton.vue';
 import AprroveButtonWithText from '@/components/reusable/Buttons/AprroveButtonWithText.vue';
 import RejectButtonWithText from '@/components/reusable/Buttons/RejectButtonWithText.vue';
 import UnsavedLabel from '@/components/reusable/UnsavedLabel.vue';
@@ -171,7 +171,7 @@ function removeEffect(id) {
 
 <template>
 
-    <MasterPageNavigation />
+    <MasterPageNavigation v-if="!store.isLoading" />
 
     <section v-if="!store.isLoading"
         class="p-2 grid grid-cols-[25%_1fr] gap-2 items-center justify-start overflow-hidden font-gothic">
@@ -180,7 +180,7 @@ function removeEffect(id) {
 
             <div class="w-full flex flex-col gap-2">
 
-                <GraySelectorButton class="w-full" v-for="type in tabs" :key="type.id" @click="activeTab = type.id"
+                <SelectorButton class="w-full" v-for="type in tabs" :key="type.id" @click="activeTab = type.id"
                     :id="type.id" :label="type.label" :active="activeTab === type.id ? true : false" />
 
             </div>
@@ -206,10 +206,10 @@ function removeEffect(id) {
 
             <div class="w-full flex flex-wrap justify-center items-center gap-2 justify-self-start">
 
-                <GraySelectorButton class="w-full basis-32" @click="selectedType = ''" id="all" label="Всі"
+                <SelectorButton class="w-full basis-32" @click="selectedType = ''" id="all" label="Всі"
                     :active="selectedType === '' ? true : false" />
 
-                <GraySelectorButton class="w-full basis-32" v-for="type in store.session.entityTypes" :key="type.id"
+                <SelectorButton class="w-full basis-32" v-for="type in store.session.entityTypes" :key="type.id"
                     @click="selectedType = type.id" :id="type.id" :label="type.name"
                     :active="selectedType === type.id ? true : false" />
 
@@ -222,13 +222,13 @@ function removeEffect(id) {
             <div class="grid grid-cols-4 gap-4 p-2 max-h-[512px]">
 
                 <div @click="selectEntity('new')"
-                    :class="selectedEntity.id === 'new' && 'outline outline-4 outline-offset-[-1px] outline-darkred-red'"
-                    class="border-8 border-darkred-dark bg-darkred-dark rounded-2xl flex justify-center items-center hover:cursor-pointer">
-                    <PlusButton class="w-20 text-darkred-light" />
+                    :class="selectedEntity.id === 'new' && 'outline outline-4 outline-offset-[-1px] outline-brand-accent'"
+                    class="p-1 rounded-2xl flex justify-center items-center hover:cursor-pointer">
+                    <PlusButton class="w-full h-full" />
                 </div>
 
                 <EntityTile v-for="entity in filteredEntities" @click="selectEntity(entity.id)" :key="entity.id"
-                    :class="selectedEntity.id === entity.id && 'outline outline-4 outline-offset-[-1px] outline-darkred-red'"
+                    :class="selectedEntity.id === entity.id && 'outline outline-4 outline-offset-[-1px] outline-brand-accent'"
                     :entity="entity" :callback_copy="copyEntity"/>
 
             </div>
@@ -261,24 +261,24 @@ function removeEffect(id) {
                     @update:inputValue="markDirty('rarity')" type="text" />
 
                 <div
-                    class="col-span-2 self-start flex gap-4 flex-wrap rounded-2xl border-2 border-darkred-light_gray p-4 mx-2">
+                    class="col-span-2 self-start flex gap-4 flex-wrap rounded-2xl border-2 border-brand-subtle p-4 mx-2">
 
                     <Header2 class="shrink w-full" label="Харакетристики:" />
 
                     <div v-if="checkObjectFieldExisting(selectedEntity.characteristics)"
                         v-for="value, key in selectedEntity.characteristics" :key="key"
-                        class="flex gap-3 items-center p-3 w-fit rounded-lg bg-darkred-dark text-darkred-light">
+                        class="flex gap-3 items-center p-3 w-fit rounded-lg bg-brand-base text-brand-text">
 
                         <div>
                             {{ key }}: {{ value }}
                         </div>
 
                         <button @click="newCharacteristic.name = key; newCharacteristic.value = value"
-                            class="p-2 rounded-xl border-2 border-darkred-dark bg-darkred-gray text-darkred-light select-none md:hover:bg-darkred-light_gray md:hover:cursor-pointer">
+                            class="p-2 rounded-xl border-2 border-brand-base bg-brand-muted text-brand-text select-none md:hover:bg-brand-subtle md:hover:cursor-pointer">
                             <PencilIcon class="w-4 h-4" />
                         </button>
 
-                        <DeleteButton class="bg-darkred-red"
+                        <DeleteButton class="bg-brand-accent"
                             @click="delete selectedEntity.characteristics[key]; markDirty('characteristics')" />
                     </div>
 
@@ -302,19 +302,19 @@ function removeEffect(id) {
                 </div>
 
                 <div
-                    class="col-span-2 self-start flex gap-4 flex-wrap rounded-2xl border-2 border-darkred-light_gray p-4 mx-2">
+                    class="col-span-2 self-start flex gap-4 flex-wrap rounded-2xl border-2 border-brand-subtle p-4 mx-2">
 
                     <Header2 class="shrink w-full" label="Вимоги:" />
 
                     <div v-if="checkObjectFieldExisting(selectedEntity.requirement)"
                         v-for="value, key in selectedEntity.requirement" :key="key"
-                        class="flex gap-3 items-center p-3 w-fit rounded-lg bg-darkred-dark text-darkred-light">
+                        class="flex gap-3 items-center p-3 w-fit rounded-lg bg-brand-base text-brand-text">
 
                         <div>
                             {{ key }}: {{ value }}
                         </div>
 
-                        <DeleteButton class="bg-darkred-red"
+                        <DeleteButton class="bg-brand-accent"
                             @click="delete selectedEntity.requirement[key]; markDirty('requirement')" />
                     </div>
 
@@ -346,12 +346,12 @@ function removeEffect(id) {
                     class="grid grid-cols-3 gap-4 items-center justify-start">
 
                     <div v-for="effect in selectedEntity.effects" :key="effect.id"
-                        class="bg-darkred-dark  p-2 rounded-2xl flex gap-4 items-center justify-between">
+                        class="bg-brand-base  p-2 rounded-2xl flex gap-4 items-center justify-between">
 
                         <EffectTile :effect="effect" class="w-full" />
 
                         <DeleteButton @click="removeEffect(effect.id)"
-                            class="bg-darkred-red h-16 w-16 text-darkred-light text-2xl" />
+                            class="bg-brand-accent h-16 w-16 text-brand-text text-2xl" />
 
                     </div>
                 </div>
