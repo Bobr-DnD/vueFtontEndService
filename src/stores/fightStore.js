@@ -38,10 +38,14 @@ export const useFightStore = defineStore('fight', () => {
         return asyncHandler(RepositoryFactory.delete('fight', id))
     }
 
-    // WS - live battle state
-    function joinFight(sessionId) {
+    // WS - live battle state. fightId is only meaningful for the GM live
+    // view (/admin/:sessionId/fight/:fightId/live) - it pins the join to that
+    // exact fight instead of "whichever one happens to be flagged active",
+    // so editing the board always targets the fight you actually navigated
+    // to. Players never pass it: they only ever see the session's active fight.
+    function joinFight(sessionId, fightId = null) {
         isLoading.value = true
-        socket.emit('fight:join', sessionId)
+        socket.emit('fight:join', { sessionId, fightId })
     }
 
     function leaveFight() {

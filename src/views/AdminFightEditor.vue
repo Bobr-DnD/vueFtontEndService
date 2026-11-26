@@ -6,6 +6,7 @@ import { useSessionStore } from '@/stores/sessionStore';
 import { useFightStore } from '@/stores/fightStore';
 import { notify } from '@utils/notification';
 import { toNewFight, toNewFightEnemy, toObject } from '@utils/objects.dto';
+import { getCenterTileId } from '@utils/tileGraph';
 import useEntityEditor from '@utils/useEntityEditor';
 
 import MasterPageNavigation from '@/components/navigations/MasterPageNavigation.vue';
@@ -132,7 +133,12 @@ function openLiveView() {
 // Enemies
 
 function addEnemy() {
-    const enemy = toNewFightEnemy();
+    // Without an initial tileId the token has nowhere to render (BattleMap
+    // hides any token with no position) - defaulting to the overlay's center
+    // tile, same as a character gets on first joining the fight, means a
+    // freshly-added enemy is immediately visible and can just be dragged
+    // from there instead of being invisible until someone first "moves" it.
+    const enemy = toNewFightEnemy({ position: { tileId: getCenterTileId(selectedFight.value.overlay) } });
     selectedFight.value.enemies.push(enemy);
     editingEnemyId.value = enemy.id;
     markDirty('enemies');

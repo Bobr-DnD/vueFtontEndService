@@ -7,7 +7,8 @@ const props = defineProps({
     characters: { type: Array, default: () => [] },
     pickedToken: { type: Object, default: null }, // { type: 'character'|'enemy', id }
     canMoveToken: { type: Function, default: () => false }, // (token) => boolean
-    selectedTileId: { type: String, default: null } // externally-selected tile (e.g. admin preview) to highlight, independent of hover
+    selectedTileId: { type: String, default: null }, // externally-selected tile (e.g. admin preview) to highlight, independent of hover
+    myCharacterId: { type: String, default: null } // the viewer's own character (player mode only) - drawn with a distinct ring so it's unmistakable in a cluster
 })
 
 const emit = defineEmits(['pick-token', 'move-to-tile', 'tile-click'])
@@ -47,6 +48,56 @@ const enemyTokens = computed(() => (props.fight.enemies ?? []).map(e => ({
 
 const allTokens = computed(() => [...characterTokens.value, ...enemyTokens.value])
 
+// Any number of tokens can share a tile - without this they'd render as one
+// opaque stack with only the last one paintable/clickable. Group by tileId
+// and spread each group into a small grid of pixel offsets around the
+// tile's own center, so every icon stays visible and individually clickable.
+const CLUSTER_SPACING_PX = 20
+
+function clusterOffset(index, count) {
+    if (count <= 1) return { dx: 0, dy: 0 }
+
+    const cols = Math.ceil(Math.sqrt(count))
+    const rows = Math.ceil(count / cols)
+    const row = Math.floor(index / cols)
+    const col = index % cols
+
+    return {
+        dx: (col - (cols - 1) / 2) * CLUSTER_SPACING_PX,
+        dy: (row - (rows - 1) / 2) * CLUSTER_SPACING_PX
+    }
+}
+
+const tokenLayout = computed(() => {
+    const groups = new Map()
+    for (const token of allTokens.value) {
+        const tileId = token.position?.tileId
+        if (!tileId) continue
+        if (!groups.has(tileId)) groups.set(tileId, [])
+        groups.get(tileId).push(token)
+    }
+
+    const layout = new Map()
+    groups.forEach((group) => {
+        group.forEach((token, index) => {
+            layout.set(`${token.type}-${token.id}`, clusterOffset(index, group.length))
+        })
+    })
+    return layout
+})
+
+function tokenStyle(token) {
+    if (!token.position?.tileId) return { display: 'none' }
+
+    const { x, y } = tilePosition(token.position.tileId)
+    const { dx, dy } = tokenLayout.value.get(`${token.type}-${token.id}`) ?? { dx: 0, dy: 0 }
+
+    return {
+        left: `calc(${x}% + ${dx}px)`,
+        top: `calc(${y}% + ${dy}px)`
+    }
+}
+
 function tileClass(tile) {
     return [
         'battle-tile',
@@ -65,6 +116,10 @@ function onTileClick(tile) {
 function onTokenClick(token) {
     if (!props.canMoveToken(token)) return
     emit('pick-token', { type: token.type, id: token.id })
+}
+
+function isMine(token) {
+    return token.type === 'character' && props.myCharacterId && token.id === props.myCharacterId
 }
 
 // Grid/radial line overlay, drawn in the same 0-100 percent coordinate space
@@ -164,18 +219,21 @@ const radialSpokes = computed(() => {
             </div>
         </template>
 
-        <div v-for="token in allTokens" :key="`${token.type}-${token.id}`" class="battle-token" :class="[
-            token.type === 'enemy' ? 'battle-token--enemy' : 'battle-token--character',
-            pickedToken?.type === token.type && pickedToken?.id === token.id && 'battle-token--picked',
-            canMoveToken(token) && 'battle-token--movable'
-        ]" :style="token.position?.tileId ? {
-            left: `${tilePosition(token.position.tileId).x}%`,
-            top: `${tilePosition(token.position.tileId).y}%`
-        } : { display: 'none' }" @click.stop="onTokenClick(token)" :title="token.name">
+        <div v-for="token in allTokens" :key="`${token.type}-${token.id}`" class="battle-token-wrapper"
+            :class="canMoveToken(token) && 'battle-token-wrapper--movable'" :style="tokenStyle(token)"
+            @click.stop="onTokenClick(token)" :title="token.name">
 
-            <img v-if="token.image" :src="token.image" :alt="token.name" draggable="false"
-                class="w-full h-full object-cover rounded-full pointer-events-none" />
-            <span v-else class="battle-token__initial">{{ token.name?.[0] ?? '?' }}</span>
+            <div class="battle-token" :class="[
+                token.type === 'enemy' ? 'battle-token--enemy' : 'battle-token--character',
+                pickedToken?.type === token.type && pickedToken?.id === token.id && 'battle-token--picked',
+                isMine(token) && 'battle-token--mine'
+            ]">
+                <img v-if="token.image" :src="token.image" :alt="token.name" draggable="false"
+                    class="w-full h-full object-cover rounded-full pointer-events-none" />
+                <span v-else class="battle-token__initial">{{ token.name?.[0] ?? '?' }}</span>
+            </div>
+
+            <span class="battle-token__label">{{ token.name }}</span>
         </div>
 
     </div>
@@ -221,12 +279,24 @@ const radialSpokes = computed(() => {
     background: rgba(230, 57, 70, 0.2);
 }
 
-.battle-token {
+.battle-token-wrapper {
     position: absolute;
     width: 36px;
     height: 36px;
     margin-left: -18px;
     margin-top: -18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 5;
+    transition: left 0.25s ease, top 0.25s ease;
+    cursor: default;
+}
+
+.battle-token {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
     border-radius: 9999px;
     display: flex;
     align-items: center;
@@ -234,9 +304,7 @@ const radialSpokes = computed(() => {
     font-weight: 700;
     font-size: 14px;
     border: 2px solid rgb(var(--brand-page));
-    z-index: 5;
     overflow: hidden;
-    transition: left 0.25s ease, top 0.25s ease;
 }
 
 .battle-token--character {
@@ -249,12 +317,37 @@ const radialSpokes = computed(() => {
     color: #F2E9E4;
 }
 
-.battle-token--movable {
+.battle-token-wrapper--movable {
     cursor: pointer;
-    box-shadow: 0 0 0 2px #FABC3F;
 }
 
 .battle-token--picked {
     box-shadow: 0 0 0 3px rgb(var(--brand-accent-hover));
- }
+}
+
+/* Persistent, independent of hover/picked state - always marks which token
+   on the board is the current player's own, so it's unmistakable even when
+   several characters are clustered tightly on the same tile. */
+.battle-token--mine {
+    box-shadow: 0 0 0 3px #FABC3F;
+}
+
+.battle-token--mine.battle-token--picked {
+    box-shadow: 0 0 0 3px #FABC3F, 0 0 0 6px rgb(var(--brand-accent-hover));
+}
+
+.battle-token__label {
+    margin-top: 2px;
+    padding: 0 4px;
+    font-size: 10px;
+    line-height: 1.3;
+    color: #F2E9E4;
+    background: rgba(13, 13, 13, 0.75);
+    border-radius: 4px;
+    white-space: nowrap;
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+}
 </style>
